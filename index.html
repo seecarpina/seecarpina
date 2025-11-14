@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SEE Carpina</title>
+    <link rel="stylesheet" href="./style.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+  </head>
+  <body>
+    <div class="loading">
+      <svg
+        class="svg-spinner"
+        viewBox="0 0 50 50"
+        role="img"
+        aria-label="Carregando"
+      >
+        <circle
+          class="path"
+          cx="25"
+          cy="25"
+          r="20"
+          fill="none"
+          stroke-width="4"
+        />
+      </svg>
+    </div>
+    <div class="container">
+      <aside>
+        <div class="top">
+          <div class="logo">
+            <h2><span class="danger">SEE</span>CARPINA</h2>
+          </div>
+          <div class="close">
+            <span class="material-symbols-outlined">close</span>
+          </div>
+        </div>
+
+        <div class="sidebar">
+          <a href="index.html" class="active">
+            <span class="material-symbols-outlined">grid_view</span>
+            <h3>Dashaboard</h3>
+          </a>
+
+          <a href="oficios.html">
+            <span class="material-symbols-outlined">list</span>
+            <h3>Ofícios</h3>
+          </a>
+
+          <a href="#" id="logout">
+            <span class="material-symbols-outlined">logout</span>
+            <h3>Logout</h3>
+          </a>
+        </div>
+      </aside>
+
+      <main>
+        <h1>Dashaboard</h1>
+        <div class="line-dash">
+          <h3 id="boasVindas">Olá!</h3>
+          <input type="date" class="date" />
+        </div>
+
+        <div class="insights">
+          <a href="">
+            <div class="timbre">
+              <span class="material-symbols-outlined">docs</span>
+              <div class="middle">
+                <div class="left">
+                  <h3>Timbres SEE</h3>
+                  <h1>Download</h1>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <a
+            href="http://pmcarpina.tabsassessoria.com.br:8893/sipweb/trabalhador/login/login.xhtml"
+            target="_blank"
+          >
+            <div class="contracheques">
+              <span class="material-symbols-outlined">payments</span>
+              <div class="middle">
+                <div class="left">
+                  <h3>Contracheques</h3>
+                  <h1>Acessar</h1>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <a href="https://www.carpina.pe.gov.br:2096/" target="_blank">
+            <div class="email">
+              <span class="material-symbols-outlined">drafts</span>
+              <div class="middle">
+                <div class="left">
+                  <h3>Email</h3>
+                  <h1>Acessar</h1>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="recent_order">
+          <h1>Ordens de Fornecimento Recentes</h1>
+          <table>
+            <thead>
+              <tr>
+                <th>Fornecedor</th>
+                <th>ARP/Contrato</th>
+                <th>Data</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td class="warning">-</td>
+                <td class="primary">-</td>
+              </tr>
+
+              <tr>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td class="warning">-</td>
+                <td class="primary">-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+
+      <div class="right">
+        <h1>Agenda</h1>
+        <span>Em construção</span>
+      </div>
+    </div>
+
+    <script type="module" src="./src/scripts.js"></script>
+  </body>
+</html>
