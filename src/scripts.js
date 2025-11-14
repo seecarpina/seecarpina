@@ -286,3 +286,31 @@ onValue(oficiosRef, (snap) => {
 });
 
 if (inputBusca) inputBusca.addEventListener("input", renderTabela);
+
+const btnTopo = document.getElementById("btnTopo");
+
+window.addEventListener("scroll", function () {
+  if (window.scrollY > 300) {
+    btnTopo.style.opacity = "1";
+  } else {
+    btnTopo.style.opacity = "0";
+  }
+});
+
+btnTopo.addEventListener("click", function () {
+  const duration = 800;
+  const start = window.scrollY;
+  const startTime = performance.now();
+
+  function animateScroll(now) {
+    const progress = Math.min((now - startTime) / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    window.scrollTo(0, start * (1 - ease));
+
+    if (progress < 1) {
+      requestAnimationFrame(animateScroll);
+    }
+  }
+
+  requestAnimationFrame(animateScroll);
+});

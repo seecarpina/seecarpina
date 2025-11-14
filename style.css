@@ -606,3 +606,29 @@ main .recent_order a {
 .autocomplete-list li:hover {
   background: var(--clr-primary);
 }
+#btnTopo {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  padding: 1rem;
+  font-size: 20px;
+  border: none;
+  background: var(--clr-primary);
+  color: var(--clr-white);
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: var(--box-shadow);
+  z-index: 999;
+  opacity: 0;
+  transition: all 0.5s ease;
+}
+
+#btnTopo:hover {
+  background: var(--clr-warnig);
+  box-shadow: none;
+}
