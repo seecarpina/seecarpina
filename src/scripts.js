@@ -256,7 +256,7 @@ function renderTabela() {
   // 🔢 Paginação numérica
   if (paginacao) {
     paginacao.innerHTML = "";
-    const maxPaginasVisiveis = 5;
+    const maxPaginasVisiveis = 10;
     let inicioPagina = Math.max(1, paginaAtual - 2);
     let fimPagina = Math.min(
       totalPaginas,
