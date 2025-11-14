@@ -42,7 +42,7 @@ let nomeResponsavel = "Usuário";
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    window.location.href = "login.html";
+    window.location.href = "./login";
     return;
   }
 
@@ -74,7 +74,7 @@ if (logoutLink) {
     e.preventDefault();
     try {
       await signOut(auth);
-      window.location.href = "login.html";
+      window.location.href = "./login";
     } catch (error) {
       alert("Erro ao sair: " + error.message);
     }
