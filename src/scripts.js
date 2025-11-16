@@ -3,7 +3,7 @@ window.addEventListener("load", () => {
   document.querySelector(".loading").style.display = "none";
 });
 
-import { carregarSidebar } from "./include.js";
+import { carregarSidebar, carregarRight } from "./include.js";
 carregarSidebar().then(() => {
   // 🚪 Logout
   const logoutLink = document.getElementById("logout");
@@ -19,6 +19,16 @@ carregarSidebar().then(() => {
     });
   }
 });
+carregarRight();
+
+function padronizarTexto(str) {
+  if (!str) return "";
+  return str
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ") // remove espaços duplicados
+    .replace(/(^\w|\s\w)/g, (m) => m.toUpperCase()); // cada palavra com letra inicial maiúscula
+}
 
 // 📦 Imports Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
@@ -98,7 +108,9 @@ const boxCopia = document.getElementById("autocompleteCopia");
 
 // Carregar destinos
 onValue(destinosRef, (snap) => {
-  destinos = snap.exists() ? Object.values(snap.val()) : [];
+  destinos = snap.exists()
+    ? [...new Set(Object.values(snap.val()).map((d) => padronizarTexto(d)))]
+    : [];
 });
 
 // Função para mostrar sugestões
@@ -173,8 +185,8 @@ if (formOficio) {
     }
 
     const assunto = document.getElementById("assunto").value.trim();
-    const destino = document.getElementById("destino").value;
-    const copia = document.getElementById("copia").value;
+    const destino = padronizarTexto(document.getElementById("destino").value);
+    const copia = padronizarTexto(document.getElementById("copia").value);
 
     if (!assunto) {
       mostrarNotificacao("Preencha o campo de assunto!", "erro");
@@ -212,6 +224,15 @@ if (formOficio) {
         responsavel: nomeResponsavel,
         criadoEm: new Date().toISOString(),
       });
+
+      // ➕ Adicionar destino/cópia que ainda não existem na lista
+      if (destino && !destinos.includes(destino)) {
+        push(destinosRef, destino);
+      }
+
+      if (copia && !destinos.includes(copia)) {
+        push(destinosRef, copia);
+      }
 
       mostrarNotificacao(`Ofício nº ${numeroGerado} cadastrado com sucesso!`);
       e.target.reset();

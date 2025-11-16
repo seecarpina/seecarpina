@@ -9,6 +9,14 @@ export async function carregarSidebar() {
   ativarLinkAtual();
 }
 
+export async function carregarRight() {
+  const el = document.querySelector(".right");
+  if (!el) return;
+
+  const html = await fetch("/src/template/right.html").then((r) => r.text());
+  el.innerHTML = html;
+}
+
 function ativarLinkAtual() {
   const links = document.querySelectorAll("#sidebar a");
   const path = window.location.pathname.toLowerCase();
