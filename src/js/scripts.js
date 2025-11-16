@@ -53,23 +53,51 @@ carregarRight().then(() => {
     sideMenu.style.display = "none";
   });
 
-  // tema
-  const themeToggler = document.querySelector(".theme-toggler");
+  // pegar elementos pelo id (usei ids para ser explícito)
+  const themeToggler = document.getElementById("themeToggler");
+  const iconLight = document.getElementById("iconLight");
+  const iconDark = document.getElementById("iconDark");
 
-  themeToggler.addEventListener("click", () => {
-    document.body.classList.toggle("dark-theme-variables");
+  // função que atualiza os ícones conforme o modo
+  function setThemeIcons(mode) {
+    if (!iconLight || !iconDark) return;
+    if (mode === "dark") {
+      iconLight.classList.remove("active");
+      iconDark.classList.add("active");
+    } else {
+      iconLight.classList.add("active");
+      iconDark.classList.remove("active");
+    }
+  }
 
-    // Alterna os spans
-    themeToggler.querySelector("span:nth-child(1)").classList.toggle("active");
-    themeToggler.querySelector("span:nth-child(2)").classList.toggle("active");
-
-    // Salvar no localStorage
-    const modoAtual = document.body.classList.contains("dark-theme-variables")
+  // aplicar tema salvo ao carregar (ou fallback ao prefer-color-scheme)
+  const temaSalvo =
+    localStorage.getItem("theme") ||
+    (window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
       ? "dark"
-      : "light";
+      : "light");
 
-    localStorage.setItem("theme", modoAtual);
-  });
+  if (temaSalvo === "dark") {
+    document.body.classList.add("dark-theme-variables");
+  } else {
+    document.body.classList.remove("dark-theme-variables");
+  }
+  setThemeIcons(temaSalvo);
+
+  // listener do toggle
+  if (themeToggler) {
+    themeToggler.addEventListener("click", () => {
+      // toggle retorna true se agora contém a classe
+      const isDark = document.body.classList.toggle("dark-theme-variables");
+
+      // atualiza ícones de forma explícita
+      setThemeIcons(isDark ? "dark" : "light");
+
+      // salvar escolha
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    });
+  }
 });
 
 function padronizarTexto(str) {
