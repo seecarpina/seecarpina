@@ -154,6 +154,7 @@
   --clr-dark-variant: #677483;
   --box-shadow: 0 2rem 3rem var(--clr-light);
 }
+
 body {
   font-family: "Poppins", sans-serif;
   min-width: 100%;
@@ -357,6 +358,7 @@ main .line-dash {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: var(--clr-dark);
 }
 
 main .insights {
@@ -499,6 +501,7 @@ main .recent_order a {
 
 .right .top .theme-toggler span.active {
   background-color: var(--clr-primary);
+  color: #fff;
   border-radius: var(--border-radius-1);
 }
 
@@ -518,6 +521,7 @@ main .recent_order a {
   flex-direction: column;
   gap: 1rem;
   transition: all 0.3s ease;
+  color: var(--clr-dark);
 }
 
 #formOficio:hover {
@@ -583,7 +587,7 @@ main .recent_order a {
   text-align: center;
 }
 #tabelaOficios tbody tr:nth-child(odd) {
-  background-color: var(--clr-info-light);
+  background-color: var(--clr-light);
 }
 #tabelaOficios td {
   padding: 5px;

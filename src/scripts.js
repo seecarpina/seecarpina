@@ -35,6 +35,12 @@ carregarRight().then(() => {
   closeBtn.addEventListener("click", () => {
     sideMenu.style.display = "none";
   });
+
+  themeToggler.addEventListener("click", () => {
+    document.body.classList.toggle("dark-theme-variables");
+    themeToggler.querySelector("span:nth-child(1)").classList.toggle("active");
+    themeToggler.querySelector("span:nth-child(2)").classList.toggle("active");
+  });
 });
 
 function padronizarTexto(str) {
@@ -106,6 +112,7 @@ onAuthStateChanged(auth, async (user) => {
 
     const boasVindas = document.getElementById("boasVindas");
     if (boasVindas) boasVindas.textContent = `👋 Olá, ${nomeResponsavel}!`;
+    document.querySelector("#nomeUsuario").textContent = nomeResponsavel;
   } catch (err) {
     console.error("Erro ao buscar nome:", err);
   }
