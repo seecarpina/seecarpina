@@ -96,18 +96,48 @@
             </div>
           </div>
 
-          <button class="btn" type="submit">Cadastrar Ofício</button>
+          <div id="botoesCadastro">
+            <button class="btn" id="btnCadastrar" type="submit">
+              Cadastrar Ofício
+            </button>
+
+            <div id="botoesEdicao" style="display: none; gap: 10px">
+              <button type="button" class="btn" id="btnSalvarEdicao">
+                Salvar edição
+              </button>
+              <button
+                type="button"
+                class="btn btn-cancelar"
+                id="btnCancelarEdicao"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+
+          <p id="msgEdicao"></p>
         </form>
 
         <hr />
 
         <h2>Ofícios cadastrados</h2>
-        <input
-          class="busca"
-          type="text"
-          id="busca"
-          placeholder="🔍 Buscar por número, assunto, destino ou responsável..."
-        />
+        <div class="flex justify-center g-1">
+          <input
+            class="busca"
+            type="text"
+            id="busca"
+            placeholder="🔍 Buscar por número, assunto, destino ou responsável..."
+          />
+
+          <label class="switch">
+            <input type="checkbox" id="filtroDisponiveis" />
+            <span class="slider">
+              <span class="ball"></span>
+            </span>
+            <span>Ver ofícios disponíveis</span>
+          </label>
+        </div>
+
         <table id="tabelaOficios">
           <thead>
             <tr>

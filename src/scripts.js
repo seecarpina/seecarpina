@@ -21,6 +21,7 @@ import {
   push,
   onValue,
   get,
+  update,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // ⚙️ Configuração Firebase
@@ -163,13 +164,23 @@ if (formOficio) {
   formOficio.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    if (editando) {
+      document.getElementById("btnSalvarEdicao").click();
+      return;
+    }
+
     const assunto = document.getElementById("assunto").value.trim();
     const destino = document.getElementById("destino").value;
     const copia = document.getElementById("copia").value;
 
-    if (!assunto)
-      return mostrarNotificacao("Preencha o campo de assunto!", "erro");
-    if (!destino) return mostrarNotificacao("Selecione um destino!", "erro");
+    if (!assunto) {
+      mostrarNotificacao("Preencha o campo de assunto!", "erro");
+      return;
+    }
+    if (!destino) {
+      mostrarNotificacao("Selecione um destino!", "erro");
+      return;
+    }
 
     const hoje = new Date();
     const dataISO = hoje.toISOString().split("T")[0];
@@ -177,8 +188,17 @@ if (formOficio) {
     try {
       const oficiosRef = ref(rtdb, "oficios");
       const snap = await get(oficiosRef);
-      const total = snap.exists() ? Object.keys(snap.val()).length : 0;
-      const numeroGerado = total + 1;
+      const dados = snap.exists() ? snap.val() : {};
+      let maiorNumero = 0;
+
+      Object.values(dados).forEach((o) => {
+        const num = Number(o.numero);
+        if (!isNaN(num) && num > maiorNumero) {
+          maiorNumero = num;
+        }
+      });
+
+      const numeroGerado = maiorNumero + 1;
 
       await push(oficiosRef, {
         numero: numeroGerado,
@@ -218,11 +238,21 @@ function renderTabela() {
   if (!tabela) return;
 
   const filtro = inputBusca ? inputBusca.value.toLowerCase() : "";
-  const filtrados = todosOficios.filter((o) =>
+  const mostrarDisponiveis =
+    document.getElementById("filtroDisponiveis")?.checked;
+
+  let filtrados = todosOficios.filter((o) =>
     `${o.numero} ${o.assunto} ${o.data} ${o.destino} ${o.copia} ${o.responsavel}`
       .toLowerCase()
       .includes(filtro)
   );
+
+  if (mostrarDisponiveis) {
+    filtrados = filtrados.filter(
+      (o) =>
+        o.assunto === undefined || o.assunto === null || o.assunto.trim() === ""
+    );
+  }
 
   const totalPaginas = Math.ceil(filtrados.length / porPagina);
   if (paginaAtual > totalPaginas) paginaAtual = totalPaginas || 1;
@@ -234,17 +264,18 @@ function renderTabela() {
   pagina.forEach((o) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-        <td>${o.numero}</td>
+        <td data-key="${o._key}">${o.numero}</td>
         <td class='assunto'>${o.assunto}</td>
         <td>${formatarDataBR(o.data)}</td>
         <td>${o.destino ?? "-"}</td>
         <td>${o.copia ?? "-"}</td>
         <td>${o.responsavel}</td>
         <td>${
-          o.responsavel === nomeResponsavel
-            ? "<span class='material-symbols-outlined'>edit_square</span>"
+          o.responsavel === nomeResponsavel || nomeResponsavel === "Raphael"
+            ? "<button class='edit-btn'><span class='material-symbols-outlined'>edit_square</span></button>"
             : ""
         }</td>`;
+
     tabela.appendChild(tr);
   });
 
@@ -278,14 +309,48 @@ function renderTabela() {
 
 onValue(oficiosRef, (snap) => {
   if (snap.exists()) {
-    todosOficios = Object.values(snap.val()).reverse();
+    todosOficios = Object.entries(snap.val())
+      .filter(([key, val]) => typeof val === "object" && val !== null)
+      .map(([key, val]) => ({ ...val, _key: key }))
+      .sort((a, b) => Number(b.numero) - Number(a.numero));
   } else {
     todosOficios = [];
   }
   renderTabela();
+  tabela.onclick = (e) => {
+    const icone = e.target.closest("span.material-symbols-outlined");
+    if (!icone) return;
+
+    const linha = icone.closest("tr");
+
+    // chave real do Firebase vinda do <td data-key="">
+    const chave = linha.querySelector("td[data-key]").dataset.key;
+
+    const oficio = todosOficios.find((o) => o._key === chave);
+    if (!oficio) return;
+
+    editando = true;
+    chaveEdicao = chave;
+
+    document.getElementById("assunto").value = oficio.assunto;
+    document.getElementById("destino").value = oficio.destino;
+    document.getElementById("copia").value = oficio.copia;
+
+    document.getElementById("btnCadastrar").style.display = "none";
+    document.getElementById("botoesEdicao").style.display = "flex";
+
+    const msg = document.getElementById("msgEdicao");
+    msg.textContent = `✏️ Editando ofício nº ${oficio.numero}`;
+    msg.style.display = "block";
+
+    btnTopo.click();
+  };
 });
 
 if (inputBusca) inputBusca.addEventListener("input", renderTabela);
+const filtroDisponiveis = document.getElementById("filtroDisponiveis");
+if (filtroDisponiveis)
+  filtroDisponiveis.addEventListener("change", renderTabela);
 
 const btnTopo = document.getElementById("btnTopo");
 
@@ -314,3 +379,86 @@ btnTopo.addEventListener("click", function () {
 
   requestAnimationFrame(animateScroll);
 });
+
+let editando = false;
+let chaveEdicao = null;
+
+document.getElementById("btnSalvarEdicao").onclick = async () => {
+  console.log("▶ Iniciando salvamento…");
+
+  if (!editando || !chaveEdicao) {
+    console.error("❌ ERRO: editando ou chaveEdicao estão inválidos:", {
+      editando,
+      chaveEdicao,
+    });
+    return;
+  }
+
+  const assunto = document.getElementById("assunto").value.trim();
+  const destino = document.getElementById("destino").value;
+  const copia = document.getElementById("copia").value;
+
+  console.log("✔ Dados capturados do formulário:", { assunto, destino, copia });
+
+  if (!assunto) {
+    console.error("❌ ERRO: campo 'assunto' vazio");
+    return mostrarNotificacao("Preencha o campo de assunto!", "erro");
+  }
+  if (!destino) {
+    console.error("❌ ERRO: campo 'destino' vazio");
+    return mostrarNotificacao("Selecione um destino!", "erro");
+  }
+
+  const oficioOriginal = todosOficios.find((o) => o._key === chaveEdicao);
+
+  if (!oficioOriginal) {
+    console.error(
+      "❌ ERRO: não encontrou o ofício original no array. chave:",
+      chaveEdicao
+    );
+    console.log("Array todosOficios:", todosOficios);
+    return mostrarNotificacao("Erro ao localizar ofício!", "erro");
+  }
+
+  console.log("✔ Ofício localizado:", oficioOriginal);
+
+  const refEdicao = ref(rtdb, `oficios/${chaveEdicao}`);
+
+  console.log("✔ Referência Firebase:", refEdicao);
+
+  try {
+    await update(refEdicao, {
+      assunto,
+      destino,
+      copia,
+      numero: oficioOriginal.numero,
+      data: oficioOriginal.data,
+      responsavel:
+        oficioOriginal.responsavel === undefined
+          ? nomeResponsavel
+          : oficioOriginal.responsavel,
+    });
+
+    console.log("✅ SALVO NO FIREBASE COM SUCESSO!");
+
+    mostrarNotificacao("Ofício atualizado com sucesso!");
+    resetarFormularioEdicao();
+  } catch (erro) {
+    console.error("❌ ERRO AO SALVAR NO FIREBASE:", erro);
+    mostrarNotificacao("Erro ao salvar no Firebase!", "erro");
+  }
+};
+
+document.getElementById("btnCancelarEdicao").onclick = () => {
+  resetarFormularioEdicao();
+};
+function resetarFormularioEdicao() {
+  editando = false;
+  chaveEdicao = null;
+
+  formOficio.reset();
+
+  document.getElementById("msgEdicao").style.display = "none";
+  document.getElementById("btnCadastrar").style.display = "block";
+  document.getElementById("botoesEdicao").style.display = "none";
+}
