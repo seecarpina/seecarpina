@@ -56,6 +56,11 @@
           </div>
 
           <div class="campo">
+            <label>Cargo:</label>
+            <input type="text" id="userCargo" />
+          </div>
+
+          <div class="campo">
             <label>Email:</label>
             <input type="text" class="email" id="userEmail" readonly />
           </div>
@@ -97,6 +102,7 @@
             // Preenche os campos
             document.getElementById("userNome").value = u.nome;
             document.getElementById("userEmail").value = u.email;
+            document.getElementById("userCargo").value = u.cargo;
 
             // Foto
             if (u.foto) {
@@ -138,6 +144,7 @@
         }
 
         const novoNome = document.getElementById("userNome").value.trim();
+        const novoCargo = document.getElementById("userCargo").value.trim();
         const preview = document.getElementById("previewFoto").src;
 
         if (!novoNome) {
@@ -156,6 +163,7 @@
           await updateDoc(refUsuario, {
             nome: novoNome,
             foto: novaFoto,
+            cargo: novoCargo,
           });
 
           const fotoTopo = document.querySelector(".profile-photo img");
