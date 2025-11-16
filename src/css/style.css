@@ -281,9 +281,15 @@ aside .top {
   margin-top: 1.4rem;
 }
 aside .logo {
-  display: flex;
-  gap: 1rem;
   color: var(--clr-dark);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem;
+}
+aside .logo img {
+  max-width: 100%;
 }
 aside .top div.close span {
   display: none;
