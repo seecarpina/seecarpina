@@ -283,6 +283,7 @@ aside .top {
 aside .logo {
   display: flex;
   gap: 1rem;
+  color: var(--clr-dark);
 }
 aside .top div.close span {
   display: none;
@@ -511,11 +512,12 @@ main .recent_order a {
   text-align: center;
 } */
 
-#formOficio {
+.box {
   background-color: var(--clr-white);
   padding: var(--card-padding);
   border-radius: var(--card-border-radius);
   box-shadow: var(--box-shadow);
+  margin-top: 1rem;
   margin-bottom: 2rem;
   display: flex;
   flex-direction: column;
@@ -524,26 +526,26 @@ main .recent_order a {
   color: var(--clr-dark);
 }
 
-#formOficio:hover {
+.box:hover {
   box-shadow: none;
 }
 
-#formOficio input,
-#formOficio select,
-#formOficio .btn {
+.box input,
+.box select,
+.box .btn {
   padding: 1rem;
   border: 1px solid var(--clr-primary);
   border-radius: var(--border-radius-1);
 }
 
-#formOficio input,
-#formOficio select,
-#formOficio datalist {
+.box input,
+.box select,
+.box datalist {
   width: 100%;
   background-color: var(--clr-white);
 }
 
-#formOficio .btn {
+.box .btn {
   width: auto;
   align-self: center;
   background-color: var(--clr-primary);
@@ -552,7 +554,7 @@ main .recent_order a {
   transition: all 0.5s ease;
 }
 
-#formOficio .btn:hover {
+.box .btn:hover {
   border: 1px solid var(--clr-warnig);
   background-color: var(--clr-warnig);
 }
@@ -838,7 +840,7 @@ main .recent_order a {
     left: 1rem;
   }
 
-  #formOficio {
+  .box {
     max-width: 100%;
     overflow-wrap: break-word;
   }

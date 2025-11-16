@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Configurações - SEE Carpina</title>
+
+    <link rel="stylesheet" href="./style.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+
+    <style>
+      #previewFoto {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 50%;
+        margin-top: 10px;
+        display: none;
+      }
+      .email {
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+
+  <body>
+    <button id="btnTopo">↑</button>
+
+    <div class="loading">
+      <svg class="svg-spinner" viewBox="0 0 50 50">
+        <circle
+          class="path"
+          cx="25"
+          cy="25"
+          r="20"
+          fill="none"
+          stroke-width="4"
+        />
+      </svg>
+    </div>
+
+    <div class="container">
+      <aside id="sidebar"></aside>
+
+      <main>
+        <h1>Configurações de Usuário</h1>
+
+        <!-- FORMULÁRIO COMPLETO -->
+        <form id="formUsuario" class="form-config box">
+          <div class="campo">
+            <label>Nome:</label>
+            <input type="text" id="userNome" />
+          </div>
+
+          <div class="campo">
+            <label>Email:</label>
+            <input type="text" class="email" id="userEmail" readonly />
+          </div>
+
+          <div class="campo">
+            <label>Foto de Perfil:</label>
+            <input type="file" id="userFoto" accept="image/*" />
+            <img id="previewFoto" />
+          </div>
+
+          <button type="button" id="btnSalvar" class="btn">Salvar</button>
+        </form>
+      </main>
+
+      <div class="right"></div>
+    </div>
+
+    <!-- IMPORTA SEU SCRIPT PRINCIPAL -->
+    <script type="module" src="./src/js/scripts.js"></script>
+
+    <!-- SCRIPT PARA CARREGAR DADOS E SALVAR EDIÇÕES -->
+    <script type="module">
+      import { db } from "./src/js/firebaseConfig.js";
+      import {
+        doc,
+        updateDoc,
+      } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+      /* ---------------------------
+          1. Carregar dados do usuário
+      ---------------------------- */
+      document.addEventListener("DOMContentLoaded", () => {
+        const intervalo = setInterval(() => {
+          if (window.dadosUsuario) {
+            clearInterval(intervalo);
+
+            const u = window.dadosUsuario;
+
+            // Preenche os campos
+            document.getElementById("userNome").value = u.nome;
+            document.getElementById("userEmail").value = u.email;
+
+            // Foto
+            if (u.foto) {
+              const img = document.getElementById("previewFoto");
+              img.src = u.foto;
+              img.style.display = "block";
+            }
+          }
+        }, 100);
+      });
+
+      /* ---------------------------
+          2. Preview da imagem
+      ---------------------------- */
+      document
+        .getElementById("userFoto")
+        .addEventListener("change", function () {
+          const file = this.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const img = document.getElementById("previewFoto");
+            img.src = e.target.result;
+            img.style.display = "block";
+          };
+          reader.readAsDataURL(file); // ← Converte para Base64
+        });
+
+      /* ---------------------------
+          3. Botão SALVAR
+      ---------------------------- */
+      const btnSalvar = document.getElementById("btnSalvar");
+
+      btnSalvar.addEventListener("click", async () => {
+        if (!window.usuarioAuth) {
+          alert("Usuário não autenticado!");
+          return;
+        }
+
+        const novoNome = document.getElementById("userNome").value.trim();
+        const preview = document.getElementById("previewFoto").src;
+
+        if (!novoNome) {
+          alert("O nome não pode estar vazio!");
+          return;
+        }
+
+        // Se a imagem é base64, salva. Se não for, mantém a atual.
+        const novaFoto = preview.startsWith("data:image")
+          ? preview
+          : window.dadosUsuario.foto ?? null;
+
+        try {
+          const refUsuario = doc(db, "usuarios", window.usuarioAuth.uid);
+
+          await updateDoc(refUsuario, {
+            nome: novoNome,
+            foto: novaFoto,
+          });
+
+          const fotoTopo = document.querySelector(".profile-photo img");
+          if (fotoTopo) fotoTopo.src = novaFoto;
+
+          alert("Dados atualizados com sucesso!");
+
+          // Atualiza dados em memória
+          window.dadosUsuario.nome = novoNome;
+          window.dadosUsuario.foto = novaFoto;
+
+          // Atualiza nome no topo do sistema
+          const nomePrimeiro = novoNome.split(" ")[0];
+          const nomeTopo = document.querySelector("#nomeUsuario");
+          if (nomeTopo) nomeTopo.textContent = nomePrimeiro;
+        } catch (erro) {
+          alert("Erro ao atualizar: " + erro.message);
+        }
+      });
+    </script>
+  </body>
+</html>

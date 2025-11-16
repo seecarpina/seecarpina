@@ -4,6 +4,8 @@ window.addEventListener("load", () => {
 });
 
 import { carregarSidebar, carregarRight } from "./include.js";
+import { auth, db, rtdb } from "./firebaseConfig.js"; // <<–– CONFIG DO FIREBASE AGORA ESTÁ AQUI
+
 carregarSidebar().then(() => {
   // 🚪 Logout
   const logoutLink = document.getElementById("logout");
@@ -19,6 +21,7 @@ carregarSidebar().then(() => {
     });
   }
 });
+
 carregarRight().then(() => {
   // menu
   const sideMenu = document.querySelector("aside");
@@ -48,44 +51,28 @@ function padronizarTexto(str) {
   return str
     .trim()
     .toLowerCase()
-    .replace(/\s+/g, " ") // remove espaços duplicados
-    .replace(/(^\w|\s\w)/g, (m) => m.toUpperCase()); // cada palavra com letra inicial maiúscula
+    .replace(/\s+/g, " ")
+    .replace(/(^\w|\s\w)/g, (m) => m.toUpperCase());
 }
 
-// 📦 Imports Firebase
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+// 📦 Imports necessários do Firebase (agora sem config)
 import {
-  getAuth,
   onAuthStateChanged,
   signOut,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
 import {
-  getFirestore,
   doc,
   getDoc,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
 import {
-  getDatabase,
   ref,
   push,
   onValue,
   get,
   update,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-
-// ⚙️ Configuração Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyCl69j1qpqKObNlZFSDOaJY5Ob8arFCr3k",
-  authDomain: "see-carpina-2a774.firebaseapp.com",
-  projectId: "see-carpina-2a774",
-  databaseURL: "https://see-carpina-2a774-default-rtdb.firebaseio.com",
-};
-
-// 🔥 Inicialização
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const rtdb = getDatabase(app);
 
 // 🧍‍♂️ Controle do usuário logado
 let nomeResponsavel = "Usuário";
@@ -106,13 +93,25 @@ onAuthStateChanged(auth, async (user) => {
       nomeResponsavel = user.displayName.split(" ")[0];
     }
 
-    // Exibe nome em campos, se existirem
+    window.dadosUsuario = userSnap.data();
+    window.usuarioAuth = user;
+
     const campoResp = document.getElementById("responsavel");
     if (campoResp) campoResp.value = nomeResponsavel;
 
     const boasVindas = document.getElementById("boasVindas");
     if (boasVindas) boasVindas.textContent = `👋 Olá, ${nomeResponsavel}!`;
+
     document.querySelector("#nomeUsuario").textContent = nomeResponsavel;
+
+    // Foto do usuário no topo
+    const fotoTopo = document.querySelector(".profile-photo img");
+
+    if (window.dadosUsuario?.foto) {
+      fotoTopo.src = window.dadosUsuario.foto;
+    } else {
+      fotoTopo.src = "./src/images/profile.webp"; // fallback padrão
+    }
   } catch (err) {
     console.error("Erro ao buscar nome:", err);
   }
@@ -120,7 +119,6 @@ onAuthStateChanged(auth, async (user) => {
 
 // 🔥 Carregar destinos do Realtime Database
 const destinosRef = ref(rtdb, "destinos");
-
 let destinos = [];
 
 const inputDestino = document.getElementById("destino");
@@ -129,14 +127,12 @@ const boxDestino = document.getElementById("autocompleteDestino");
 const inputCopia = document.getElementById("copia");
 const boxCopia = document.getElementById("autocompleteCopia");
 
-// Carregar destinos
 onValue(destinosRef, (snap) => {
   destinos = snap.exists()
     ? [...new Set(Object.values(snap.val()).map((d) => padronizarTexto(d)))]
     : [];
 });
 
-// Função para mostrar sugestões
 function mostrarSugestoes(input, lista, box) {
   const texto = input.value.toLowerCase();
   box.innerHTML = "";
@@ -166,7 +162,6 @@ function mostrarSugestoes(input, lista, box) {
   box.style.display = "block";
 }
 
-// Eventos dos inputs
 inputDestino.addEventListener("input", () =>
   mostrarSugestoes(inputDestino, destinos, boxDestino)
 );
@@ -175,7 +170,6 @@ inputCopia.addEventListener("input", () =>
   mostrarSugestoes(inputCopia, destinos, boxCopia)
 );
 
-// Fechar ao clicar fora
 document.addEventListener("click", (e) => {
   if (!inputDestino.contains(e.target)) boxDestino.style.display = "none";
   if (!inputCopia.contains(e.target)) boxCopia.style.display = "none";
@@ -184,12 +178,13 @@ document.addEventListener("click", (e) => {
 // 💬 Notificações
 function mostrarNotificacao(msg, tipo = "sucesso") {
   const c = document.getElementById("notificacao");
-  if (!c) return alert(msg); // fallback se não existir container
+  if (!c) return alert(msg);
 
   const div = document.createElement("div");
   div.className = `msg ${tipo}`;
   div.textContent = msg;
   c.appendChild(div);
+
   setTimeout(() => {
     div.style.animation = "desaparecer 0.4s forwards";
     setTimeout(() => div.remove(), 400);
@@ -211,14 +206,9 @@ if (formOficio) {
     const destino = padronizarTexto(document.getElementById("destino").value);
     const copia = padronizarTexto(document.getElementById("copia").value);
 
-    if (!assunto) {
-      mostrarNotificacao("Preencha o campo de assunto!", "erro");
-      return;
-    }
-    if (!destino) {
-      mostrarNotificacao("Selecione um destino!", "erro");
-      return;
-    }
+    if (!assunto)
+      return mostrarNotificacao("Preencha o campo de assunto!", "erro");
+    if (!destino) return mostrarNotificacao("Selecione um destino!", "erro");
 
     const hoje = new Date();
     const dataISO = hoje.toISOString().split("T")[0];
@@ -231,9 +221,7 @@ if (formOficio) {
 
       Object.values(dados).forEach((o) => {
         const num = Number(o.numero);
-        if (!isNaN(num) && num > maiorNumero) {
-          maiorNumero = num;
-        }
+        if (!isNaN(num) && num > maiorNumero) maiorNumero = num;
       });
 
       const numeroGerado = maiorNumero + 1;
@@ -248,14 +236,8 @@ if (formOficio) {
         criadoEm: new Date().toISOString(),
       });
 
-      // ➕ Adicionar destino/cópia que ainda não existem na lista
-      if (destino && !destinos.includes(destino)) {
-        push(destinosRef, destino);
-      }
-
-      if (copia && !destinos.includes(copia)) {
-        push(destinosRef, copia);
-      }
+      if (destino && !destinos.includes(destino)) push(destinosRef, destino);
+      if (copia && !destinos.includes(copia)) push(destinosRef, copia);
 
       mostrarNotificacao(`Ofício nº ${numeroGerado} cadastrado com sucesso!`);
       e.target.reset();
@@ -265,9 +247,10 @@ if (formOficio) {
   });
 }
 
-// 📡 Atualização em tempo real da tabela
+// 📡 Atualização da tabela
 const tabela = document.querySelector("#tabelaOficios tbody");
-tabela.innerHTML = `<tr><td colspan="7" style="text-align:center;"><svg class="svg-spinner" viewBox="0 0 50 50" role="img" aria-label="Carregando"> <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="4"/></svg></td></tr>`;
+tabela.innerHTML = `<tr><td colspan="7" style="text-align:center;"><svg class="svg-spinner" viewBox="0 0 50 50"><circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="4"/></svg></td></tr>`;
+
 const paginacao = document.getElementById("paginacao");
 const inputBusca = document.getElementById("busca");
 const oficiosRef = ref(rtdb, "oficios");
@@ -296,10 +279,7 @@ function renderTabela() {
   );
 
   if (mostrarDisponiveis) {
-    filtrados = filtrados.filter(
-      (o) =>
-        o.assunto === undefined || o.assunto === null || o.assunto.trim() === ""
-    );
+    filtrados = filtrados.filter((o) => !o.assunto || o.assunto.trim() === "");
   }
 
   const totalPaginas = Math.ceil(filtrados.length / porPagina);
@@ -312,17 +292,17 @@ function renderTabela() {
   pagina.forEach((o) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-        <td data-key="${o._key}">${o.numero}</td>
-        <td class='assunto'>${o.assunto}</td>
-        <td>${formatarDataBR(o.data)}</td>
-        <td>${o.destino ?? "-"}</td>
-        <td>${o.copia ?? "-"}</td>
-        <td>${o.responsavel}</td>
-        <td>${
-          o.responsavel === nomeResponsavel || nomeResponsavel === "Raphael"
-            ? "<button class='edit-btn'><span class='material-symbols-outlined'>edit_square</span></button>"
-            : ""
-        }</td>`;
+      <td data-key="${o._key}">${o.numero}</td>
+      <td class='assunto'>${o.assunto}</td>
+      <td>${formatarDataBR(o.data)}</td>
+      <td>${o.destino ?? "-"}</td>
+      <td>${o.copia ?? "-"}</td>
+      <td>${o.responsavel}</td>
+      <td>${
+        o.responsavel === nomeResponsavel || nomeResponsavel === "Raphael"
+          ? "<button class='edit-btn'><span class='material-symbols-outlined'>edit_square</span></button>"
+          : ""
+      }</td>`;
 
     tabela.appendChild(tr);
   });
@@ -332,7 +312,6 @@ function renderTabela() {
       '<tr><td colspan="6" style="text-align:center;">Nenhum resultado encontrado</td></tr>';
   }
 
-  // 🔢 Paginação numérica
   if (paginacao) {
     paginacao.innerHTML = "";
     const maxPaginasVisiveis = 10;
@@ -346,10 +325,12 @@ function renderTabela() {
       const btn = document.createElement("button");
       btn.textContent = i;
       if (i === paginaAtual) btn.classList.add("ativo");
+
       btn.onclick = () => {
         paginaAtual = i;
         renderTabela();
       };
+
       paginacao.appendChild(btn);
     }
   }
@@ -364,17 +345,17 @@ onValue(oficiosRef, (snap) => {
   } else {
     todosOficios = [];
   }
+
   renderTabela();
+
   tabela.onclick = (e) => {
     const icone = e.target.closest("span.material-symbols-outlined");
     if (!icone) return;
 
     const linha = icone.closest("tr");
-
-    // chave real do Firebase vinda do <td data-key="">
     const chave = linha.querySelector("td[data-key]").dataset.key;
-
     const oficio = todosOficios.find((o) => o._key === chave);
+
     if (!oficio) return;
 
     editando = true;
@@ -396,6 +377,7 @@ onValue(oficiosRef, (snap) => {
 });
 
 if (inputBusca) inputBusca.addEventListener("input", renderTabela);
+
 const filtroDisponiveis = document.getElementById("filtroDisponiveis");
 if (filtroDisponiveis)
   filtroDisponiveis.addEventListener("change", renderTabela);
@@ -403,11 +385,7 @@ if (filtroDisponiveis)
 const btnTopo = document.getElementById("btnTopo");
 
 window.addEventListener("scroll", function () {
-  if (window.scrollY > 300) {
-    btnTopo.style.opacity = "1";
-  } else {
-    btnTopo.style.opacity = "0";
-  }
+  btnTopo.style.opacity = window.scrollY > 300 ? "1" : "0";
 });
 
 btnTopo.addEventListener("click", function () {
@@ -432,47 +410,25 @@ let editando = false;
 let chaveEdicao = null;
 
 document.getElementById("btnSalvarEdicao").onclick = async () => {
-  console.log("▶ Iniciando salvamento…");
-
   if (!editando || !chaveEdicao) {
-    console.error("❌ ERRO: editando ou chaveEdicao estão inválidos:", {
-      editando,
-      chaveEdicao,
-    });
-    return;
+    return mostrarNotificacao("Erro ao localizar ofício!", "erro");
   }
 
   const assunto = document.getElementById("assunto").value.trim();
   const destino = document.getElementById("destino").value;
   const copia = document.getElementById("copia").value;
 
-  console.log("✔ Dados capturados do formulário:", { assunto, destino, copia });
-
-  if (!assunto) {
-    console.error("❌ ERRO: campo 'assunto' vazio");
+  if (!assunto)
     return mostrarNotificacao("Preencha o campo de assunto!", "erro");
-  }
-  if (!destino) {
-    console.error("❌ ERRO: campo 'destino' vazio");
-    return mostrarNotificacao("Selecione um destino!", "erro");
-  }
+  if (!destino) return mostrarNotificacao("Selecione um destino!", "erro");
 
   const oficioOriginal = todosOficios.find((o) => o._key === chaveEdicao);
 
   if (!oficioOriginal) {
-    console.error(
-      "❌ ERRO: não encontrou o ofício original no array. chave:",
-      chaveEdicao
-    );
-    console.log("Array todosOficios:", todosOficios);
     return mostrarNotificacao("Erro ao localizar ofício!", "erro");
   }
 
-  console.log("✔ Ofício localizado:", oficioOriginal);
-
   const refEdicao = ref(rtdb, `oficios/${chaveEdicao}`);
-
-  console.log("✔ Referência Firebase:", refEdicao);
 
   try {
     await update(refEdicao, {
@@ -481,18 +437,12 @@ document.getElementById("btnSalvarEdicao").onclick = async () => {
       copia,
       numero: oficioOriginal.numero,
       data: oficioOriginal.data,
-      responsavel:
-        oficioOriginal.responsavel === undefined
-          ? nomeResponsavel
-          : oficioOriginal.responsavel,
+      responsavel: oficioOriginal.responsavel ?? nomeResponsavel,
     });
-
-    console.log("✅ SALVO NO FIREBASE COM SUCESSO!");
 
     mostrarNotificacao("Ofício atualizado com sucesso!");
     resetarFormularioEdicao();
   } catch (erro) {
-    console.error("❌ ERRO AO SALVAR NO FIREBASE:", erro);
     mostrarNotificacao("Erro ao salvar no Firebase!", "erro");
   }
 };
@@ -500,6 +450,7 @@ document.getElementById("btnSalvarEdicao").onclick = async () => {
 document.getElementById("btnCancelarEdicao").onclick = () => {
   resetarFormularioEdicao();
 };
+
 function resetarFormularioEdicao() {
   editando = false;
   chaveEdicao = null;
