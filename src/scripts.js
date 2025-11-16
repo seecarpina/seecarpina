@@ -19,7 +19,23 @@ carregarSidebar().then(() => {
     });
   }
 });
-carregarRight();
+carregarRight().then(() => {
+  // menu
+  const sideMenu = document.querySelector("aside");
+  const menuBtn = document.querySelector("#menu_bar");
+  const closeBtn = document.querySelector("#close_btn");
+
+  // tema
+  const themeToggler = document.querySelector(".theme-toggler");
+
+  menuBtn.addEventListener("click", () => {
+    sideMenu.style.display = "block";
+  });
+
+  closeBtn.addEventListener("click", () => {
+    sideMenu.style.display = "none";
+  });
+});
 
 function padronizarTexto(str) {
   if (!str) return "";

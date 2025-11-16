@@ -477,7 +477,7 @@ main .recent_order a {
   display: none;
 }
 
-.right .top .theme-toggle {
+.right .top .theme-toggler {
   background-color: var(--clr-white);
   display: flex;
   justify-content: space-between;
@@ -488,7 +488,7 @@ main .recent_order a {
   box-shadow: var(--box-shadow);
 }
 
-.right .top .theme-toggle span {
+.right .top .theme-toggler span {
   font-size: 1.2rem;
   width: 100%;
   height: 100%;
@@ -497,7 +497,7 @@ main .recent_order a {
   justify-content: center;
 }
 
-.right .top .theme-toggle span.active {
+.right .top .theme-toggler span.active {
   background-color: var(--clr-primary);
   border-radius: var(--border-radius-1);
 }
@@ -769,6 +769,14 @@ main .recent_order a {
     z-index: 3;
     background-color: var(--clr-white);
     display: none;
+    left: -100px;
+    animation: menuAni 0.5s forwards;
+  }
+
+  @keyframes menuAni {
+    to {
+      left: 0;
+    }
   }
 
   aside .logo h2 {
