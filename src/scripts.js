@@ -1,6 +1,8 @@
 // 🌀 Remove a tela de loading e seta o tema
 window.addEventListener("load", () => {
-  document.querySelector(".loading").style.display = "none";
+  setTimeout(() => {
+    document.querySelector(".loading").style.display = "none";
+  }, 200);
 
   const savedTheme = localStorage.getItem("theme");
 
