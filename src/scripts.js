@@ -223,6 +223,7 @@ if (formOficio) {
 
 // 📡 Atualização em tempo real da tabela
 const tabela = document.querySelector("#tabelaOficios tbody");
+tabela.innerHTML = `<tr><td colspan="7" style="text-align:center;"><svg class="svg-spinner" viewBox="0 0 50 50" role="img" aria-label="Carregando"> <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="4"/></svg></td></tr>`;
 const paginacao = document.getElementById("paginacao");
 const inputBusca = document.getElementById("busca");
 const oficiosRef = ref(rtdb, "oficios");
