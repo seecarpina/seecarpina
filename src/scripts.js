@@ -1,6 +1,18 @@
-// 🌀 Remove a tela de loading
+// 🌀 Remove a tela de loading e seta o tema
 window.addEventListener("load", () => {
   document.querySelector(".loading").style.display = "none";
+
+  const savedTheme = localStorage.getItem("theme");
+
+  if (savedTheme === "dark") {
+    document.body.classList.add("dark-theme-variables");
+    themeToggler.querySelector("span:nth-child(1)").classList.add("active");
+    themeToggler.querySelector("span:nth-child(2)").classList.remove("active");
+  } else {
+    document.body.classList.remove("dark-theme-variables");
+    themeToggler.querySelector("span:nth-child(1)").classList.remove("active");
+    themeToggler.querySelector("span:nth-child(2)").classList.add("active");
+  }
 });
 
 import { carregarSidebar, carregarRight } from "./include.js";
@@ -38,6 +50,10 @@ carregarRight().then(() => {
 
   themeToggler.addEventListener("click", () => {
     document.body.classList.toggle("dark-theme-variables");
+
+    const isDark = document.body.classList.contains("dark-theme-variables");
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+
     themeToggler.querySelector("span:nth-child(1)").classList.toggle("active");
     themeToggler.querySelector("span:nth-child(2)").classList.toggle("active");
   });
