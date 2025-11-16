@@ -4,7 +4,21 @@ window.addEventListener("load", () => {
 });
 
 import { carregarSidebar } from "./include.js";
-carregarSidebar();
+carregarSidebar().then(() => {
+  // 🚪 Logout
+  const logoutLink = document.getElementById("logout");
+  if (logoutLink) {
+    logoutLink.addEventListener("click", async (e) => {
+      e.preventDefault();
+      try {
+        await signOut(auth);
+        window.location.href = "./login";
+      } catch (error) {
+        alert("Erro ao sair: " + error.message);
+      }
+    });
+  }
+});
 
 // 📦 Imports Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
@@ -70,20 +84,6 @@ onAuthStateChanged(auth, async (user) => {
     console.error("Erro ao buscar nome:", err);
   }
 });
-
-// 🚪 Logout
-const logoutLink = document.getElementById("logout");
-if (logoutLink) {
-  logoutLink.addEventListener("click", async (e) => {
-    e.preventDefault();
-    try {
-      await signOut(auth);
-      window.location.href = "./login";
-    } catch (error) {
-      alert("Erro ao sair: " + error.message);
-    }
-  });
-}
 
 // 🔥 Carregar destinos do Realtime Database
 const destinosRef = ref(rtdb, "destinos");
