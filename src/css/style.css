@@ -432,10 +432,10 @@ main .recent_order {
 main .recent_order h1 {
   margin-bottom: 1rem;
 }
-main .recent_order h2 {
+main h2 {
   color: var(--clr-dark);
 }
-main .recent_order table {
+main table {
   background: var(--clr-white);
   width: 100%;
   padding: var(--card-padding);
@@ -549,7 +549,7 @@ main .recent_order a {
   width: auto;
   align-self: center;
   background-color: var(--clr-primary);
-  color: var(--clr-white);
+  color: #fff;
   cursor: pointer;
   transition: all 0.5s ease;
 }
@@ -578,6 +578,7 @@ main .recent_order a {
   margin-bottom: 2rem;
   transition: all 0.3s ease;
   border-collapse: separate;
+  color: var(--clr-dark);
 }
 #tabelaOficios .assunto {
   text-align: left;
@@ -593,6 +594,7 @@ main .recent_order a {
 }
 #tabelaOficios td {
   padding: 5px;
+  color: var(--clr-dark);
 }
 
 #msgEdicao {
@@ -710,6 +712,7 @@ main .recent_order a {
   cursor: pointer;
   user-select: none;
   transition: all 1s ease;
+  color: var(--clr-dark);
 }
 
 .switch input {

@@ -1,6 +1,23 @@
-// 🌀 Remove a tela de loading
+// Remove a tela de loading e Aplicar tema salvo
 window.addEventListener("load", () => {
-  document.querySelector(".loading").style.display = "none";
+  const temaSalvo = localStorage.getItem("theme");
+
+  if (temaSalvo === "dark") {
+    document.body.classList.add("dark-theme-variables");
+
+    // ajustar spans do ícone
+    const themeToggler = document.querySelector(".theme-toggler");
+    if (themeToggler) {
+      themeToggler.querySelector("span:nth-child(1)").classList.add("active");
+      themeToggler
+        .querySelector("span:nth-child(2)")
+        .classList.remove("active");
+    }
+  }
+
+  setTimeout(() => {
+    document.querySelector(".loading").style.display = "none";
+  }, 200);
 });
 
 import { carregarSidebar, carregarRight } from "./include.js";
@@ -28,9 +45,6 @@ carregarRight().then(() => {
   const menuBtn = document.querySelector("#menu_bar");
   const closeBtn = document.querySelector("#close_btn");
 
-  // tema
-  const themeToggler = document.querySelector(".theme-toggler");
-
   menuBtn.addEventListener("click", () => {
     sideMenu.style.display = "block";
   });
@@ -39,10 +53,22 @@ carregarRight().then(() => {
     sideMenu.style.display = "none";
   });
 
+  // tema
+  const themeToggler = document.querySelector(".theme-toggler");
+
   themeToggler.addEventListener("click", () => {
     document.body.classList.toggle("dark-theme-variables");
+
+    // Alterna os spans
     themeToggler.querySelector("span:nth-child(1)").classList.toggle("active");
     themeToggler.querySelector("span:nth-child(2)").classList.toggle("active");
+
+    // Salvar no localStorage
+    const modoAtual = document.body.classList.contains("dark-theme-variables")
+      ? "dark"
+      : "light";
+
+    localStorage.setItem("theme", modoAtual);
   });
 });
 
