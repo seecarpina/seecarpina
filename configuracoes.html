@@ -76,6 +76,7 @@
       </main>
 
       <div class="right"></div>
+      <div id="notificacao"></div>
     </div>
 
     <!-- IMPORTA SEU SCRIPT PRINCIPAL -->
@@ -83,6 +84,22 @@
 
     <!-- SCRIPT PARA CARREGAR DADOS E SALVAR EDIÇÕES -->
     <script type="module">
+      // 💬 Notificações
+      function mostrarNotificacao(msg, tipo = "sucesso") {
+        const c = document.getElementById("notificacao");
+        if (!c) return alert(msg);
+
+        const div = document.createElement("div");
+        div.className = `msg ${tipo}`;
+        div.textContent = msg;
+        c.appendChild(div);
+
+        setTimeout(() => {
+          div.style.animation = "desaparecer 0.4s forwards";
+          setTimeout(() => div.remove(), 400);
+        }, 5000);
+      }
+
       import { db } from "./src/js/firebaseConfig.js";
       import {
         doc,
@@ -139,7 +156,7 @@
 
       btnSalvar.addEventListener("click", async () => {
         if (!window.usuarioAuth) {
-          alert("Usuário não autenticado!");
+          mostrarNotificacao("Usuário não autenticado!", "erro");
           return;
         }
 
@@ -148,7 +165,7 @@
         const preview = document.getElementById("previewFoto").src;
 
         if (!novoNome) {
-          alert("O nome não pode estar vazio!");
+          mostrarNotificacao("O nome não pode estar vazio!", "erro");
           return;
         }
 
@@ -169,7 +186,7 @@
           const fotoTopo = document.querySelector(".profile-photo img");
           if (fotoTopo) fotoTopo.src = novaFoto;
 
-          alert("Dados atualizados com sucesso!");
+          mostrarNotificacao("Dados atualizados com sucesso!");
 
           // Atualiza dados em memória
           window.dadosUsuario.nome = novoNome;
@@ -180,7 +197,7 @@
           const nomeTopo = document.querySelector("#nomeUsuario");
           if (nomeTopo) nomeTopo.textContent = nomePrimeiro;
         } catch (erro) {
-          alert("Erro ao atualizar: " + erro.message);
+          mostrarNotificacao("Erro ao atualizar: " + erro.message, "erro");
         }
       });
     </script>
