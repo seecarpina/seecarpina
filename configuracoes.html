@@ -191,11 +191,6 @@
           // Atualiza dados em memória
           window.dadosUsuario.nome = novoNome;
           window.dadosUsuario.foto = novaFoto;
-
-          // Atualiza nome no topo do sistema
-          const nomePrimeiro = novoNome.split(" ")[0];
-          const nomeTopo = document.querySelector("#nomeUsuario");
-          if (nomeTopo) nomeTopo.textContent = nomePrimeiro;
         } catch (erro) {
           mostrarNotificacao("Erro ao atualizar: " + erro.message, "erro");
         }
