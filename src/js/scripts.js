@@ -156,7 +156,14 @@ onAuthStateChanged(auth, async (user) => {
     const boasVindas = document.getElementById("boasVindas");
     if (boasVindas) boasVindas.textContent = `👋 Olá, ${nomeResponsavel}!`;
 
-    document.querySelector("#nomeUsuario").textContent = nomeResponsavel;
+    if (window.dadosUsuario?.nome) {
+      document.querySelector("#nomeUsuario").textContent = nomeResponsavel;
+    }
+
+    if (window.dadosUsuario?.cargo) {
+      document.querySelector("#cargoUsuario").textContent =
+        window.dadosUsuario.cargo;
+    }
 
     // Foto do usuário no topo
     const fotoTopo = document.querySelector(".profile-photo img");
