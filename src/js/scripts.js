@@ -223,13 +223,17 @@ function mostrarSugestoes(input, lista, box) {
   box.style.display = "block";
 }
 
-inputDestino.addEventListener("input", () =>
-  mostrarSugestoes(inputDestino, destinos, boxDestino)
-);
+if (inputDestino) {
+  inputDestino.addEventListener("input", () =>
+    mostrarSugestoes(inputDestino, destinos, boxDestino)
+  );
+}
 
-inputCopia.addEventListener("input", () =>
-  mostrarSugestoes(inputCopia, destinos, boxCopia)
-);
+if (inputCopia) {
+  inputCopia.addEventListener("input", () =>
+    mostrarSugestoes(inputCopia, destinos, boxCopia)
+  );
+}
 
 document.addEventListener("click", (e) => {
   if (!inputDestino.contains(e.target)) boxDestino.style.display = "none";
@@ -310,8 +314,9 @@ if (formOficio) {
 
 // 📡 Atualização da tabela
 const tabela = document.querySelector("#tabelaOficios tbody");
-tabela.innerHTML = `<tr><td colspan="7" style="text-align:center;"><svg class="svg-spinner" viewBox="0 0 50 50"><circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="4"/></svg></td></tr>`;
-
+if (tabela) {
+  tabela.innerHTML = `<tr><td colspan="7" style="text-align:center;"><svg class="svg-spinner" viewBox="0 0 50 50"><circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="4"/></svg></td></tr>`;
+}
 const paginacao = document.getElementById("paginacao");
 const inputBusca = document.getElementById("busca");
 const oficiosRef = ref(rtdb, "oficios");
@@ -409,32 +414,34 @@ onValue(oficiosRef, (snap) => {
 
   renderTabela();
 
-  tabela.onclick = (e) => {
-    const icone = e.target.closest("span.material-symbols-outlined");
-    if (!icone) return;
+  if (tabela) {
+    tabela.onclick = (e) => {
+      const icone = e.target.closest("span.material-symbols-outlined");
+      if (!icone) return;
 
-    const linha = icone.closest("tr");
-    const chave = linha.querySelector("td[data-key]").dataset.key;
-    const oficio = todosOficios.find((o) => o._key === chave);
+      const linha = icone.closest("tr");
+      const chave = linha.querySelector("td[data-key]").dataset.key;
+      const oficio = todosOficios.find((o) => o._key === chave);
 
-    if (!oficio) return;
+      if (!oficio) return;
 
-    editando = true;
-    chaveEdicao = chave;
+      editando = true;
+      chaveEdicao = chave;
 
-    document.getElementById("assunto").value = oficio.assunto;
-    document.getElementById("destino").value = oficio.destino;
-    document.getElementById("copia").value = oficio.copia;
+      document.getElementById("assunto").value = oficio.assunto;
+      document.getElementById("destino").value = oficio.destino;
+      document.getElementById("copia").value = oficio.copia;
 
-    document.getElementById("btnCadastrar").style.display = "none";
-    document.getElementById("botoesEdicao").style.display = "flex";
+      document.getElementById("btnCadastrar").style.display = "none";
+      document.getElementById("botoesEdicao").style.display = "flex";
 
-    const msg = document.getElementById("msgEdicao");
-    msg.textContent = `✏️ Editando ofício nº ${oficio.numero}`;
-    msg.style.display = "block";
+      const msg = document.getElementById("msgEdicao");
+      msg.textContent = `✏️ Editando ofício nº ${oficio.numero}`;
+      msg.style.display = "block";
 
-    btnTopo.click();
-  };
+      btnTopo.click();
+    };
+  }
 });
 
 if (inputBusca) inputBusca.addEventListener("input", renderTabela);
@@ -469,48 +476,54 @@ btnTopo.addEventListener("click", function () {
 
 let editando = false;
 let chaveEdicao = null;
+let btnSalvarEdicao = document.getElementById("btnSalvarEdicao");
+let btnCancelarEdicao = document.getElementById("btnCancelarEdicao");
 
-document.getElementById("btnSalvarEdicao").onclick = async () => {
-  if (!editando || !chaveEdicao) {
-    return mostrarNotificacao("Erro ao localizar ofício!", "erro");
-  }
+if (btnSalvarEdicao) {
+  btnSalvarEdicao.onclick = async () => {
+    if (!editando || !chaveEdicao) {
+      return mostrarNotificacao("Erro ao localizar ofício!", "erro");
+    }
 
-  const assunto = document.getElementById("assunto").value.trim();
-  const destino = document.getElementById("destino").value;
-  const copia = document.getElementById("copia").value;
+    const assunto = document.getElementById("assunto").value.trim();
+    const destino = document.getElementById("destino").value;
+    const copia = document.getElementById("copia").value;
 
-  if (!assunto)
-    return mostrarNotificacao("Preencha o campo de assunto!", "erro");
-  if (!destino) return mostrarNotificacao("Selecione um destino!", "erro");
+    if (!assunto)
+      return mostrarNotificacao("Preencha o campo de assunto!", "erro");
+    if (!destino) return mostrarNotificacao("Selecione um destino!", "erro");
 
-  const oficioOriginal = todosOficios.find((o) => o._key === chaveEdicao);
+    const oficioOriginal = todosOficios.find((o) => o._key === chaveEdicao);
 
-  if (!oficioOriginal) {
-    return mostrarNotificacao("Erro ao localizar ofício!", "erro");
-  }
+    if (!oficioOriginal) {
+      return mostrarNotificacao("Erro ao localizar ofício!", "erro");
+    }
 
-  const refEdicao = ref(rtdb, `oficios/${chaveEdicao}`);
+    const refEdicao = ref(rtdb, `oficios/${chaveEdicao}`);
 
-  try {
-    await update(refEdicao, {
-      assunto,
-      destino,
-      copia,
-      numero: oficioOriginal.numero,
-      data: oficioOriginal.data,
-      responsavel: oficioOriginal.responsavel ?? nomeResponsavel,
-    });
+    try {
+      await update(refEdicao, {
+        assunto,
+        destino,
+        copia,
+        numero: oficioOriginal.numero,
+        data: oficioOriginal.data,
+        responsavel: oficioOriginal.responsavel ?? nomeResponsavel,
+      });
 
-    mostrarNotificacao("Ofício atualizado com sucesso!");
+      mostrarNotificacao("Ofício atualizado com sucesso!");
+      resetarFormularioEdicao();
+    } catch (erro) {
+      mostrarNotificacao("Erro ao salvar no Firebase!", "erro");
+    }
+  };
+}
+
+if (btnCancelarEdicao) {
+  btnCancelarEdicao.onclick = () => {
     resetarFormularioEdicao();
-  } catch (erro) {
-    mostrarNotificacao("Erro ao salvar no Firebase!", "erro");
-  }
-};
-
-document.getElementById("btnCancelarEdicao").onclick = () => {
-  resetarFormularioEdicao();
-};
+  };
+}
 
 function resetarFormularioEdicao() {
   editando = false;
