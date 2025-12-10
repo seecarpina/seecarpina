@@ -351,7 +351,12 @@ function renderTabela() {
   );
 
   if (mostrarDisponiveis) {
-    filtrados = filtrados.filter((o) => !o.assunto || o.assunto.trim() === "");
+    filtrados = filtrados.filter(
+      (o) =>
+        !o.assunto ||
+        o.assunto.trim() === "" ||
+        o.assunto.trim() === "undefined"
+    );
   }
 
   const totalPaginas = Math.ceil(filtrados.length / porPagina);
@@ -370,9 +375,17 @@ function renderTabela() {
       <td>${o.destino ?? "-"}</td>
       <td>${o.copia ?? "-"}</td>
       <td>${o.responsavel}</td>
-      <td>${
+      <td class="flex">${
         o.responsavel === nomeResponsavel || nomeResponsavel === "Raphael"
-          ? "<button class='edit-btn'><span class='material-symbols-outlined'>edit_square</span></button>"
+          ? `
+      <button class='edit-btn'>
+        <span class='material-symbols-outlined'>edit_square</span>
+      </button>
+
+      <button class='cancel-btn' title='Cancelar Ofício'>
+        <span class='material-symbols-outlined'>cancel</span>
+      </button>
+      `
           : ""
       }</td>`;
 
@@ -422,30 +435,55 @@ onValue(oficiosRef, (snap) => {
 
   if (tabela) {
     tabela.onclick = (e) => {
-      const icone = e.target.closest("span.material-symbols-outlined");
-      if (!icone) return;
+      const alvo = e.target.closest("span.material-symbols-outlined");
+      if (!alvo) return;
 
-      const linha = icone.closest("tr");
+      const linha = alvo.closest("tr");
       const chave = linha.querySelector("td[data-key]").dataset.key;
       const oficio = todosOficios.find((o) => o._key === chave);
-
       if (!oficio) return;
 
-      editando = true;
-      chaveEdicao = chave;
+      // ✏️ EDITAR
+      if (alvo.textContent.trim() === "edit_square") {
+        editando = true;
+        chaveEdicao = chave;
 
-      document.getElementById("assunto").value = oficio.assunto;
-      document.getElementById("destino").value = oficio.destino;
-      document.getElementById("copia").value = oficio.copia;
+        document.getElementById("assunto").value = oficio.assunto ?? "";
+        document.getElementById("destino").value = oficio.destino ?? "";
+        document.getElementById("copia").value = oficio.copia ?? "";
 
-      document.getElementById("btnCadastrar").style.display = "none";
-      document.getElementById("botoesEdicao").style.display = "flex";
+        document.getElementById("btnCadastrar").style.display = "none";
+        document.getElementById("botoesEdicao").style.display = "flex";
 
-      const msg = document.getElementById("msgEdicao");
-      msg.textContent = `✏️ Editando ofício nº ${oficio.numero}`;
-      msg.style.display = "block";
+        const msg = document.getElementById("msgEdicao");
+        msg.textContent = `✏️ Editando ofício nº ${oficio.numero}`;
+        msg.style.display = "block";
 
-      btnTopo.click();
+        btnTopo.click();
+      }
+
+      // ❌ CANCELAR OFÍCIO
+      if (alvo.textContent.trim() === "cancel") {
+        if (
+          !confirm(
+            `Tem certeza que deseja cancelar o ofício nº ${oficio.numero} ?`
+          )
+        )
+          return;
+
+        const refCancelar = ref(rtdb, `oficios/${chave}`);
+
+        update(refCancelar, {
+          assunto: "",
+          destino: "",
+          copia: "",
+          responsavel: "",
+        })
+          .then(() => {
+            mostrarNotificacao(`Ofício nº ${oficio.numero} cancelado.`);
+          })
+          .catch(() => mostrarNotificacao("Erro ao cancelar!", "erro"));
+      }
     };
   }
 });

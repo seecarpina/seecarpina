@@ -577,6 +577,17 @@ main .recent_order a {
 .edit-btn:hover {
   color: var(--clr-warnig);
 }
+
+.cancel-btn {
+  cursor: pointer;
+  color: var(--clr-danger);
+  transition: all 0.5s ease;
+  box-shadow: var(--box-shadow);
+  background: none;
+}
+.cancel-btn:hover {
+  color: var(--clr-warnig);
+}
 #tabelaOficios {
   width: 100%;
   background-color: var(--clr-white);
