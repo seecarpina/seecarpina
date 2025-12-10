@@ -376,7 +376,10 @@ function renderTabela() {
       <td>${o.copia ?? "-"}</td>
       <td>${o.responsavel}</td>
       <td class="flex">${
-        o.responsavel === nomeResponsavel || nomeResponsavel === "Raphael"
+        o.responsavel === nomeResponsavel ||
+        nomeResponsavel === "Raphael" ||
+        o.responsavel === "" ||
+        o.responsavel === undefined
           ? `
       <button class='edit-btn'>
         <span class='material-symbols-outlined'>edit_square</span>
