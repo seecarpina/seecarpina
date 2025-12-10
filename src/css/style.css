@@ -241,7 +241,8 @@ h5 {
 small {
   font-size: 0.75rem;
 }
-.profile-photo img {
+.profile-photo img,
+#profile-photo img {
   width: 2.8rem;
   height: 2.8rem;
   border-radius: 50%;

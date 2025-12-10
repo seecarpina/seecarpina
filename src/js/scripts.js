@@ -122,6 +122,8 @@ import {
 import {
   doc,
   getDoc,
+  collection,
+  getDocs,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 import {
@@ -545,3 +547,41 @@ if (inputData) {
   const hoje = new Date().toISOString().split("T")[0];
   inputData.value = hoje;
 }
+
+async function carregarUsuarios() {
+  const tbody = document.querySelector("#tabelaUsuarios tbody");
+  tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">
+        <svg class="svg-spinner" viewBox="0 0 50 50">
+          <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="4"/>
+        </svg></td></tr>`;
+
+  try {
+    const snap = await getDocs(collection(db, "usuarios"));
+    tbody.innerHTML = "";
+
+    snap.forEach((doc) => {
+      const u = doc.data();
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+            <td><div id="profile-photo"><img src="${
+              u.foto ?? "./src/images/profile.webp"
+            }"></div></td>
+            <td>${u.nome ?? "-"}</td>
+            <td>${u.email ?? "-"}</td>
+            <td>${u.cargo ?? "-"}</td>
+          `;
+
+      tbody.appendChild(tr);
+    });
+
+    if (!tbody.innerHTML.trim()) {
+      tbody.innerHTML =
+        '<tr><td colspan="5">Nenhum usuário encontrado</td></tr>';
+    }
+  } catch (error) {
+    alert("Erro ao carregar usuários: " + error.message);
+  }
+}
+
+carregarUsuarios();
