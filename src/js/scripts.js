@@ -539,3 +539,9 @@ function resetarFormularioEdicao() {
   document.getElementById("btnCadastrar").style.display = "block";
   document.getElementById("botoesEdicao").style.display = "none";
 }
+
+const inputData = document.querySelector("#dataHoje");
+if (inputData) {
+  const hoje = new Date().toISOString().split("T")[0];
+  inputData.value = hoje;
+}
