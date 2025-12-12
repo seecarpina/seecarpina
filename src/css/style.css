@@ -310,11 +310,13 @@ aside h3 {
 aside .sidebar a {
   display: flex;
   color: var(--clr-info-dark);
-  margin-left: 2rem;
   gap: 1rem;
   align-items: center;
   height: 3.2rem;
   transition: all 0.4s ease-in;
+  margin-left: 0; /* remover margem que causa salto */
+  padding-left: 2rem; /* espaço interno fixo para ícone/texto */
+  position: relative; /* necessário para o ::before posicionado */
 }
 aside .sidebar a span {
   font-size: 1.6rem;
@@ -328,11 +330,12 @@ aside .sidebar a:last-child {
 aside .sidebar a.active {
   background: var(--clr-light);
   color: var(--clr-primary);
-  margin-left: 0;
-  /* border-left: 5px solid var(--clr-primary); */
 }
 aside .sidebar a.active::before {
   content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
   width: 5px;
   height: 100%;
   background: var(--clr-primary);
