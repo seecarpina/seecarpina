@@ -375,7 +375,7 @@ function renderTabela() {
       <td>${o.destino ?? "-"}</td>
       <td>${o.copia ?? "-"}</td>
       <td>${o.responsavel}</td>
-      <td class="flex">${
+      <td><div class="flex">${
         o.responsavel === nomeResponsavel ||
         nomeResponsavel === "Raphael" ||
         o.responsavel === "" ||
@@ -390,7 +390,7 @@ function renderTabela() {
       </button>
       `
           : ""
-      }</td>`;
+      }</div></td>`;
 
     tabela.appendChild(tr);
   });
