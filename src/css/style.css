@@ -314,9 +314,8 @@ aside .sidebar a {
   align-items: center;
   height: 3.2rem;
   transition: all 0.4s ease-in;
-  margin-left: 0; /* remover margem que causa salto */
-  padding-left: 2rem; /* espaço interno fixo para ícone/texto */
-  position: relative; /* necessário para o ::before posicionado */
+  padding-left: 1rem;
+  position: relative;
 }
 aside .sidebar a span {
   font-size: 1.6rem;
