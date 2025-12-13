@@ -523,12 +523,12 @@ main .recent_order a {
   text-align: center;
 } */
 
+.lembretes {
+  color: var(--clr-dark);
+}
+
 .lembretes .item {
   background-color: var(--clr-white);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1;
   margin: 10px 0;
   width: 100%;
   margin-bottom: 0.8rem;
@@ -538,6 +538,10 @@ main .recent_order a {
   transition: all 0.3s ease;
 }
 
+.lembretes span {
+  font-size: 0.7rem;
+}
+
 .lembretes .item:hover {
   box-shadow: none;
 }
@@ -545,6 +549,12 @@ main .recent_order a {
 .lembretes .item textarea {
   width: 100%;
   min-height: 10rem;
+}
+
+.lembretes .item textarea {
+  background-color: transparent;
+  font-family: "Poppins", sans-serif;
+  color: var(--clr-dark);
 }
 
 .box {
