@@ -926,6 +926,10 @@ select {
     left: 1rem;
   }
 
+  .lembretes {
+    padding: var(--card-padding);
+  }
+
   .box {
     max-width: 100%;
     overflow-wrap: break-word;
