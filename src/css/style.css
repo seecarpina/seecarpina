@@ -589,7 +589,7 @@ main .recent_order a {
 .cancel-btn:hover {
   color: var(--clr-warnig);
 }
-#tabelaOficios {
+table {
   width: 100%;
   background-color: var(--clr-white);
   padding: var(--card-padding);
@@ -600,20 +600,23 @@ main .recent_order a {
   border-collapse: separate;
   color: var(--clr-dark);
 }
-#tabelaOficios .assunto {
+table .assunto {
   text-align: left;
 }
-#tabelaOficios:hover {
+table:hover {
   box-shadow: none;
 }
-#tabelaOficios tbody {
+table tbody {
   text-align: center;
 }
-#tabelaOficios tbody tr:nth-child(odd) {
+table tbody tr:nth-child(odd) {
   background-color: var(--clr-light);
 }
-#tabelaOficios td {
+table td {
   padding: 5px;
+  color: var(--clr-dark);
+}
+select {
   color: var(--clr-dark);
 }
 
