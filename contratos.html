@@ -34,7 +34,50 @@
       <aside id="sidebar"></aside>
 
       <main>
-        <h1>Cadastro de Contratos e ARPS</h1>
+        <h1>Contratos cadastrados</h1>
+        <br />
+        <div class="flex justify-center g-1">
+          <input
+            class="busca"
+            type="text"
+            id="busca"
+            placeholder="🔍 Buscar por número, credor, gestor, fiscal ou situação..."
+          />
+
+          <select id="filtroTipoContrato" class="busca">
+            <option value="">Exibir todos</option>
+            <option value="Contratos CNPJ nº 30.784.957/0001-37">
+              Apenas Contratos CNPJ nº 30.784.957/0001-37
+            </option>
+            <option value="Contratos CNPJ nº 59.593.430/0001-07">
+              Apenas Contratos CNPJ nº 59.593.430/0001-07
+            </option>
+            <option
+              value="Atas de Registro de Preços - CNPJ nº 59.593.430/0001-07"
+            >
+              Apenas Atas de Registro de Preços - CNPJ nº 59.593.430/0001-07
+            </option>
+          </select>
+        </div>
+
+        <table id="tabelaContratos">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Número</th>
+              <th>Credor</th>
+              <th>Modalidade</th>
+              <th>Gestor</th>
+              <th>Fiscal</th>
+              <th style="display: none">Situação</th>
+              <th>Tipo</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <h2>Cadastro de Contratos e ARPS</h2>
 
         <form id="formFiscalContrato" class="box">
           <input type="hidden" id="responsavel" />
@@ -116,49 +159,6 @@
 
           <div id="msgEdicao"></div>
         </form>
-
-        <h2>Contratos cadastrados</h2>
-
-        <div class="flex justify-center g-1">
-          <input
-            class="busca"
-            type="text"
-            id="busca"
-            placeholder="🔍 Buscar por número, credor, gestor, fiscal ou situação..."
-          />
-
-          <select id="filtroTipoContrato" class="busca">
-            <option value="">Exibir todos</option>
-            <option value="Contratos CNPJ nº 30.784.957/0001-37">
-              Apenas Contratos CNPJ nº 30.784.957/0001-37
-            </option>
-            <option value="Contratos CNPJ nº 59.593.430/0001-07">
-              Apenas Contratos CNPJ nº 59.593.430/0001-07
-            </option>
-            <option
-              value="Atas de Registro de Preços - CNPJ nº 59.593.430/0001-07"
-            >
-              Apenas Atas de Registro de Preços - CNPJ nº 59.593.430/0001-07
-            </option>
-          </select>
-        </div>
-
-        <table id="tabelaContratos">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Número</th>
-              <th>Credor</th>
-              <th>Modalidade</th>
-              <th>Gestor</th>
-              <th>Fiscal</th>
-              <th style="display: none">Situação</th>
-              <th>Tipo</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
 
         <div class="paginacao" id="paginacao"></div>
       </main>
