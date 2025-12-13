@@ -203,8 +203,8 @@ function renderTabela() {
   filtrados.forEach((c) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-    <td>
-    <div title="${c.situacao}" class="bdg ${
+    <td title="${c.situacao}">
+    <div class="bdg ${
       c.situacao === "DISTRATADO"
         ? "distratado"
         : c.situacao === "EM EXECUÇÃO"
@@ -223,7 +223,7 @@ function renderTabela() {
       <td>${c.modalidade}</td>
       <td>${c.gestor}</td>
       <td>${c.fiscal}</td>
-      <td>${c.situacao}</td>
+      <td style="display: none">${c.situacao}</td>
       <td>${c.tipoContrato}</td>
       <td>
         <button class="edit-btn">
