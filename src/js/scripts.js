@@ -124,6 +124,7 @@ import {
   getDoc,
   collection,
   getDocs,
+  updateDoc,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 import {
@@ -136,6 +137,9 @@ import {
 
 // 🧍‍♂️ Controle do usuário logado
 let nomeResponsavel = "Usuário";
+
+// controle de alteração do lembrete
+let lembreteOriginal = "";
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
@@ -181,6 +185,39 @@ onAuthStateChanged(auth, async (user) => {
     }
   } catch (err) {
     console.error("Erro ao buscar nome:", err);
+  }
+
+  // lembretes
+  if (window.dadosUsuario?.lembretes) {
+    const textarea = document.getElementById("lembretes");
+    if (textarea) {
+      lembreteOriginal = window.dadosUsuario.lembretes;
+      textarea.value = lembreteOriginal;
+    }
+  }
+
+  // salvar somente se mudar
+  const textareaLembretes = document.getElementById("lembretes");
+  if (textareaLembretes) {
+    textareaLembretes.addEventListener("blur", async () => {
+      const novoTexto = textareaLembretes.value.trim();
+      if (novoTexto === lembreteOriginal) return;
+
+      const user = window.usuarioAuth;
+      if (!user) return;
+
+      try {
+        await updateDoc(doc(db, "usuarios", user.uid), {
+          lembretes: novoTexto,
+          atualizadoEm: new Date().toISOString(),
+        });
+
+        lembreteOriginal = novoTexto;
+        mostrarNotificacao("Lembrete salvo");
+      } catch {
+        mostrarNotificacao("Erro ao salvar lembrete", "erro");
+      }
+    });
   }
 });
 

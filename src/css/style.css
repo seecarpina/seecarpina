@@ -523,6 +523,30 @@ main .recent_order a {
   text-align: center;
 } */
 
+.lembretes .item {
+  background-color: var(--clr-white);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1;
+  margin: 10px 0;
+  width: 100%;
+  margin-bottom: 0.8rem;
+  padding: 1.4rem var(--card-padding);
+  border-radius: var(--border-radius-3);
+  box-shadow: var(--box-shadow);
+  transition: all 0.3s ease;
+}
+
+.lembretes .item:hover {
+  box-shadow: none;
+}
+
+.lembretes .item textarea {
+  width: 100%;
+  min-height: 10rem;
+}
+
 .box {
   background-color: var(--clr-white);
   padding: var(--card-padding);
