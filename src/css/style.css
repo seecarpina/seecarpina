@@ -763,6 +763,32 @@ main .recent_order a {
   justify-content: flex-end;
 }
 
+.bdg {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.distratado {
+  background-color: crimson;
+}
+
+.em-execucao {
+  background-color: dodgerblue;
+}
+
+.executado {
+  background-color: orange;
+}
+
+.finalizado {
+  background-color: seagreen;
+}
+
+.assinado {
+  background-color: mediumslateblue;
+}
+
 /* MEDIA QUERY */
 
 @media screen and (max-width: 1200px) {

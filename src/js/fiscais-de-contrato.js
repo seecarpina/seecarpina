@@ -203,6 +203,21 @@ function renderTabela() {
   filtrados.forEach((c) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
+    <td>
+    <div title="${c.situacao}" class="bdg ${
+      c.situacao === "DISTRATADO"
+        ? "distratado"
+        : c.situacao === "EM EXECUÇÃO"
+        ? "em-execucao"
+        : c.situacao === "EXECUTADO"
+        ? "executado"
+        : c.situacao === "FINALIZADO"
+        ? "finalizado"
+        : c.situacao === "ASSINADO"
+        ? "assinado"
+        : ""
+    }"></div>
+  </td>
       <td data-key="${c._key}">${c.numero}</td>
       <td>${c.credor}</td>
       <td>${c.modalidade}</td>
