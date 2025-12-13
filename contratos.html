@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fiscais de Contrato - SEE Carpina</title>
+    <link rel="stylesheet" href="./src/css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+  </head>
+
+  <body>
+    <button id="btnTopo">↑</button>
+    <div class="loading">
+      <svg
+        class="svg-spinner"
+        viewBox="0 0 50 50"
+        role="img"
+        aria-label="Carregando"
+      >
+        <circle
+          class="path"
+          cx="25"
+          cy="25"
+          r="20"
+          fill="none"
+          stroke-width="4"
+        />
+      </svg>
+    </div>
+    <div class="container">
+      <aside id="sidebar"></aside>
+
+      <main>
+        <h1>Cadastro de Contratos e ARPS</h1>
+
+        <form id="formFiscalContrato" class="box">
+          <input type="hidden" id="responsavel" />
+
+          <div class="flex g-1">
+            <div class="w-100">
+              <label>Número</label>
+              <input type="text" id="numero" required />
+            </div>
+            <div class="w-100">
+              <label>Credor</label>
+              <input type="text" id="credor" required />
+            </div>
+
+            <div class="autocomplete w-100">
+              <label>Modalidade</label>
+              <input type="text" id="modalidade" />
+              <ul id="autoModalidade" class="autocomplete-list"></ul>
+            </div>
+          </div>
+
+          <div class="flex g-1">
+            <div class="autocomplete w-100">
+              <label>Gestor</label>
+              <input type="text" id="gestor" />
+              <ul id="autoGestor" class="autocomplete-list"></ul>
+            </div>
+
+            <div class="autocomplete w-100">
+              <label>Fiscal</label>
+              <input type="text" id="fiscal" />
+              <ul id="autoFiscal" class="autocomplete-list"></ul>
+            </div>
+          </div>
+
+          <div class="flex g-1">
+            <div class="w-100">
+              <label>Situação</label>
+              <select id="situacao">
+                <option selected disabled>SELECIONE</option>
+                <option>EM EXECUÇÃO</option>
+                <option>EXECUTADO</option>
+                <option>FINALIZADO</option>
+                <option>DISTRATADO</option>
+                <option>ASSINADO</option>
+              </select>
+            </div>
+
+            <div class="w-100">
+              <label>Tipo de Contrato</label>
+              <select id="tipoContrato">
+                <option selected disabled>SELECIONE</option>
+                <option>Contratos CNPJ nº 30.784.957/0001-37</option>
+                <option>Contratos CNPJ nº 59.593.430/0001-07</option>
+                <option>
+                  Atas de Registro de Preços - CNPJ nº 59.593.430/0001-07
+                </option>
+              </select>
+            </div>
+          </div>
+          <div id="botoesCadastro">
+            <button class="btn" id="btnCadastrar" type="submit">
+              Cadastrar
+            </button>
+
+            <div id="botoesEdicao" style="display: none; gap: 10px">
+              <button type="button" class="btn" id="btnSalvarEdicao">
+                Salvar edição
+              </button>
+              <button
+                type="button"
+                class="btn btn-cancelar"
+                id="btnCancelarEdicao"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+
+          <div id="msgEdicao"></div>
+        </form>
+
+        <h2>Contratos cadastrados</h2>
+
+        <div class="flex justify-center g-1">
+          <input
+            class="busca"
+            type="text"
+            id="busca"
+            placeholder="🔍 Buscar por número, credor, gestor, fiscal ou situação..."
+          />
+
+          <select id="filtroTipoContrato" class="busca">
+            <option value="">Ver todos</option>
+            <option value="Contratos CNPJ nº 30.784.957/0001-37">
+              Apenas Contratos CNPJ nº 30.784.957/0001-37
+            </option>
+            <option value="Contratos CNPJ nº 59.593.430/0001-07">
+              Apenas Contratos CNPJ nº 59.593.430/0001-07
+            </option>
+            <option
+              value="Atas de Registro de Preços - CNPJ nº 59.593.430/0001-07"
+            >
+              Apenas Atas de Registro de Preços - CNPJ nº 59.593.430/0001-07
+            </option>
+          </select>
+        </div>
+
+        <table id="tabelaContratos">
+          <thead>
+            <tr>
+              <th>Número</th>
+              <th>Credor</th>
+              <th>Modalidade</th>
+              <th>Gestor</th>
+              <th>Fiscal</th>
+              <th>Situação</th>
+              <th>Tipo</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <div class="paginacao" id="paginacao"></div>
+      </main>
+
+      <div class="right"></div>
+    </div>
+
+    <div id="notificacao"></div>
+    <script type="module" src="./src/js/scripts.js"></script>
+    <script type="module" src="./src/js/fiscais-de-contrato.js"></script>
+  </body>
+</html>
