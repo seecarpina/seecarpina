@@ -32,6 +32,18 @@
   outline: none;
   border: 0;
 }
+*::-webkit-scrollbar {
+  width: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--clr-primary);
+  border-radius: var(--border-radius-1);
+}
 .loading {
   width: 100%;
   height: 100%;
@@ -547,11 +559,9 @@ main .recent_order a {
 }
 
 .lembretes .item textarea {
-  width: 100%;
+  max-width: 100%;
+  min-width: 100%;
   min-height: 10rem;
-}
-
-.lembretes .item textarea {
   background-color: transparent;
   font-family: "Poppins", sans-serif;
   color: var(--clr-dark);
