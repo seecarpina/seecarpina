@@ -894,6 +894,69 @@ select {
   background-color: mediumslateblue;
 }
 
+.calendario {
+  margin-top: 1rem;
+  color: var(--clr-dark);
+}
+
+.cal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.cal-header button {
+  background: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: var(--clr-primary);
+}
+
+.cal-semana,
+.cal-dias {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+}
+
+.cal-semana span {
+  font-size: 0.75rem;
+  color: var(--clr-info-dark);
+}
+
+.cal-dias div {
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  position: relative;
+  cursor: pointer;
+}
+
+.cal-dias div:hover {
+  background: var(--clr-light);
+  border-radius: 50%;
+}
+
+.cal-dias .tem-evento::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--clr-primary);
+  border-radius: 50%;
+  position: absolute;
+  bottom: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.calendario .btn {
+  font-size: 0.8rem;
+  padding: 0.5rem;
+}
+
 /* MEDIA QUERY */
 
 @media screen and (max-width: 1200px) {

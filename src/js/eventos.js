@@ -148,7 +148,13 @@ onValue(eventosRef, (snap) => {
     .sort((a, b) => a.data.localeCompare(b.data));
 
   eventos.forEach((e) => {
-    eventosPorData[e.data] = true;
+    if (!eventosPorData[e.data]) {
+      eventosPorData[e.data] = [];
+    }
+
+    eventosPorData[e.data].push({
+      titulo: e.titulo,
+    });
 
     const tr = document.createElement("tr");
     tr.innerHTML = `

@@ -40,6 +40,77 @@ carregarSidebar().then(() => {
 });
 
 carregarRight().then(() => {
+  function initCalendario() {
+    // ==============================
+    // CALENDÁRIO (global)
+    // ==============================
+    const calDias = document.getElementById("calDias");
+    const mesAno = document.getElementById("mesAno");
+    const prevMes = document.getElementById("prevMes");
+    const nextMes = document.getElementById("nextMes");
+
+    if (calDias && mesAno && prevMes && nextMes) {
+      let dataAtual = new Date();
+      let eventosPorData = {};
+
+      function renderCalendario() {
+        calDias.innerHTML = "";
+
+        const ano = dataAtual.getFullYear();
+        const mes = dataAtual.getMonth();
+
+        mesAno.textContent = dataAtual.toLocaleDateString("pt-BR", {
+          month: "long",
+          year: "numeric",
+        });
+
+        const primeiroDia = new Date(ano, mes, 1).getDay();
+        const totalDias = new Date(ano, mes + 1, 0).getDate();
+
+        // espaços vazios antes do dia 1
+        for (let i = 0; i < primeiroDia; i++) {
+          calDias.appendChild(document.createElement("div"));
+        }
+
+        for (let dia = 1; dia <= totalDias; dia++) {
+          const div = document.createElement("div");
+          div.textContent = dia;
+
+          const dataISO = `${ano}-${String(mes + 1).padStart(2, "0")}-${String(
+            dia
+          ).padStart(2, "0")}`;
+
+          if (eventosPorData[dataISO]) {
+            div.classList.add("tem-evento");
+          }
+
+          calDias.appendChild(div);
+        }
+      }
+
+      prevMes.onclick = () => {
+        dataAtual.setMonth(dataAtual.getMonth() - 1);
+        renderCalendario();
+      };
+
+      nextMes.onclick = () => {
+        dataAtual.setMonth(dataAtual.getMonth() + 1);
+        renderCalendario();
+      };
+
+      // 🔔 escuta eventos vindos do eventos.js
+      window.addEventListener("eventosAtualizados", (e) => {
+        eventosPorData = e.detail || {};
+        renderCalendario();
+      });
+
+      renderCalendario();
+    }
+  }
+  if (document.querySelector(".calendario")) {
+    initCalendario();
+  }
+
   // menu
   const sideMenu = document.querySelector("aside");
   const menuBtn = document.querySelector("#menu_bar");
