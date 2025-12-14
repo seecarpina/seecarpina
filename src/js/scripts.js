@@ -83,6 +83,11 @@ carregarRight().then(() => {
 
           if (eventosPorData[dataISO]) {
             div.classList.add("tem-evento");
+
+            div.addEventListener("click", (e) => {
+              e.stopPropagation();
+              mostrarTooltipEvento(div, eventosPorData[dataISO]);
+            });
           }
 
           calDias.appendChild(div);
@@ -104,6 +109,61 @@ carregarRight().then(() => {
         eventosPorData = e.detail || {};
         renderCalendario();
       });
+
+      // Tooltip eventos
+      function mostrarTooltipEvento(elemento, eventos) {
+        removerTooltip();
+
+        const tooltip = document.createElement("div");
+        tooltip.className = "tooltip-evento";
+
+        tooltip.innerHTML = eventos
+          .map((e) => `<div>• ${e.titulo}</div>`)
+          .join("");
+
+        document.body.appendChild(tooltip);
+
+        const rect = elemento.getBoundingClientRect();
+
+        const calendario = document.querySelector(".calendario");
+        const calRect = calendario.getBoundingClientRect();
+        const calStyle = getComputedStyle(calendario);
+
+        const paddingLeft = parseFloat(calStyle.paddingLeft);
+        const paddingRight = parseFloat(calStyle.paddingRight);
+
+        const limiteEsquerdo = calRect.left + window.scrollX + paddingLeft;
+        const limiteDireito = calRect.right + window.scrollX - paddingRight;
+
+        let left = rect.left + window.scrollX;
+        const top = rect.bottom + window.scrollY + 6;
+
+        // força layout para medir largura
+        tooltip.style.maxWidth = `${limiteDireito - limiteEsquerdo}px`;
+        const tooltipWidth = tooltip.offsetWidth;
+
+        // ajuste se passar do limite direito
+        if (left + tooltipWidth > limiteDireito) {
+          left = limiteDireito - tooltipWidth;
+        }
+
+        // ajuste se passar do limite esquerdo
+        if (left < limiteEsquerdo) {
+          left = limiteEsquerdo;
+        }
+
+        tooltip.style.top = `${top}px`;
+        tooltip.style.left = `${left}px`;
+
+        // fechar clicando fora
+        setTimeout(() => {
+          document.addEventListener("click", removerTooltip, { once: true });
+        }, 0);
+      }
+
+      function removerTooltip() {
+        document.querySelector(".tooltip-evento")?.remove();
+      }
 
       renderCalendario();
     }

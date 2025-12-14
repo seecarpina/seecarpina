@@ -959,7 +959,7 @@ select {
   content: "";
   width: 6px;
   height: 6px;
-  background: var(--clr-primary);
+  background: var(--clr-warnig);
   border-radius: 50%;
   position: absolute;
   bottom: 0px;
@@ -970,6 +970,20 @@ select {
 .calendario .btn {
   font-size: 0.8rem;
   padding: 0.5rem;
+}
+.tooltip-evento {
+  position: absolute;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  background: var(--clr-warnig);
+  color: #fff;
+  border-radius: var(--border-radius-1);
+  font-size: 0.75rem;
+  white-space: normal;
+  word-wrap: break-word;
+  word-break: break-word;
+  z-index: 999;
 }
 
 /* MEDIA QUERY */
