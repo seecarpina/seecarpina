@@ -13,7 +13,6 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/fi
 /* =========================
    CONTROLE
 ========================= */
-let nomeResponsavel = "Usuário";
 let editando = false;
 let chaveEdicao = null;
 
@@ -28,20 +27,6 @@ const btnSalvarEdicao = document.getElementById("btnSalvarEdicaoEvento");
 const botoesEdicao = document.getElementById("botoesEdicaoEvento");
 const btnCancelarEdicao = document.getElementById("btnCancelarEdicaoEvento");
 const msgEdicao = document.getElementById("msgEdicao");
-
-/* =========================
-   AUTH
-========================= */
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    window.location.href = "./login";
-    return;
-  }
-
-  nomeResponsavel = user.displayName?.split(" ")[0] || "Usuário";
-  const campoResp = document.getElementById("responsavel");
-  if (campoResp) campoResp.value = nomeResponsavel;
-});
 
 /* =========================
    FIREBASE
@@ -82,7 +67,6 @@ form.addEventListener("submit", async (e) => {
       titulo,
       data,
       descricao,
-      responsavel: nomeResponsavel,
     });
 
     mostrarNotificacao("Evento cadastrado com sucesso!");
@@ -161,7 +145,6 @@ onValue(eventosRef, (snap) => {
       <td>${formatarData(e.data)}</td>
       <td>${e.titulo}</td>
       <td>${e.descricao || "-"}</td>
-      <td>${e.responsavel || "-"}</td>
       <td>
         <button class="edit-btn">
           <span class="material-symbols-outlined">edit_square</span>
