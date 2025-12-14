@@ -60,10 +60,13 @@ carregarRight().then(() => {
         const ano = dataAtual.getFullYear();
         const mes = dataAtual.getMonth();
 
-        mesAno.textContent = dataAtual.toLocaleDateString("pt-BR", {
+        const textoMes = dataAtual.toLocaleDateString("pt-BR", {
           month: "long",
           year: "numeric",
         });
+
+        mesAno.textContent =
+          textoMes.charAt(0).toUpperCase() + textoMes.slice(1);
 
         const primeiroDia = new Date(ano, mes, 1).getDay();
         const totalDias = new Date(ano, mes + 1, 0).getDate();
