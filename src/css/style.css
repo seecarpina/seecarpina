@@ -114,6 +114,63 @@
   width: 100%;
 }
 
+/* MODAL */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  background: var(--clr-white);
+  padding: 2rem;
+  border-radius: var(--card-border-radius);
+  width: 90%;
+  max-width: 400px;
+  box-shadow: var(--box-shadow);
+  position: relative;
+  text-align: center;
+}
+
+.modal-content h2 {
+  margin-bottom: 1.5rem;
+  color: var(--clr-dark);
+}
+
+.modal-content .opcoes {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modal-content .opcoes a {
+  padding: 1rem;
+  border-radius: var(--border-radius-2);
+  background: var(--clr-primary);
+  color: #fff;
+  transition: 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content .opcoes a:hover {
+  background: var(--clr-warnig);
+}
+
+.fechar {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 22px;
+  cursor: pointer;
+  color: var(--clr-danger);
+}
+
 /* 💬 Estilo das notificações */
 #notificacao {
   position: fixed;
@@ -396,6 +453,7 @@ main .insights a > div {
   margin-top: 1rem;
   box-shadow: var(--box-shadow);
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 main .insights a > div:hover {

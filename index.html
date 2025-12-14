@@ -40,8 +40,8 @@
         </div>
 
         <div class="insights">
-          <a href="">
-            <div class="timbre">
+          <a>
+            <div class="timbre" id="abrirTimbres">
               <span class="material-symbols-outlined">docs</span>
               <div class="middle">
                 <div class="left">
@@ -51,6 +51,30 @@
               </div>
             </div>
           </a>
+          <!-- POPUP -->
+          <div class="modal" id="modalTimbres">
+            <div class="modal-content">
+              <span class="fechar">&times;</span>
+              <h2>Timbres SEE</h2>
+
+              <div class="opcoes">
+                <a
+                  href="./src/downloads/SEE CARPINA - Timbre Vertical.docx"
+                  download
+                >
+                  <span class="material-symbols-outlined">download</span>
+                  <span>Timbre Vertical</span>
+                </a>
+                <a
+                  href="./src/downloads/SEE CARPINA - Timbre Horizontal.docx"
+                  download
+                >
+                  <span class="material-symbols-outlined">download</span>
+                  <span>Timbre Horizontal</span>
+                </a>
+              </div>
+            </div>
+          </div>
 
           <a
             href="http://pmcarpina.tabsassessoria.com.br:8893/sipweb/trabalhador/login/login.xhtml"
@@ -117,5 +141,25 @@
     </div>
 
     <script type="module" src="./src/js/scripts.js"></script>
+    <script>
+      // POPUP TIMBRES
+      const abrirTimbres = document.getElementById("abrirTimbres");
+      const modalTimbres = document.getElementById("modalTimbres");
+      const fechar = modalTimbres.querySelector(".fechar");
+
+      abrirTimbres.addEventListener("click", () => {
+        modalTimbres.style.display = "flex";
+      });
+
+      fechar.addEventListener("click", () => {
+        modalTimbres.style.display = "none";
+      });
+
+      modalTimbres.addEventListener("click", (e) => {
+        if (e.target === modalTimbres) {
+          modalTimbres.style.display = "none";
+        }
+      });
+    </script>
   </body>
 </html>
