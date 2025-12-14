@@ -298,6 +298,7 @@ function mostrarNotificacao(msg, tipo = "sucesso") {
     setTimeout(() => div.remove(), 400);
   }, 5000);
 }
+window.mostrarNotificacao = mostrarNotificacao;
 
 // 💾 Cadastro de ofício
 const formOficio = document.getElementById("formOficio");

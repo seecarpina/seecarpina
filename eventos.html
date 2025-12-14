@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Eventos - SEE Carpina</title>
+    <link rel="stylesheet" href="./src/css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+    />
+  </head>
+
+  <body>
+    <div class="container">
+      <aside id="sidebar"></aside>
+
+      <main>
+        <h1>Cadastrar evento</h1>
+
+        <form id="formEvento" class="box">
+          <div class="flex g-1">
+            <div class="w-100">
+              <label>Título</label>
+              <input type="text" id="titulo" required />
+            </div>
+
+            <div class="w-100">
+              <label>Data</label>
+              <input type="date" id="data" required />
+            </div>
+          </div>
+
+          <div class="w-100">
+            <label>Descrição</label>
+            <textarea id="descricao"></textarea>
+          </div>
+
+          <div id="botoesEvento">
+            <button class="btn" id="btnCadastrarEvento" type="submit">
+              Salvar evento
+            </button>
+
+            <div id="botoesEdicaoEvento" style="display: none; gap: 10px">
+              <button type="button" class="btn" id="btnSalvarEdicaoEvento">
+                Salvar edição
+              </button>
+              <button
+                type="button"
+                class="btn btn-cancelar"
+                id="btnCancelarEdicaoEvento"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+
+          <div id="msgEdicao" style="display: none"></div>
+        </form>
+
+        <h2>Eventos</h2>
+        <table id="tabelaEventos">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Título</th>
+              <th>Descrição</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </main>
+
+      <div class="right"></div>
+    </div>
+
+    <script type="module" src="./src/js/scripts.js"></script>
+    <script type="module" src="./src/js/eventos.js"></script>
+  </body>
+</html>
