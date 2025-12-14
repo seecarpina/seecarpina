@@ -160,11 +160,6 @@ onValue(eventosRef, (snap) => {
 
     tbody.appendChild(tr);
   });
-
-  // 🔔 envia eventos para o calendário global
-  window.dispatchEvent(
-    new CustomEvent("eventosAtualizados", { detail: eventosPorData })
-  );
 });
 
 /* =========================

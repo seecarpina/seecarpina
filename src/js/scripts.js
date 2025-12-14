@@ -20,6 +20,7 @@ window.addEventListener("load", () => {
   }, 200);
 });
 
+import "./eventosStore.js";
 import { carregarSidebar, carregarRight } from "./include.js";
 import { auth, db, rtdb } from "./firebaseConfig.js"; // <<–– CONFIG DO FIREBASE AGORA ESTÁ AQUI
 
