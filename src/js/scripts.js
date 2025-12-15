@@ -799,3 +799,53 @@ async function carregarUsuarios() {
 }
 
 carregarUsuarios();
+// 📅 Injeta aviso no topo do body se existir evento HOJE
+(function avisoEventoHojeTopo() {
+  let box = null;
+  let eventosCarregados = false;
+
+  function criarBox() {
+    if (box) return box;
+
+    box = document.createElement("div");
+    box.id = "avisoEventoHoje";
+    box.style.display = "none";
+
+    document.body.insertBefore(box, document.body.firstChild);
+    return box;
+  }
+
+  window.addEventListener("eventosAtualizados", (e) => {
+    eventosCarregados = true;
+
+    const eventosPorData = e.detail || {};
+    const hojeISO = new Date().toISOString().split("T")[0];
+    const aviso = criarBox();
+
+    if (!eventosPorData[hojeISO]) {
+      aviso.style.display = "none";
+      aviso.innerHTML = "";
+    } else {
+      const eventosHoje = eventosPorData[hojeISO];
+
+      aviso.innerHTML = `
+        <div class="aviso-evento-wrap">
+          <div class="aviso-evento-label">
+            📅 Eventos hoje:
+          </div>
+
+          <div class="aviso-evento-marquee">
+            <div class="aviso-evento-marquee__content">
+              ${eventosHoje.map((e) => e.titulo).join(" • ")}
+            </div>
+          </div>
+        </div>
+      `;
+
+      aviso.style.display = "block";
+    }
+
+    // 🔔 avisa que a checagem já ocorreu
+    window.dispatchEvent(new Event("eventoHojeChecado"));
+  });
+})();
