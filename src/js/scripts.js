@@ -819,7 +819,8 @@ carregarUsuarios();
     eventosCarregados = true;
 
     const eventosPorData = e.detail || {};
-    const hojeISO = new Date().toISOString().split("T")[0];
+    // const hojeISO = new Date().toISOString().split("T")[0];
+    const hojeISO = new Date().toLocaleDateString("sv-SE");
     const aviso = criarBox();
 
     if (!eventosPorData[hojeISO]) {
