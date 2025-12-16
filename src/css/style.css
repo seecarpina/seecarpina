@@ -289,6 +289,14 @@ body {
   margin: 0 auto;
 }
 
+.full-page .container {
+  grid-template-columns: minmax(10rem, 14rem) 1fr;
+}
+
+.full-page .right {
+  display: none;
+}
+
 a {
   color: var(--clr-dark);
 }
