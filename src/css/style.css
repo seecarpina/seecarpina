@@ -103,10 +103,18 @@
 .justify-center {
   justify-content: center;
 }
+.space-around {
+  justify-content: space-around;
+}
+.space-between {
+  justify-content: space-between;
+}
 .align-center {
   align-items: center;
 }
-
+.align-stretch {
+  align-items: stretch;
+}
 .g-1 {
   gap: 1rem;
 }
@@ -512,6 +520,17 @@ main .insights svg circle {
   stroke: var(--clr-primary);
   stroke-width: 5;
   transform: rotate(270, 80, 80);
+}
+.dashboard-graficos {
+  margin-top: 2rem;
+  padding: var(--padding-1);
+  background-color: var(--clr-white);
+  border-radius: var(--card-border-radius);
+  box-shadow: var(--box-shadow);
+  transition: all 0.3s ease;
+}
+.dashboard-graficos:hover {
+  box-shadow: none;
 }
 
 main .recent_order {

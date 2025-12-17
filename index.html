@@ -9,6 +9,7 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
     />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
     <button id="btnTopo">↑</button>
@@ -104,7 +105,25 @@
           </a>
         </div>
 
-        <div class="recent_order">
+        <div class="dashboard-graficos">
+          <div class="flex space-around g-1 align-stretch graficos-dash">
+            <div class="card">
+              <h2>Ofícios enviados</h2>
+              <select id="selectAno"></select>
+              <div id="totalOficios" class="total-oficios">
+                Total geral de ofícios: <strong>0</strong>
+              </div>
+              <canvas id="graficoOficiosMes" height="220"></canvas>
+            </div>
+
+            <div class="card">
+              <h2>Total de contratos e ARPs</h2>
+              <canvas id="graficoContratos" height="200"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="recent_order" style="display: none">
           <h1>Ordens de Fornecimento Recentes</h1>
           <table>
             <thead>
@@ -141,6 +160,7 @@
     </div>
 
     <script type="module" src="./src/js/scripts.js"></script>
+    <script type="module" src="./src/js/dashboard.js"></script>
     <script>
       // POPUP TIMBRES
       const abrirTimbres = document.getElementById("abrirTimbres");
