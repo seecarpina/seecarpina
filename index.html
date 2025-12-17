@@ -146,18 +146,27 @@
       const abrirTimbres = document.getElementById("abrirTimbres");
       const modalTimbres = document.getElementById("modalTimbres");
       const fechar = modalTimbres.querySelector(".fechar");
+      function abrirFecharmodal(acao) {
+        modalTimbres.style.display = acao;
+      }
 
       abrirTimbres.addEventListener("click", () => {
-        modalTimbres.style.display = "flex";
+        abrirFecharmodal("flex");
+      });
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+          abrirFecharmodal("none");
+        }
       });
 
       fechar.addEventListener("click", () => {
-        modalTimbres.style.display = "none";
+        abrirFecharmodal("none");
       });
 
       modalTimbres.addEventListener("click", (e) => {
         if (e.target === modalTimbres) {
-          modalTimbres.style.display = "none";
+          abrirFecharmodal("none");
         }
       });
     </script>
