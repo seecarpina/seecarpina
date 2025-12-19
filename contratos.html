@@ -94,6 +94,16 @@
                 </option>
               </select>
             </div>
+
+            <div class="w-100">
+              <label>Valor global do contrato</label>
+              <input
+                type="text"
+                id="valorGlobal"
+                placeholder="R$ 0,00"
+                inputmode="decimal"
+              />
+            </div>
           </div>
           <div id="botoesCadastro">
             <button class="btn" id="btnCadastrar" type="submit">
@@ -152,11 +162,13 @@
               <th>Modalidade</th>
               <th>Gestor</th>
               <th>Fiscal</th>
+              <th>Valor Global</th>
               <th style="display: none">Situação</th>
               <th>Tipo</th>
               <th></th>
             </tr>
           </thead>
+
           <tbody></tbody>
         </table>
 

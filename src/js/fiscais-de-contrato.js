@@ -105,6 +105,7 @@ const gestor = document.getElementById("gestor");
 const fiscal = document.getElementById("fiscal");
 const situacao = document.getElementById("situacao");
 const tipoContrato = document.getElementById("tipoContrato");
+const valorGlobal = document.getElementById("valorGlobal");
 
 const btnCadastrar = document.getElementById("btnCadastrar");
 const btnSalvarEdicao = document.getElementById("btnSalvarEdicao");
@@ -146,6 +147,7 @@ form.addEventListener("submit", async (e) => {
     fiscal: padronizarTexto(fiscal.value),
     situacao: situacao.value,
     tipoContrato: tipoContrato.value,
+    valorGlobal: valorGlobal.value.trim(),
     responsavel: window.nomeResponsavel || "",
     criadoEm: new Date().toISOString(),
   };
@@ -223,6 +225,7 @@ function renderTabela() {
       <td>${c.modalidade}</td>
       <td>${c.gestor}</td>
       <td>${c.fiscal}</td>
+      <td>${c.valorGlobal || "-"}</td>
       <td style="display: none">${c.situacao}</td>
       <td>${c.tipoContrato}</td>
       <td>
@@ -235,7 +238,7 @@ function renderTabela() {
 
   if (!filtrados.length) {
     tabela.innerHTML =
-      '<tr><td colspan="8" style="text-align:center;">Nenhum resultado encontrado</td></tr>';
+      '<tr><td colspan="9" style="text-align:center;">Nenhum resultado encontrado</td></tr>';
   }
 }
 
@@ -271,6 +274,7 @@ tabela.onclick = (e) => {
   fiscal.value = contrato.fiscal;
   situacao.value = contrato.situacao;
   tipoContrato.value = contrato.tipoContrato;
+  valorGlobal.value = contrato.valorGlobal || "";
 
   btnCadastrar.style.display = "none";
   document.getElementById("botoesEdicao").style.display = "flex";
@@ -292,6 +296,7 @@ btnSalvarEdicao.onclick = async () => {
     fiscal: padronizarTexto(fiscal.value),
     situacao: situacao.value,
     tipoContrato: tipoContrato.value,
+    valorGlobal: valorGlobal.value.trim(),
   });
 
   mostrarNotificacao("Contrato atualizado");
