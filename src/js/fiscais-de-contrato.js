@@ -10,7 +10,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // ===============================
-// 🔧 Utils (iguais ao scripts.js)
+// 🔧 Utils
 // ===============================
 function padronizarTexto(str) {
   if (!str) return "";
@@ -63,6 +63,41 @@ function mostrarNotificacao(msg, tipo = "sucesso") {
     div.style.animation = "desaparecer 0.4s forwards";
     setTimeout(() => div.remove(), 400);
   }, 5000);
+}
+
+// ===============================
+// 💰 Máscara de moeda (CORRETA)
+// ===============================
+function mascaraMoeda(input) {
+  let valor = input.value.replace(/\D/g, "");
+
+  if (!valor) {
+    input.value = "";
+    return;
+  }
+
+  valor = (Number(valor) / 100).toFixed(2);
+
+  input.value = Number(valor).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+}
+
+function moedaParaNumero(valor) {
+  if (!valor) return "";
+  return valor
+    .replace(/\./g, "")
+    .replace(",", ".")
+    .replace(/[^\d.]/g, "");
+}
+
+function formatarMoedaTabela(valor) {
+  if (!valor) return "-";
+  return Number(valor).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
 }
 
 // ===============================
@@ -129,6 +164,11 @@ setupAutocomplete("gestor", "autoGestor", gestoresRef, gestores);
 setupAutocomplete("fiscal", "autoFiscal", fiscaisRef, fiscais);
 
 // ===============================
+// 💰 Máscara no input
+// ===============================
+valorGlobal.addEventListener("input", () => mascaraMoeda(valorGlobal));
+
+// ===============================
 // 💾 Cadastro / Edição
 // ===============================
 let editando = false;
@@ -147,7 +187,7 @@ form.addEventListener("submit", async (e) => {
     fiscal: padronizarTexto(fiscal.value),
     situacao: situacao.value,
     tipoContrato: tipoContrato.value,
-    valorGlobal: valorGlobal.value.trim(),
+    valorGlobal: moedaParaNumero(valorGlobal.value),
     responsavel: window.nomeResponsavel || "",
     criadoEm: new Date().toISOString(),
   };
@@ -171,20 +211,9 @@ form.addEventListener("submit", async (e) => {
 });
 
 // ===============================
-// 📡 Listagem + Loading
+// 📡 Listagem
 // ===============================
 let contratos = [];
-
-if (tabela) {
-  tabela.innerHTML = `
-    <tr>
-      <td colspan="8" style="text-align:center;">
-        <svg class="svg-spinner" viewBox="0 0 50 50">
-          <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="4"/>
-        </svg>
-      </td>
-    </tr>`;
-}
 
 function renderTabela() {
   const filtroTexto = busca.value.toLowerCase();
@@ -205,34 +234,36 @@ function renderTabela() {
   filtrados.forEach((c) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-    <td title="${c.situacao}">
-    <div class="bdg ${
-      c.situacao === "DISTRATADO"
-        ? "distratado"
-        : c.situacao === "EM EXECUÇÃO"
-        ? "em-execucao"
-        : c.situacao === "EXECUTADO"
-        ? "executado"
-        : c.situacao === "FINALIZADO"
-        ? "finalizado"
-        : c.situacao === "ASSINADO"
-        ? "assinado"
-        : ""
-    }"></div>
-  </td>
+      <td title="${c.situacao}">
+        <div class="bdg ${
+          c.situacao === "DISTRATADO"
+            ? "distratado"
+            : c.situacao === "EM EXECUÇÃO"
+            ? "em-execucao"
+            : c.situacao === "EXECUTADO"
+            ? "executado"
+            : c.situacao === "FINALIZADO"
+            ? "finalizado"
+            : c.situacao === "ASSINADO"
+            ? "assinado"
+            : ""
+        }"></div>
+
+      </td>
       <td data-key="${c._key}">${c.numero}</td>
       <td>${c.credor}</td>
       <td>${c.modalidade}</td>
       <td>${c.gestor}</td>
       <td>${c.fiscal}</td>
-      <td>${c.valorGlobal || "-"}</td>
-      <td style="display: none">${c.situacao}</td>
+      <td>${formatarMoedaTabela(c.valorGlobal)}</td>
+      <td style="display:none">${c.situacao}</td>
       <td>${c.tipoContrato}</td>
       <td>
         <button class="edit-btn">
           <span class="material-symbols-outlined">edit_square</span>
         </button>
-      </td>`;
+      </td>
+    `;
     tabela.appendChild(tr);
   });
 
@@ -246,7 +277,6 @@ onValue(fiscaisContratoRef, (snap) => {
   contratos = snap.exists()
     ? Object.entries(snap.val()).map(([k, v]) => ({ ...v, _key: k }))
     : [];
-
   renderTabela();
 });
 
@@ -274,7 +304,9 @@ tabela.onclick = (e) => {
   fiscal.value = contrato.fiscal;
   situacao.value = contrato.situacao;
   tipoContrato.value = contrato.tipoContrato;
-  valorGlobal.value = contrato.valorGlobal || "";
+  valorGlobal.value = contrato.valorGlobal
+    ? formatarMoedaTabela(contrato.valorGlobal)
+    : "";
 
   btnCadastrar.style.display = "none";
   document.getElementById("botoesEdicao").style.display = "flex";
@@ -296,7 +328,7 @@ btnSalvarEdicao.onclick = async () => {
     fiscal: padronizarTexto(fiscal.value),
     situacao: situacao.value,
     tipoContrato: tipoContrato.value,
-    valorGlobal: valorGlobal.value.trim(),
+    valorGlobal: moedaParaNumero(valorGlobal.value),
   });
 
   mostrarNotificacao("Contrato atualizado");
