@@ -240,6 +240,21 @@ function calcularSaldo(contrato) {
   return valor - deducoes;
 }
 
+function calcularPercentualSaldo(contrato) {
+  const valor = Number(contrato.valorGlobal || 0);
+  if (valor <= 0) return 0;
+
+  const saldo = calcularSaldo(contrato);
+  return Math.round((saldo / valor) * 100);
+}
+
+function corSaldo(percentual) {
+  if (percentual <= 0) return "vermelho";
+  if (percentual < 50) return "laranja";
+  if (percentual < 100) return "amarelo";
+  return "verde";
+}
+
 function renderTabela() {
   const filtroTexto = busca.value.toLowerCase();
   const filtroTipo = filtroTipoContrato.value;
@@ -258,6 +273,10 @@ function renderTabela() {
 
   filtrados.forEach((c) => {
     const tr = document.createElement("tr");
+    const saldo = calcularSaldo(c);
+    const percentual = calcularPercentualSaldo(c);
+    const cor = corSaldo(percentual);
+
     tr.innerHTML = `
       <td title="${c.situacao}">
         <div class="bdg ${
@@ -280,8 +299,20 @@ function renderTabela() {
       <td>${c.modalidade}</td>
       <td>${c.gestor}</td>
       <td>${c.fiscal}</td>
-      <td>${formatarMoedaTabela(c.valorGlobal)}</td>
-      <td>${formatarMoedaTabela(calcularSaldo(c))}</td>
+      <td>${formatarMoedaTabela(c.valorGlobal)} <br></td>
+      <td>
+        <div style="font-weight:600">
+          ${formatarMoedaTabela(saldo)}
+        </div>
+
+      <div class="barra-saldo">
+        <div class="barra-saldo-preenchida ${cor}" style="width:${Math.max(
+      0,
+      Math.min(percentual, 100)
+    )}%" title="${percentual}%"></div>
+      </div>
+      </td>
+
       <td style="display:none">${c.situacao}</td>
       <td>${c.tipoContrato}</td>
       <td>
