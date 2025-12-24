@@ -105,6 +105,27 @@
               />
             </div>
           </div>
+          <div class="w-100" id="blocoDeducoes" style="display: none">
+            <h3>Dedução de valores</h3>
+
+            <div class="flex g-1">
+              <input type="date" id="deducaoData" />
+              <input
+                type="text"
+                id="deducaoValor"
+                placeholder="Valor"
+                inputmode="decimal"
+              />
+              <input
+                type="text"
+                id="deducaoDescricao"
+                placeholder="Descrição"
+              />
+              <button type="button" class="btn" id="btnAddDeducao">OK</button>
+            </div>
+
+            <ul id="listaDeducoes" style="margin-top: 1rem"></ul>
+          </div>
           <div id="botoesCadastro">
             <button class="btn" id="btnCadastrar" type="submit">
               Cadastrar
@@ -163,6 +184,7 @@
               <th>Gestor</th>
               <th>Fiscal</th>
               <th>Valor Global</th>
+              <th>Saldo</th>
               <th style="display: none">Situação</th>
               <th>Tipo</th>
               <th></th>

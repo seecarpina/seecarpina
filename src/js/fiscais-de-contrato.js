@@ -153,6 +153,18 @@ const btnTopo = document.getElementById("btnTopo");
 const msgEdicao = document.getElementById("msgEdicao");
 
 // ===============================
+// ➖ Deduções
+// ===============================
+const blocoDeducoes = document.getElementById("blocoDeducoes");
+const deducaoData = document.getElementById("deducaoData");
+const deducaoValor = document.getElementById("deducaoValor");
+const deducaoDescricao = document.getElementById("deducaoDescricao");
+const btnAddDeducao = document.getElementById("btnAddDeducao");
+const listaDeducoes = document.getElementById("listaDeducoes");
+
+let deducoesTemp = [];
+
+// ===============================
 // 🧠 Autocompletes
 // ===============================
 const modalidades = [];
@@ -167,6 +179,7 @@ setupAutocomplete("fiscal", "autoFiscal", fiscaisRef, fiscais);
 // 💰 Máscara no input
 // ===============================
 valorGlobal.addEventListener("input", () => mascaraMoeda(valorGlobal));
+deducaoValor.addEventListener("input", () => mascaraMoeda(deducaoValor));
 
 // ===============================
 // 💾 Cadastro / Edição
@@ -215,6 +228,18 @@ form.addEventListener("submit", async (e) => {
 // ===============================
 let contratos = [];
 
+function calcularSaldo(contrato) {
+  const valor = Number(contrato.valorGlobal || 0);
+  const deducoes = contrato.deducoes
+    ? Object.values(contrato.deducoes).reduce(
+        (s, d) => s + Number(d.valor || 0),
+        0
+      )
+    : 0;
+
+  return valor - deducoes;
+}
+
 function renderTabela() {
   const filtroTexto = busca.value.toLowerCase();
   const filtroTipo = filtroTipoContrato.value;
@@ -256,6 +281,7 @@ function renderTabela() {
       <td>${c.gestor}</td>
       <td>${c.fiscal}</td>
       <td>${formatarMoedaTabela(c.valorGlobal)}</td>
+      <td>${formatarMoedaTabela(calcularSaldo(c))}</td>
       <td style="display:none">${c.situacao}</td>
       <td>${c.tipoContrato}</td>
       <td>
@@ -269,7 +295,7 @@ function renderTabela() {
 
   if (!filtrados.length) {
     tabela.innerHTML =
-      '<tr><td colspan="9" style="text-align:center;">Nenhum resultado encontrado</td></tr>';
+      '<tr><td colspan="10" style="text-align:center;">Nenhum resultado encontrado</td></tr>';
   }
 }
 
@@ -308,6 +334,19 @@ tabela.onclick = (e) => {
     ? formatarMoedaTabela(contrato.valorGlobal)
     : "";
 
+  blocoDeducoes.style.display = "block";
+  deducoesTemp = [];
+
+  listaDeducoes.innerHTML = "";
+
+  // carregar deduções existentes
+  if (contrato.deducoes) {
+    Object.values(contrato.deducoes).forEach((d) => {
+      deducoesTemp.push(d);
+    });
+    renderListaDeducoes();
+  }
+
   btnCadastrar.style.display = "none";
   document.getElementById("botoesEdicao").style.display = "flex";
 
@@ -315,6 +354,43 @@ tabela.onclick = (e) => {
   msgEdicao.style.display = "block";
 
   if (btnTopo) btnTopo.click();
+};
+
+function renderListaDeducoes() {
+  listaDeducoes.innerHTML = "";
+
+  deducoesTemp.forEach((d, i) => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      ${d.data} – ${formatarMoedaTabela(d.valor)} – ${d.descricao}
+      <button data-i="${i}" style="margin-left:10px">❌</button>
+    `;
+
+    li.querySelector("button").onclick = () => {
+      deducoesTemp.splice(i, 1);
+      renderListaDeducoes();
+    };
+
+    listaDeducoes.appendChild(li);
+  });
+}
+
+btnAddDeducao.onclick = () => {
+  if (!deducaoData.value || !deducaoValor.value) {
+    return mostrarNotificacao("Informe data e valor", "erro");
+  }
+
+  deducoesTemp.push({
+    data: deducaoData.value,
+    valor: Number(moedaParaNumero(deducaoValor.value)),
+    descricao: deducaoDescricao.value.trim(),
+  });
+
+  deducaoData.value = "";
+  deducaoValor.value = "";
+  deducaoDescricao.value = "";
+
+  renderListaDeducoes();
 };
 
 btnSalvarEdicao.onclick = async () => {
@@ -329,6 +405,7 @@ btnSalvarEdicao.onclick = async () => {
     situacao: situacao.value,
     tipoContrato: tipoContrato.value,
     valorGlobal: moedaParaNumero(valorGlobal.value),
+    deducoes: deducoesTemp,
   });
 
   mostrarNotificacao("Contrato atualizado");
@@ -345,4 +422,7 @@ function resetarEdicao() {
   document.getElementById("botoesEdicao").style.display = "none";
   msgEdicao.textContent = "";
   msgEdicao.style.display = "none";
+  blocoDeducoes.style.display = "none";
+  deducoesTemp = [];
+  listaDeducoes.innerHTML = "";
 }
