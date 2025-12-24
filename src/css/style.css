@@ -180,6 +180,18 @@
   color: var(--clr-danger);
 }
 
+details {
+  background-color: var(--clr-color-background);
+  margin-bottom: 1rem;
+  padding: var(--padding-1) var(--padding-1) 0.5rem var(--padding-1);
+  color: var(--clr-dark);
+}
+
+summary {
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+}
+
 /* 💬 Estilo das notificações */
 #notificacao {
   position: fixed;

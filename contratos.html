@@ -104,25 +104,26 @@
             </div>
           </div>
           <div class="w-100" id="blocoDeducoes" style="display: none">
-            <h3>Dedução de valores</h3>
+            <details>
+              <summary><h3>Dedução de valores</h3></summary>
+              <div class="flex g-1">
+                <input type="date" id="deducaoData" />
+                <input
+                  type="text"
+                  id="deducaoValor"
+                  placeholder="Valor"
+                  inputmode="decimal"
+                />
+                <input
+                  type="text"
+                  id="deducaoDescricao"
+                  placeholder="Descrição"
+                />
+                <button type="button" class="btn" id="btnAddDeducao">OK</button>
+              </div>
 
-            <div class="flex g-1">
-              <input type="date" id="deducaoData" />
-              <input
-                type="text"
-                id="deducaoValor"
-                placeholder="Valor"
-                inputmode="decimal"
-              />
-              <input
-                type="text"
-                id="deducaoDescricao"
-                placeholder="Descrição"
-              />
-              <button type="button" class="btn" id="btnAddDeducao">OK</button>
-            </div>
-
-            <ul id="listaDeducoes" style="margin-top: 1rem"></ul>
+              <ul id="listaDeducoes" style="margin-top: 1rem"></ul>
+            </details>
           </div>
           <div id="botoesCadastro">
             <button class="btn" id="btnCadastrar" type="submit">
