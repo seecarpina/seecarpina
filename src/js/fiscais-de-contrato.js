@@ -100,6 +100,12 @@ function formatarMoedaTabela(valor) {
   });
 }
 
+function formatarDataBR(iso) {
+  if (!iso) return "-";
+  const [ano, mes, dia] = iso.split("-");
+  return `${dia}/${mes}/${ano}`;
+}
+
 // ===============================
 // 🔥 Firebase refs
 // ===============================
@@ -147,6 +153,25 @@ const btnSalvarEdicao = document.getElementById("btnSalvarEdicao");
 const btnCancelarEdicao = document.getElementById("btnCancelarEdicao");
 
 const tabela = document.querySelector("#tabelaContratos tbody");
+function mostrarLoadingTabela() {
+  tabela.innerHTML = `
+    <tr>
+      <td colspan="10" style="text-align:center; padding:2rem">
+        <svg class="svg-spinner" viewBox="0 0 50 50" width="40">
+          <circle
+            class="path"
+            cx="25"
+            cy="25"
+            r="20"
+            fill="none"
+            stroke-width="4"
+          />
+        </svg>
+      </td>
+    </tr>
+  `;
+}
+
 const busca = document.getElementById("busca");
 const filtroTipoContrato = document.getElementById("filtroTipoContrato");
 const btnTopo = document.getElementById("btnTopo");
@@ -330,6 +355,8 @@ function renderTabela() {
   }
 }
 
+mostrarLoadingTabela();
+
 onValue(fiscaisContratoRef, (snap) => {
   contratos = snap.exists()
     ? Object.entries(snap.val()).map(([k, v]) => ({ ...v, _key: k }))
@@ -393,7 +420,9 @@ function renderListaDeducoes() {
   deducoesTemp.forEach((d, i) => {
     const li = document.createElement("li");
     li.innerHTML = `
-      ${d.data} – ${formatarMoedaTabela(d.valor)} – ${d.descricao}
+      ${formatarDataBR(d.data)} – ${formatarMoedaTabela(d.valor)} – ${
+      d.descricao
+    }
       <button data-i="${i}" style="margin-left:10px">❌</button>
     `;
 
