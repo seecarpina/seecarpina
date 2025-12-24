@@ -63,7 +63,7 @@ function desenharGraficoContratos(cnpj1, cnpj2, atas) {
       labels: [
         "Contratos CNPJ 30.784.957/0001-37",
         "Contratos CNPJ 59.593.430/0001-07",
-        "Atas de Registro de Preço",
+        "ARPS",
       ],
       datasets: [
         {
