@@ -276,6 +276,29 @@ let nomeResponsavel = "Usuário";
 // controle de alteração do lembrete
 let lembreteOriginal = "";
 
+function saudacao() {
+  const agora = new Date();
+
+  // horário UTC em ms
+  const utc = agora.getTime() + agora.getTimezoneOffset() * 60000;
+
+  // Brasília = UTC - 3
+  const brasilia = new Date(utc - 3 * 60 * 60 * 1000);
+  const hora = brasilia.getHours();
+
+  let mensagem = "";
+
+  if (hora >= 5 && hora < 12) {
+    mensagem = "Bom dia";
+  } else if (hora >= 12 && hora < 18) {
+    mensagem = "Boa tarde";
+  } else {
+    mensagem = "Boa noite";
+  }
+
+  return mensagem;
+}
+
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "./login";
@@ -299,7 +322,8 @@ onAuthStateChanged(auth, async (user) => {
     if (campoResp) campoResp.value = nomeResponsavel;
 
     const boasVindas = document.getElementById("boasVindas");
-    if (boasVindas) boasVindas.textContent = `👋 Olá, ${nomeResponsavel}!`;
+    if (boasVindas)
+      boasVindas.textContent = `👋 ${saudacao()}, ${nomeResponsavel}!`;
 
     if (window.dadosUsuario?.nome) {
       document.querySelector("#nomeUsuario").textContent = nomeResponsavel;
@@ -355,6 +379,30 @@ onAuthStateChanged(auth, async (user) => {
     });
   }
 });
+
+// Frase do Dia
+async function carregarFraseDoDia() {
+  const span = document.getElementById("frase-do-dia");
+
+  try {
+    const url = "https://motivacional.top/api.php?acao=aleatoria";
+    const proxy =
+      "https://api.allorigins.win/raw?url=" + encodeURIComponent(url);
+
+    const response = await fetch(proxy);
+    const data = await response.json();
+
+    const frase = data.dados[0].frase;
+    const autor = data.dados[0].autor || "";
+
+    span.textContent = autor ? `"${frase}" — ${autor}` : `"${frase}"`;
+  } catch (error) {
+    console.error(error);
+    span.textContent = "Acredite: você já deu o primeiro passo.";
+  }
+}
+
+carregarFraseDoDia();
 
 // 🔥 Carregar destinos do Realtime Database
 const destinosRef = ref(rtdb, "destinos");
