@@ -4,6 +4,7 @@ import {
   push,
   onValue,
   update,
+  get,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 /* ===============================
@@ -57,20 +58,21 @@ const btnCancelar = document.getElementById("btnCancelarServidor");
 
 const inputCPF = document.getElementById("cpf");
 const inputCargo = document.getElementById("cargo");
-const boxCargo = document.getElementById("autocompleteCargo");
 const inputVinculo = document.getElementById("vinculo");
-const boxVinculo = document.getElementById("autocompleteVinculo");
 const inputLocal = document.getElementById("localExercicio");
+
+const boxCargo = document.getElementById("autocompleteCargo");
+const boxVinculo = document.getElementById("autocompleteVinculo");
 const boxLocal = document.getElementById("autocompleteLocal");
 
 /* ===============================
-   CONTROLE DE EDIÇÃO
+   CONTROLE
 ================================ */
 let editando = false;
 let chaveEdicao = null;
 
 /* ===============================
-   MÁSCARA CPF
+   CPF
 ================================ */
 inputCPF.addEventListener("input", () => {
   inputCPF.value = formatarCPF(inputCPF.value);
@@ -78,7 +80,7 @@ inputCPF.addEventListener("input", () => {
 inputCPF.maxLength = 14;
 
 /* ===============================
-   AUTOCOMPLETE (DADOS)
+   AUTOCOMPLETE
 ================================ */
 let cargos = [];
 let vinculos = [];
@@ -87,16 +89,15 @@ let locais = [];
 onValue(cargosRef, (s) => {
   cargos = s.exists() ? Object.values(s.val()).map(padronizarTexto) : [];
 });
+
 onValue(vinculosRef, (s) => {
   vinculos = s.exists() ? Object.values(s.val()).map(padronizarTexto) : [];
 });
+
 onValue(locaisRef, (s) => {
   locais = s.exists() ? Object.values(s.val()).map(padronizarTexto) : [];
 });
 
-/* ===============================
-   AUTOCOMPLETE (UI)
-================================ */
 function mostrarSugestoes(input, lista, box) {
   const texto = input.value.toLowerCase();
   box.innerHTML = "";
@@ -111,10 +112,10 @@ function mostrarSugestoes(input, lista, box) {
     .forEach((item) => {
       const li = document.createElement("li");
       li.textContent = item;
-      li.addEventListener("mousedown", () => {
+      li.onclick = () => {
         input.value = item;
         box.style.display = "none";
-      });
+      };
       box.appendChild(li);
     });
 
@@ -131,14 +132,19 @@ inputLocal.addEventListener("input", () =>
   mostrarSugestoes(inputLocal, locais, boxLocal)
 );
 
-document.addEventListener("click", (e) => {
-  if (!inputCargo.contains(e.target) && !boxCargo.contains(e.target))
-    boxCargo.style.display = "none";
-  if (!inputVinculo.contains(e.target) && !boxVinculo.contains(e.target))
-    boxVinculo.style.display = "none";
-  if (!inputLocal.contains(e.target) && !boxLocal.contains(e.target))
-    boxLocal.style.display = "none";
-});
+/* ===============================
+   SALVAR SUBNÓS (NOVO)
+================================ */
+async function salvarSeNaoExistir(refBase, valor) {
+  if (!valor) return;
+
+  const snap = await get(refBase);
+  const lista = snap.exists() ? Object.values(snap.val()) : [];
+
+  if (!lista.includes(valor)) {
+    await push(refBase, valor);
+  }
+}
 
 /* ===============================
    SALVAR / EDITAR
@@ -168,6 +174,10 @@ async function salvarServidor() {
   }
 
   try {
+    await salvarSeNaoExistir(cargosRef, servidor.cargo);
+    await salvarSeNaoExistir(vinculosRef, servidor.vinculo);
+    await salvarSeNaoExistir(locaisRef, servidor.localExercicio);
+
     if (editando && chaveEdicao) {
       await update(ref(rtdb, `servidores/registros/${chaveEdicao}`), servidor);
       mostrarNotificacao("Servidor atualizado com sucesso!");
@@ -183,7 +193,7 @@ async function salvarServidor() {
 }
 
 /* ===============================
-   LISTAGEM + BUSCA
+   LISTAGEM
 ================================ */
 let servidores = [];
 
@@ -194,12 +204,10 @@ onValue(registrosRef, (s) => {
   renderTabela();
 });
 
-// 🔥 LISTENER DA BUSCA (FALTAVA)
 busca.addEventListener("input", renderTabela);
 
 function renderTabela() {
   tabela.innerHTML = "";
-
   const termo = busca.value.toLowerCase();
 
   const filtrados = servidores.filter((s) =>
@@ -263,7 +271,7 @@ function editarServidor(s) {
 }
 
 /* ===============================
-   RESET / CANCELAR
+   RESET
 ================================ */
 function resetarFormulario() {
   editando = false;
@@ -274,5 +282,4 @@ function resetarFormulario() {
   blocoEdicao.style.display = "none";
 
   msgEdicao.textContent = "";
-  msgEdicao.classList.remove("edicao");
 }
