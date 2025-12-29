@@ -161,7 +161,6 @@ async function salvarServidor() {
     localExercicio: padronizarTexto(inputLocal.value),
     dataAdmissao: dataAdmissao.value,
     situacao: situacao.value,
-    atualizadoEm: new Date().toISOString(),
   };
 
   if (!servidor.codigo || !servidor.nome || !servidor.cpf) {
@@ -173,7 +172,6 @@ async function salvarServidor() {
       await update(ref(rtdb, `servidores/registros/${chaveEdicao}`), servidor);
       mostrarNotificacao("Servidor atualizado com sucesso!");
     } else {
-      servidor.criadoEm = new Date().toISOString();
       await push(registrosRef, servidor);
       mostrarNotificacao("Servidor cadastrado com sucesso!");
     }
