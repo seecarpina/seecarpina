@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Servidores - SEE Carpina</title>
+
+    <link rel="stylesheet" href="./src/css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+  </head>
+
+  <body>
+    <button id="btnTopo">↑</button>
+
+    <!-- Loading -->
+    <div class="loading">
+      <svg
+        class="svg-spinner"
+        viewBox="0 0 50 50"
+        role="img"
+        aria-label="Carregando"
+      >
+        <circle
+          class="path"
+          cx="25"
+          cy="25"
+          r="20"
+          fill="none"
+          stroke-width="4"
+        />
+      </svg>
+    </div>
+
+    <div class="container">
+      <!-- Sidebar -->
+      <aside id="sidebar"></aside>
+
+      <!-- Conteúdo principal -->
+      <main>
+        <h1>Cadastro de Servidores</h1>
+
+        <!-- 📋 FORMULÁRIO -->
+        <form id="formServidor" class="box">
+          <input type="hidden" id="chaveServidor" />
+
+          <div class="flex g-1">
+            <div class="w-100">
+              <label for="codigo">Código:</label>
+              <input
+                type="text"
+                id="codigo"
+                placeholder="Código do servidor"
+                required
+              />
+            </div>
+
+            <div class="w-100">
+              <label for="cpf">CPF:</label>
+              <input
+                type="text"
+                id="cpf"
+                placeholder="000.000.000-00"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label for="nome">Nome:</label>
+            <input type="text" id="nome" placeholder="Nome completo" required />
+          </div>
+
+          <div class="flex g-1">
+            <div class="w-100">
+              <div class="autocomplete">
+                <label for="cargo">Cargo:</label>
+                <input
+                  type="text"
+                  id="cargo"
+                  placeholder="Digite para buscar ou cadastrar..."
+                />
+                <ul id="autocompleteCargo" class="autocomplete-list"></ul>
+              </div>
+            </div>
+
+            <div class="w-100">
+              <div class="autocomplete">
+                <label for="vinculo">Vínculo:</label>
+                <input
+                  type="text"
+                  id="vinculo"
+                  placeholder="Digite para buscar ou cadastrar..."
+                />
+                <ul id="autocompleteVinculo" class="autocomplete-list"></ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex g-1">
+            <div class="w-100">
+              <label for="dataAdmissao">Data de admissão:</label>
+              <input type="date" id="dataAdmissao" required />
+            </div>
+
+            <div class="w-100">
+              <label for="situacao">Situação:</label>
+              <select id="situacao" required>
+                <option value="">Selecione</option>
+                <option value="Ativo">Ativo</option>
+                <option value="Inativo">Inativo</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="autocomplete">
+            <label for="localExercicio">Local de exercício:</label>
+            <input
+              type="text"
+              id="localExercicio"
+              placeholder="Digite para buscar ou cadastrar..."
+              required
+            />
+            <ul id="autocompleteLocal" class="autocomplete-list"></ul>
+          </div>
+
+          <!-- 🔁 BOTÕES -->
+          <div id="botoesCadastroServidor">
+            <button type="submit" class="btn" id="btnCadastrarServidor">
+              Cadastrar servidor
+            </button>
+          </div>
+
+          <div id="botoesEdicaoServidor" style="display: none; gap: 10px">
+            <button type="button" class="btn" id="btnSalvarServidor">
+              Salvar edição
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-cancelar"
+              id="btnCancelarServidor"
+            >
+              Cancelar edição
+            </button>
+          </div>
+
+          <!-- 🩷 FRASE DE EDIÇÃO -->
+          <!-- <p id="msgEdicaoServidor" class="edicao"></p> -->
+          <p id="msgEdicao"></p>
+        </form>
+
+        <hr />
+
+        <!-- 📑 LISTAGEM -->
+        <h2>Servidores cadastrados</h2>
+
+        <input
+          class="busca"
+          type="text"
+          id="buscaServidor"
+          placeholder="🔍 Buscar por nome, CPF, cargo, vínculo ou local..."
+        />
+
+        <table id="tabelaServidores">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Nome</th>
+              <th>CPF</th>
+              <th>Cargo</th>
+              <th>Vínculo</th>
+              <th>Admissão</th>
+              <th>Situação</th>
+              <th>Local</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <div class="paginacao" id="paginacaoServidores"></div>
+      </main>
+
+      <!-- Right -->
+      <div class="right"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="./src/js/scripts.js"></script>
+    <script type="module" src="./src/js/servidores.js"></script>
+  </body>
+</html>
