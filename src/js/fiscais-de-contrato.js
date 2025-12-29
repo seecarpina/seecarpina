@@ -93,7 +93,8 @@ function moedaParaNumero(valor) {
 }
 
 function formatarMoedaTabela(valor) {
-  if (!valor) return "-";
+  if (valor === null || valor === undefined || valor === "") return "-";
+
   return Number(valor).toLocaleString("pt-BR", {
     style: "currency",
     currency: "BRL",
