@@ -1,3 +1,5 @@
+const ANO_ATUAL = new Date().getFullYear().toString();
+
 // Remove a tela de loading e Aplicar tema salvo
 window.addEventListener("load", () => {
   const temaSalvo = localStorage.getItem("theme");
@@ -506,7 +508,7 @@ if (formOficio) {
     const dataISO = hoje.toISOString().split("T")[0];
 
     try {
-      const oficiosRef = ref(rtdb, "oficios");
+      const oficiosRef = ref(rtdb, `oficios/${ANO_ATUAL}`);
       const snap = await get(oficiosRef);
       const dados = snap.exists() ? snap.val() : {};
       let maiorNumero = 0;
@@ -546,7 +548,7 @@ if (tabela) {
 }
 const paginacao = document.getElementById("paginacao");
 const inputBusca = document.getElementById("busca");
-const oficiosRef = ref(rtdb, "oficios");
+const oficiosRef = ref(rtdb, `oficios/${ANO_ATUAL}`);
 
 let todosOficios = [];
 let paginaAtual = 1;
