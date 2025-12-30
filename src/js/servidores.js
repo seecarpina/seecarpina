@@ -198,11 +198,15 @@ function renderTabela() {
 
   const termo = busca.value.toLowerCase();
 
-  const filtrados = servidores.filter((s) =>
-    `${s.codigo} ${s.nome} ${s.cpf} ${s.cargo} ${s.vinculo} ${s.localExercicio}`
-      .toLowerCase()
-      .includes(termo)
-  );
+  const filtrados = servidores
+    .filter((s) =>
+      `${s.codigo} ${s.nome} ${s.cpf} ${s.cargo} ${s.vinculo} ${s.localExercicio}`
+        .toLowerCase()
+        .includes(termo)
+    )
+    .sort((a, b) =>
+      a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
+    );
 
   const totalPaginas = Math.ceil(filtrados.length / itensPorPagina);
   const inicio = (paginaAtual - 1) * itensPorPagina;
