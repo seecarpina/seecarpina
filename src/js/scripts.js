@@ -595,7 +595,9 @@ function renderTabela() {
   pagina.forEach((o) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td data-key="${o._key}">${o.numero}</td>
+      <td data-key="${o._key}">
+        ${formatarNumeroOficio(o.numero, anoSelecionado)}
+      </td>
       <td class='assunto'>${o.assunto}</td>
       <td>${formatarDataBR(o.data)}</td>
       <td>${o.destino ?? "-"}</td>
@@ -951,4 +953,9 @@ function carregarOficiosPorAno() {
 
     renderTabela();
   });
+}
+
+function formatarNumeroOficio(numero, ano) {
+  if (!numero) return "-";
+  return `${String(numero).padStart(3, "0")}/${ano}`;
 }
