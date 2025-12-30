@@ -343,6 +343,8 @@ function editarServidor(s) {
   blocoEdicao.style.display = "flex";
   msgEdicao.textContent = `✏️ Editando servidor ${s.nome}`;
   msgEdicao.style.display = "block";
+
+  btnTopo.click();
 }
 
 /* ===============================
