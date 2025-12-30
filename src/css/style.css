@@ -301,6 +301,10 @@ body {
   box-shadow: none;
 }
 
+form {
+  margin-bottom: 1.5rem;
+}
+
 .container {
   display: grid;
   width: 96%;
