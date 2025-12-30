@@ -44,7 +44,7 @@ const locaisRef = ref(rtdb, "servidores/locaisExercicio");
 ================================ */
 let servidores = [];
 let paginaAtual = 1;
-const itensPorPagina = 10;
+const itensPorPagina = 100;
 let editando = false;
 let chaveEdicao = null;
 
