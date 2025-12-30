@@ -702,7 +702,7 @@ onValue(getOficiosRef(), (snap) => {
         )
           return;
 
-        const refCancelar = ref(rtdb, `oficios/${chave}`);
+        const refCancelar = ref(rtdb, `oficios/${anoSelecionado}/${chave}`);
 
         update(refCancelar, {
           assunto: "",
@@ -774,7 +774,7 @@ if (btnSalvarEdicao) {
       return mostrarNotificacao("Erro ao localizar ofício!", "erro");
     }
 
-    const refEdicao = ref(rtdb, `oficios/${chaveEdicao}`);
+    const refEdicao = ref(rtdb, `oficios/${anoSelecionado}/${chaveEdicao}`);
 
     try {
       await update(refEdicao, {
