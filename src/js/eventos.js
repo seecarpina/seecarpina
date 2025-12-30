@@ -17,6 +17,39 @@ let editando = false;
 let chaveEdicao = null;
 
 /* =========================
+   CATEGORIAS DOS EVENTOS
+========================= */
+
+const selectCategoria = document.getElementById("categoria");
+
+const categorias = [
+  { value: "aniversario", label: "Aniversário" },
+  { value: "eventos", label: "Eventos" },
+  { value: "reuniao", label: "Reunião" },
+  { value: "resposta_mp", label: "Resposta ao MP" },
+  { value: "alerta", label: "Alerta" },
+  { value: "outros", label: "Outros" },
+];
+
+function carregarCategorias() {
+  selectCategoria.innerHTML = `<option value="">Selecione</option>`;
+
+  categorias.forEach((cat) => {
+    const option = document.createElement("option");
+    option.value = cat.value;
+    option.textContent = cat.label;
+    selectCategoria.appendChild(option);
+  });
+}
+
+carregarCategorias();
+
+function getCategoriaLabel(value) {
+  const cat = categorias.find((c) => c.value === value);
+  return cat ? cat.label : "-";
+}
+
+/* =========================
    ELEMENTOS
 ========================= */
 const form = document.getElementById("formEvento");
@@ -56,9 +89,10 @@ form.addEventListener("submit", async (e) => {
   const titulo = document.getElementById("titulo").value.trim();
   const data = document.getElementById("data").value;
   const descricao = document.getElementById("descricao").value.trim();
+  const categoria = document.getElementById("categoria").value;
 
-  if (!titulo || !data) {
-    mostrarNotificacao("Preencha título e data!", "erro");
+  if (!titulo || !data || !categoria) {
+    mostrarNotificacao("Preencha título, data e categoria!", "erro");
     return;
   }
 
@@ -66,6 +100,7 @@ form.addEventListener("submit", async (e) => {
     await push(eventosRef, {
       titulo,
       data,
+      categoria,
       descricao,
     });
 
@@ -84,6 +119,7 @@ btnSalvarEdicao.addEventListener("click", async () => {
 
   const titulo = document.getElementById("titulo").value.trim();
   const data = document.getElementById("data").value;
+  const categoria = document.getElementById("categoria").value;
   const descricao = document.getElementById("descricao").value.trim();
 
   if (!titulo || !data) {
@@ -95,6 +131,7 @@ btnSalvarEdicao.addEventListener("click", async () => {
     await update(ref(rtdb, `eventos/${chaveEdicao}`), {
       titulo,
       data,
+      categoria,
       descricao,
     });
 
@@ -144,6 +181,7 @@ onValue(eventosRef, (snap) => {
     tr.innerHTML = `
       <td>${formatarData(e.data)}</td>
       <td>${e.titulo}</td>
+      <td>${getCategoriaLabel(e.categoria)}</td>
       <td>${e.descricao || "-"}</td>
       <td>
         <button class="edit-btn">
@@ -171,6 +209,7 @@ function editarEvento(e) {
 
   document.getElementById("titulo").value = e.titulo;
   document.getElementById("data").value = e.data;
+  document.getElementById("categoria").value = e.categoria || "";
   document.getElementById("descricao").value = e.descricao ?? "";
 
   btnCadastrar.style.display = "none";
