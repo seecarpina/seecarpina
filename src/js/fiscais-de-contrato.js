@@ -487,3 +487,69 @@ function resetarEdicao() {
   deducoesTemp = [];
   listaDeducoes.innerHTML = "";
 }
+
+// ===============================
+// 📊 Exportar contratos para Excel
+// ===============================
+const btnExportarContratos = document.getElementById("btnExportarContratos");
+
+if (btnExportarContratos) {
+  btnExportarContratos.addEventListener("click", () => {
+    if (!contratos.length) {
+      mostrarNotificacao("Nenhum contrato para exportar", "erro");
+      return;
+    }
+
+    const filtroTexto = busca.value.toLowerCase();
+    const filtroTipo = filtroTipoContrato.value;
+
+    let dadosFiltrados = contratos.filter((c) =>
+      `${c.numero} ${c.credor} ${c.modalidade} ${c.gestor} ${c.fiscal} ${c.situacao} ${c.tipoContrato}`
+        .toLowerCase()
+        .includes(filtroTexto)
+    );
+
+    if (filtroTipo) {
+      dadosFiltrados = dadosFiltrados.filter(
+        (c) => c.tipoContrato === filtroTipo
+      );
+    }
+
+    if (!dadosFiltrados.length) {
+      mostrarNotificacao("Nenhum registro encontrado", "erro");
+      return;
+    }
+
+    // Ordena pelo número do contrato
+    dadosFiltrados.sort((a, b) =>
+      String(a.numero).localeCompare(String(b.numero), "pt-BR", {
+        numeric: true,
+      })
+    );
+
+    // Monta os dados do Excel
+    const dadosExcel = dadosFiltrados.map((c) => ({
+      "Nº Contrato": c.numero,
+      Credor: c.credor,
+      Modalidade: c.modalidade,
+      Gestor: c.gestor,
+      Fiscal: c.fiscal,
+      Situação: c.situacao,
+      "Tipo de Contrato": c.tipoContrato,
+      "Valor Global": formatarMoedaTabela(c.valorGlobal),
+      "Saldo Atual": formatarMoedaTabela(calcularSaldo(c)),
+    }));
+
+    // Gera planilha
+    const worksheet = XLSX.utils.json_to_sheet(dadosExcel);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Contratos");
+
+    const nomeArquivo = `contratos_${new Date()
+      .toISOString()
+      .slice(0, 10)}.xlsx`;
+
+    XLSX.writeFile(workbook, nomeArquivo);
+  });
+}

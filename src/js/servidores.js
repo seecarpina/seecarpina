@@ -373,3 +373,65 @@ async function salvarSeNaoExistir(refBase, valor) {
     await push(refBase, valor);
   }
 }
+
+// ===============================
+// 📊 EXPORTAR SERVIDORES PARA EXCEL
+// ===============================
+const btnExportarExcel = document.getElementById("btnExportarServidores");
+
+if (btnExportarExcel) {
+  btnExportarExcel.addEventListener("click", () => {
+    if (!servidores.length) {
+      mostrarNotificacao("Nenhum servidor para exportar", "erro");
+      return;
+    }
+
+    const termo = busca.value
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+
+    // Aplica o mesmo filtro da tabela
+    const filtrados = servidores.filter((s) =>
+      `${s.codigo} ${s.nome} ${s.cpf} ${s.cargo} ${s.vinculo} ${s.localExercicio}`
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .includes(termo)
+    );
+
+    if (!filtrados.length) {
+      mostrarNotificacao("Nenhum registro encontrado", "erro");
+      return;
+    }
+
+    // Ordena por nome
+    filtrados.sort((a, b) =>
+      a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
+    );
+
+    // Monta planilha
+    const dadosExcel = filtrados.map((s) => ({
+      Código: s.codigo,
+      Nome: s.nome,
+      CPF: formatarCPF(s.cpf),
+      Cargo: s.cargo,
+      Vínculo: s.vinculo,
+      "Data de Admissão": formatarDataBR(s.dataAdmissao),
+      Situação: s.situacao,
+      "Local de Exercício": s.localExercicio,
+    }));
+
+    // Gera Excel
+    const worksheet = XLSX.utils.json_to_sheet(dadosExcel);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Servidores");
+
+    const nomeArquivo = `servidores_${new Date()
+      .toISOString()
+      .slice(0, 10)}.xlsx`;
+
+    XLSX.writeFile(workbook, nomeArquivo);
+  });
+}
