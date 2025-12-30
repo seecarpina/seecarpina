@@ -1,4 +1,5 @@
 const ANO_ATUAL = new Date().getFullYear().toString();
+let anoSelecionado = ANO_ATUAL;
 
 // Remove a tela de loading e Aplicar tema salvo
 window.addEventListener("load", () => {
@@ -548,7 +549,9 @@ if (tabela) {
 }
 const paginacao = document.getElementById("paginacao");
 const inputBusca = document.getElementById("busca");
-const oficiosRef = ref(rtdb, `oficios/${ANO_ATUAL}`);
+function getOficiosRef() {
+  return ref(rtdb, `oficios/${anoSelecionado}`);
+}
 
 let todosOficios = [];
 let paginaAtual = 1;
@@ -647,7 +650,7 @@ function renderTabela() {
   }
 }
 
-onValue(oficiosRef, (snap) => {
+onValue(getOficiosRef(), (snap) => {
   if (snap.exists()) {
     todosOficios = Object.entries(snap.val())
       .filter(([key, val]) => typeof val === "object" && val !== null)
@@ -900,3 +903,52 @@ carregarUsuarios();
     window.dispatchEvent(new Event("eventoHojeChecado"));
   });
 })();
+
+async function carregarAnosDisponiveis() {
+  const select = document.getElementById("filtroAno");
+  if (!select) return;
+
+  const snapshot = await get(ref(rtdb, "oficios"));
+  if (!snapshot.exists()) return;
+
+  const anos = Object.keys(snapshot.val())
+    .filter((k) => /^\d{4}$/.test(k))
+    .sort((a, b) => b - a); // mais recente primeiro
+
+  select.innerHTML = "";
+
+  anos.forEach((ano) => {
+    const option = document.createElement("option");
+    option.value = ano;
+    option.textContent = ano;
+
+    if (ano === ANO_ATUAL) option.selected = true;
+
+    select.appendChild(option);
+  });
+
+  anoSelecionado = select.value;
+}
+document.getElementById("filtroAno")?.addEventListener("change", (e) => {
+  anoSelecionado = e.target.value;
+  carregarOficiosPorAno();
+});
+
+await carregarAnosDisponiveis();
+carregarOficiosPorAno();
+
+function carregarOficiosPorAno() {
+  const refAno = getOficiosRef();
+
+  onValue(refAno, (snap) => {
+    if (snap.exists()) {
+      todosOficios = Object.entries(snap.val())
+        .map(([key, val]) => ({ ...val, _key: key }))
+        .sort((a, b) => Number(b.numero) - Number(a.numero));
+    } else {
+      todosOficios = [];
+    }
+
+    renderTabela();
+  });
+}

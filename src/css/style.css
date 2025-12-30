@@ -806,6 +806,18 @@ select {
   background: #aaa;
   cursor: not-allowed;
 }
+#filtroAno {
+  padding: var(--padding-1);
+  background-color: var(--clr-white);
+  border-radius: var(--card-border-radius);
+  box-shadow: var(--box-shadow);
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+#filtroAno:hover {
+  box-shadow: none;
+}
 .busca {
   width: 100%;
   padding: var(--padding-1);
