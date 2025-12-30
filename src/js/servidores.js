@@ -196,11 +196,16 @@ onValue(registrosRef, (snap) => {
 function renderTabela() {
   tabela.innerHTML = "";
 
-  const termo = busca.value.toLowerCase();
+  const termo = busca.value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
 
   const filtrados = servidores
     .filter((s) =>
       `${s.codigo} ${s.nome} ${s.cpf} ${s.cargo} ${s.vinculo} ${s.localExercicio}`
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase()
         .includes(termo)
     )
