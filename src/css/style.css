@@ -103,6 +103,9 @@
 .justify-center {
   justify-content: center;
 }
+.justify-end {
+  justify-content: flex-end;
+}
 .space-around {
   justify-content: space-around;
 }
@@ -817,6 +820,9 @@ select {
 }
 #filtroAno:hover {
   box-shadow: none;
+}
+.total-oficios {
+  color: var(--clr-dark);
 }
 .busca {
   width: 100%;

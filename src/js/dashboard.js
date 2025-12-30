@@ -91,10 +91,28 @@ function desenharGraficoContratos(cnpj1, cnpj2, atas) {
 // 📊 GRÁFICO 2 — OFÍCIOS POR MÊS
 // ===============================
 onValue(oficiosRef, (snap) => {
-  todosOficios = snap.exists() ? Object.values(snap.val()) : [];
+  if (!snap.exists()) return;
+
+  const dados = snap.val();
+
+  // extrai anos válidos
+  const anos = Object.keys(dados).filter((a) => /^\d{4}$/.test(a));
+
+  // popula select
+  popularSelectAnos(anos);
+
+  // ano selecionado (default: atual)
+  const anoAtual = new Date().getFullYear().toString();
+  const anoSelecionado = filtroAno.value || anoAtual;
+
+  // pega os ofícios do ano
+  const oficiosAno = dados[anoSelecionado]
+    ? Object.values(dados[anoSelecionado])
+    : [];
+
+  todosOficios = oficiosAno;
 
   atualizarTotalGeralOficios();
-  popularSelectAnos();
   atualizarGraficoOficios();
 });
 
@@ -111,40 +129,48 @@ function atualizarTotalGeralOficios() {
 // ===============================
 // 🔽 Select de anos
 // ===============================
-const selectAno = document.getElementById("selectAno");
+const filtroAno = document.getElementById("filtroAno");
 
-function popularSelectAnos() {
-  if (!selectAno) return;
+filtroAno.addEventListener("change", () => {
+  const ano = filtroAno.value;
 
-  const anos = [
-    ...new Set(
-      todosOficios
-        .filter((o) => o.data)
-        .map((o) => Number(o.data.split("-")[0]))
-    ),
-  ].sort((a, b) => b - a);
+  const refAno = ref(rtdb, `oficios/${ano}`);
 
-  selectAno.innerHTML = "";
-
-  anos.forEach((ano) => {
-    const opt = document.createElement("option");
-    opt.value = ano;
-    opt.textContent = ano;
-    selectAno.appendChild(opt);
+  onValue(refAno, (snap) => {
+    todosOficios = snap.exists() ? Object.values(snap.val()) : [];
+    atualizarTotalGeralOficios();
+    atualizarGraficoOficios();
   });
+});
 
-  if (!selectAno.value) {
-    selectAno.value = new Date().getFullYear();
+function popularSelectAnos(anos) {
+  if (!filtroAno) return;
+
+  filtroAno.innerHTML = "";
+
+  anos
+    .sort((a, b) => b - a)
+    .forEach((ano) => {
+      const opt = document.createElement("option");
+      opt.value = ano;
+      opt.textContent = ano;
+      filtroAno.appendChild(opt);
+    });
+
+  // seleciona o ano atual, se existir
+  const atual = new Date().getFullYear().toString();
+  if (anos.includes(atual)) {
+    filtroAno.value = atual;
   }
 }
 
-selectAno?.addEventListener("change", atualizarGraficoOficios);
+filtroAno?.addEventListener("change", atualizarGraficoOficios);
 
 // ===============================
 // 🔄 Atualiza gráfico mensal
 // ===============================
 function atualizarGraficoOficios() {
-  const ano = Number(selectAno.value);
+  const ano = Number(filtroAno.value);
   const meses = Array(12).fill(0);
 
   todosOficios.forEach((o) => {
