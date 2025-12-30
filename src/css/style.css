@@ -690,7 +690,8 @@ main .recent_order a {
 
 .box input,
 .box select,
-.box .btn {
+.box .btn,
+.btn-excel {
   padding: 1rem;
   border: 1px solid var(--clr-primary);
   border-radius: var(--border-radius-1);
@@ -703,7 +704,8 @@ main .recent_order a {
   background-color: var(--clr-white);
 }
 
-.box .btn {
+.box .btn,
+.btn-excel {
   width: auto;
   align-self: center;
   background-color: var(--clr-primary);
@@ -712,9 +714,14 @@ main .recent_order a {
   transition: all 0.5s ease;
 }
 
-.box .btn:hover {
+.box .btn:hover,
+.btn-excel:hover {
   border: 1px solid var(--clr-warnig);
   background-color: var(--clr-warnig);
+}
+
+.btn-excel {
+  margin-bottom: 1rem;
 }
 
 .edit-btn {

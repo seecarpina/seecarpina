@@ -959,3 +959,61 @@ function formatarNumeroOficio(numero, ano) {
   if (!numero) return "-";
   return `${String(numero).padStart(3, "0")}/${ano}`;
 }
+
+// 📊 Exportar tabela para Excel
+const btnExportar = document.getElementById("btnExportarExcel");
+
+if (btnExportar) {
+  btnExportar.addEventListener("click", () => {
+    if (!todosOficios.length) {
+      mostrarNotificacao("Nenhum dado para exportar", "erro");
+      return;
+    }
+
+    // Usa os mesmos filtros aplicados na tela
+    const filtro = inputBusca?.value.toLowerCase() || "";
+    const somenteDisponiveis =
+      document.getElementById("filtroDisponiveis")?.checked;
+
+    let dadosFiltrados = todosOficios.filter((o) =>
+      `${o.numero} ${o.assunto} ${o.data} ${o.destino} ${o.copia} ${o.responsavel}`
+        .toLowerCase()
+        .includes(filtro)
+    );
+
+    if (somenteDisponiveis) {
+      dadosFiltrados = dadosFiltrados.filter(
+        (o) =>
+          !o.assunto || o.assunto.trim() === "" || o.assunto === "undefined"
+      );
+    }
+
+    if (!dadosFiltrados.length) {
+      mostrarNotificacao("Nenhum registro encontrado", "erro");
+      return;
+    }
+
+    // Ordena em ordem crescente
+    dadosFiltrados.sort((a, b) => Number(a.numero) - Number(b.numero));
+
+    // Monta dados para o Excel
+    const dadosExcel = dadosFiltrados.map((o) => ({
+      Número: formatarNumeroOficio(o.numero, anoSelecionado),
+      Assunto: o.assunto || "",
+      Data: formatarDataBR(o.data),
+      Destino: o.destino || "",
+      Cópia: o.copia || "",
+      Responsável: o.responsavel || "",
+    }));
+    // Criar planilha
+    const worksheet = XLSX.utils.json_to_sheet(dadosExcel);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Ofícios");
+
+    // Nome do arquivo
+    const nomeArquivo = `oficios_${anoSelecionado}.xlsx`;
+
+    XLSX.writeFile(workbook, nomeArquivo);
+  });
+}
