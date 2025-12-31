@@ -1,53 +1,6 @@
 const ANO_ATUAL = new Date().getFullYear().toString();
 let anoSelecionado = ANO_ATUAL;
 
-// REMOVE LOADING QUANDO TUDO CARREGA
-function removerLoading() {
-  const loading = document.querySelector(".loading");
-  if (!loading) return;
-
-  loading.style.opacity = "0";
-  loading.style.pointerEvents = "none";
-
-  loading.remove();
-}
-function aguardarAuth() {
-  return new Promise((resolve) => {
-    onAuthStateChanged(auth, (user) => {
-      resolve(user);
-    });
-  });
-}
-function aguardarPrimeiroValor(ref) {
-  return new Promise((resolve) => {
-    const unsubscribe = onValue(ref, (snap) => {
-      resolve(snap);
-      unsubscribe(); // para de escutar após o primeiro retorno
-    });
-  });
-}
-function aguardarColecao(ref) {
-  return getDocs(ref);
-}
-async function iniciarApp() {
-  const promessas = [];
-
-  // Auth
-  promessas.push(aguardarAuth());
-
-  // Firebase Realtime DB
-  promessas.push(aguardarPrimeiroValor(ref(rtdb, "oficios")));
-
-  // Firestore
-  promessas.push(aguardarColecao(collection(db, "usuarios")));
-
-  await Promise.all(promessas);
-
-  removerLoading();
-}
-
-window.addEventListener("load", iniciarApp);
-
 // Remove a tela de loading e Aplicar tema salvo
 window.addEventListener("load", () => {
   const temaSalvo = localStorage.getItem("theme");
@@ -65,9 +18,9 @@ window.addEventListener("load", () => {
     }
   }
 
-  // setTimeout(() => {
-  //   document.querySelector(".loading").style.display = "none";
-  // }, 200);
+  setTimeout(() => {
+    document.querySelector(".loading").style.display = "none";
+  }, 400);
 });
 
 import "./eventosStore.js";
