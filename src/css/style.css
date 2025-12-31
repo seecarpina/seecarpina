@@ -670,6 +670,11 @@ main .recent_order a {
   color: var(--clr-dark);
 }
 
+.links-uteis {
+  margin-top: 1rem;
+  color: var(--clr-dark);
+}
+
 .links-uteis details {
   background-color: transparent;
   width: 100%;
