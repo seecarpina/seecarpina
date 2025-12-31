@@ -321,6 +321,24 @@ onAuthStateChanged(auth, async (user) => {
     window.dadosUsuario = userSnap.data();
     window.usuarioAuth = user;
 
+    // 🔐 Controle de acesso por cargo (sidebar)
+    function controlarAcessoSidebar() {
+      const cargoUsuario = window.dadosUsuario?.cargo?.trim().toUpperCase();
+
+      document.querySelectorAll("[data-role]").forEach((item) => {
+        const cargosPermitidos = item
+          .getAttribute("data-role")
+          .split(",")
+          .map((c) => c.trim().toUpperCase());
+
+        // Se o cargo do usuário NÃO estiver na lista → esconde
+        if (!cargosPermitidos.includes(cargoUsuario)) {
+          item.style.display = "none";
+        }
+      });
+    }
+    controlarAcessoSidebar();
+
     const campoResp = document.getElementById("responsavel");
     if (campoResp) campoResp.value = nomeResponsavel;
 
