@@ -197,16 +197,127 @@ onValue(registrosRef, (snap) => {
       <td>${u.periodo}</td>
       <td>${u.rota}</td>
       <td>
-        <button class="edit-btn">
+        <button class="edit-btn" title="Editar">
           <span class="material-symbols-outlined">edit_square</span>
+        </button>
+        <button class="edit-btn print-btn" title="Gerar PDF">
+          <span class="material-symbols-outlined">picture_as_pdf</span>
         </button>
       </td>
     `;
 
     tr.querySelector(".edit-btn").onclick = () => editarUniversitario(u);
+    tr.querySelector(".print-btn").onclick = () => gerarPDF(u);
+
     tabela.appendChild(tr);
   });
 });
+
+function formatarDataBR(dataISO) {
+  if (!dataISO) return "-";
+  const [ano, mes, dia] = dataISO.split("-");
+  return `${dia}/${mes}/${ano}`;
+}
+
+function gerarPDF(u) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF("p", "mm", "a4");
+
+  // ================================
+  // PAPEL TIMBRADO
+  // ================================
+  const imgTimbrado = new Image();
+  imgTimbrado.src = "./src/images/papel-timbrado.png";
+
+  imgTimbrado.onload = () => {
+    doc.addImage(imgTimbrado, "PNG", 0, 0, 210, 297);
+
+    // ================================
+    // TÍTULO
+    // ================================
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("Ficha Cadastral de Estudante Universitário", 105, 50, {
+      align: "center",
+    });
+
+    // ================================
+    // FOTO 3x4
+    // ================================
+    if (u.foto) {
+      doc.addImage(
+        u.foto,
+        "JPEG",
+        90, // centralizado
+        60, // maisabaixo do título
+        30, // largura
+        40 // altura
+      );
+    }
+
+    // ================================
+    // DADOS DO ALUNO
+    // ================================
+    let y = 115;
+
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(12);
+
+    const dados = [
+      ["Nome:", u.nome],
+      ["CPF:", u.cpf],
+      ["Data de Nascimento:", formatarDataBR(u.nascimento)],
+      ["Nome da Mãe:", u.nomeMae],
+      ["Faculdade:", u.faculdade],
+      ["Período:", u.periodo],
+      ["Rota:", u.rota],
+    ];
+
+    dados.forEach(([label, valor]) => {
+      doc.text(label, 30, y);
+      doc.text(valor || "-", 80, y);
+      y += 8;
+    });
+
+    // ================================
+    // ASSINATURA
+    // ================================
+    y += 25;
+
+    doc.line(60, y, 150, y);
+    doc.text("Assinatura do Responsável", 105, y + 6, {
+      align: "center",
+    });
+
+    // ================================
+    // DATA DE GERAÇÃO
+    // ================================
+    const agora = new Date();
+
+    const dia = String(agora.getDate()).padStart(2, "0");
+    const mes = String(agora.getMonth() + 1).padStart(2, "0");
+    const ano = agora.getFullYear();
+
+    const hora = String(agora.getHours()).padStart(2, "0");
+    const minuto = String(agora.getMinutes()).padStart(2, "0");
+    const segundo = String(agora.getSeconds()).padStart(2, "0");
+
+    const dataHoraFormatada = `${dia}/${mes}/${ano} às ${hora}h ${minuto}m ${segundo}s`;
+
+    doc.setFontSize(10);
+    doc.text(`Gerado em: ${dataHoraFormatada}`, 105, 270, {
+      align: "center",
+    });
+
+    // ================================
+    // ABRIR EM NOVA ABA COM TÍTULO
+    // ================================
+    const pdfBlob = doc.output("blob");
+    const url = URL.createObjectURL(pdfBlob);
+    const novaAba = window.open(url);
+    novaAba.document.title = `Ficha Cadastral`;
+  };
+}
 
 /* ===============================
    SALVAR / EDITAR
