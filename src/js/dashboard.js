@@ -15,6 +15,15 @@ const contratosRef = ref(rtdb, "contratos/fiscais");
 const oficiosRef = ref(rtdb, "oficios");
 
 // ===============================
+// Controles
+// ===============================
+function cssVar(nome) {
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue(nome)
+    .trim();
+}
+
+// ===============================
 // 🎯 Identificadores
 // ===============================
 const CNPJ_1 = "30.784.957/0001-37";
@@ -68,6 +77,11 @@ function desenharGraficoContratos(cnpj1, cnpj2, atas) {
       datasets: [
         {
           data: [cnpj1, cnpj2, atas],
+          backgroundColor: [
+            cssVar("--clr-success"),
+            cssVar("--clr-danger"),
+            cssVar("--clr-warnig"),
+          ],
         },
       ],
     },
@@ -213,6 +227,7 @@ function desenharGraficoOficiosMes(valores, ano) {
         {
           label: `Ofícios enviados em ${ano}`,
           data: valores,
+          backgroundColor: cssVar("--clr-primary"),
         },
       ],
     },
