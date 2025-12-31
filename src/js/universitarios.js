@@ -363,6 +363,7 @@ form.addEventListener("submit", async (e) => {
    EDITAR
 ================================ */
 function editarUniversitario(u) {
+  btnTopo.click();
   editando = true;
   chaveEdicao = u._key;
 
