@@ -41,7 +41,7 @@ onValue(contratosRef, (snap) => {
 
       if (tipo.includes(CNPJ_1)) totalCnpj1++;
       if (tipo.includes(CNPJ_2)) totalCnpj2++;
-      if (tipo.includes("ATA")) totalAtas++;
+      if (tipo.includes("ARPS")) totalAtas++;
     });
   }
 
