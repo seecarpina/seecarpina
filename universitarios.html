@@ -150,6 +150,19 @@
 
         <h2>Universitários cadastrados</h2>
 
+        <input
+          class="busca"
+          type="text"
+          id="buscaUniversitario"
+          placeholder="🔍 Buscar por nome, CPF, faculdade, período ou rota..."
+        />
+
+        <div class="flex justify-center">
+          <button id="btnExportarUniversitarios" class="btn-excel">
+            📊 Exportar para Excel
+          </button>
+        </div>
+
         <table id="tabelaUniversitarios">
           <thead>
             <tr>
@@ -164,13 +177,14 @@
           </thead>
           <tbody></tbody>
         </table>
+        <div class="paginacao" id="paginacaoUniversitarios"></div>
       </main>
 
       <div class="right"></div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script type="module" src="./src/js/scripts.js"></script>
     <script type="module" src="./src/js/universitarios.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   </body>
 </html>

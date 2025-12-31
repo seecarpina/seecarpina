@@ -27,6 +27,12 @@ const previewFoto = document.getElementById("previewFoto");
 const btnCamera = document.getElementById("btnCamera");
 const listaFaculdades = document.getElementById("listaFaculdades");
 
+const busca = document.getElementById("buscaUniversitario");
+const paginacao = document.getElementById("paginacaoUniversitarios");
+
+let paginaAtual = 1;
+const itensPorPagina = 100;
+
 /* ===============================
    FIREBASE
 ================================ */
@@ -165,6 +171,23 @@ btnCamera.addEventListener("click", async () => {
 /* ===============================
    LISTAGEM
 ================================ */
+tabela.innerHTML = `
+  <tr>
+    <td colspan="7" style="text-align:center;">
+      <svg class="svg-spinner" viewBox="0 0 50 50" width="40">
+        <circle
+          class="path"
+          cx="25"
+          cy="25"
+          r="20"
+          fill="none"
+          stroke-width="4"
+        />
+      </svg>
+    </td>
+  </tr>
+`;
+
 onValue(registrosRef, (snap) => {
   tabela.innerHTML = "";
 
@@ -174,7 +197,8 @@ onValue(registrosRef, (snap) => {
         <td colspan="7" style="text-align:center">
           Nenhum universitário cadastrado
         </td>
-      </tr>`;
+      </tr>
+    `;
     return;
   }
 
@@ -183,34 +207,95 @@ onValue(registrosRef, (snap) => {
     _key: k,
   }));
 
-  universitarios.forEach((u) => {
-    const foto = u.foto
-      ? `<img src="${u.foto}">`
-      : `<img src="./src/images/profile.webp">`;
+  renderTabela();
+});
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td class="col-foto" id="profile-photo">${foto}</td>
-      <td>${u.nome}</td>
-      <td>${u.cpf}</td>
-      <td>${u.faculdade}</td>
-      <td>${u.periodo}</td>
-      <td>${u.rota}</td>
-      <td>
-        <button class="edit-btn" title="Editar">
-          <span class="material-symbols-outlined">edit_square</span>
-        </button>
-        <button class="edit-btn print-btn" title="Gerar PDF">
-          <span class="material-symbols-outlined">picture_as_pdf</span>
-        </button>
-      </td>
-    `;
+function renderTabela() {
+  tabela.innerHTML = "";
 
-    tr.querySelector(".edit-btn").onclick = () => editarUniversitario(u);
-    tr.querySelector(".print-btn").onclick = () => gerarPDF(u);
+  const termo = busca.value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
 
-    tabela.appendChild(tr);
-  });
+  const filtrados = universitarios.filter((u) =>
+    `${u.nome} ${u.cpf} ${u.faculdade} ${u.periodo} ${u.rota}`
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .includes(termo)
+  );
+
+  const totalPaginas = Math.ceil(filtrados.length / itensPorPagina);
+  const inicio = (paginaAtual - 1) * itensPorPagina;
+  const fim = inicio + itensPorPagina;
+
+  const pagina = filtrados.slice(inicio, fim);
+
+  if (!pagina.length) {
+    tabela.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align:center">
+          Nenhum universitário encontrado
+        </td>
+      </tr>`;
+  } else {
+    pagina.forEach((u) => {
+      const foto = u.foto
+        ? `<img src="${u.foto}">`
+        : `<img src="./src/images/profile.webp">`;
+
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td class="col-foto" id="profile-photo">${foto}</td>
+        <td>${u.nome}</td>
+        <td>${u.cpf}</td>
+        <td>${u.faculdade}</td>
+        <td>${u.periodo}</td>
+        <td>${u.rota}</td>
+        <td>
+          <button class="edit-btn">
+            <span class="material-symbols-outlined">edit_square</span>
+          </button>
+          <button class="edit-btn print-btn">
+            <span class="material-symbols-outlined">picture_as_pdf</span>
+          </button>
+        </td>
+      `;
+
+      tr.querySelector(".edit-btn").onclick = () => editarUniversitario(u);
+      tr.querySelector(".print-btn").onclick = () => gerarPDF(u);
+
+      tabela.appendChild(tr);
+    });
+  }
+
+  renderPaginacao(totalPaginas);
+}
+
+function renderPaginacao(total) {
+  paginacao.innerHTML = "";
+
+  if (total <= 1) return;
+
+  for (let i = 1; i <= total; i++) {
+    const btn = document.createElement("button");
+    btn.textContent = i;
+    btn.classList.toggle("ativo", i === paginaAtual);
+
+    btn.onclick = () => {
+      paginaAtual = i;
+      renderTabela();
+    };
+
+    paginacao.appendChild(btn);
+  }
+}
+
+busca.addEventListener("input", () => {
+  paginaAtual = 1;
+  renderTabela();
 });
 
 function formatarDataBR(dataISO) {
@@ -405,4 +490,64 @@ function resetarFormulario() {
   document.getElementById("btnCadastrar").style.display = "block";
   document.getElementById("botoesEdicao").style.display = "none";
   document.getElementById("msgEdicao").style.display = "none";
+}
+
+// Exportar para Excel
+const btnExportarUniversitarios = document.getElementById(
+  "btnExportarUniversitarios"
+);
+
+if (btnExportarUniversitarios) {
+  btnExportarUniversitarios.addEventListener("click", () => {
+    if (!universitarios.length) {
+      mostrarNotificacao("Nenhum universitário para exportar", "erro");
+      return;
+    }
+
+    const termo = busca.value
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+
+    // Aplica o mesmo filtro da tabela
+    const filtrados = universitarios.filter((u) =>
+      `${u.nome} ${u.cpf} ${u.faculdade} ${u.periodo} ${u.rota}`
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .includes(termo)
+    );
+
+    if (!filtrados.length) {
+      mostrarNotificacao("Nenhum registro encontrado", "erro");
+      return;
+    }
+
+    // Ordena por nome
+    filtrados.sort((a, b) =>
+      a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
+    );
+
+    // Monta planilha
+    const dadosExcel = filtrados.map((u) => ({
+      Nome: u.nome,
+      CPF: u.cpf,
+      "Data de Nascimento": formatarDataBR(u.nascimento),
+      Faculdade: u.faculdade,
+      Período: u.periodo,
+      Rota: u.rota,
+    }));
+
+    // Gera planilha
+    const worksheet = XLSX.utils.json_to_sheet(dadosExcel);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Universitários");
+
+    const nomeArquivo = `universitarios_${new Date()
+      .toISOString()
+      .slice(0, 10)}.xlsx`;
+
+    XLSX.writeFile(workbook, nomeArquivo);
+  });
 }
