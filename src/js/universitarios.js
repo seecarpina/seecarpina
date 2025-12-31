@@ -375,13 +375,18 @@ function editarUniversitario(u) {
   inputMae.value = u.nomeMae;
   inputRota.value = u.rota;
 
+  document.getElementById("btnCadastrar").style.display = "none";
+  document.getElementById("botoesEdicao").style.display = "flex";
+
+  const msg = document.getElementById("msgEdicao");
+  msg.textContent = `✏️ Editando estudante ${u.nome}`;
+  msg.style.display = "block";
+
   if (u.foto) {
     fotoBase64 = u.foto;
     previewFoto.src = u.foto;
     previewFoto.style.display = "block";
   }
-
-  btnCancelar.style.display = "inline-block";
 }
 
 /* ===============================
@@ -397,5 +402,7 @@ function resetarFormulario() {
   fotoBase64 = "";
   previewFoto.style.display = "none";
 
-  btnCancelar.style.display = "none";
+  document.getElementById("btnCadastrar").style.display = "block";
+  document.getElementById("botoesEdicao").style.display = "none";
+  document.getElementById("msgEdicao").style.display = "none";
 }
