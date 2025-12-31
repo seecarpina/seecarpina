@@ -26,6 +26,7 @@ const inputFoto = document.getElementById("foto");
 const previewFoto = document.getElementById("previewFoto");
 const btnCamera = document.getElementById("btnCamera");
 const listaFaculdades = document.getElementById("listaFaculdades");
+const listaRotas = document.getElementById("listaRotas");
 
 const busca = document.getElementById("buscaUniversitario");
 const paginacao = document.getElementById("paginacaoUniversitarios");
@@ -38,12 +39,14 @@ const itensPorPagina = 100;
 ================================ */
 const registrosRef = ref(rtdb, "universitarios/registros");
 const faculdadesRef = ref(rtdb, "universitarios/faculdades");
+const rotasRef = ref(rtdb, "universitarios/rotas");
 
 /* ===============================
    VARIÁVEIS
 ================================ */
 let universitarios = [];
 let faculdades = [];
+let rotas = [];
 let editando = false;
 let chaveEdicao = null;
 let fotoBase64 = "";
@@ -78,6 +81,10 @@ onValue(faculdadesRef, (snap) => {
   faculdades = snap.exists() ? Object.values(snap.val()) : [];
 });
 
+onValue(rotasRef, (snap) => {
+  rotas = snap.exists() ? Object.values(snap.val()) : [];
+});
+
 inputFaculdade.addEventListener("input", () => {
   const termo = inputFaculdade.value.toLowerCase().trim();
   listaFaculdades.innerHTML = "";
@@ -105,6 +112,40 @@ inputFaculdade.addEventListener("input", () => {
 document.addEventListener("click", (e) => {
   if (!inputFaculdade.contains(e.target)) {
     listaFaculdades.style.display = "none";
+  }
+});
+
+inputRota.addEventListener("input", () => {
+  const termo = inputRota.value.toLowerCase().trim();
+  listaRotas.innerHTML = "";
+
+  if (!termo) {
+    listaRotas.style.display = "none";
+    return;
+  }
+
+  const filtrados = rotas.filter((r) => r.toLowerCase().includes(termo));
+
+  filtrados.forEach((r) => {
+    const li = document.createElement("li");
+    li.textContent = r;
+    li.onclick = () => {
+      inputRota.value = r;
+      listaRotas.style.display = "none";
+    };
+    listaRotas.appendChild(li);
+  });
+
+  listaRotas.style.display = filtrados.length ? "block" : "none";
+});
+
+document.addEventListener("click", (e) => {
+  if (!inputFaculdade.contains(e.target)) {
+    listaFaculdades.style.display = "none";
+  }
+
+  if (!inputRota.contains(e.target)) {
+    listaRotas.style.display = "none";
   }
 });
 
@@ -436,6 +477,9 @@ form.addEventListener("submit", async (e) => {
 
     if (dados.faculdade && !faculdades.includes(dados.faculdade)) {
       push(faculdadesRef, dados.faculdade);
+    }
+    if (dados.rota && !rotas.includes(dados.rota)) {
+      push(rotasRef, dados.rota);
     }
 
     resetarFormulario();
