@@ -570,7 +570,7 @@ function gerarPDFTransferencia(dados) {
     );
 
     // Linha pontilhada central
-    doc.setLineDash([3, 3]);
+    doc.setLineDash([1, 1]);
     doc.line(larguraPagina / 2, 10, larguraPagina / 2, alturaPagina - 10);
     doc.setLineDash([]);
 
@@ -677,7 +677,7 @@ function gerarPDFTransferencia(dados) {
       const usuario = window.dadosUsuario?.nome || "USUÁRIO";
       const protocolo = dados.protocolo;
 
-      doc.setFontSize(8);
+      doc.setFontSize(7);
       doc.text(
         `Protocolo nº ${protocolo} gerado por ${usuario} em ${new Date().toLocaleString(
           "pt-BR"
