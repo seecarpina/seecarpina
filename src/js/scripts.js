@@ -406,17 +406,13 @@ async function carregarFraseDoDia() {
   const span = document.getElementById("frase-do-dia");
 
   try {
-    const url = "https://motivacional.top/api.php?acao=aleatoria";
-    const proxy =
-      "https://api.allorigins.win/raw?url=" + encodeURIComponent(url);
+    const response = await fetch("./src/json/frases.json");
+    const frases = await response.json();
 
-    const response = await fetch(proxy);
-    const data = await response.json();
+    const randomIndex = Math.floor(Math.random() * frases.length);
+    const frase = frases[randomIndex].frase;
 
-    const frase = data.dados[0].frase;
-    const autor = data.dados[0].autor || "";
-
-    span.textContent = autor ? `"${frase}" — ${autor}` : `"${frase}"`;
+    span.textContent = `"${frase}"`;
   } catch (error) {
     console.error(error);
     span.textContent = "Acredite: você já deu o primeiro passo.";
