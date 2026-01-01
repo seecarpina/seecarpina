@@ -470,6 +470,7 @@ function abrirTransferencia(servidor) {
 
 document.getElementById("btnCancelarTransferencia").onclick = () => {
   document.getElementById("modalTransferencia").style.display = "none";
+  document.getElementById("obsTransferencia").value = "";
 };
 
 document.getElementById("btnGerarTransferencia").onclick = async () => {
@@ -481,6 +482,8 @@ async function transferirServidor() {
 
   const novoLocal = document.getElementById("selectNovoLocal").value;
   const dataTransferencia = document.getElementById("dataTransferencia").value;
+  const observacao = document.getElementById("obsTransferencia").value.trim();
+  const protocolo = gerarNumeroProtocolo();
 
   if (!novoLocal || !dataTransferencia) {
     alert("Preencha todos os campos.");
@@ -504,9 +507,11 @@ async function transferirServidor() {
   );
 
   await push(historicoRef, {
+    protocolo: protocolo,
     de: servidorSelecionado.localExercicio,
     para: novoLocal,
     data: dataTransferencia,
+    observacao: observacao,
     criadoEm: new Date().toISOString(),
   });
 
@@ -515,6 +520,8 @@ async function transferirServidor() {
     ...servidorSelecionado,
     novoLocal,
     dataTransferencia,
+    protocolo,
+    observacao,
   });
 
   // Atualiza visualmente
@@ -525,52 +532,160 @@ async function transferirServidor() {
 
   mostrarNotificacao("Transferência realizada com sucesso!");
 }
+
+function gerarNumeroProtocolo() {
+  const agora = new Date();
+
+  const data = agora.toISOString().slice(0, 10).replace(/-/g, "");
+
+  const hora = agora.toTimeString().slice(0, 8).replace(/:/g, "");
+
+  const aleatorio = Math.floor(1000 + Math.random() * 9000);
+
+  return `${data}-${hora}-${aleatorio}`;
+}
+
 function gerarPDFTransferencia(dados) {
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF("p", "mm", "a4");
+  const doc = new jsPDF("landscape", "mm", "a4");
+
+  const larguraPagina = 297;
+  const alturaPagina = 210;
+  const margem = 15;
+  const colunaLargura = larguraPagina / 2 - 25;
 
   const imgTimbrado = new Image();
   imgTimbrado.src = "./src/images/papel-timbrado.png";
 
   imgTimbrado.onload = () => {
-    doc.addImage(imgTimbrado, "PNG", 0, 0, 210, 297);
+    // Fundo
+    doc.addImage(imgTimbrado, "PNG", 0, 0, larguraPagina / 2, alturaPagina);
+    doc.addImage(
+      imgTimbrado,
+      "PNG",
+      larguraPagina / 2,
+      0,
+      larguraPagina / 2,
+      alturaPagina
+    );
 
-    doc.setFont("Helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("TERMO DE TRANSFERÊNCIA DE SERVIDOR", 105, 45, {
-      align: "center",
-    });
+    // Linha pontilhada central
+    doc.setLineDash([3, 3]);
+    doc.line(larguraPagina / 2, 10, larguraPagina / 2, alturaPagina - 10);
+    doc.setLineDash([]);
 
-    let y = 70;
-    doc.setFontSize(12);
-    doc.setFont("Helvetica", "normal");
+    function desenharVia(xInicial) {
+      let y = 35;
 
-    const campos = [
-      ["Nome:", dados.nome],
-      ["CPF:", dados.cpf],
-      ["Cargo:", dados.cargo],
-      ["Local anterior:", dados.localExercicio],
-      ["Novo local:", dados.novoLocal],
-      ["Data da transferência:", formatarDataBR(dados.dataTransferencia)],
-    ];
+      // Título
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(13);
+      doc.text("ENCAMINHAMENTO", xInicial + colunaLargura / 2, y, {
+        align: "center",
+      });
 
-    campos.forEach(([label, valor]) => {
-      doc.text(label, 30, y);
-      doc.text(valor || "-", 95, y);
+      y += 14;
+      doc.setFontSize(10);
+      doc.setFont("Helvetica", "normal");
+
+      doc.text("Da: SECRETARIA DE EDUCAÇÃO", xInicial, y);
+      y += 6;
+
+      doc.text(`À Direção da: ${dados.novoLocal}`, xInicial, y);
+      y += 8;
+
+      doc.text(`Encaminhamos o(a) servidor(a): ${dados.nome}`, xInicial, y);
+
+      y += 6;
+      doc.text(
+        `Matrícula: ${
+          dados.codigo
+        } para ser lotado(a) nesta Unidade de Ensino a partir de ${formatarDataBR(
+          dados.dataTransferencia
+        )}.`,
+        xInicial,
+        y
+      );
+
+      // Caixa servidor
       y += 10;
-    });
+      doc.rect(xInicial, y, colunaLargura, 45);
 
-    y += 30;
-    doc.line(60, y, 150, y);
-    doc.text("Assinatura do Responsável", 105, y + 6, {
-      align: "center",
-    });
+      y += 7;
+      doc.setFont("Helvetica", "bold");
+      doc.text("SERVIDOR(A)", xInicial + colunaLargura / 2, y, {
+        align: "center",
+      });
 
-    const agora = new Date().toLocaleString("pt-BR");
-    doc.setFontSize(10);
-    doc.text(`Gerado em: ${agora}`, 105, 270, {
-      align: "center",
-    });
+      y += 8;
+      doc.setFont("Helvetica", "normal");
+      doc.text(`VÍNCULO: ${dados.vinculo}`, xInicial + 5, y);
+
+      y += 6;
+      doc.text(`CARGO/FUNÇÃO: ${dados.cargo}`, xInicial + 5, y);
+
+      y += 8;
+      doc.text("HORÁRIO:", xInicial + 5, y);
+      doc.text("[  ] Manhã    [  ] Tarde    [  ] Noite", xInicial + 40, y);
+
+      y += 8;
+      doc.text("OBS.:", xInicial + 5, y);
+
+      if (dados.observacao) {
+        const textoObs = doc.splitTextToSize(
+          dados.observacao,
+          colunaLargura - 10
+        );
+
+        y += 6;
+        doc.text(textoObs, xInicial + 5, y);
+      }
+
+      // Assinatura (subida)
+      y = alturaPagina - 60;
+
+      doc.text(
+        `Carpina, ${new Date().toLocaleDateString("pt-BR")}.`,
+        xInicial + colunaLargura / 2,
+        y,
+        { align: "center" }
+      );
+
+      y += 15;
+      doc.line(xInicial + 25, y, xInicial + colunaLargura - 25, y);
+
+      y += 6;
+      doc.setFontSize(9);
+      doc.text("ROSEJARA RAMOS DE OLIVEIRA", xInicial + colunaLargura / 2, y, {
+        align: "center",
+      });
+
+      y += 4;
+      doc.text(
+        "Secretária Municipal de Educação e Esportes",
+        xInicial + colunaLargura / 2,
+        y,
+        { align: "center" }
+      );
+
+      // Rodapé
+      const usuario = window.dadosUsuario?.nome || "USUÁRIO";
+      const protocolo = dados.protocolo;
+
+      doc.setFontSize(8);
+      doc.text(
+        `Protocolo nº ${protocolo} gerado por ${usuario} em ${new Date().toLocaleString(
+          "pt-BR"
+        )}`,
+        xInicial + colunaLargura / 2,
+        alturaPagina - 20,
+        { align: "center" }
+      );
+    }
+
+    // Duas vias
+    desenharVia(10);
+    desenharVia(larguraPagina / 2 + 5);
 
     const blob = doc.output("blob");
     const url = URL.createObjectURL(blob);
