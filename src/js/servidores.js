@@ -613,9 +613,14 @@ function gerarPDFTransferencia(dados) {
 
       y += 7;
       doc.setFont("Helvetica", "bold");
-      doc.text("SERVIDOR(A)", xInicial + colunaLargura / 2, y, {
-        align: "center",
-      });
+      doc.text(
+        "DADOS FUNCIONAIS DO SERVIDOR(A)",
+        xInicial + colunaLargura / 2,
+        y,
+        {
+          align: "center",
+        }
+      );
 
       y += 8;
       doc.setFont("Helvetica", "normal");
