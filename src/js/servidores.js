@@ -243,10 +243,14 @@ function renderTabela() {
           <button class="edit-btn">
             <span class="material-symbols-outlined">edit_square</span>
           </button>
+          <button class="edit-btn transfer-btn">
+            <span class="material-symbols-outlined">swap_horiz</span>
+          </button>
         </td>
       `;
 
       tr.querySelector(".edit-btn").onclick = () => editarServidor(s);
+      tr.querySelector(".transfer-btn").onclick = () => abrirTransferencia(s);
       tabela.appendChild(tr);
     });
   }
@@ -434,4 +438,142 @@ if (btnExportarExcel) {
 
     XLSX.writeFile(workbook, nomeArquivo);
   });
+}
+
+let servidorSelecionado = null;
+
+function abrirTransferencia(servidor) {
+  servidorSelecionado = servidor;
+
+  document.getElementById("modalTransferencia").style.display = "flex";
+  document.getElementById("nomeServidorTransferencia").textContent =
+    servidor.nome;
+
+  // Preencher locais
+  const select = document.getElementById("selectNovoLocal");
+  select.innerHTML = "";
+
+  locais.forEach((local) => {
+    const opt = document.createElement("option");
+    opt.value = local;
+    opt.textContent = local;
+    select.appendChild(opt);
+  });
+
+  select.value = servidor.localExercicio;
+
+  // Data atual
+  document.getElementById("dataTransferencia").value = new Date()
+    .toISOString()
+    .split("T")[0];
+}
+
+document.getElementById("btnCancelarTransferencia").onclick = () => {
+  document.getElementById("modalTransferencia").style.display = "none";
+};
+
+document.getElementById("btnGerarTransferencia").onclick = async () => {
+  await transferirServidor();
+};
+
+async function transferirServidor() {
+  if (!servidorSelecionado) return;
+
+  const novoLocal = document.getElementById("selectNovoLocal").value;
+  const dataTransferencia = document.getElementById("dataTransferencia").value;
+
+  if (!novoLocal || !dataTransferencia) {
+    alert("Preencha todos os campos.");
+    return;
+  }
+
+  const servidorRef = ref(
+    rtdb,
+    `servidores/registros/${servidorSelecionado._key}`
+  );
+
+  // 🔄 Atualiza o local do servidor
+  await update(servidorRef, {
+    localExercicio: novoLocal,
+  });
+
+  // 📜 Histórico (opcional, mas recomendado)
+  const historicoRef = ref(
+    rtdb,
+    `servidores/transferencias/${servidorSelecionado._key}`
+  );
+
+  await push(historicoRef, {
+    de: servidorSelecionado.localExercicio,
+    para: novoLocal,
+    data: dataTransferencia,
+    criadoEm: new Date().toISOString(),
+  });
+
+  // 🧾 Gera PDF
+  gerarPDFTransferencia({
+    ...servidorSelecionado,
+    novoLocal,
+    dataTransferencia,
+  });
+
+  // Atualiza visualmente
+  servidorSelecionado.localExercicio = novoLocal;
+
+  // Fecha modal
+  document.getElementById("modalTransferencia").style.display = "none";
+
+  mostrarNotificacao("Transferência realizada com sucesso!");
+}
+function gerarPDFTransferencia(dados) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF("p", "mm", "a4");
+
+  const imgTimbrado = new Image();
+  imgTimbrado.src = "./src/images/papel-timbrado.png";
+
+  imgTimbrado.onload = () => {
+    doc.addImage(imgTimbrado, "PNG", 0, 0, 210, 297);
+
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("TERMO DE TRANSFERÊNCIA DE SERVIDOR", 105, 45, {
+      align: "center",
+    });
+
+    let y = 70;
+    doc.setFontSize(12);
+    doc.setFont("Helvetica", "normal");
+
+    const campos = [
+      ["Nome:", dados.nome],
+      ["CPF:", dados.cpf],
+      ["Cargo:", dados.cargo],
+      ["Local anterior:", dados.localExercicio],
+      ["Novo local:", dados.novoLocal],
+      ["Data da transferência:", formatarDataBR(dados.dataTransferencia)],
+    ];
+
+    campos.forEach(([label, valor]) => {
+      doc.text(label, 30, y);
+      doc.text(valor || "-", 95, y);
+      y += 10;
+    });
+
+    y += 30;
+    doc.line(60, y, 150, y);
+    doc.text("Assinatura do Responsável", 105, y + 6, {
+      align: "center",
+    });
+
+    const agora = new Date().toLocaleString("pt-BR");
+    doc.setFontSize(10);
+    doc.text(`Gerado em: ${agora}`, 105, 270, {
+      align: "center",
+    });
+
+    const blob = doc.output("blob");
+    const url = URL.createObjectURL(blob);
+    window.open(url);
+  };
 }
