@@ -497,7 +497,7 @@ main .insights a > div:hover {
   box-shadow: none;
 }
 main .insights a > div span {
-  background-color: coral;
+  background-color: var(--clr-primary);
   padding: 0.5rem;
   border-radius: 50%;
   color: var(--clr-white);
