@@ -80,7 +80,7 @@ function desenharGraficoContratos(cnpj1, cnpj2, atas) {
           backgroundColor: [
             cssVar("--clr-success"),
             cssVar("--clr-danger"),
-            cssVar("--clr-warnig"),
+            cssVar("--clr-primary"),
           ],
         },
       ],

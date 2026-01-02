@@ -1,9 +1,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
 
 :root {
-  --clr-primary: #7380ec;
+  /* --clr-primary: #7380ec;
   --clr-danger: #ff7782;
-  --clr-success: #41f1b6;
+  --clr-success: #41f1b6; */
+  --clr-primary: #006be0;
+  --clr-danger: #d52305;
+  --clr-success: #7b09c0;
   --clr-white: #fff;
   --clr-info-dark: #7d8da1;
   --clr-info-light: #dce1eb;
@@ -171,7 +174,7 @@
 }
 
 .modal-content .opcoes a:hover {
-  background: var(--clr-warnig);
+  background: var(--clr-danger);
 }
 
 .fechar {
@@ -685,7 +688,7 @@ main .recent_order a {
   color: var(--clr-primary);
 }
 .links-uteis details a:hover {
-  color: var(--clr-warnig);
+  color: var(--clr-danger);
 }
 .links-uteis ul {
   list-style: none;
