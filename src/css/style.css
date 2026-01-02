@@ -350,6 +350,7 @@ small {
   height: 2.8rem;
   border-radius: 50%;
   overflow: hidden;
+  object-fit: cover;
 }
 .text-muted {
   color: var(--clr-info-dark);
