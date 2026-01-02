@@ -185,8 +185,6 @@
 
 details {
   background-color: var(--clr-color-background);
-  margin-bottom: 1rem;
-  padding: var(--padding-1) var(--padding-1) 0.5rem var(--padding-1);
   color: var(--clr-dark);
 }
 
@@ -667,7 +665,7 @@ main .recent_order a {
 .lembretes .item textarea {
   max-width: 100%;
   min-width: 100%;
-  min-height: 10rem;
+  min-height: 5rem;
   background-color: transparent;
   color: var(--clr-dark);
 }
