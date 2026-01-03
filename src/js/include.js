@@ -36,3 +36,13 @@ function ativarLinkAtual() {
     }
   });
 }
+import { initChat } from "./chat.js";
+
+export async function carregarChat() {
+  const res = await fetch("/src/template/chat.html");
+  const html = await res.text();
+  document.body.insertAdjacentHTML("beforeend", html);
+
+  // 🔥 AGORA o HTML existe
+  initChat();
+}

@@ -1,0 +1,21 @@
+<div id="chat-admin" class="chat-fechado">
+  <audio id="chat-sound" preload="auto">
+    <source src="./src/sons/notification.mp3" type="audio/mpeg" />
+  </audio>
+  <div id="chat-header">
+    <div><span>Chat</span> <span id="chat-badge"></span></div>
+    <span id="chat-toggle-icon" class="material-symbols-outlined">
+      expand_more
+    </span>
+  </div>
+
+  <div id="chat-body">
+    <div id="chat-mensagens"></div>
+    <div id="chat-digitando"></div>
+
+    <div id="chat-input">
+      <input type="text" id="chat-texto" placeholder="Digite sua mensagem..." />
+      <button id="chat-enviar">Enviar</button>
+    </div>
+  </div>
+</div>

@@ -24,8 +24,10 @@ window.addEventListener("load", () => {
 });
 
 import "./eventosStore.js";
-import { carregarSidebar, carregarRight } from "./include.js";
+import { carregarSidebar, carregarRight, carregarChat } from "./include.js";
 import { auth, db, rtdb } from "./firebaseConfig.js"; // <<–– CONFIG DO FIREBASE AGORA ESTÁ AQUI
+
+carregarChat();
 
 carregarSidebar().then(() => {
   // 🚪 Logout
