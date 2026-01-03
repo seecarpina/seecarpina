@@ -482,7 +482,7 @@ main .line-dash {
 
 main .insights {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.6rem;
 }
 main .insights a > div {
@@ -510,6 +510,9 @@ main .insights a > div.contracheques span {
 }
 main .insights a > div.email span {
   background-color: var(--clr-success);
+}
+main .insights a > div.noticias span {
+  background-color: var(--clr-warnig);
 }
 main .insights a > div .middle {
   display: flex;
@@ -835,12 +838,13 @@ select {
 
 .paginacao button:hover {
   background: var(--clr-primary-variant);
-  color: var(--clr-white);
+  color: #fff;
 }
 
 .paginacao button.ativo {
   background: var(--clr-primary);
   font-weight: bold;
+  color: #fff;
 }
 
 .paginacao button:disabled {
