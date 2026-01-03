@@ -65,6 +65,11 @@
             </div>
           </div>
 
+          <div>
+            <label>Nome da mãe:</label>
+            <input type="text" id="nomeMae" />
+          </div>
+
           <div class="flex g-1">
             <div class="autocomplete w-100">
               <label>Faculdade:</label>
@@ -79,7 +84,7 @@
             <div class="w-100">
               <label>Período:</label>
               <select id="periodo">
-                <option value="">Selecione</option>
+                <option value="" disabled selected>Selecione</option>
                 <option value="1º">1º</option>
                 <option value="2º">2º</option>
                 <option value="3º">3º</option>
@@ -94,15 +99,26 @@
             </div>
           </div>
 
-          <div>
-            <label>Nome da mãe:</label>
-            <input type="text" id="nomeMae" />
-          </div>
+          <div class="flex g-1">
+            <div class="w-100 autocomplete">
+              <label>Rota:</label>
+              <input
+                type="text"
+                id="rota"
+                placeholder="Digite para buscar..."
+              />
+              <ul id="listaRotas" class="autocomplete-list"></ul>
+            </div>
 
-          <div class="autocomplete">
-            <label>Rota:</label>
-            <input type="text" id="rota" placeholder="Digite para buscar..." />
-            <ul id="listaRotas" class="autocomplete-list"></ul>
+            <div class="w-100">
+              <label>Turno</label>
+              <select id="turno">
+                <option value="" disabled selected>Selecione</option>
+                <option value="Manhã">Manhã</option>
+                <option value="Tarde">Tarde</option>
+                <option value="Noite">Noite</option>
+              </select>
+            </div>
           </div>
 
           <label>Foto:</label>
@@ -155,7 +171,7 @@
           class="busca"
           type="text"
           id="buscaUniversitario"
-          placeholder="🔍 Buscar por nome, CPF, faculdade, período ou rota..."
+          placeholder="🔍 Buscar por nome, CPF, faculdade, período, turno ou rota..."
         />
 
         <div class="flex justify-center">
@@ -172,6 +188,7 @@
               <th>CPF</th>
               <th>Faculdade</th>
               <th>Período</th>
+              <th>Turno</th>
               <th>Rota</th>
               <th></th>
             </tr>

@@ -21,6 +21,7 @@ const inputFaculdade = document.getElementById("faculdade");
 const inputPeriodo = document.getElementById("periodo");
 const inputMae = document.getElementById("nomeMae");
 const inputRota = document.getElementById("rota");
+const inputTurno = document.getElementById("turno");
 
 const inputFoto = document.getElementById("foto");
 const previewFoto = document.getElementById("previewFoto");
@@ -260,7 +261,7 @@ function renderTabela() {
     .toLowerCase();
 
   const filtrados = universitarios.filter((u) =>
-    `${u.nome} ${u.cpf} ${u.faculdade} ${u.periodo} ${u.rota}`
+    `${u.nome} ${u.cpf} ${u.faculdade} ${u.periodo} ${u.turno} ${u.rota}`
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase()
@@ -294,6 +295,7 @@ function renderTabela() {
         <td>${u.cpf}</td>
         <td>${u.faculdade}</td>
         <td>${u.periodo}</td>
+        <td>${u.turno}</td>
         <td>${u.rota}</td>
         <td>
           <button class="edit-btn">
@@ -396,6 +398,7 @@ function gerarPDF(u) {
       ["Nome da Mãe:", u.nomeMae],
       ["Faculdade:", u.faculdade],
       ["Período:", u.periodo],
+      ["Turno:", u.turno || "-"],
       ["Rota:", u.rota],
     ];
 
@@ -457,6 +460,7 @@ form.addEventListener("submit", async (e) => {
     cpf: inputCPF.value,
     faculdade: padronizarTexto(inputFaculdade.value),
     periodo: inputPeriodo.value,
+    turno: inputTurno.value,
     nomeMae: padronizarTexto(inputMae.value),
     rota: padronizarTexto(inputRota.value),
     foto: fotoBase64,
@@ -503,6 +507,7 @@ function editarUniversitario(u) {
   inputPeriodo.value = u.periodo;
   inputMae.value = u.nomeMae;
   inputRota.value = u.rota;
+  inputTurno.value = u.turno || "";
 
   document.getElementById("btnCadastrar").style.display = "none";
   document.getElementById("botoesEdicao").style.display = "flex";
@@ -579,6 +584,7 @@ if (btnExportarUniversitarios) {
       "Data de Nascimento": formatarDataBR(u.nascimento),
       Faculdade: u.faculdade,
       Período: u.periodo,
+      Turno: u.turno,
       Rota: u.rota,
     }));
 
