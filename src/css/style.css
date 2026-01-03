@@ -1119,7 +1119,7 @@ select {
 
 #chat-admin {
   position: fixed;
-  right: 1.5rem;
+  right: 5rem;
   bottom: 0px;
   width: 19rem;
   box-shadow: var(--box-shadow);
