@@ -105,6 +105,13 @@ export function initChat() {
       marcarComoLido();
     }
   });
+  document.addEventListener("keydown", (e) => {
+    if (!chatBox.classList.contains("aberto")) return;
+
+    if (e.key === "Escape") {
+      chatBox.classList.remove("aberto");
+    }
+  });
 
   window.addEventListener("beforeunload", () => {
     if (usuarioAtual) {
