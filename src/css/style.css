@@ -419,7 +419,7 @@ aside h3 {
 }
 aside .sidebar a {
   display: flex;
-  color: var(--clr-info-dark);
+  color: var(--clr-dark);
   gap: 1rem;
   align-items: center;
   height: 3.2rem;
