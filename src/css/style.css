@@ -71,7 +71,9 @@
   stroke-dasharray: 90;
   stroke-dashoffset: 0;
   transform-origin: 50% 50%;
-  animation: svg-rot 1.6s linear infinite, dash 1.2s ease-in-out infinite;
+  animation:
+    svg-rot 1.6s linear infinite,
+    dash 1.2s ease-in-out infinite;
 }
 
 @keyframes svg-rot {
@@ -1101,7 +1103,7 @@ select {
 .calendario .btn {
   display: flex;
   justify-content: center;
-  margin: 1rem 0;
+  margin: 1rem 0 5rem 0;
 }
 .tooltip-evento {
   position: absolute;
