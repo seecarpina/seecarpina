@@ -1428,6 +1428,64 @@ select {
   animation-play-state: paused;
 }
 
+.abas-eventos {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.abas-eventos .aba {
+  padding: var(--padding-1);
+  border: none;
+  cursor: pointer;
+  border-radius: var(--border-radius-1);
+  background: var(--clr-info-light);
+  box-shadow: var(--box-shadow);
+  transition: all 0.3s ease;
+}
+
+.abas-eventos .aba.ativa {
+  background: var(--clr-primary);
+  color: #fff;
+}
+
+.abas-eventos .aba:hover,
+.abas-eventos .aba:hover {
+  background-color: var(--clr-warnig);
+  color: #fff;
+  box-shadow: none;
+}
+
+#tabelaEventos input[type="checkbox"] {
+  all: unset;
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  cursor: pointer;
+  background: var(--clr-info-light);
+  border: 1px solid var(--clr-primary);
+  transition: all 0.3s ease;
+}
+
+#tabelaEventos input[type="checkbox"]:hover {
+  background-color: var(--clr-primary);
+}
+
+#tabelaEventos input[type="checkbox"]:checked {
+  background: var(--clr-primary);
+  position: relative;
+}
+
+#tabelaEventos input[type="checkbox"]:checked::after {
+  content: "✓";
+  color: var(--clr-white);
+  position: absolute;
+  left: 4px;
+  top: -1px;
+  font-size: 14px;
+}
+
 .progress {
   width: 100%;
   height: 8px;

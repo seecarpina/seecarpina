@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
@@ -80,6 +80,11 @@
         </form>
 
         <h2>Eventos</h2>
+        <div class="abas-eventos">
+          <button class="aba ativa" data-aba="futuros">Eventos futuros</button>
+          <button class="aba" data-aba="concluidos">Eventos concluídos</button>
+        </div>
+
         <table id="tabelaEventos">
           <thead>
             <tr>
@@ -87,6 +92,7 @@
               <th>Título</th>
               <th>Categoria</th>
               <th>Descrição</th>
+              <th></th>
               <th></th>
             </tr>
           </thead>

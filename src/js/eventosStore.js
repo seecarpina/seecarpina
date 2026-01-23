@@ -25,6 +25,6 @@ onValue(eventosRef, (snap) => {
   window.dispatchEvent(
     new CustomEvent("eventosAtualizados", {
       detail: eventosPorData,
-    })
+    }),
   );
 });
