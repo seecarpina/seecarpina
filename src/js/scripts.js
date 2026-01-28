@@ -86,7 +86,7 @@ carregarRight().then(() => {
           div.textContent = dia;
 
           const dataISO = `${ano}-${String(mes + 1).padStart(2, "0")}-${String(
-            dia
+            dia,
           ).padStart(2, "0")}`;
 
           if (eventosPorData[dataISO]) {
@@ -470,13 +470,13 @@ function mostrarSugestoes(input, lista, box) {
 
 if (inputDestino) {
   inputDestino.addEventListener("input", () =>
-    mostrarSugestoes(inputDestino, destinos, boxDestino)
+    mostrarSugestoes(inputDestino, destinos, boxDestino),
   );
 }
 
 if (inputCopia) {
   inputCopia.addEventListener("input", () =>
-    mostrarSugestoes(inputCopia, destinos, boxCopia)
+    mostrarSugestoes(inputCopia, destinos, boxCopia),
   );
 }
 
@@ -589,7 +589,7 @@ function renderTabela() {
   let filtrados = todosOficios.filter((o) =>
     `${o.numero} ${o.assunto} ${o.data} ${o.destino} ${o.copia} ${o.responsavel}`
       .toLowerCase()
-      .includes(filtro)
+      .includes(filtro),
   );
 
   if (mostrarDisponiveis) {
@@ -597,7 +597,7 @@ function renderTabela() {
       (o) =>
         !o.assunto ||
         o.assunto.trim() === "" ||
-        o.assunto.trim() === "undefined"
+        o.assunto.trim() === "undefined",
     );
   }
 
@@ -650,7 +650,7 @@ function renderTabela() {
     let inicioPagina = Math.max(1, paginaAtual - 2);
     let fimPagina = Math.min(
       totalPaginas,
-      inicioPagina + maxPaginasVisiveis - 1
+      inicioPagina + maxPaginasVisiveis - 1,
     );
 
     for (let i = inicioPagina; i <= fimPagina; i++) {
@@ -713,7 +713,7 @@ onValue(getOficiosRef(), (snap) => {
       if (alvo.textContent.trim() === "cancel") {
         if (
           !confirm(
-            `Tem certeza que deseja cancelar o ofício nº ${oficio.numero} ?`
+            `Tem certeza que deseja cancelar o ofício nº ${oficio.numero} ?`,
           )
         )
           return;
@@ -799,7 +799,10 @@ if (btnSalvarEdicao) {
         copia,
         numero: oficioOriginal.numero,
         data: oficioOriginal.data,
-        responsavel: oficioOriginal.responsavel ?? nomeResponsavel,
+        responsavel:
+          oficioOriginal.responsavel && oficioOriginal.responsavel.trim() !== ""
+            ? oficioOriginal.responsavel
+            : nomeResponsavel,
       });
 
       mostrarNotificacao("Ofício atualizado com sucesso!");
@@ -994,13 +997,13 @@ if (btnExportar) {
     let dadosFiltrados = todosOficios.filter((o) =>
       `${o.numero} ${o.assunto} ${o.data} ${o.destino} ${o.copia} ${o.responsavel}`
         .toLowerCase()
-        .includes(filtro)
+        .includes(filtro),
     );
 
     if (somenteDisponiveis) {
       dadosFiltrados = dadosFiltrados.filter(
         (o) =>
-          !o.assunto || o.assunto.trim() === "" || o.assunto === "undefined"
+          !o.assunto || o.assunto.trim() === "" || o.assunto === "undefined",
       );
     }
 
