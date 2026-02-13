@@ -320,7 +320,7 @@ form {
 }
 
 .full-page .container {
-  grid-template-columns: minmax(10rem, 14rem) 1fr;
+  grid-template-columns: min(15rem, 15rem) 1fr;
 }
 
 .full-page .right {
