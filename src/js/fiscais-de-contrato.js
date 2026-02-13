@@ -148,6 +148,7 @@ const fiscal = document.getElementById("fiscal");
 const situacao = document.getElementById("situacao");
 const tipoContrato = document.getElementById("tipoContrato");
 const valorGlobal = document.getElementById("valorGlobal");
+const vigencia = document.getElementById("vigencia");
 
 const btnCadastrar = document.getElementById("btnCadastrar");
 const btnSalvarEdicao = document.getElementById("btnSalvarEdicao");
@@ -227,6 +228,7 @@ form.addEventListener("submit", async (e) => {
     situacao: situacao.value,
     tipoContrato: tipoContrato.value,
     valorGlobal: moedaParaNumero(valorGlobal.value),
+    vigencia: vigencia.value,
     responsavel: window.nomeResponsavel || "",
     criadoEm: new Date().toISOString(),
   };
@@ -259,7 +261,7 @@ function calcularSaldo(contrato) {
   const deducoes = contrato.deducoes
     ? Object.values(contrato.deducoes).reduce(
         (s, d) => s + Number(d.valor || 0),
-        0
+        0,
       )
     : 0;
 
@@ -288,7 +290,7 @@ function renderTabela() {
   let filtrados = contratos.filter((c) =>
     `${c.numero} ${c.credor} ${c.modalidade} ${c.gestor} ${c.fiscal} ${c.situacao} ${c.tipoContrato}`
       .toLowerCase()
-      .includes(filtroTexto)
+      .includes(filtroTexto),
   );
 
   if (filtroTipo) {
@@ -309,14 +311,14 @@ function renderTabela() {
           c.situacao === "DISTRATADO"
             ? "distratado"
             : c.situacao === "EM EXECUÇÃO"
-            ? "em-execucao"
-            : c.situacao === "EXECUTADO"
-            ? "executado"
-            : c.situacao === "FINALIZADO"
-            ? "finalizado"
-            : c.situacao === "ASSINADO"
-            ? "assinado"
-            : ""
+              ? "em-execucao"
+              : c.situacao === "EXECUTADO"
+                ? "executado"
+                : c.situacao === "FINALIZADO"
+                  ? "finalizado"
+                  : c.situacao === "ASSINADO"
+                    ? "assinado"
+                    : ""
         }"></div>
 
       </td>
@@ -333,13 +335,14 @@ function renderTabela() {
 
       <div class="barra-saldo">
         <div class="barra-saldo-preenchida ${cor}" style="width:${Math.max(
-      0,
-      Math.min(percentual, 100)
-    )}%" title="${percentual}%"></div>
+          0,
+          Math.min(percentual, 100),
+        )}%" title="${percentual}%"></div>
       </div>
       </td>
 
       <td style="display:none">${c.situacao}</td>
+      <td>${formatarDataBR(c.vigencia)}</td>
       <td>${c.tipoContrato}</td>
       <td>
         <button class="edit-btn">
@@ -392,7 +395,7 @@ tabela.onclick = (e) => {
   valorGlobal.value = contrato.valorGlobal
     ? formatarMoedaTabela(contrato.valorGlobal)
     : "";
-
+  vigencia.value = contrato.vigencia || "";
   blocoDeducoes.style.display = "block";
   deducoesTemp = [];
 
@@ -422,8 +425,8 @@ function renderListaDeducoes() {
     const li = document.createElement("li");
     li.innerHTML = `
       ${formatarDataBR(d.data)} – ${formatarMoedaTabela(d.valor)} – ${
-      d.descricao
-    }
+        d.descricao
+      }
       <button data-i="${i}" style="margin-left:10px">❌</button>
     `;
 
@@ -466,6 +469,7 @@ btnSalvarEdicao.onclick = async () => {
     situacao: situacao.value,
     tipoContrato: tipoContrato.value,
     valorGlobal: moedaParaNumero(valorGlobal.value),
+    vigencia: vigencia.value,
     deducoes: deducoesTemp,
   });
 
@@ -506,12 +510,12 @@ if (btnExportarContratos) {
     let dadosFiltrados = contratos.filter((c) =>
       `${c.numero} ${c.credor} ${c.modalidade} ${c.gestor} ${c.fiscal} ${c.situacao} ${c.tipoContrato}`
         .toLowerCase()
-        .includes(filtroTexto)
+        .includes(filtroTexto),
     );
 
     if (filtroTipo) {
       dadosFiltrados = dadosFiltrados.filter(
-        (c) => c.tipoContrato === filtroTipo
+        (c) => c.tipoContrato === filtroTipo,
       );
     }
 
@@ -524,7 +528,7 @@ if (btnExportarContratos) {
     dadosFiltrados.sort((a, b) =>
       String(a.numero).localeCompare(String(b.numero), "pt-BR", {
         numeric: true,
-      })
+      }),
     );
 
     // Monta os dados do Excel
@@ -538,6 +542,7 @@ if (btnExportarContratos) {
       "Tipo de Contrato": c.tipoContrato,
       "Valor Global": formatarMoedaTabela(c.valorGlobal),
       "Saldo Atual": formatarMoedaTabela(calcularSaldo(c)),
+      Vigência: formatarDataBR(c.vigencia),
     }));
 
     // Gera planilha
