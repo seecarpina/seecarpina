@@ -532,6 +532,8 @@ main .insights h1 {
 }
 main .insights h3 {
   color: var(--clr-dark);
+  font-size: 0.7rem;
+  margin-top: 0.5rem;
 }
 main .insights p {
   color: var(--clr-dark);
