@@ -602,6 +602,13 @@ main .recent_order a {
   display: block;
   margin: 1rem;
 }
+#tabelaOficios a {
+  color: var(--clr-primary);
+}
+
+#tabelaOficios a:hover {
+  color: var(--clr-danger);
+}
 
 .right {
   margin-top: 1.4rem;

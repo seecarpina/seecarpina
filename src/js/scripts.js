@@ -610,11 +610,27 @@ function renderTabela() {
   tabela.innerHTML = "";
   pagina.forEach((o) => {
     const tr = document.createElement("tr");
+    let assuntoFormatado = o.assunto || "";
+
+    // Verifica condição
+    if (
+      assuntoFormatado.toLowerCase().includes("processo") &&
+      (o.copia || "").toLowerCase() === "sistema carpina digital"
+    ) {
+      const match = assuntoFormatado.match(/processo\s*(\d+)/i);
+
+      if (match && match[1]) {
+        const numeroProcesso = match[1];
+        const link = `https://digital.carpina.pe.gov.br/app/processos/manage/${numeroProcesso}`;
+
+        assuntoFormatado = `<a href="${link}" target="_blank" title="Abrir Processo">${assuntoFormatado} <span class="material-symbols-outlined">link_2</span></a>`;
+      }
+    }
     tr.innerHTML = `
       <td data-key="${o._key}">
         ${formatarNumeroOficio(o.numero, anoSelecionado)}
       </td>
-      <td class='assunto'>${o.assunto}</td>
+      <td class='assunto'>${assuntoFormatado}</td>
       <td>${formatarDataBR(o.data)}</td>
       <td>${o.destino ?? "-"}</td>
       <td>${o.copia ?? "-"}</td>
