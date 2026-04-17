@@ -768,23 +768,32 @@ main .recent_order a {
 .btn-excel {
   margin-bottom: 1rem;
 }
+.edit-btn,
+.cancel-btn,
+.upload-btn,
+.view-btn {
+  cursor: pointer;
+  transition: all 0.5s ease;
+  background: none;
+}
 
 .edit-btn {
-  cursor: pointer;
   color: var(--clr-primary);
-  transition: all 0.5s ease;
-  background: none;
 }
-.edit-btn:hover {
-  color: var(--clr-warnig);
-}
-
 .cancel-btn {
-  cursor: pointer;
   color: var(--clr-danger);
-  transition: all 0.5s ease;
-  background: none;
 }
+.upload-btn {
+  color: var(--clr-success);
+}
+.view-btn {
+  color: var(--clr-primary-variant);
+}
+.view-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.edit-btn:hover,
 .cancel-btn:hover {
   color: var(--clr-warnig);
 }

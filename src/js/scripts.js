@@ -635,22 +635,38 @@ function renderTabela() {
       <td>${o.destino ?? "-"}</td>
       <td>${o.copia ?? "-"}</td>
       <td>${o.responsavel}</td>
-      <td><div class="flex">${
-        o.responsavel === nomeResponsavel ||
-        nomeResponsavel === "Raphael" ||
-        o.responsavel === "" ||
-        o.responsavel === undefined
-          ? `
-      <button class='edit-btn'>
-        <span class='material-symbols-outlined'>edit_square</span>
-      </button>
+      <td>
+  <div class="flex align-center">
 
-      <button class='cancel-btn' title='Cancelar Ofício'>
-        <span class='material-symbols-outlined'>cancel</span>
-      </button>
+    <label class="icon-btn upload-btn" title="Enviar PDF">
+      <input type="file" accept="application/pdf" hidden class="input-pdf">
+        <span class="material-symbols-outlined upload-btn">upload_file</span>
+    </label>
+
+    <button class="icon-btn view-btn" title="Visualizar PDF" ${
+      o.pdf ? "" : "disabled"
+    }>
+      <span class="material-symbols-outlined">picture_as_pdf</span>
+    </button>
+
+    ${
+      o.responsavel === nomeResponsavel ||
+      nomeResponsavel === "Raphael" ||
+      !o.responsavel
+        ? `
+        <button class='edit-btn'>
+          <span class='material-symbols-outlined'>edit_square</span>
+        </button>
+
+        <button class='cancel-btn'>
+          <span class='material-symbols-outlined'>cancel</span>
+        </button>
       `
-          : ""
-      }</div></td>`;
+        : ""
+    }
+
+  </div>
+</td>`;
 
     tabela.appendChild(tr);
   });
@@ -746,6 +762,56 @@ onValue(getOficiosRef(), (snap) => {
             mostrarNotificacao(`Ofício nº ${oficio.numero} cancelado.`);
           })
           .catch(() => mostrarNotificacao("Erro ao cancelar!", "erro"));
+      }
+
+      // 📤 UPLOAD PDF
+      if (alvo.closest(".upload-btn")) {
+        const inputFile = linha.querySelector(".input-pdf");
+
+        inputFile.click();
+
+        inputFile.onchange = async () => {
+          const file = inputFile.files[0];
+          if (!file) return;
+
+          if (file.type !== "application/pdf") {
+            return mostrarNotificacao("Envie apenas PDF", "erro");
+          }
+
+          const reader = new FileReader();
+
+          reader.onload = async () => {
+            const base64 = reader.result.split(",")[1];
+
+            const refPdf = ref(rtdb, `oficios/${anoSelecionado}/${chave}`);
+
+            await update(refPdf, {
+              pdf: base64,
+            });
+
+            mostrarNotificacao("PDF enviado com sucesso!");
+          };
+
+          reader.readAsDataURL(file);
+        };
+      }
+
+      // 👁️ VISUALIZAR PDF
+      if (alvo.textContent.trim() === "picture_as_pdf") {
+        if (!oficio.pdf) return;
+
+        const byteCharacters = atob(oficio.pdf);
+        const byteNumbers = new Array(byteCharacters.length);
+
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: "application/pdf" });
+
+        const url = URL.createObjectURL(blob);
+        window.open(url, "_blank");
       }
     };
   }
