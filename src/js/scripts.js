@@ -768,8 +768,6 @@ onValue(getOficiosRef(), (snap) => {
       if (alvo.closest(".upload-btn")) {
         const inputFile = linha.querySelector(".input-pdf");
 
-        inputFile.click();
-
         inputFile.onchange = async () => {
           const file = inputFile.files[0];
           if (!file) return;
