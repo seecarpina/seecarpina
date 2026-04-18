@@ -725,11 +725,11 @@ main .recent_order a {
 
 .btn-salvar {
   padding: 1rem;
-    border-radius: var(--border-radius-2);
-    background: var(--clr-primary);
-    color: #fff;
-    transition: 0.3s ease;
-    cursor: pointer;
+  border-radius: var(--border-radius-2);
+  background: var(--clr-primary);
+  color: #fff;
+  transition: 0.3s ease;
+  cursor: pointer;
 }
 .modal-content {
   display: flex;
@@ -737,11 +737,11 @@ main .recent_order a {
   gap: 1rem;
 }
 .modal-content input {
-width: 100%;
-    background-color: var(--clr-white);
-    padding: 1rem;
-    border: 1px solid var(--clr-primary);
-    border-radius: var(--border-radius-1);
+  width: 100%;
+  background-color: var(--clr-white);
+  padding: 1rem;
+  border: 1px solid var(--clr-primary);
+  border-radius: var(--border-radius-1);
 }
 
 .box {

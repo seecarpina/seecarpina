@@ -267,7 +267,7 @@ import {
   updateDoc,
   addDoc,
   query,
-  orderBy
+  orderBy,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 import {
@@ -1120,7 +1120,6 @@ if (btnExportar) {
   });
 }
 
-
 // Links uteis
 
 async function carregarLinksUteis() {
@@ -1159,7 +1158,7 @@ async function carregarLinksUteis() {
               ${link.nome}
             </a>
           </li>
-        `
+        `,
           )
           .join("")}
       </ul>
@@ -1187,7 +1186,7 @@ if (btnSalvarLink) {
         grupo,
         nome,
         url,
-        ordem: Date.now()
+        ordem: Date.now(),
       });
 
       mostrarNotificacao("Link salvo!", "sucesso");
