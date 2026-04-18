@@ -32,61 +32,24 @@
 
 <div class="links-uteis">
   <h2>Links Úteis</h2>
-  <div class="box">
-    <details>
-      <summary>Certidões</summary>
-      <ul>
-        <li>
-          <a
-            href="https://servicos.receitafederal.gov.br/servico/certidoes/#/home/cnpj"
-            target="_blank"
-            title="Abrir"
-          >
-            Certidão de Pessoa Jurídica
-          </a>
-        </li>
+  <div class="box" id="linksContainer"></div>
 
-        <li>
-          <a
-            href="https://efisco.sefaz.pe.gov.br/sfi_trb_gpf/PREmitirCertidaoNegativaNarrativaDebitoFiscal"
-            target="_blank"
-            title="Abrir"
-          >
-            Certidão Negativa de Débitos Fiscais
-          </a>
-        </li>
+  <button id="btnNovoLink">
+    + Novo Link
+  </button>
+</div>
 
-        <li>
-          <a
-            href="https://cndt-certidao.tst.jus.br/inicio.faces"
-            target="_blank"
-            title="Abrir"
-          >
-            Certidão de Débito Trabalhista
-          </a>
-        </li>
+<div id="modalLink" class="modal">
+  <div class="modal-content">
+    <span class="fechar">&times;</span>
 
-        <li>
-          <a
-            href="https://consulta-crf.caixa.gov.br/consultacrf/pages/consultaEmpregador.jsf"
-            target="_blank"
-            title="Abrir"
-          >
-            Certidão de Regularidade do Empregador
-          </a>
-        </li>
+    <h3>Novo Link</h3>
 
-        <li>
-          <a
-            href="https://certidoesunificadas.app.tjpe.jus.br/certidao-civel-1g/pessoa-juridica-licitacao"
-            target="_blank"
-            title="Abrir"
-          >
-            Certidão Cível para Fins de Licitação
-          </a>
-        </li>
-      </ul>
-    </details>
+    <input type="text" id="grupoLink" placeholder="Grupo" class="w-100" />
+    <input type="text" id="nomeLink" placeholder="Nome" class="w-100"/>
+    <input type="text" id="urlLink" placeholder="URL" class="w-100" />
+
+    <button id="salvarLink" class="btn-salvar">Salvar</button>
   </div>
 </div>
 

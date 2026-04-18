@@ -265,6 +265,9 @@ import {
   collection,
   getDocs,
   updateDoc,
+  addDoc,
+  query,
+  orderBy
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 import {
@@ -1116,3 +1119,119 @@ if (btnExportar) {
     XLSX.writeFile(workbook, nomeArquivo);
   });
 }
+
+
+// Links uteis
+
+async function carregarLinksUteis() {
+  const container = document.getElementById("linksContainer");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  const q = query(collection(db, "linksUteis"), orderBy("ordem"));
+  const snapshot = await getDocs(q);
+
+  let grupos = {};
+
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+
+    if (!grupos[data.grupo]) {
+      grupos[data.grupo] = [];
+    }
+
+    grupos[data.grupo].push(data);
+  });
+
+  // montar HTML
+  Object.keys(grupos).forEach((grupo) => {
+    const details = document.createElement("details");
+
+    details.innerHTML = `
+      <summary>${grupo}</summary>
+      <ul>
+        ${grupos[grupo]
+          .map(
+            (link) => `
+          <li>
+            <a href="${link.url}" target="_blank">
+              ${link.nome}
+            </a>
+          </li>
+        `
+          )
+          .join("")}
+      </ul>
+    `;
+
+    container.appendChild(details);
+  });
+}
+
+const btnSalvarLink = document.getElementById("salvarLink");
+
+if (btnSalvarLink) {
+  btnSalvarLink.addEventListener("click", async () => {
+    const grupo = document.getElementById("grupoLink").value;
+    const nome = document.getElementById("nomeLink").value;
+    const url = document.getElementById("urlLink").value;
+
+    if (!grupo || !nome || !url) {
+      mostrarNotificacao("Preencha todos os campos", "erro");
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, "linksUteis"), {
+        grupo,
+        nome,
+        url,
+        ordem: Date.now()
+      });
+
+      mostrarNotificacao("Link salvo!", "sucesso");
+
+      document.getElementById("modalLink").style.display = "none";
+
+      carregarLinksUteis(); // 🔥 atualiza sem recarregar
+    } catch (e) {
+      mostrarNotificacao("Erro ao salvar", "erro");
+    }
+  });
+}
+
+carregarLinksUteis();
+
+const modalLink = document.getElementById("modalLink");
+const btnAbrirLink = document.getElementById("btnNovoLink");
+const btnFecharLink = modalLink.querySelector(".fechar");
+
+// mesma função do index
+function abrirFecharModalLink(acao) {
+  modalLink.style.display = acao;
+}
+
+// abrir
+btnAbrirLink.addEventListener("click", () => {
+  abrirFecharModalLink("flex");
+});
+
+// fechar no X
+btnFecharLink.addEventListener("click", () => {
+  abrirFecharModalLink("none");
+});
+
+// fechar no ESC (igual ao index)
+document.addEventListener("keydown", function (event) {
+  if (event.key === "Escape") {
+    abrirFecharModalLink("none");
+  }
+});
+
+// fechar clicando fora (igual ao index)
+modalLink.addEventListener("click", (e) => {
+  if (e.target === modalLink) {
+    abrirFecharModalLink("none");
+  }
+});
