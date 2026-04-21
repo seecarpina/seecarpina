@@ -1044,6 +1044,7 @@ async function carregarUsuarios() {
 
     snap.forEach((doc) => {
       const u = doc.data();
+      if (u.ativo === false) return;
       const tr = document.createElement("tr");
 
       tr.innerHTML = `
