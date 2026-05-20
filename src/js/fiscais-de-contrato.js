@@ -191,6 +191,12 @@ const listaDeducoes = document.getElementById("listaDeducoes");
 
 let deducoesTemp = [];
 
+// ➕ Aditivo
+const blocoAditivo = document.getElementById("blocoAditivo");
+const temAditivo = document.getElementById("temAditivo");
+const campoValorAditivo = document.getElementById("campoValorAditivo");
+const valorAditivo = document.getElementById("valorAditivo");
+
 // ===============================
 // 🧠 Autocompletes
 // ===============================
@@ -207,6 +213,15 @@ setupAutocomplete("fiscal", "autoFiscal", fiscaisRef, fiscais);
 // ===============================
 valorGlobal.addEventListener("input", () => mascaraMoeda(valorGlobal));
 deducaoValor.addEventListener("input", () => mascaraMoeda(deducaoValor));
+valorAditivo.addEventListener("input", () => mascaraMoeda(valorAditivo));
+
+temAditivo.addEventListener("change", () => {
+  campoValorAditivo.style.display = temAditivo.checked ? "block" : "none";
+
+  if (!temAditivo.checked) {
+    valorAditivo.value = "";
+  }
+});
 
 // ===============================
 // 💾 Cadastro / Edição
@@ -258,6 +273,9 @@ let contratos = [];
 
 function calcularSaldo(contrato) {
   const valor = Number(contrato.valorGlobal || 0);
+
+  const aditivo = Number(contrato.valorAditivo || 0);
+
   const deducoes = contrato.deducoes
     ? Object.values(contrato.deducoes).reduce(
         (s, d) => s + Number(d.valor || 0),
@@ -265,7 +283,7 @@ function calcularSaldo(contrato) {
       )
     : 0;
 
-  return valor - deducoes;
+  return valor + aditivo - deducoes;
 }
 
 function calcularPercentualSaldo(contrato) {
@@ -398,6 +416,18 @@ tabela.onclick = (e) => {
   vigencia.value = contrato.vigencia || "";
   blocoDeducoes.style.display = "block";
   deducoesTemp = [];
+  blocoAditivo.style.display = "block";
+
+  if (contrato.valorAditivo) {
+    temAditivo.checked = true;
+    campoValorAditivo.style.display = "block";
+
+    valorAditivo.value = formatarMoedaTabela(contrato.valorAditivo);
+  } else {
+    temAditivo.checked = false;
+    campoValorAditivo.style.display = "none";
+    valorAditivo.value = "";
+  }
 
   listaDeducoes.innerHTML = "";
 
@@ -471,6 +501,7 @@ btnSalvarEdicao.onclick = async () => {
     valorGlobal: moedaParaNumero(valorGlobal.value),
     vigencia: vigencia.value,
     deducoes: deducoesTemp,
+    valorAditivo: temAditivo.checked ? moedaParaNumero(valorAditivo.value) : 0,
   });
 
   mostrarNotificacao("Contrato atualizado");
@@ -490,6 +521,10 @@ function resetarEdicao() {
   blocoDeducoes.style.display = "none";
   deducoesTemp = [];
   listaDeducoes.innerHTML = "";
+  blocoAditivo.style.display = "none";
+  temAditivo.checked = false;
+  campoValorAditivo.style.display = "none";
+  valorAditivo.value = "";
 }
 
 // ===============================

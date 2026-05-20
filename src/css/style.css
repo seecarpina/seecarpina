@@ -809,6 +809,15 @@ main .btn,
   width: 100%;
   background-color: var(--clr-white);
 }
+.box input[type="checkbox"] {
+  width: auto;
+}
+.box input[type="checkbox"]:checked {
+  background-image: url(../images/checkmark.png);
+  background-repeat: no-repeat;
+  background-size: 60%;
+  background-position: center center;
+}
 
 .box .btn,
 .btn-excel,

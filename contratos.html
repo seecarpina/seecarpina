@@ -130,6 +130,31 @@
               <ul id="listaDeducoes" style="margin-top: 1rem"></ul>
             </details>
           </div>
+          <div class="w-100" id="blocoDeducoes" style="display: none"></div>
+          <div class="w-100" id="blocoAditivo" style="display: none">
+            <details>
+              <summary><h3>Aditivo</h3></summary>
+
+              <div style="margin-top: 1rem">
+                <label style="display: flex; align-items: center; gap: 10px">
+                  <input type="checkbox" id="temAditivo" />
+                  Possui aditivo
+                </label>
+              </div>
+
+              <div
+                id="campoValorAditivo"
+                style="display: none; margin-top: 1rem"
+              >
+                <input
+                  type="text"
+                  id="valorAditivo"
+                  placeholder="Valor do aditivo"
+                  inputmode="decimal"
+                />
+              </div>
+            </details>
+          </div>
           <div id="botoesCadastro">
             <button class="btn" id="btnCadastrar" type="submit">
               Cadastrar
