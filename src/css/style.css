@@ -1472,6 +1472,11 @@ select {
     position: absolute;
     left: 1rem;
   }
+  
+  button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
   .lembretes {
     padding: var(--card-padding);

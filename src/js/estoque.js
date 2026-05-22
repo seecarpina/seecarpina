@@ -468,39 +468,100 @@ document
 function gerarPDF(dados) {
   const doc = new jsPDF();
 
-  doc.setFontSize(18);
+  // =========================
+  // TIMBRE (IMAGEM)
+  // =========================
 
-  doc.text("ROMANEIO DE ENTREGA", 20, 20);
+  const img = new Image();
 
-  doc.setFontSize(12);
+  img.src = "./src/images/papel-timbrado.png";
 
-  doc.text(`Destino: ${dados.destino}`, 20, 40);
+  img.onload = () => {
+    // imagem ocupando topo da folha
+    doc.addImage(img, "PNG", 0, 0, 210, 297);
 
-  doc.text(`Data: ${formatarData(dados.data)}`, 20, 50);
+    // =========================
+    // TÍTULO
+    // =========================
 
-  let y = 70;
+    doc.setFont("helvetica", "bold");
 
-  doc.text("ITENS:", 20, y);
+    doc.setFontSize(14);
 
-  y += 10;
+    doc.text("ROMANEIO DE ENTREGA", 105, 48, {
+      align: "center",
+    });
 
-  dados.itens.forEach((item) => {
-    doc.text(`${item.nome} - ${item.quantidade} ${item.unidade}`, 20, y);
+    // =========================
+    // DADOS
+    // =========================
+
+    doc.setFont("helvetica", "normal");
+
+    doc.setFontSize(12);
+
+    doc.text(`Destino: ${dados.destino}`, 20, 68);
+
+    doc.text(`Data: ${formatarData(dados.data)}`, 20, 76);
+
+    doc.text(`Responsável: ${dados.responsavel || "-"}`, 20, 84);
+
+    // =========================
+    // ITENS
+    // =========================
+
+    let y = 102;
+
+    doc.setFont("helvetica", "bold");
+
+    doc.text("ITENS:", 20, y);
 
     y += 10;
-  });
 
-  y += 20;
+    doc.setFont("helvetica", "normal");
 
-  doc.text("________________________________", 20, y);
+    dados.itens.forEach((item, index) => {
+      doc.text(
+        `${index + 1}. ${item.nome} - ${item.quantidade} ${item.unidade}`,
+        20,
+        y,
+      );
 
-  doc.text("Assinatura", 45, y + 10);
+      y += 8;
+    });
 
-  const blob = doc.output("blob");
+    // =========================
+    // ASSINATURAS
+    // =========================
 
-  const url = URL.createObjectURL(blob);
+    y += 40;
 
-  window.open(url, "_blank");
+    // assinatura entrega
+    doc.line(20, y, 85, y);
+
+    // assinatura recebimento
+    doc.line(125, y, 190, y);
+
+    doc.setFontSize(11);
+
+    doc.text("Responsável pela Entrega", 52, y + 7, {
+      align: "center",
+    });
+
+    doc.text("Responsável pelo Recebimento", 157, y + 7, {
+      align: "center",
+    });
+
+    // =========================
+    // ABRIR PDF
+    // =========================
+
+    const blob = doc.output("blob");
+
+    const url = URL.createObjectURL(blob);
+
+    window.open(url, "_blank");
+  };
 }
 
 /* =========================
