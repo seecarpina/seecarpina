@@ -76,6 +76,21 @@ function getNomeResponsavel() {
   return window.dadosUsuario?.nome?.split(" ")[0] || "Usuário";
 }
 
+function formatarUnidade(unidade, quantidade) {
+  if (quantidade === 1) return unidade;
+
+  const plurais = {
+    Unidade: "Unidades",
+    Resma: "Resmas",
+    Pacote: "Pacotes",
+    Fardo: "Fardos",
+    Caixa: "Caixas",
+    Kit: "Kits",
+  };
+
+  return plurais[unidade] || `${unidade}s`;
+}
+
 function padronizarTexto(str) {
   if (!str) return "";
 
@@ -401,7 +416,7 @@ function renderItensEntrega() {
 
       <td>
         ${item.quantidade}
-        ${item.unidade}
+        ${formatarUnidade(item.unidade, item.quantidade)}
       </td>
 
       <td>
@@ -551,13 +566,30 @@ function gerarPDF(dados) {
 
     dados.itens.forEach((item, index) => {
       doc.text(
-        `${index + 1}. ${item.nome} - ${item.quantidade} ${item.unidade}`,
+        `${index + 1}. ${item.nome} - ${item.quantidade} ${formatarUnidade(item.unidade, item.quantidade)}`,
         20,
         y,
       );
 
       y += 8;
     });
+
+    // =========================
+    // TOTAL DE ITENS
+    // =========================
+
+    const totalVolumes = dados.itens.reduce(
+      (total, item) => total + Number(item.quantidade),
+      0,
+    );
+
+    y += 10;
+
+    doc.setFont("helvetica", "bold");
+
+    doc.text(`Volume total: ${totalVolumes} unidades`, 20, y);
+
+    doc.setFont("helvetica", "normal");
 
     // =========================
     // ASSINATURAS
