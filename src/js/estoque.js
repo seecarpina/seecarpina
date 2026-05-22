@@ -198,49 +198,65 @@ onValue(materiaisRef, (snap) => {
    CADASTRO MATERIAL
 ========================= */
 
-document
-  .getElementById("formMaterial")
-  .addEventListener("submit", async (e) => {
-    e.preventDefault();
+const formMaterial = document.getElementById("formMaterial");
 
-    const nome = padronizarTexto(inputMaterial.value);
+let salvandoMaterial = false;
 
-    const unidade = document.getElementById("unidade").value;
+formMaterial.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    const quantidade = Number(document.getElementById("quantidade").value);
+  if (salvandoMaterial) return;
 
-    if (!nome || quantidade <= 0) {
-      return mostrarNotificacao("Preencha os campos corretamente", "erro");
+  salvandoMaterial = true;
+
+  const btnSubmit = formMaterial.querySelector("button[type='submit']");
+
+  btnSubmit.disabled = true;
+  btnSubmit.textContent = "Salvando...";
+
+  const nome = padronizarTexto(inputMaterial.value);
+
+  const unidade = document.getElementById("unidade").value;
+
+  const quantidade = Number(document.getElementById("quantidade").value);
+
+  if (!nome || quantidade <= 0) {
+    return mostrarNotificacao("Preencha os campos corretamente", "erro");
+  }
+
+  try {
+    const existente = materiais.find((m) => m.nome === nome);
+
+    if (existente) {
+      await update(ref(rtdb, `materiais/${existente._key}`), {
+        estoque: Number(existente.estoque || 0) + quantidade,
+
+        atualizadoEm: new Date().toISOString(),
+      });
+    } else {
+      await push(materiaisRef, {
+        nome,
+        unidade,
+        estoque: quantidade,
+        criadoEm: new Date().toISOString(),
+        atualizadoEm: new Date().toISOString(),
+      });
     }
 
-    try {
-      const existente = materiais.find((m) => m.nome === nome);
+    mostrarNotificacao("Material salvo com sucesso!");
 
-      if (existente) {
-        await update(ref(rtdb, `materiais/${existente._key}`), {
-          estoque: Number(existente.estoque || 0) + quantidade,
+    e.target.reset();
+  } catch (err) {
+    console.error(err);
 
-          atualizadoEm: new Date().toISOString(),
-        });
-      } else {
-        await push(materiaisRef, {
-          nome,
-          unidade,
-          estoque: quantidade,
-          criadoEm: new Date().toISOString(),
-          atualizadoEm: new Date().toISOString(),
-        });
-      }
+    mostrarNotificacao("Erro ao salvar material", "erro");
+  } finally {
+    salvandoMaterial = false;
 
-      mostrarNotificacao("Material salvo com sucesso!");
-
-      e.target.reset();
-    } catch (err) {
-      console.error(err);
-
-      mostrarNotificacao("Erro ao salvar material", "erro");
-    }
-  });
+    btnSubmit.disabled = false;
+    btnSubmit.textContent = "Adicionar ao estoque";
+  }
+});
 
 /* =========================
    TABELA
@@ -411,55 +427,68 @@ window.removerItem = function (index) {
 /* =========================
    GERAR ROMANEIO
 ========================= */
+const btnGerarRomaneio = document.getElementById("btnGerarRomaneio");
 
-document
-  .getElementById("btnGerarRomaneio")
-  .addEventListener("click", async () => {
-    const destino = padronizarTexto(inputDestinoEntrega.value);
+let gerandoRomaneio = false;
 
-    if (!destino) {
-      return mostrarNotificacao("Informe o destino", "erro");
+btnGerarRomaneio.addEventListener("click", async () => {
+  if (gerandoRomaneio) return;
+
+  gerandoRomaneio = true;
+
+  btnGerarRomaneio.disabled = true;
+  btnGerarRomaneio.textContent = "Gerando...";
+
+  const destino = padronizarTexto(inputDestinoEntrega.value);
+
+  if (!destino) {
+    return mostrarNotificacao("Informe o destino", "erro");
+  }
+
+  if (!itensEntrega.length) {
+    return mostrarNotificacao("Adicione itens", "erro");
+  }
+
+  try {
+    for (const item of itensEntrega) {
+      const material = materiais.find((m) => m._key === item.materialId);
+
+      await update(ref(rtdb, `materiais/${item.materialId}`), {
+        estoque: Number(material.estoque) - item.quantidade,
+
+        atualizadoEm: new Date().toISOString(),
+      });
     }
 
-    if (!itensEntrega.length) {
-      return mostrarNotificacao("Adicione itens", "erro");
-    }
+    const movimentacao = {
+      destino,
+      data: new Date().toISOString(),
+      itens: itensEntrega,
+      responsavel: getNomeResponsavel(),
+    };
 
-    try {
-      for (const item of itensEntrega) {
-        const material = materiais.find((m) => m._key === item.materialId);
+    await push(movimentacoesRef, movimentacao);
 
-        await update(ref(rtdb, `materiais/${item.materialId}`), {
-          estoque: Number(material.estoque) - item.quantidade,
+    gerarPDF(movimentacao);
 
-          atualizadoEm: new Date().toISOString(),
-        });
-      }
+    itensEntrega = [];
 
-      const movimentacao = {
-        destino,
-        data: new Date().toISOString(),
-        itens: itensEntrega,
-        responsavel: getNomeResponsavel(),
-      };
+    renderItensEntrega();
 
-      await push(movimentacoesRef, movimentacao);
+    modalEntrega.style.display = "none";
 
-      gerarPDF(movimentacao);
+    mostrarNotificacao("Romaneio gerado com sucesso!");
+  } catch (err) {
+    console.error(err);
 
-      itensEntrega = [];
+    mostrarNotificacao("Erro ao gerar romaneio", "erro");
+  } finally {
+    gerandoRomaneio = false;
 
-      renderItensEntrega();
-
-      modalEntrega.style.display = "none";
-
-      mostrarNotificacao("Romaneio gerado com sucesso!");
-    } catch (err) {
-      console.error(err);
-
-      mostrarNotificacao("Erro ao gerar romaneio", "erro");
-    }
-  });
+    btnGerarRomaneio.disabled = false;
+    btnGerarRomaneio.textContent = "Gerar Romaneio";
+  }
+});
 
 /* =========================
    PDF
