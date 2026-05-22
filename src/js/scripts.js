@@ -1,6 +1,22 @@
 const ANO_ATUAL = new Date().getFullYear().toString();
 let anoSelecionado = ANO_ATUAL;
 
+/* ---------------------------
+    Aplicar tema salvo em todas as páginas
+---------------------------- */
+
+document.addEventListener("DOMContentLoaded", () => {
+  const temaSalvo = localStorage.getItem("temaCores");
+
+  // Remove qualquer tema anterior
+  document.body.classList.remove("paleta_1", "paleta_2", "paleta_3");
+
+  // Aplica se existir
+  if (temaSalvo) {
+    document.body.classList.add(temaSalvo);
+  }
+});
+
 // Remove a tela de loading e Aplicar tema salvo
 window.addEventListener("load", () => {
   const temaSalvo = localStorage.getItem("theme");

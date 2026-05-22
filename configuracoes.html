@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
@@ -71,6 +71,16 @@
             <img id="previewFoto" />
           </div>
 
+          <div class="campo">
+            <label>Esquema de cores:</label>
+            <select id="temaCores">
+              <option value="">Padrão</option>
+              <option value="paleta_1">Paleta 1</option>
+              <option value="paleta_2">Paleta 2</option>
+              <option value="paleta_3">Paleta 3</option>
+            </select>
+          </div>
+
           <button type="button" id="btnSalvar" class="btn">Salvar</button>
         </form>
       </main>
@@ -83,6 +93,30 @@
 
     <!-- SCRIPT PARA CARREGAR DADOS E SALVAR EDIÇÕES -->
     <script type="module">
+      const seletorTema = document.getElementById("temaCores");
+
+      // Quando abrir a página, marcar a opção correta
+      document.addEventListener("DOMContentLoaded", () => {
+        const temaSalvo = localStorage.getItem("temaCores");
+
+        if (temaSalvo) {
+          seletorTema.value = temaSalvo;
+        }
+      });
+
+      // Troca tema
+      seletorTema.addEventListener("change", function () {
+        document.body.classList.remove("paleta_1", "paleta_2", "paleta_3");
+
+        const temaEscolhido = this.value;
+
+        if (temaEscolhido) {
+          document.body.classList.add(temaEscolhido);
+        }
+
+        localStorage.setItem("temaCores", temaEscolhido);
+      });
+
       // 💬 Notificações
       function mostrarNotificacao(msg, tipo = "sucesso") {
         const c = document.getElementById("notificacao");
@@ -171,7 +205,7 @@
         // Se a imagem é base64, salva. Se não for, mantém a atual.
         const novaFoto = preview.startsWith("data:image")
           ? preview
-          : window.dadosUsuario.foto ?? null;
+          : (window.dadosUsuario.foto ?? null);
 
         try {
           const refUsuario = doc(db, "usuarios", window.usuarioAuth.uid);

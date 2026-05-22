@@ -26,6 +26,29 @@
   --padding-1: 1.2rem;
   --box-shadow: 0 2rem 3rem var(--clr-light);
 }
+
+.paleta_1 {
+  --clr-primary: #1abc9c;
+  --clr-danger: #e74c3c;
+  --clr-success: #2ecc71;
+  --clr-warnig: #f39c12;
+  --clr-primary-variant: #117864;
+}
+.paleta_2 {
+  --clr-primary: #fd79a8;
+  --clr-danger: #e55039;
+  --clr-success: #6ab04c;
+  --clr-warnig: #c44569;
+  --clr-primary-variant: #f6b93b;
+}
+.paleta_3 {
+  --clr-primary: #e74c3c;
+  --clr-danger: #c0392b;
+  --clr-success: #27ae60;
+  --clr-warnig: #f39c12;
+  --clr-primary-variant: #922b21;
+}
+
 * {
   font-family: "Poppins", sans-serif;
   margin: 0;
@@ -1472,11 +1495,11 @@ select {
     position: absolute;
     left: 1rem;
   }
-  
+
   button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 
   .lembretes {
     padding: var(--card-padding);
