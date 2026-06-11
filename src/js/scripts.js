@@ -49,7 +49,8 @@ import "./eventosStore.js";
 import { carregarSidebar, carregarRight, carregarChat } from "./include.js";
 import { auth, db, rtdb } from "./firebaseConfig.js"; // <<–– CONFIG DO FIREBASE AGORA ESTÁ AQUI
 
-carregarChat();
+// DESATIVAR/ATIVAR CHAt
+// carregarChat();
 
 carregarSidebar().then(() => {
   // 🚪 Logout
