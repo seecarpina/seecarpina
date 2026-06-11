@@ -48,6 +48,13 @@
   --clr-warnig: #f39c12;
   --clr-primary-variant: #922b21;
 }
+.paleta_4 {
+  --clr-primary: #8a6662;
+  --clr-success: #c98d7b;
+  --clr-danger: #deb297;
+  --clr-warnig: #e6d0b1;
+  --clr-primary-variant: #a9baae;
+}
 
 * {
   font-family: "Poppins", sans-serif;
