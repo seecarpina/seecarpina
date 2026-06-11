@@ -17,6 +17,7 @@ onValue(eventosRef, (snap) => {
 
       eventosPorData[e.data].push({
         titulo: e.titulo,
+        concluido: e.concluido ?? false,
       });
     });
   }

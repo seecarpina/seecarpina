@@ -2,10 +2,7 @@ const ANO_ATUAL = new Date().getFullYear().toString();
 let anoSelecionado = ANO_ATUAL;
 
 document.addEventListener("keyup", (e) => {
-  if (
-    e.target.tagName === "INPUT" &&
-    e.target.type !== "date"
-  ) {
+  if (e.target.tagName === "INPUT" && e.target.type !== "date") {
     e.target.value = e.target.value.toUpperCase();
   }
 });
@@ -1118,11 +1115,15 @@ carregarUsuarios();
     const hojeISO = new Date().toLocaleDateString("sv-SE");
     const aviso = criarBox();
 
-    if (!eventosPorData[hojeISO]) {
+    const eventosHoje = (eventosPorData[hojeISO] || []).filter(
+      (e) => !e.concluido,
+    );
+
+    if (eventosHoje.length === 0) {
       aviso.style.display = "none";
       aviso.innerHTML = "";
     } else {
-      const eventosHoje = eventosPorData[hojeISO];
+      const eventosHoje = eventosPorData[hojeISO].filter((e) => !e.concluido);
 
       aviso.innerHTML = `
         <div class="aviso-evento-wrap">
