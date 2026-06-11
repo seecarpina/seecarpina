@@ -643,6 +643,7 @@ main table {
   box-shadow: var(--box-shadow);
   transition: all 0.3s ease;
   color: var(--clr-dark);
+  text-transform: uppercase;
 }
 main .recent_order table:hover {
   box-shadow: none;

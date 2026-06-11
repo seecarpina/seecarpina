@@ -1,6 +1,10 @@
 const ANO_ATUAL = new Date().getFullYear().toString();
 let anoSelecionado = ANO_ATUAL;
 
+document.addEventListener("keyup", (e) => {
+  e.target.value = e.target.value.toUpperCase();
+});
+
 /* ---------------------------
     Aplicar tema salvo em todas as páginas
 ---------------------------- */
