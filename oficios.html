@@ -37,7 +37,7 @@
         <h1>Cadastro de Ofícios</h1>
 
         <!-- 📋 Formulário -->
-        <form id="formOficio" class="box">
+        <form id="formOficio" class="box glass">
           <input type="hidden" id="numero" />
           <input type="hidden" id="responsavel" />
           <input type="hidden" id="data" />
@@ -125,21 +125,22 @@
             📊 Exportar para Excel
           </button>
         </div>
-
-        <table id="tabelaOficios">
-          <thead>
-            <tr>
-              <th>Número</th>
-              <th>Assunto</th>
-              <th>Data</th>
-              <th>Destino</th>
-              <th>Cópia</th>
-              <th>Responsável</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+        <div class="table-wrapper">
+          <table id="tabelaOficios" class="glass">
+            <thead>
+              <tr>
+                <th>Número</th>
+                <th>Assunto</th>
+                <th>Data</th>
+                <th>Destino</th>
+                <th>Cópia</th>
+                <th>Responsável</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
 
         <!-- 🔢 Paginação -->
         <div class="paginacao" id="paginacao"></div>

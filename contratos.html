@@ -11,7 +11,7 @@
     />
   </head>
 
-  <body class="full-page">
+  <body>
     <div id="notificacao"></div>
     <button id="btnTopo">↑</button>
     <div class="loading">
@@ -37,7 +37,7 @@
       <main>
         <h1>Cadastro de Contratos e ARPS</h1>
 
-        <form id="formFiscalContrato" class="box">
+        <form id="formFiscalContrato" class="box glass">
           <input type="hidden" id="responsavel" />
 
           <div class="flex g-1">
@@ -206,27 +206,28 @@
             📊 Exportar para Excel
           </button>
         </div>
+        <div class="table-wrapper">
+          <table id="tabelaContratos" class="glass">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Número</th>
+                <th>Credor</th>
+                <th>Modalidade</th>
+                <th>Gestor</th>
+                <th>Fiscal</th>
+                <th>Valor Global</th>
+                <th>Saldo</th>
+                <th style="display: none">Situação</th>
+                <th>Vigência</th>
+                <th>Tipo</th>
+                <th></th>
+              </tr>
+            </thead>
 
-        <table id="tabelaContratos">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Número</th>
-              <th>Credor</th>
-              <th>Modalidade</th>
-              <th>Gestor</th>
-              <th>Fiscal</th>
-              <th>Valor Global</th>
-              <th>Saldo</th>
-              <th style="display: none">Situação</th>
-              <th>Vigência</th>
-              <th>Tipo</th>
-              <th></th>
-            </tr>
-          </thead>
-
-          <tbody></tbody>
-        </table>
+            <tbody></tbody>
+          </table>
+        </div>
 
         <div class="paginacao" id="paginacao"></div>
       </main>

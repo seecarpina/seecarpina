@@ -36,7 +36,7 @@
       <main>
         <h1>Dashaboard</h1>
         <div class="line-dash">
-          <h3 id="boasVindas">Olá!</h3>
+          <h2 id="boasVindas">Olá!</h2>
           <!-- <input type="date" class="date" id="dataHoje" /> -->
           <select id="filtroAno"></select>
         </div>
@@ -47,8 +47,14 @@
 
         <div class="insights">
           <a>
-            <div class="timbre" id="abrirTimbres">
-              <span class="material-symbols-outlined">docs</span>
+            <div
+              class="timbre glass"
+              id="abrirTimbres"
+              data-tilt
+              data-tilt-glare
+              data-tilt-max-glare="0.2"
+            >
+              <span class="material-symbols-outlined glass">folder</span>
               <div class="middle">
                 <div class="left">
                   <h3>Timbres SEE</h3>
@@ -86,8 +92,13 @@
             href="http://pmcarpina.tabsassessoria.com.br:8893/sipweb/trabalhador/login/login.xhtml"
             target="_blank"
           >
-            <div class="contracheques">
-              <span class="material-symbols-outlined">payments</span>
+            <div
+              class="contracheques glass"
+              data-tilt
+              data-tilt-glare
+              data-tilt-max-glare="0.2"
+            >
+              <span class="material-symbols-outlined glass">payments</span>
               <div class="middle">
                 <div class="left">
                   <h3>Contracheques</h3>
@@ -98,8 +109,13 @@
           </a>
 
           <a href="https://www.carpina.pe.gov.br:2096/" target="_blank">
-            <div class="email">
-              <span class="material-symbols-outlined">drafts</span>
+            <div
+              class="email glass"
+              data-tilt
+              data-tilt-glare
+              data-tilt-max-glare="0.2"
+            >
+              <span class="material-symbols-outlined glass">drafts</span>
               <div class="middle">
                 <div class="left">
                   <h3>Email</h3>
@@ -110,8 +126,15 @@
           </a>
 
           <a href="https://digital.carpina.pe.gov.br/" target="_blank">
-            <div class="digital">
-              <span class="material-symbols-outlined">bring_your_own_ip</span>
+            <div
+              class="digital glass"
+              data-tilt
+              data-tilt-glare
+              data-tilt-max-glare="0.2"
+            >
+              <span class="material-symbols-outlined glass"
+                >bring_your_own_ip</span
+              >
               <div class="middle">
                 <div class="left">
                   <h3>Carpina Digital</h3>
@@ -122,8 +145,8 @@
           </a>
         </div>
 
-        <div class="dashboard-graficos">
-          <div class="flex space-around g-1 align-stretch graficos-dash">
+        <div class="dashboard-graficos glass">
+          <div class="graficos">
             <div class="card">
               <h2>Ofícios enviados</h2>
 
@@ -177,6 +200,7 @@
     </div>
 
     <script type="module" src="./src/js/scripts.js"></script>
+    <script type="module" src="./src/js/vanilla-tilt.min.js"></script>
     <script type="module" src="./src/js/dashboard.js"></script>
     <script>
       // POPUP TIMBRES

@@ -11,11 +11,20 @@ document.addEventListener("keyup", (e) => {
     Aplicar tema salvo em todas as páginas
 ---------------------------- */
 
+if (localStorage.getItem("temaCores")) {
+  localStorage.removeItem("temaCores");
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const temaSalvo = localStorage.getItem("temaCores");
 
   // Remove qualquer tema anterior
-  document.body.classList.remove("paleta_1", "paleta_2", "paleta_3");
+  document.body.classList.remove(
+    "paleta_1",
+    "paleta_2",
+    "paleta_3",
+    "paleta_4",
+  );
 
   // Aplica se existir
   if (temaSalvo) {
@@ -1102,6 +1111,7 @@ carregarUsuarios();
 
     box = document.createElement("div");
     box.id = "avisoEventoHoje";
+    box.className = "glass";
     box.style.display = "none";
 
     document.body.insertBefore(box, document.body.firstChild);

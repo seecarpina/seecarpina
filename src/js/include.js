@@ -26,13 +26,13 @@ function ativarLinkAtual() {
 
     // Caso especial: página principal ("/")
     if (href === "/" && path === "/") {
-      link.classList.add("active");
+      link.classList.add("active", "glass");
       return;
     }
 
     // Para páginas internas, ex: /oficios
     if (href !== "/" && path.includes(href.replace("./", ""))) {
-      link.classList.add("active");
+      link.classList.add("active", "glass");
     }
   });
 }

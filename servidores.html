@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
@@ -12,7 +12,7 @@
     />
   </head>
 
-  <body class="full-page">
+  <body>
     <div id="notificacao"></div>
     <button id="btnTopo">↑</button>
 
@@ -44,7 +44,7 @@
         <h1>Cadastro de Servidores</h1>
 
         <!-- 📋 FORMULÁRIO -->
-        <form id="formServidor" class="box">
+        <form id="formServidor" class="box glass">
           <input type="hidden" id="chaveServidor" />
 
           <div class="flex g-1">
@@ -170,24 +170,24 @@
             📊 Exportar para Excel
           </button>
         </div>
-
-        <table id="tabelaServidores">
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Nome</th>
-              <th>CPF</th>
-              <th>Cargo</th>
-              <th>Vínculo</th>
-              <th>Data</th>
-              <th>Situação</th>
-              <th>Local</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-
+        <div class="table-wrapper">
+          <table id="tabelaServidores" class="glass">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Nome</th>
+                <th>CPF</th>
+                <th>Cargo</th>
+                <th>Vínculo</th>
+                <th>Data</th>
+                <th>Situação</th>
+                <th>Local</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
         <!-- MODAL TRANSFERÊNCIA -->
         <div id="modalTransferencia" class="modal" style="display: none">
           <div class="modal-content box">
@@ -222,6 +222,7 @@
 
         <div class="paginacao" id="paginacaoServidores"></div>
       </main>
+      <div class="right"></div>
     </div>
 
     <!-- Scripts -->
