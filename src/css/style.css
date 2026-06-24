@@ -655,6 +655,10 @@ main .insights a > div span {
   pointer-events: none;
 }
 
+main .insights a > div img {
+  width: 50px;
+}
+
 main .insights a > div .middle {
   display: flex;
   align-items: center;
