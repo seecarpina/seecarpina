@@ -394,8 +394,6 @@ body {
   gap: 1rem;
   padding: 2rem;
   border-radius: var(--card-border-radius);
-  background-color: var(--clr-white);
-  box-shadow: var(--box-shadow);
   transition: all 0.3s ease;
 }
 .login form:hover {
