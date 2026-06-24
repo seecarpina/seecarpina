@@ -10,6 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
     />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@hiseb/confetti@2.1.0/dist/confetti.min.js"></script>
   </head>
   <body>
     <button id="btnTopo">↑</button>
@@ -84,17 +85,11 @@
                   <span class="material-symbols-outlined">download</span>
                   <span>Timbre Horizontal</span>
                 </a>
-                <a
-                  href="./src/downloads/Ficha Funcional.pdf"
-                  download
-                >
+                <a href="./src/downloads/Ficha Funcional.pdf" download>
                   <span class="material-symbols-outlined">download</span>
                   <span>Ficha Funcional</span>
                 </a>
-                <a
-                  href="./src/downloads/Requerimento Padrão.pdf"
-                  download
-                >
+                <a href="./src/downloads/Requerimento Padrão.pdf" download>
                   <span class="material-symbols-outlined">download</span>
                   <span>Requerimento Padrão</span>
                 </a>
@@ -228,12 +223,31 @@
       </main>
 
       <div class="right"></div>
+
+      <div class="modal glass" id="modalTema" style="position: fixed">
+        <div class="modal-content">
+          <h2>NOVO TEMA APLICADO</h2>
+          <button class="btn-excel" id="fecharModalTema">Confirmar</button>
+        </div>
+      </div>
     </div>
 
     <script type="module" src="./src/js/scripts.js"></script>
     <script type="module" src="./src/js/vanilla-tilt.min.js"></script>
     <script type="module" src="./src/js/dashboard.js"></script>
     <script>
+      const modalTema = document.getElementById("modalTema");
+      const fecharModalTema = document.getElementById("fecharModalTema");
+
+      if (!localStorage.getItem("novoTemaApresentado")) {
+        modalTema.style.display = "flex";
+        fecharModalTema.addEventListener("click", () => {
+          modalTema.style.display = "none";
+          confetti();
+          localStorage.setItem("novoTemaApresentado", "true");
+        });
+      }
+
       // POPUP DOCUMENTOS
       const abrirDocs = document.getElementById("abrirDocs");
       const modalDocumentos = document.getElementById("modalDocumentos");
