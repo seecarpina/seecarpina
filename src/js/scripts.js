@@ -34,20 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Remove a tela de loading e Aplicar tema salvo
 window.addEventListener("load", () => {
-  const temaSalvo = localStorage.getItem("theme");
 
-  if (temaSalvo === "dark") {
-    document.body.classList.add("dark-theme-variables");
-
-    // ajustar spans do ícone
-    const themeToggler = document.querySelector(".theme-toggler");
-    if (themeToggler) {
-      themeToggler.querySelector("span:nth-child(1)").classList.add("active");
-      themeToggler
-        .querySelector("span:nth-child(2)")
-        .classList.remove("active");
-    }
-  }
 
   setTimeout(() => {
     document.querySelector(".loading").style.display = "none";
@@ -345,47 +332,67 @@ carregarRight().then(() => {
   const themeToggler = document.getElementById("themeToggler");
   const iconLight = document.getElementById("iconLight");
   const iconDark = document.getElementById("iconDark");
+  const iconSystem = document.getElementById("iconSystem");
 
   // função que atualiza os ícones conforme o modo
-  function setThemeIcons(mode) {
-    if (!iconLight || !iconDark) return;
-    if (mode === "dark") {
-      iconLight.classList.remove("active");
-      iconDark.classList.add("active");
-    } else {
-      iconLight.classList.add("active");
-      iconDark.classList.remove("active");
-    }
+function setThemeIcons(mode) {
+  iconLight.classList.remove("active");
+  iconDark.classList.remove("active");
+  iconSystem.classList.remove("active");
+
+  if (mode === "light") {
+    iconLight.classList.add("active");
+  } else if (mode === "dark") {
+    iconDark.classList.add("active");
+  } else {
+    iconSystem.classList.add("active");
   }
+}
+
+function aplicarTema(mode) {
+  const sistemaEscuro = window.matchMedia(
+    "(prefers-color-scheme: dark)"
+  ).matches;
+
+  const usarDark =
+    mode === "dark" ||
+    (mode === "system" && sistemaEscuro);
+
+  document.body.classList.toggle(
+    "dark-theme-variables",
+    usarDark
+  );
+
+  setThemeIcons(mode);
+}
 
   // aplicar tema salvo ao carregar (ou fallback ao prefer-color-scheme)
-  const temaSalvo =
-    localStorage.getItem("theme") ||
-    (window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light");
+const temaSalvo =
+  localStorage.getItem("theme") || "system";
 
-  if (temaSalvo === "dark") {
-    document.body.classList.add("dark-theme-variables");
-  } else {
-    document.body.classList.remove("dark-theme-variables");
-  }
-  setThemeIcons(temaSalvo);
+aplicarTema(temaSalvo);
 
   // listener do toggle
-  if (themeToggler) {
-    themeToggler.addEventListener("click", () => {
-      // toggle retorna true se agora contém a classe
-      const isDark = document.body.classList.toggle("dark-theme-variables");
+if (themeToggler) {
+  themeToggler.querySelectorAll("[data-theme]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tema = btn.dataset.theme;
 
-      // atualiza ícones de forma explícita
-      setThemeIcons(isDark ? "dark" : "light");
-
-      // salvar escolha
-      localStorage.setItem("theme", isDark ? "dark" : "light");
+      localStorage.setItem("theme", tema);
+      aplicarTema(tema);
     });
-  }
+  });
+}
+
+window
+  .matchMedia("(prefers-color-scheme: dark)")
+  .addEventListener("change", () => {
+    const tema = localStorage.getItem("theme");
+
+    if (tema === "system") {
+      aplicarTema("system");
+    }
+  });
 });
 
 function padronizarTexto(str) {
