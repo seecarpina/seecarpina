@@ -4,7 +4,7 @@
   /* --clr-primary: #7380ec;
   --clr-danger: #ff7782;
   --clr-success: #41f1b6; */
-  --clr-primary: #5ac8fa;
+  --clr-primary: #0a84ff;
   --clr-danger: #ff9f0a;
   --clr-success: #34c759;
   --clr-white: #fff;
@@ -361,7 +361,7 @@ summary {
   --glass-highlight: rgba(255, 255, 255, 0.04);
 }
 ::selection {
-  background-color: var(--clr-info-dark);
+  background-color: var(--clr-primary);
   color: #fff;
 }
 body {
@@ -567,7 +567,7 @@ aside .sidebar a span {
   border-radius: 5px;
 }
 aside .sidebar a:nth-child(1) span {
-  background: #0a84ff;
+  background: var(--clr-primary);
 }
 aside .sidebar a:nth-child(2) span {
   background: #5ac8fa;
