@@ -48,8 +48,8 @@
         <div class="insights">
           <a>
             <div
-              class="timbre glass"
-              id="abrirTimbres"
+              class="documentos glass"
+              id="abrirDocs"
               data-tilt
               data-tilt-glare
               data-tilt-max-glare="0.2"
@@ -57,17 +57,17 @@
               <img src="./src/images/icons/files.svg" />
               <div class="middle">
                 <div class="left">
-                  <h3>Timbres SEE</h3>
+                  <h3>Modelos de Documentos</h3>
                   <h1>Acessar</h1>
                 </div>
               </div>
             </div>
           </a>
           <!-- POPUP -->
-          <div class="modal" id="modalTimbres">
+          <div class="modal" id="modalDocumentos">
             <div class="modal-content">
               <span class="fechar">&times;</span>
-              <h2>Timbres SEE</h2>
+              <h2>Modelos de Documentos</h2>
 
               <div class="opcoes">
                 <a
@@ -83,6 +83,20 @@
                 >
                   <span class="material-symbols-outlined">download</span>
                   <span>Timbre Horizontal</span>
+                </a>
+                <a
+                  href="./src/downloads/Ficha Funcional.pdf"
+                  download
+                >
+                  <span class="material-symbols-outlined">download</span>
+                  <span>Ficha Funcional</span>
+                </a>
+                <a
+                  href="./src/downloads/Requerimento Padrão.pdf"
+                  download
+                >
+                  <span class="material-symbols-outlined">download</span>
+                  <span>Requerimento Padrão</span>
                 </a>
               </div>
             </div>
@@ -220,15 +234,15 @@
     <script type="module" src="./src/js/vanilla-tilt.min.js"></script>
     <script type="module" src="./src/js/dashboard.js"></script>
     <script>
-      // POPUP TIMBRES
-      const abrirTimbres = document.getElementById("abrirTimbres");
-      const modalTimbres = document.getElementById("modalTimbres");
-      const fechar = modalTimbres.querySelector(".fechar");
+      // POPUP DOCUMENTOS
+      const abrirDocs = document.getElementById("abrirDocs");
+      const modalDocumentos = document.getElementById("modalDocumentos");
+      const fechar = modalDocumentos.querySelector(".fechar");
       function abrirFecharmodal(acao) {
-        modalTimbres.style.display = acao;
+        modalDocumentos.style.display = acao;
       }
 
-      abrirTimbres.addEventListener("click", () => {
+      abrirDocs.addEventListener("click", () => {
         abrirFecharmodal("flex");
       });
 
@@ -242,8 +256,8 @@
         abrirFecharmodal("none");
       });
 
-      modalTimbres.addEventListener("click", (e) => {
-        if (e.target === modalTimbres) {
+      modalDocumentos.addEventListener("click", (e) => {
+        if (e.target === modalDocumentos) {
           abrirFecharmodal("none");
         }
       });
