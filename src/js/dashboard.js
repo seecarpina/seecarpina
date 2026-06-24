@@ -135,9 +135,11 @@ onValue(oficiosRef, (snap) => {
 // ===============================
 function atualizarTotalGeralOficios() {
   const el = document.querySelector("#totalOficios strong");
+  const svg = document.querySelector("#totalOficios .svg-spinner");
   if (!el) return;
 
   el.textContent = todosOficios.length;
+  svg?.remove();
 }
 
 // ===============================
