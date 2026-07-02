@@ -223,31 +223,12 @@
       </main>
 
       <div class="right"></div>
-
-      <div class="modal glass" id="modalTema" style="position: fixed">
-        <div class="modal-content">
-          <h2>NOVO TEMA APLICADO</h2>
-          <button class="btn-excel" id="fecharModalTema">Confirmar</button>
-        </div>
-      </div>
     </div>
 
     <script type="module" src="./src/js/scripts.js"></script>
     <script type="module" src="./src/js/vanilla-tilt.min.js"></script>
     <script type="module" src="./src/js/dashboard.js"></script>
     <script>
-      const modalTema = document.getElementById("modalTema");
-      const fecharModalTema = document.getElementById("fecharModalTema");
-
-      if (!localStorage.getItem("novoTemaApresentado")) {
-        modalTema.style.display = "flex";
-        fecharModalTema.addEventListener("click", () => {
-          modalTema.style.display = "none";
-          confetti();
-          localStorage.setItem("novoTemaApresentado", "true");
-        });
-      }
-
       // POPUP DOCUMENTOS
       const abrirDocs = document.getElementById("abrirDocs");
       const modalDocumentos = document.getElementById("modalDocumentos");
