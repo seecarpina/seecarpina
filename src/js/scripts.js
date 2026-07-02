@@ -34,8 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Remove a tela de loading e Aplicar tema salvo
 window.addEventListener("load", () => {
-
-
   setTimeout(() => {
     document.querySelector(".loading").style.display = "none";
   }, 400);
@@ -335,64 +333,58 @@ carregarRight().then(() => {
   const iconSystem = document.getElementById("iconSystem");
 
   // função que atualiza os ícones conforme o modo
-function setThemeIcons(mode) {
-  iconLight.classList.remove("active");
-  iconDark.classList.remove("active");
-  iconSystem.classList.remove("active");
+  function setThemeIcons(mode) {
+    iconLight.classList.remove("active");
+    iconDark.classList.remove("active");
+    iconSystem.classList.remove("active");
 
-  if (mode === "light") {
-    iconLight.classList.add("active");
-  } else if (mode === "dark") {
-    iconDark.classList.add("active");
-  } else {
-    iconSystem.classList.add("active");
+    if (mode === "light") {
+      iconLight.classList.add("active");
+    } else if (mode === "dark") {
+      iconDark.classList.add("active");
+    } else {
+      iconSystem.classList.add("active");
+    }
   }
-}
 
-function aplicarTema(mode) {
-  const sistemaEscuro = window.matchMedia(
-    "(prefers-color-scheme: dark)"
-  ).matches;
+  function aplicarTema(mode) {
+    const sistemaEscuro = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
 
-  const usarDark =
-    mode === "dark" ||
-    (mode === "system" && sistemaEscuro);
+    const usarDark = mode === "dark" || (mode === "system" && sistemaEscuro);
 
-  document.body.classList.toggle(
-    "dark-theme-variables",
-    usarDark
-  );
+    document.body.classList.toggle("dark-theme-variables", usarDark);
 
-  setThemeIcons(mode);
-}
+    setThemeIcons(mode);
+  }
 
   // aplicar tema salvo ao carregar (ou fallback ao prefer-color-scheme)
-const temaSalvo =
-  localStorage.getItem("theme") || "system";
+  const temaSalvo = localStorage.getItem("theme") || "system";
 
-aplicarTema(temaSalvo);
+  aplicarTema(temaSalvo);
 
   // listener do toggle
-if (themeToggler) {
-  themeToggler.querySelectorAll("[data-theme]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const tema = btn.dataset.theme;
+  if (themeToggler) {
+    themeToggler.querySelectorAll("[data-theme]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const tema = btn.dataset.theme;
 
-      localStorage.setItem("theme", tema);
-      aplicarTema(tema);
+        localStorage.setItem("theme", tema);
+        aplicarTema(tema);
+      });
     });
-  });
-}
+  }
 
-window
-  .matchMedia("(prefers-color-scheme: dark)")
-  .addEventListener("change", () => {
-    const tema = localStorage.getItem("theme");
+  window
+    .matchMedia("(prefers-color-scheme: dark)")
+    .addEventListener("change", () => {
+      const tema = localStorage.getItem("theme");
 
-    if (tema === "system") {
-      aplicarTema("system");
-    }
-  });
+      if (tema === "system") {
+        aplicarTema("system");
+      }
+    });
 });
 
 function padronizarTexto(str) {
@@ -558,21 +550,49 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // Frase do Dia
+let fraseAtual = "";
+
 async function carregarFraseDoDia() {
   const span = document.getElementById("frase-do-dia");
+  const btnPin = document.getElementById("btn-pin");
 
   try {
     const response = await fetch("./src/json/frases.json");
     const frases = await response.json();
 
-    const randomIndex = Math.floor(Math.random() * frases.length);
-    const frase = frases[randomIndex].frase;
+    const fraseSalva = localStorage.getItem("fraseFavorita");
 
-    span.textContent = `"${frase}"`;
+    if (fraseSalva) {
+      fraseAtual = fraseSalva;
+    } else {
+      const randomIndex = Math.floor(Math.random() * frases.length);
+      fraseAtual = frases[randomIndex].frase;
+    }
+
+    span.textContent = `"${fraseAtual}"`;
+
+    atualizarIconePin();
+
+    btnPin.onclick = () => {
+      const fraseSalva = localStorage.getItem("fraseFavorita");
+      if (fraseSalva === fraseAtual) {
+        localStorage.removeItem("fraseFavorita");
+      } else {
+        localStorage.setItem("fraseFavorita", fraseAtual);
+      }
+      atualizarIconePin();
+    };
   } catch (error) {
     console.error(error);
     span.textContent = "Acredite: você já deu o primeiro passo.";
   }
+}
+
+function atualizarIconePin() {
+  const btnPin = document.getElementById("btn-pin");
+  const fraseSalva = localStorage.getItem("fraseFavorita");
+
+  btnPin.classList.toggle("ativo", fraseSalva === fraseAtual);
 }
 
 carregarFraseDoDia();

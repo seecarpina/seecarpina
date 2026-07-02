@@ -633,6 +633,28 @@ main .line-dash {
   color: var(--clr-dark);
 }
 
+.frase-container {
+  justify-content: flex-start !important;
+  gap: 0.5rem;
+}
+
+.frase-container #btn-pin {
+  cursor: pointer;
+  background: none;
+}
+
+.frase-container #btn-pin span {
+  font-size: 1.2rem;
+}
+
+.frase-container #btn-pin span:hover {
+  color: var(--clr-primary);
+}
+
+.frase-container #btn-pin.ativo {
+  color: var(--clr-primary);
+}
+
 main .insights {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
