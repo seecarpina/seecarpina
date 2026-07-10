@@ -512,116 +512,226 @@ btnGerarRomaneio.addEventListener("click", async () => {
 function gerarPDF(dados) {
   const doc = new jsPDF();
 
-  // =========================
-  // TIMBRE (IMAGEM)
-  // =========================
-
   const img = new Image();
-
   img.src = "./src/images/papel-timbrado.png";
 
   img.onload = () => {
-    // imagem ocupando topo da folha
-    doc.addImage(img, "PNG", 0, 0, 210, 297);
+    const larguraPagina = doc.internal.pageSize.getWidth();
+    const alturaPagina = doc.internal.pageSize.getHeight();
 
-    // =========================
-    // TÍTULO
-    // =========================
+    // Limites do conteúdo
+    const margemEsquerda = 20;
+    const margemDireita = 20;
+    const larguraTexto =
+      larguraPagina - margemEsquerda - margemDireita;
 
+    // A lista de itens não deverá ultrapassar esta posição
+    const limiteInferiorItens = 235;
+
+    let paginaAtual = 1;
+    let y = 0;
+
+    /* =========================
+       CRIAR CABEÇALHO DA PÁGINA
+    ========================= */
+function adicionarCabecalhoPagina(primeiraPagina = false) {
+  // Papel timbrado em todas as páginas
+  doc.addImage(
+    img,
+    "PNG",
+    0,
+    0,
+    larguraPagina,
+    alturaPagina,
+  );
+
+  if (primeiraPagina) {
     doc.setFont("helvetica", "bold");
-
     doc.setFontSize(14);
 
-    doc.text("ROMANEIO DE ENTREGA", 105, 48, {
-      align: "center",
-    });
-
-    // =========================
-    // DADOS
-    // =========================
+    doc.text(
+      "ROMANEIO DE ENTREGA",
+      larguraPagina / 2,
+      48,
+      {
+        align: "center",
+      },
+    );
 
     doc.setFont("helvetica", "normal");
-
     doc.setFontSize(12);
 
-    doc.text(`Destino: ${dados.destino}`, 20, 68);
+    doc.text(
+      `Destino: ${dados.destino}`,
+      margemEsquerda,
+      68,
+    );
 
-    doc.text(`Data: ${formatarData(dados.data)}`, 20, 76);
+    doc.text(
+      `Data: ${formatarData(dados.data)}`,
+      margemEsquerda,
+      76,
+    );
 
-    doc.text(`Responsável: ${dados.responsavel || "-"}`, 20, 84);
-
-    // =========================
-    // ITENS
-    // =========================
-
-    let y = 102;
+    doc.text(
+      `Responsável: ${dados.responsavel || "-"}`,
+      margemEsquerda,
+      84,
+    );
 
     doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
 
-    doc.text("ITENS:", 20, y);
+    doc.text("ITENS:", margemEsquerda, 102);
 
-    y += 10;
+    y = 112;
+  } else {
+    // Nas páginas seguintes, começa mais próximo do topo
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
 
-    doc.setFont("helvetica", "normal");
+    doc.text("CONTINUAÇÃO DOS ITENS:", margemEsquerda, 48);
 
+    y = 58;
+  }
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+
+  doc.text(
+    `Página ${paginaAtual}`,
+    larguraPagina - margemDireita,
+    alturaPagina - 15,
+    {
+      align: "right",
+    },
+  );
+
+  doc.setFontSize(12);
+}
+
+    /* =========================
+       CRIAR NOVA PÁGINA
+    ========================= */
+function adicionarNovaPagina() {
+  doc.addPage();
+
+  paginaAtual++;
+
+  adicionarCabecalhoPagina(false);
+}
+
+    // Cabeçalho da primeira página
+    adicionarCabecalhoPagina(true);
+
+    /* =========================
+       LISTA DE ITENS
+    ========================= */
     dados.itens.forEach((item, index) => {
-      doc.text(
-        `${index + 1}. ${item.nome} - ${item.quantidade} ${formatarUnidade(item.unidade, item.quantidade)}`,
-        20,
-        y,
+      const descricao = `${index + 1}. ${item.nome} - ${
+        item.quantidade
+      } ${formatarUnidade(
+        item.unidade,
+        item.quantidade,
+      )}`;
+
+      // Divide nomes grandes em mais de uma linha
+      const linhas = doc.splitTextToSize(
+        descricao,
+        larguraTexto,
       );
 
-      y += 8;
+      const alturaItem = linhas.length * 7;
+
+      // Verifica se o item cabe na página atual
+      if (y + alturaItem > limiteInferiorItens) {
+        adicionarNovaPagina();
+      }
+
+      doc.text(linhas, margemEsquerda, y);
+
+      y += alturaItem + 3;
     });
 
-    // =========================
-    // TOTAL DE ITENS
-    // =========================
-
+    /* =========================
+       TOTAL DE VOLUMES
+    ========================= */
     const totalVolumes = dados.itens.reduce(
-      (total, item) => total + Number(item.quantidade),
+      (total, item) =>
+        total + Number(item.quantidade || 0),
       0,
     );
 
-    y += 10;
+    // Espaço necessário para total e assinaturas
+    const espacoFinalNecessario = 55;
+
+    if (y + espacoFinalNecessario > alturaPagina - 20) {
+      adicionarNovaPagina();
+    }
+
+    y += 7;
 
     doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
 
-    doc.text(`Volume total: ${totalVolumes} unidades`, 20, y);
+    doc.text(
+      `Volume total: ${totalVolumes} unidades`,
+      margemEsquerda,
+      y,
+    );
+
+    /* =========================
+       ASSINATURAS
+    ========================= */
+    y += 35;
 
     doc.setFont("helvetica", "normal");
-
-    // =========================
-    // ASSINATURAS
-    // =========================
-
-    y += 40;
-
-    // assinatura entrega
-    doc.line(20, y, 85, y);
-
-    // assinatura recebimento
-    doc.line(125, y, 190, y);
-
     doc.setFontSize(11);
 
-    doc.text("Responsável pela Entrega", 52, y + 7, {
-      align: "center",
-    });
+    doc.line(20, y, 85, y);
+    doc.line(125, y, 190, y);
 
-    doc.text("Responsável pelo Recebimento", 157, y + 7, {
-      align: "center",
-    });
+    doc.text(
+      "Responsável pela Entrega",
+      52,
+      y + 7,
+      {
+        align: "center",
+      },
+    );
 
-    // =========================
-    // ABRIR PDF
-    // =========================
+    doc.text(
+      "Responsável pelo Recebimento",
+      157,
+      y + 7,
+      {
+        align: "center",
+      },
+    );
 
+    /* =========================
+       ABRIR PDF
+    ========================= */
     const blob = doc.output("blob");
-
     const url = URL.createObjectURL(blob);
 
     window.open(url, "_blank");
+
+    // Libera a URL temporária após algum tempo
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 60000);
+  };
+
+  img.onerror = () => {
+    console.error(
+      "Não foi possível carregar o papel timbrado.",
+    );
+
+    mostrarNotificacao(
+      "Erro ao carregar o papel timbrado do PDF",
+      "erro",
+    );
   };
 }
 
