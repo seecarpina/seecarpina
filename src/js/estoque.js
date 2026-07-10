@@ -601,7 +601,7 @@ function adicionarCabecalhoPagina(primeiraPagina = false) {
   doc.text(
     `Página ${paginaAtual}`,
     larguraPagina - margemDireita,
-    alturaPagina - 15,
+    alturaPagina - 10,
     {
       align: "right",
     },
