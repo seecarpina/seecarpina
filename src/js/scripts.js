@@ -1091,40 +1091,136 @@ if (inputData) {
 }
 
 async function carregarUsuarios() {
-  const tbody = document.querySelector("#tabelaUsuarios tbody");
-  tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">
-        <svg class="svg-spinner" viewBox="0 0 50 50">
-          <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="4"/>
-        </svg></td></tr>`;
+  const lista = document.getElementById("listaUsuarios");
+  const busca = document.getElementById("buscaUsuarios");
+  const contador = document.getElementById("contadorUsuarios");
+
+  if (!lista) return;
+
+  lista.innerHTML = `
+    <div class="usuarios-carregando">
+      <svg class="svg-spinner" viewBox="0 0 50 50">
+        <circle
+          class="path"
+          cx="25"
+          cy="25"
+          r="20"
+          fill="none"
+          stroke-width="4"
+        />
+      </svg>
+    </div>
+  `;
 
   try {
-    const snap = await getDocs(collection(db, "usuarios"));
-    tbody.innerHTML = "";
+    const snapshot = await getDocs(collection(db, "usuarios"));
 
-    snap.forEach((doc) => {
-      const u = doc.data();
-      if (u.ativo === false) return;
-      const tr = document.createElement("tr");
+    let usuarios = [];
 
-      tr.innerHTML = `
-            <td><div id="profile-photo"><img src="${
-              u.foto ?? "./src/images/profile.webp"
-            }"></div></td>
-            <td>${u.nome ?? "-"}</td>
-            <td>${u.email ?? "-"}</td>
-            <td>${u.cargo ?? "-"}</td>
-          `;
+    snapshot.forEach((documento) => {
+      const usuario = documento.data();
 
-      tbody.appendChild(tr);
+      if (usuario.ativo === false) return;
+
+      usuarios.push({
+        id: documento.id,
+        ...usuario,
+      });
     });
 
-    if (!tbody.innerHTML.trim()) {
-      tbody.innerHTML =
-        '<tr><td colspan="5">Nenhum usuário encontrado</td></tr>';
+    usuarios.sort((a, b) =>
+      (a.nome || "").localeCompare(b.nome || "", "pt-BR"),
+    );
+
+    function renderizarUsuarios() {
+      const termo = normalizarTexto(busca?.value || "");
+
+      const filtrados = usuarios.filter((usuario) => {
+        const texto = normalizarTexto(
+          `${usuario.nome || ""} ${usuario.email || ""} ${usuario.cargo || ""}`,
+        );
+
+        return texto.includes(termo);
+      });
+
+      if (contador) {
+        contador.textContent = `${filtrados.length} usuário${
+          filtrados.length === 1 ? "" : "s"
+        }`;
+      }
+
+      if (!filtrados.length) {
+        lista.innerHTML = `
+          <div class="usuarios-vazio">
+            Nenhum usuário encontrado.
+          </div>
+        `;
+
+        return;
+      }
+
+      lista.innerHTML = filtrados
+        .map(
+          (usuario) => `
+            <article class="card-usuario">
+              <div class="usuario-foto">
+                <img
+                  src="${usuario.foto || "./src/images/profile.webp"}"
+                  alt="Foto de ${escaparHtmlUsuario(usuario.nome || "usuário")}"
+                />
+              </div>
+
+              <div class="usuario-conteudo">
+                <h3 class="usuario-nome">
+                  ${escaparHtmlUsuario(usuario.nome || "-")}
+                </h3>
+
+                <span class="usuario-email">
+                  ${escaparHtmlUsuario(usuario.email || "-")}
+                </span>
+
+                <span class="usuario-cargo">
+                  <span class="material-symbols-outlined">
+                    badge
+                  </span>
+
+                  ${escaparHtmlUsuario(usuario.cargo || "Sem cargo")}
+                </span>
+              </div>
+            </article>
+          `,
+        )
+        .join("");
     }
-  } catch (error) {
-    alert("Erro ao carregar usuários: " + error.message);
+
+    busca?.addEventListener("input", renderizarUsuarios);
+
+    renderizarUsuarios();
+  } catch (erro) {
+    console.error("Erro ao carregar usuários:", erro);
+
+    lista.innerHTML = `
+      <div class="usuarios-vazio">
+        Não foi possível carregar os usuários.
+      </div>
+    `;
+
+    mostrarNotificacao("Erro ao carregar usuários.", "erro");
   }
+}
+
+function normalizarTexto(texto) {
+  return String(texto || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function escaparHtmlUsuario(texto) {
+  const elemento = document.createElement("div");
+  elemento.textContent = texto ?? "";
+  return elemento.innerHTML;
 }
 
 carregarUsuarios();

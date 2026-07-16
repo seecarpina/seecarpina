@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Usuários - SEE Carpina</title>
     <link rel="stylesheet" href="./src/css/style.css" />
+    <link rel="stylesheet" href="./src/css/usuarios.css" />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
@@ -34,19 +35,39 @@
 
       <main>
         <h1>Usuários Cadastrados</h1>
-        <br />
-        <div class="table-wrapper">
-          <table id="tabelaUsuarios" class="glass">
-            <thead>
-              <tr>
-                <th>Foto</th>
-                <th>Nome</th>
-                <th>Email</th>
-                <th>Cargo</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
+
+        <div class="usuarios-grid">
+          <section class="box glass">
+            <div class="info-card">
+              <span class="material-symbols-outlined">group</span>
+
+              <div>
+                <strong>Equipe do sistema</strong><br />
+                Consulte os usuários ativos e suas respectivas funções.
+              </div>
+            </div>
+          </section>
+
+          <section class="box glass">
+            <div class="usuarios-toolbar">
+              <div class="campo-busca-usuarios">
+                <span class="material-symbols-outlined">search</span>
+
+                <input
+                  type="search"
+                  id="buscaUsuarios"
+                  placeholder="Buscar por nome, e-mail ou cargo"
+                  autocomplete="off"
+                />
+              </div>
+
+              <span id="contadorUsuarios" class="usuarios-contador"></span>
+            </div>
+
+            <div id="listaUsuarios" class="lista-usuarios">
+              <div class="usuarios-carregando">Carregando usuários...</div>
+            </div>
+          </section>
         </div>
       </main>
 
