@@ -6,6 +6,7 @@
     <title>Servidores - SEE Carpina</title>
 
     <link rel="stylesheet" href="./src/css/style.css" />
+    <link rel="stylesheet" href="./src/css/servidores.css" />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
@@ -43,184 +44,282 @@
       <main>
         <h1>Cadastro de Servidores</h1>
 
-        <!-- 📋 FORMULÁRIO -->
-        <form id="formServidor" class="box glass">
-          <input type="hidden" id="chaveServidor" />
+        <div class="servidores-grid">
+          <!-- INFORMAÇÃO -->
+          <section class="box glass">
+            <div class="info-card">
+              <span class="material-symbols-outlined">badge</span>
 
-          <div class="flex g-1">
-            <div class="w-100">
-              <label for="codigo">Código:</label>
+              <div>
+                <strong>Gestão de servidores</strong><br />
+                Cadastre, consulte, edite e acompanhe a lotação dos servidores.
+              </div>
+            </div>
+          </section>
+
+          <!-- FORMULÁRIO -->
+          <section class="box glass">
+            <form id="formServidor" class="servidores-form">
+              <input type="hidden" id="chaveServidor" />
+
+              <div class="linha-identificacao-servidor">
+                <div>
+                  <label for="codigo">Código</label>
+
+                  <input
+                    type="text"
+                    id="codigo"
+                    placeholder="Código do servidor"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label for="cpf">CPF</label>
+
+                  <input
+                    type="text"
+                    id="cpf"
+                    placeholder="000.000.000-00"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="campo-nome-servidor">
+                <label for="nome">Nome completo</label>
+
+                <input
+                  type="text"
+                  id="nome"
+                  placeholder="Digite o nome completo"
+                  required
+                />
+              </div>
+
+              <div class="linha-dados-servidor">
+                <div class="autocomplete">
+                  <label for="cargo">Cargo</label>
+
+                  <input
+                    type="text"
+                    id="cargo"
+                    placeholder="Digite para buscar ou cadastrar"
+                    autocomplete="off"
+                  />
+
+                  <ul id="autocompleteCargo" class="autocomplete-list"></ul>
+                </div>
+
+                <div class="autocomplete">
+                  <label for="vinculo">Vínculo</label>
+
+                  <input
+                    type="text"
+                    id="vinculo"
+                    placeholder="Digite para buscar ou cadastrar"
+                    autocomplete="off"
+                  />
+
+                  <ul id="autocompleteVinculo" class="autocomplete-list"></ul>
+                </div>
+              </div>
+
+              <div class="linha-dados-servidor">
+                <div>
+                  <label for="dataAdmissao">Data de admissão</label>
+
+                  <input type="date" id="dataAdmissao" required />
+                </div>
+
+                <div>
+                  <label for="situacao">Situação</label>
+
+                  <select id="situacao" required>
+                    <option value="">Selecione</option>
+                    <option value="Ativo">Ativo</option>
+                    <option value="Inativo">Inativo</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="autocomplete campo-local-servidor">
+                <label for="localExercicio"> Local de exercício </label>
+
+                <input
+                  type="text"
+                  id="localExercicio"
+                  placeholder="Digite para buscar ou cadastrar"
+                  autocomplete="off"
+                  required
+                />
+
+                <ul id="autocompleteLocal" class="autocomplete-list"></ul>
+              </div>
+
+              <div class="acoes-form-servidor">
+                <div id="botoesCadastroServidor">
+                  <button type="submit" class="btn" id="btnCadastrarServidor">
+                    <span class="material-symbols-outlined"> person_add </span>
+
+                    Cadastrar servidor
+                  </button>
+                </div>
+
+                <div id="botoesEdicaoServidor">
+                  <button type="button" class="btn" id="btnSalvarServidor">
+                    <span class="material-symbols-outlined"> save </span>
+
+                    Salvar edição
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn btn-cancelar"
+                    id="btnCancelarServidor"
+                  >
+                    <span class="material-symbols-outlined"> close </span>
+
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+
+              <div id="msgEdicao"></div>
+            </form>
+          </section>
+
+          <!-- LISTAGEM -->
+          <section class="box glass">
+            <div class="servidores-cabecalho">
+              <div>
+                <h2>Servidores cadastrados</h2>
+
+                <span
+                  id="contadorServidores"
+                  class="servidores-contador"
+                ></span>
+              </div>
+
+              <button
+                id="btnExportarServidores"
+                class="btn-excel"
+                type="button"
+              >
+                <span class="material-symbols-outlined"> table_view </span>
+
+                Exportar para Excel
+              </button>
+            </div>
+
+            <div class="campo-busca-servidores">
+              <span class="material-symbols-outlined"> search </span>
+
               <input
-                type="text"
-                id="codigo"
-                placeholder="Código do servidor"
-                required
+                type="search"
+                id="buscaServidor"
+                placeholder="Buscar por nome, CPF, cargo, vínculo ou local"
+                autocomplete="off"
               />
             </div>
 
-            <div class="w-100">
-              <label for="cpf">CPF:</label>
-              <input
-                type="text"
-                id="cpf"
-                placeholder="000.000.000-00"
-                required
-              />
-            </div>
-          </div>
+            <div class="table-wrapper tabela-servidores-wrapper">
+              <table id="tabelaServidores">
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>Cargo</th>
+                    <th>Vínculo</th>
+                    <th>Admissão</th>
+                    <th>Situação</th>
+                    <th>Local de exercício</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
 
-          <div>
-            <label for="nome">Nome:</label>
-            <input type="text" id="nome" placeholder="Nome completo" required />
-          </div>
-
-          <div class="flex g-1">
-            <div class="w-100">
-              <div class="autocomplete">
-                <label for="cargo">Cargo:</label>
-                <input
-                  type="text"
-                  id="cargo"
-                  placeholder="Digite para buscar ou cadastrar..."
-                />
-                <ul id="autocompleteCargo" class="autocomplete-list"></ul>
-              </div>
+                <tbody></tbody>
+              </table>
             </div>
 
-            <div class="w-100">
-              <div class="autocomplete">
-                <label for="vinculo">Vínculo:</label>
-                <input
-                  type="text"
-                  id="vinculo"
-                  placeholder="Digite para buscar ou cadastrar..."
-                />
-                <ul id="autocompleteVinculo" class="autocomplete-list"></ul>
-              </div>
-            </div>
-          </div>
-
-          <div class="flex g-1">
-            <div class="w-100">
-              <label for="dataAdmissao">Data de admissão:</label>
-              <input type="date" id="dataAdmissao" required />
-            </div>
-
-            <div class="w-100">
-              <label for="situacao">Situação:</label>
-              <select id="situacao" required>
-                <option value="">Selecione</option>
-                <option value="Ativo">Ativo</option>
-                <option value="Inativo">Inativo</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="autocomplete">
-            <label for="localExercicio">Local de exercício:</label>
-            <input
-              type="text"
-              id="localExercicio"
-              placeholder="Digite para buscar ou cadastrar..."
-              required
-            />
-            <ul id="autocompleteLocal" class="autocomplete-list"></ul>
-          </div>
-
-          <!-- 🔁 BOTÕES -->
-          <div id="botoesCadastroServidor">
-            <button type="submit" class="btn" id="btnCadastrarServidor">
-              Cadastrar servidor
-            </button>
-          </div>
-
-          <div id="botoesEdicaoServidor" style="display: none; gap: 10px">
-            <button type="button" class="btn" id="btnSalvarServidor">
-              Salvar edição
-            </button>
-
-            <button
-              type="button"
-              class="btn btn-cancelar"
-              id="btnCancelarServidor"
-            >
-              Cancelar edição
-            </button>
-          </div>
-
-          <!-- 🩷 FRASE DE EDIÇÃO -->
-          <!-- <p id="msgEdicaoServidor" class="edicao"></p> -->
-          <p id="msgEdicao"></p>
-        </form>
-
-        <hr />
-
-        <!-- 📑 LISTAGEM -->
-        <h2>Servidores cadastrados</h2>
-
-        <input
-          class="busca"
-          type="text"
-          id="buscaServidor"
-          placeholder="🔍 Buscar por nome, CPF, cargo, vínculo ou local..."
-        />
-
-        <div class="flex justify-center">
-          <button id="btnExportarServidores" class="btn-excel">
-            📊 Exportar para Excel
-          </button>
+            <div class="paginacao" id="paginacaoServidores"></div>
+          </section>
         </div>
-        <div class="table-wrapper">
-          <table id="tabelaServidores" class="glass">
-            <thead>
-              <tr>
-                <th>Código</th>
-                <th>Nome</th>
-                <th>CPF</th>
-                <th>Cargo</th>
-                <th>Vínculo</th>
-                <th>Data</th>
-                <th>Situação</th>
-                <th>Local</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <!-- MODAL TRANSFERÊNCIA -->
+
+        <!-- MODAL DE TRANSFERÊNCIA -->
         <div id="modalTransferencia" class="modal" style="display: none">
-          <div class="modal-content box">
-            <h3>TRANSFERÊNCIA DE SERVIDOR</h3>
+          <div class="modal-content box modal-transferencia-content">
+            <div class="modal-transferencia-cabecalho">
+              <div>
+                <span class="modal-transferencia-label">
+                  Movimentação funcional
+                </span>
 
-            <p>
-              <strong>Servidor:</strong>
-              <span id="nomeServidorTransferencia"></span>
-            </p>
+                <h2>Transferir servidor</h2>
+              </div>
 
-            <label>Local de destino:</label>
-            <select id="selectNovoLocal"></select>
+              <button
+                type="button"
+                class="btn-fechar-transferencia"
+                id="btnFecharTransferencia"
+                aria-label="Fechar"
+              >
+                <span class="material-symbols-outlined"> close </span>
+              </button>
+            </div>
 
-            <label>Data da transferência:</label>
-            <input type="date" id="dataTransferencia" />
+            <div class="servidor-transferencia-info">
+              <span class="material-symbols-outlined"> person </span>
 
-            <label>Observações:</label>
-            <textarea
-              id="obsTransferencia"
-              rows="3"
-              placeholder="Digite observações (opcional)"
-            ></textarea>
+              <div>
+                <small>Servidor selecionado</small>
 
-            <div class="flex g-1" style="margin-top: 15px">
-              <button class="btn" id="btnGerarTransferencia">Transferir</button>
-              <button class="btn btn-cancelar" id="btnCancelarTransferencia">
+                <strong id="nomeServidorTransferencia"></strong>
+              </div>
+            </div>
+
+            <div class="campos-transferencia">
+              <div>
+                <label for="selectNovoLocal"> Novo local de exercício </label>
+
+                <select id="selectNovoLocal"></select>
+              </div>
+
+              <div>
+                <label for="dataTransferencia"> Data da transferência </label>
+
+                <input type="date" id="dataTransferencia" />
+              </div>
+            </div>
+
+            <div>
+              <label for="obsTransferencia"> Observações </label>
+
+              <textarea
+                id="obsTransferencia"
+                rows="4"
+                placeholder="Digite observações, se necessário"
+              ></textarea>
+            </div>
+
+            <div class="acoes-transferencia">
+              <button class="btn" type="button" id="btnGerarTransferencia">
+                <span class="material-symbols-outlined"> swap_horiz </span>
+
+                Confirmar transferência
+              </button>
+
+              <button
+                class="btn btn-cancelar"
+                type="button"
+                id="btnCancelarTransferencia"
+              >
                 Cancelar
               </button>
             </div>
           </div>
         </div>
-
-        <div class="paginacao" id="paginacaoServidores"></div>
       </main>
       <div class="right"></div>
     </div>

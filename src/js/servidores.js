@@ -31,6 +31,8 @@ const boxCargo = document.getElementById("autocompleteCargo");
 const boxVinculo = document.getElementById("autocompleteVinculo");
 const boxLocal = document.getElementById("autocompleteLocal");
 
+const contadorServidores = document.getElementById("contadorServidores");
+
 /* ===============================
    FIREBASE
 ================================ */
@@ -108,15 +110,15 @@ function mostrarSugestoes(input, lista, box) {
 }
 
 inputCargo.addEventListener("input", () =>
-  mostrarSugestoes(inputCargo, cargos, boxCargo)
+  mostrarSugestoes(inputCargo, cargos, boxCargo),
 );
 
 inputVinculo.addEventListener("input", () =>
-  mostrarSugestoes(inputVinculo, vinculos, boxVinculo)
+  mostrarSugestoes(inputVinculo, vinculos, boxVinculo),
 );
 
 inputLocal.addEventListener("input", () =>
-  mostrarSugestoes(inputLocal, locais, boxLocal)
+  mostrarSugestoes(inputLocal, locais, boxLocal),
 );
 
 document.addEventListener("click", (e) => {
@@ -207,11 +209,19 @@ function renderTabela() {
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase()
-        .includes(termo)
+        .includes(termo),
     )
     .sort((a, b) =>
-      a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
+      a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" }),
     );
+
+  if (contadorServidores) {
+    const total = filtrados.length;
+
+    contadorServidores.textContent = `${total} servidor${
+      total === 1 ? "" : "es"
+    } encontrado${total === 1 ? "" : "s"}`;
+  }
 
   const totalPaginas = Math.ceil(filtrados.length / itensPorPagina);
   const inicio = (paginaAtual - 1) * itensPorPagina;
@@ -230,27 +240,65 @@ function renderTabela() {
     pagina.forEach((s) => {
       const tr = document.createElement("tr");
 
-      tr.innerHTML = `
-        <td>${s.codigo}</td>
-        <td>${s.nome}</td>
-        <td>${formatarCPF(s.cpf)}</td>
-        <td>${s.cargo}</td>
-        <td>${s.vinculo}</td>
-        <td>${formatarDataBR(s.dataAdmissao)}</td>
-        <td>${s.situacao}</td>
-        <td>${s.localExercicio}</td>
-        <td>
-          <button class="edit-btn">
-            <span class="material-symbols-outlined">edit_square</span>
-          </button>
-          <button class="edit-btn transfer-btn">
-            <span class="material-symbols-outlined">swap_horiz</span>
-          </button>
-        </td>
-      `;
+      const classeSituacao =
+        String(s.situacao || "").toLowerCase() === "ativo"
+          ? "ativo"
+          : "inativo";
 
-      tr.querySelector(".edit-btn").onclick = () => editarServidor(s);
-      tr.querySelector(".transfer-btn").onclick = () => abrirTransferencia(s);
+      tr.innerHTML = `
+    <td>${s.codigo || "-"}</td>
+
+    <td>${s.nome || "-"}</td>
+
+    <td>${formatarCPF(s.cpf || "")}</td>
+
+    <td>${s.cargo || "-"}</td>
+
+    <td>${s.vinculo || "-"}</td>
+
+    <td>${formatarDataBR(s.dataAdmissao)}</td>
+
+    <td>
+      <span class="status-servidor ${classeSituacao}">
+        ${s.situacao || "-"}
+      </span>
+    </td>
+
+    <td>${s.localExercicio || "-"}</td>
+
+    <td>
+      <div class="acoes-servidor">
+        <button
+          class="edit-btn"
+          type="button"
+          title="Editar servidor"
+        >
+          <span class="material-symbols-outlined">
+            edit_square
+          </span>
+        </button>
+
+        <button
+          class="transfer-btn"
+          type="button"
+          title="Transferir servidor"
+        >
+          <span class="material-symbols-outlined">
+            swap_horiz
+          </span>
+        </button>
+      </div>
+    </td>
+  `;
+
+      tr.querySelector(".edit-btn").addEventListener("click", () => {
+        editarServidor(s);
+      });
+
+      tr.querySelector(".transfer-btn").addEventListener("click", () => {
+        abrirTransferencia(s);
+      });
+
       tabela.appendChild(tr);
     });
   }
@@ -261,21 +309,67 @@ function renderTabela() {
 /* ===============================
    PAGINAÇÃO
 ================================ */
-function renderPaginacao(total) {
+function renderPaginacao(totalPaginas) {
   paginacao.innerHTML = "";
-  if (total <= 1) return;
 
-  for (let i = 1; i <= total; i++) {
-    const btn = document.createElement("button");
-    btn.textContent = i;
-    btn.classList.toggle("ativo", i === paginaAtual);
+  if (totalPaginas <= 1) return;
 
-    btn.onclick = () => {
-      paginaAtual = i;
+  const maxPaginasVisiveis = 10;
+
+  let inicioPagina = Math.max(1, paginaAtual - 2);
+
+  let fimPagina = Math.min(totalPaginas, inicioPagina + maxPaginasVisiveis - 1);
+
+  if (fimPagina - inicioPagina + 1 < maxPaginasVisiveis) {
+    inicioPagina = Math.max(1, fimPagina - maxPaginasVisiveis + 1);
+  }
+
+  if (paginaAtual > 1) {
+    const btnAnterior = document.createElement("button");
+
+    btnAnterior.type = "button";
+    btnAnterior.textContent = "‹";
+    btnAnterior.title = "Página anterior";
+
+    btnAnterior.addEventListener("click", () => {
+      paginaAtual--;
       renderTabela();
-    };
+    });
+
+    paginacao.appendChild(btnAnterior);
+  }
+
+  for (let pagina = inicioPagina; pagina <= fimPagina; pagina++) {
+    const btn = document.createElement("button");
+
+    btn.type = "button";
+    btn.textContent = pagina;
+
+    if (pagina === paginaAtual) {
+      btn.classList.add("ativo");
+    }
+
+    btn.addEventListener("click", () => {
+      paginaAtual = pagina;
+      renderTabela();
+    });
 
     paginacao.appendChild(btn);
+  }
+
+  if (paginaAtual < totalPaginas) {
+    const btnProxima = document.createElement("button");
+
+    btnProxima.type = "button";
+    btnProxima.textContent = "›";
+    btnProxima.title = "Próxima página";
+
+    btnProxima.addEventListener("click", () => {
+      paginaAtual++;
+      renderTabela();
+    });
+
+    paginacao.appendChild(btnProxima);
   }
 }
 
@@ -345,7 +439,19 @@ function editarServidor(s) {
 
   blocoCadastro.style.display = "none";
   blocoEdicao.style.display = "flex";
-  msgEdicao.textContent = `✏️ Editando servidor ${s.nome}`;
+  msgEdicao.innerHTML = `
+  <div class="edicao-servidor-info">
+    <span class="material-symbols-outlined">
+      edit_note
+    </span>
+
+    <div>
+      <strong>Modo de edição</strong>
+      <span>${s.nome}</span>
+    </div>
+  </div>
+`;
+
   msgEdicao.style.display = "block";
 
   btnTopo.click();
@@ -361,7 +467,8 @@ function resetarFormulario() {
 
   blocoCadastro.style.display = "block";
   blocoEdicao.style.display = "none";
-  msgEdicao.textContent = "";
+  msgEdicao.innerHTML = "";
+  msgEdicao.style.display = "none";
 }
 
 /* ===============================
@@ -401,7 +508,7 @@ if (btnExportarExcel) {
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase()
-        .includes(termo)
+        .includes(termo),
     );
 
     if (!filtrados.length) {
@@ -411,7 +518,7 @@ if (btnExportarExcel) {
 
     // Ordena por nome
     filtrados.sort((a, b) =>
-      a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
+      a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" }),
     );
 
     // Monta planilha
@@ -468,10 +575,28 @@ function abrirTransferencia(servidor) {
     .split("T")[0];
 }
 
-document.getElementById("btnCancelarTransferencia").onclick = () => {
+const btnFecharTransferencia = document.getElementById(
+  "btnFecharTransferencia",
+);
+
+function fecharModalTransferencia() {
   document.getElementById("modalTransferencia").style.display = "none";
+
   document.getElementById("obsTransferencia").value = "";
-};
+
+  servidorSelecionado = null;
+}
+
+btnFecharTransferencia?.addEventListener("click", fecharModalTransferencia);
+
+document.getElementById("btnCancelarTransferencia").onclick =
+  fecharModalTransferencia;
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    fecharModalTransferencia();
+  }
+});
 
 document.getElementById("btnGerarTransferencia").onclick = async () => {
   await transferirServidor();
@@ -492,7 +617,7 @@ async function transferirServidor() {
 
   const servidorRef = ref(
     rtdb,
-    `servidores/registros/${servidorSelecionado._key}`
+    `servidores/registros/${servidorSelecionado._key}`,
   );
 
   // 🔄 Atualiza o local do servidor
@@ -503,7 +628,7 @@ async function transferirServidor() {
   // 📜 Histórico (opcional, mas recomendado)
   const historicoRef = ref(
     rtdb,
-    `servidores/transferencias/${servidorSelecionado._key}`
+    `servidores/transferencias/${servidorSelecionado._key}`,
   );
 
   await push(historicoRef, {
@@ -566,7 +691,7 @@ function gerarPDFTransferencia(dados) {
       larguraPagina / 2,
       0,
       larguraPagina / 2,
-      alturaPagina
+      alturaPagina,
     );
 
     // Linha pontilhada central
@@ -601,10 +726,10 @@ function gerarPDFTransferencia(dados) {
         `Matrícula: ${
           dados.codigo
         } para ser lotado(a) nesta Unidade de Ensino a partir de ${formatarDataBR(
-          dados.dataTransferencia
+          dados.dataTransferencia,
         )}.`,
         xInicial,
-        y
+        y,
       );
 
       // Caixa servidor
@@ -619,7 +744,7 @@ function gerarPDFTransferencia(dados) {
         y,
         {
           align: "center",
-        }
+        },
       );
 
       y += 8;
@@ -639,7 +764,7 @@ function gerarPDFTransferencia(dados) {
       if (dados.observacao) {
         const textoObs = doc.splitTextToSize(
           dados.observacao,
-          colunaLargura - 10
+          colunaLargura - 10,
         );
 
         y += 6;
@@ -653,7 +778,7 @@ function gerarPDFTransferencia(dados) {
         `Carpina, ${new Date().toLocaleDateString("pt-BR")}.`,
         xInicial + colunaLargura / 2,
         y,
-        { align: "center" }
+        { align: "center" },
       );
 
       y += 15;
@@ -670,7 +795,7 @@ function gerarPDFTransferencia(dados) {
         "Secretária Municipal de Educação e Esportes",
         xInicial + colunaLargura / 2,
         y,
-        { align: "center" }
+        { align: "center" },
       );
 
       // Rodapé
@@ -680,11 +805,11 @@ function gerarPDFTransferencia(dados) {
       doc.setFontSize(7);
       doc.text(
         `Protocolo nº ${protocolo} gerado por ${usuario} em ${new Date().toLocaleString(
-          "pt-BR"
+          "pt-BR",
         )}`,
         xInicial + colunaLargura / 2,
         alturaPagina - 20,
-        { align: "center" }
+        { align: "center" },
       );
     }
 

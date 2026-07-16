@@ -1,0 +1,493 @@
+/* =========================================
+   ESTRUTURA
+========================================= */
+
+.servidores-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.2rem;
+}
+
+/* =========================================
+   FORMULÁRIO
+========================================= */
+
+.servidores-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.servidores-form label {
+  display: block;
+  margin-bottom: 0.45rem;
+}
+
+.servidores-form input,
+.servidores-form select,
+.servidores-form textarea {
+  width: 100%;
+}
+
+.linha-identificacao-servidor {
+  display: grid;
+  grid-template-columns:
+    minmax(160px, 0.5fr)
+    minmax(220px, 1fr);
+  gap: 1rem;
+}
+
+.campo-nome-servidor {
+  width: 100%;
+}
+
+.linha-dados-servidor {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.campo-local-servidor {
+  width: 100%;
+}
+
+.acoes-form-servidor {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+#botoesCadastroServidor .btn,
+#botoesEdicaoServidor .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+#botoesEdicaoServidor {
+  display: none;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+/* =========================================
+   AVISO DE EDIÇÃO
+========================================= */
+
+.edicao-servidor-info {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.edicao-servidor-info > .material-symbols-outlined {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--clr-primary);
+  color: var(--clr-white);
+}
+
+.edicao-servidor-info div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.edicao-servidor-info strong {
+  font-size: 0.9rem;
+  color: var(--clr-dark);
+}
+
+.edicao-servidor-info span:not(.material-symbols-outlined) {
+  font-size: 0.82rem;
+  opacity: 0.75;
+}
+
+/* =========================================
+   CABEÇALHO DA LISTAGEM
+========================================= */
+
+.servidores-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.servidores-cabecalho h2 {
+  margin: 0;
+}
+
+.servidores-contador {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.btn-excel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: 0;
+  border-radius: 0.7rem;
+  padding: 0.7rem 1rem;
+  background: var(--clr-primary);
+  color: var(--clr-white);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* =========================================
+   BUSCA
+========================================= */
+
+.campo-busca-servidores {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0 1rem;
+  border-radius: 0.9rem;
+  background: var(--clr-white);
+}
+
+.campo-busca-servidores > .material-symbols-outlined {
+  flex-shrink: 0;
+  color: var(--clr-primary);
+}
+
+.campo-busca-servidores input {
+  width: 100%;
+  border: 0;
+  padding-left: 0;
+  background: transparent;
+}
+
+.campo-busca-servidores input:focus {
+  outline: none;
+}
+
+/* =========================================
+   TABELA
+========================================= */
+
+.tabela-servidores-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 1rem;
+  font-size: 0.7rem;
+}
+
+#tabelaServidores {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--clr-white);
+}
+
+#tabelaServidores thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+#tabelaServidores thead th {
+  background: var(--clr-primary);
+  color: var(--clr-white);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+}
+
+#tabelaServidores th,
+#tabelaServidores td {
+  padding: 0.8rem 0.75rem;
+  vertical-align: middle;
+}
+
+#tabelaServidores tbody tr {
+  transition: background 0.2s ease;
+}
+
+#tabelaServidores tbody tr:nth-child(even) {
+  background: var(--clr-light);
+}
+
+#tabelaServidores tbody tr:hover {
+  background: rgba(115, 128, 236, 0.12);
+}
+
+#tabelaServidores td:first-child {
+  font-weight: 700;
+  color: var(--clr-primary);
+  white-space: nowrap;
+}
+
+#tabelaServidores td:nth-child(2) {
+  min-width: 230px;
+  font-weight: 600;
+}
+
+#tabelaServidores td:nth-child(3),
+#tabelaServidores td:nth-child(6) {
+  white-space: nowrap;
+}
+
+#tabelaServidores td:nth-child(4) {
+  min-width: 190px;
+}
+
+#tabelaServidores td:nth-child(5) {
+  min-width: 130px;
+}
+
+#tabelaServidores td:nth-child(8) {
+  min-width: 220px;
+}
+
+#tabelaServidores td:last-child {
+  min-width: 100px;
+}
+
+/* =========================================
+   SITUAÇÃO
+========================================= */
+
+.status-servidor {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.status-servidor.ativo {
+  background: rgba(46, 139, 87, 0.14);
+  color: seagreen;
+}
+
+.status-servidor.inativo {
+  background: rgba(220, 20, 60, 0.14);
+  color: crimson;
+}
+
+/* =========================================
+   AÇÕES
+========================================= */
+
+.acoes-servidor {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.acoes-servidor button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.acoes-servidor button:hover {
+  background: var(--clr-light);
+}
+
+.acoes-servidor .edit-btn {
+  color: var(--clr-primary);
+}
+
+.acoes-servidor .transfer-btn {
+  color: darkorange;
+}
+
+/* =========================================
+   PAGINAÇÃO
+========================================= */
+
+.paginacao {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 1.2rem;
+}
+
+.paginacao button {
+  min-width: 2.3rem;
+  height: 2.3rem;
+  border: 1px solid var(--clr-primary);
+  border-radius: 0.6rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.paginacao button:hover,
+.paginacao button.ativo {
+  background: var(--clr-primary);
+  color: var(--clr-white);
+}
+
+/* =========================================
+   MODAL DE TRANSFERÊNCIA
+========================================= */
+
+.modal-transferencia-content {
+  width: min(600px, calc(100% - 2rem));
+}
+
+.modal-transferencia-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.modal-transferencia-cabecalho h2 {
+  margin: 0.2rem 0 0;
+}
+
+.modal-transferencia-label {
+  font-size: 0.75rem;
+  color: var(--clr-primary);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04rem;
+}
+
+.btn-fechar-transferencia {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.btn-fechar-transferencia:hover {
+  background: var(--clr-light);
+}
+
+.servidor-transferencia-info {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.9rem;
+  background: var(--clr-light);
+}
+
+.servidor-transferencia-info > .material-symbols-outlined {
+  color: var(--clr-primary);
+}
+
+.servidor-transferencia-info div {
+  display: flex;
+  flex-direction: column;
+}
+
+.servidor-transferencia-info small {
+  opacity: 0.7;
+}
+
+.campos-transferencia {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.modal-transferencia-content label {
+  display: block;
+  margin-bottom: 0.45rem;
+}
+
+.modal-transferencia-content select,
+.modal-transferencia-content input,
+.modal-transferencia-content textarea {
+  width: 100%;
+}
+
+.acoes-transferencia {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.acoes-transferencia .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+/* =========================================
+   RESPONSIVO
+========================================= */
+
+@media (max-width: 700px) {
+  .linha-identificacao-servidor,
+  .linha-dados-servidor,
+  .campos-transferencia {
+    grid-template-columns: 1fr;
+  }
+
+  .servidores-cabecalho {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .btn-excel {
+    width: 100%;
+  }
+
+  #botoesEdicaoServidor {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  #botoesCadastroServidor,
+  #botoesCadastroServidor .btn,
+  #botoesEdicaoServidor .btn {
+    width: 100%;
+  }
+
+  .acoes-transferencia {
+    flex-direction: column;
+  }
+
+  .acoes-transferencia .btn {
+    width: 100%;
+  }
+}
