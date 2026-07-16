@@ -26,7 +26,7 @@ function ativarLinkAtual() {
 
     // Caso especial: página principal ("/")
     if (href === "/" && path === "/") {
-      link.classList.add("active", "glass");
+      link.classList.add("active");
       return;
     }
 
