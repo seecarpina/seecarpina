@@ -772,7 +772,7 @@ function iniciarEdicao(oficio) {
     behavior: "smooth",
   });
 
-  inputAssunto.focus();
+  btnTopo.click();
 }
 
 btnSalvarEdicao?.addEventListener("click", async () => {
