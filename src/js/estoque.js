@@ -10,68 +10,27 @@ import {
 const { jsPDF } = window.jspdf;
 const mostrarNotificacao = window.mostrarNotificacao;
 
-const tabela = document.querySelector("#tabelaMateriais tbody");
+const listaMateriais = document.getElementById("listaMateriais");
+const listaHistorico = document.getElementById("listaHistorico");
 
-const tabelaHistorico = document.querySelector("#tabelaHistorico tbody");
-
-// Spinner inicial enquanto carrega Firebase
-if (tabela) {
-  tabela.innerHTML = `
-    <tr>
-      <td colspan="5" style="text-align:center;">
-        <svg class="svg-spinner" viewBox="0 0 50 50">
-          <circle
-            class="path"
-            cx="25"
-            cy="25"
-            r="20"
-            fill="none"
-            stroke-width="4"
-          />
-        </svg>
-      </td>
-    </tr>
-  `;
-}
-
-if (tabelaHistorico) {
-  tabelaHistorico.innerHTML = `
-    <tr>
-      <td colspan="5" style="text-align:center;">
-        <svg class="svg-spinner" viewBox="0 0 50 50">
-          <circle
-            class="path"
-            cx="25"
-            cy="25"
-            r="20"
-            fill="none"
-            stroke-width="4"
-          />
-        </svg>
-      </td>
-    </tr>
-  `;
-}
+const contadorMateriais = document.getElementById("contadorMateriais");
+const contadorRomaneios = document.getElementById("contadorRomaneios");
 
 const materiaisRef = ref(rtdb, "materiais");
-
 const movimentacoesRef = ref(rtdb, "movimentacoes");
-
 const destinosRef = ref(rtdb, "servidores/locaisExercicio");
 
 const modalEntrega = document.getElementById("modalEntrega");
 
 let materiais = [];
-
 let historicoRomaneios = [];
-
 let destinos = [];
-
 let itensEntrega = [];
 
 /* =========================
    FUNÇÕES AUXILIARES
 ========================= */
+
 function getNomeResponsavel() {
   return window.dadosUsuario?.nome?.split(" ")[0] || "Usuário";
 }
@@ -102,7 +61,38 @@ function padronizarTexto(str) {
 }
 
 function formatarData(data) {
+  if (!data) return "-";
+
   return new Date(data).toLocaleDateString("pt-BR");
+}
+
+function escaparHtmlEstoque(texto) {
+  const elemento = document.createElement("div");
+  elemento.textContent = texto ?? "";
+  return elemento.innerHTML;
+}
+
+function separarDataRomaneio(dataISO) {
+  if (!dataISO) {
+    return {
+      dia: "--",
+      mes: "---",
+      ano: "----",
+    };
+  }
+
+  const data = new Date(dataISO);
+
+  return {
+    dia: String(data.getDate()).padStart(2, "0"),
+    mes: data
+      .toLocaleDateString("pt-BR", {
+        month: "short",
+      })
+      .replace(".", "")
+      .toUpperCase(),
+    ano: data.getFullYear(),
+  };
 }
 
 /* =========================
@@ -113,7 +103,7 @@ function mostrarSugestoes(input, lista, box) {
   if (!input || !box) return;
 
   input.oninput = () => {
-    const valor = input.value.toLowerCase();
+    const valor = input.value.toLowerCase().trim();
 
     box.innerHTML = "";
 
@@ -136,53 +126,66 @@ function mostrarSugestoes(input, lista, box) {
 
       li.textContent = item;
 
-      li.onclick = () => {
+      li.addEventListener("click", () => {
         input.value = item;
         box.style.display = "none";
-      };
+      });
 
       box.appendChild(li);
     });
 
     box.style.display = "block";
   };
+}
 
-  document.addEventListener("click", (e) => {
-    if (!input.contains(e.target) && !box.contains(e.target)) {
+document.addEventListener("click", (event) => {
+  document.querySelectorAll(".autocomplete-list").forEach((box) => {
+    const autocomplete = box.closest(".autocomplete");
+
+    if (autocomplete && !autocomplete.contains(event.target)) {
       box.style.display = "none";
     }
   });
-}
+});
 
 /* =========================
-   INPUTS
+   ELEMENTOS
 ========================= */
 
 const inputMaterial = document.getElementById("nomeMaterial");
-
 const boxMaterial = document.getElementById("autocompleteMaterial");
 
 const inputDestinoEntrega = document.getElementById("destinoEntrega");
-
 const boxDestinoEntrega = document.getElementById("autocompleteDestinoEntrega");
 
 const inputMaterialEntrega = document.getElementById("materialEntrega");
-
 const boxEntrega = document.getElementById("autocompleteEntrega");
+
+const formMaterial = document.getElementById("formMaterial");
+const btnAdicionarEstoque = document.getElementById("btnAdicionarEstoque");
+
+const btnNovaEntrega = document.getElementById("btnNovaEntrega");
+const btnFecharModalEntrega = document.getElementById("fecharModalEntrega");
+
+const btnAdicionarItem = document.getElementById("btnAdicionarItem");
+const btnGerarRomaneio = document.getElementById("btnGerarRomaneio");
+
+const inputBusca = document.getElementById("busca");
+const inputBuscaHistorico = document.getElementById("buscaHistorico");
 
 /* =========================
    DESTINOS
 ========================= */
 
-onValue(destinosRef, (snap) => {
-  destinos = snap.exists()
+onValue(destinosRef, (snapshot) => {
+  destinos = snapshot.exists()
     ? [
         ...new Set(
-          Object.values(snap.val())
+          Object.values(snapshot.val())
             .filter(Boolean)
-            .map((d) => padronizarTexto(d)),
+            .map((destino) => padronizarTexto(destino)),
         ),
-      ].sort()
+      ].sort((a, b) => a.localeCompare(b, "pt-BR"))
     : [];
 
   mostrarSugestoes(inputDestinoEntrega, destinos, boxDestinoEntrega);
@@ -192,60 +195,74 @@ onValue(destinosRef, (snap) => {
    MATERIAIS
 ========================= */
 
-onValue(materiaisRef, (snap) => {
-  materiais = snap.exists()
-    ? Object.entries(snap.val()).map(([key, val]) => ({
-        ...val,
-        _key: key,
-      }))
-    : [];
+onValue(
+  materiaisRef,
+  (snapshot) => {
+    materiais = snapshot.exists()
+      ? Object.entries(snapshot.val()).map(([key, dados]) => ({
+          ...dados,
+          _key: key,
+        }))
+      : [];
 
-  renderTabela();
+    materiais.sort((a, b) =>
+      (a.nome || "").localeCompare(b.nome || "", "pt-BR"),
+    );
 
-  const nomes = materiais.map((m) => m.nome);
+    renderTabela();
 
-  mostrarSugestoes(inputMaterial, nomes, boxMaterial);
+    const nomes = materiais.map((material) => material.nome).filter(Boolean);
 
-  mostrarSugestoes(inputMaterialEntrega, nomes, boxEntrega);
-});
+    mostrarSugestoes(inputMaterial, nomes, boxMaterial);
+
+    mostrarSugestoes(inputMaterialEntrega, nomes, boxEntrega);
+  },
+  (erro) => {
+    console.error("Erro ao carregar materiais:", erro);
+
+    if (listaMateriais) {
+      listaMateriais.innerHTML = `
+        <div class="estoque-vazio">
+          Não foi possível carregar os materiais.
+        </div>
+      `;
+    }
+
+    mostrarNotificacao("Erro ao carregar materiais.", "erro");
+  },
+);
 
 /* =========================
-   CADASTRO MATERIAL
+   CADASTRO DE MATERIAL
 ========================= */
-
-const formMaterial = document.getElementById("formMaterial");
 
 let salvandoMaterial = false;
 
-formMaterial.addEventListener("submit", async (e) => {
-  e.preventDefault();
+formMaterial.addEventListener("submit", async (event) => {
+  event.preventDefault();
 
   if (salvandoMaterial) return;
 
-  salvandoMaterial = true;
-
-  const btnSubmit = formMaterial.querySelector("button[type='submit']");
-
-  btnSubmit.disabled = true;
-  btnSubmit.textContent = "Salvando...";
-
   const nome = padronizarTexto(inputMaterial.value);
-
   const unidade = document.getElementById("unidade").value;
-
   const quantidade = Number(document.getElementById("quantidade").value);
 
   if (!nome || quantidade <= 0) {
-    return mostrarNotificacao("Preencha os campos corretamente", "erro");
+    mostrarNotificacao("Preencha os campos corretamente.", "erro");
+    return;
   }
 
+  salvandoMaterial = true;
+
+  btnAdicionarEstoque.disabled = true;
+  btnAdicionarEstoque.value = "Salvando...";
+
   try {
-    const existente = materiais.find((m) => m.nome === nome);
+    const existente = materiais.find((material) => material.nome === nome);
 
     if (existente) {
       await update(ref(rtdb, `materiais/${existente._key}`), {
         estoque: Number(existente.estoque || 0) + quantidade,
-
         atualizadoEm: new Date().toISOString(),
       });
     } else {
@@ -260,171 +277,235 @@ formMaterial.addEventListener("submit", async (e) => {
 
     mostrarNotificacao("Material salvo com sucesso!");
 
-    e.target.reset();
-  } catch (err) {
-    console.error(err);
+    formMaterial.reset();
+    inputMaterial.focus();
+  } catch (erro) {
+    console.error("Erro ao salvar material:", erro);
 
-    mostrarNotificacao("Erro ao salvar material", "erro");
+    mostrarNotificacao("Erro ao salvar material.", "erro");
   } finally {
     salvandoMaterial = false;
 
-    btnSubmit.disabled = false;
-    btnSubmit.textContent = "Adicionar ao estoque";
+    btnAdicionarEstoque.disabled = false;
+    btnAdicionarEstoque.value = "Adicionar ao estoque";
   }
 });
 
 /* =========================
-   TABELA
+   RENDERIZAÇÃO DOS MATERIAIS
 ========================= */
 
 function renderTabela() {
-  tabela.innerHTML = "";
+  if (!listaMateriais) return;
 
-  const busca = document.getElementById("busca").value.toLowerCase();
+  const busca = inputBusca.value.toLowerCase().trim();
 
-  const filtrados = materiais.filter((m) =>
-    m.nome.toLowerCase().includes(busca),
+  const filtrados = materiais.filter((material) =>
+    (material.nome || "").toLowerCase().includes(busca),
   );
 
-  filtrados.forEach((m) => {
-    const tr = document.createElement("tr");
+  if (contadorMateriais) {
+    const total = filtrados.length;
+    const texto = total === 1 ? "material" : "materiais";
 
-    tr.innerHTML = `
-      <td class="assunto">
-        ${m.nome}
-      </td>
+    contadorMateriais.textContent = `${total} ${texto}`;
+  }
 
-      <td>
-        ${m.unidade}
-      </td>
-
-      <td>
-        ${
-          m.estoque <= 5
-            ? `
-              <span class="danger">
-                ${m.estoque}
-              </span>
-            `
-            : m.estoque
-        }
-
-        <div class="barra-saldo">
-          <div
-            class="barra-saldo-preenchida ${
-              m.estoque > 20
-                ? "verde"
-                : m.estoque > 10
-                  ? "amarelo"
-                  : m.estoque > 5
-                    ? "laranja"
-                    : "vermelho"
-            }"
-            style="width:${Math.min(m.estoque, 100)}%"
-          ></div>
-        </div>
-      </td>
-
-      <td>
-        ${m.atualizadoEm ? formatarData(m.atualizadoEm) : "-"}
-      </td>
+  if (!filtrados.length) {
+    listaMateriais.innerHTML = `
+      <div class="estoque-vazio">
+        Nenhum material encontrado.
+      </div>
     `;
 
-    tabela.appendChild(tr);
-  });
+    return;
+  }
+
+  listaMateriais.innerHTML = filtrados
+    .map((material) => {
+      const estoque = Number(material.estoque || 0);
+      const percentual = Math.min(Math.max(estoque, 0), 100);
+
+      let classeBarra = "";
+
+      if (estoque <= 5) {
+        classeBarra = "estoque-baixo";
+      } else if (estoque <= 15) {
+        classeBarra = "estoque-medio";
+      }
+
+      return `
+        <article class="card-material">
+          <div class="material-cabecalho">
+            <div>
+              <h3 class="material-nome">
+                ${escaparHtmlEstoque(material.nome || "-")}
+              </h3>
+
+              <span class="material-unidade">
+                ${escaparHtmlEstoque(material.unidade || "Unidade")}
+              </span>
+            </div>
+
+            <div
+              class="material-estoque ${estoque <= 5 ? "baixo" : ""}"
+            >
+              <strong>${estoque}</strong>
+              <span>em estoque</span>
+            </div>
+          </div>
+
+          <div class="material-barra">
+            <div
+              class="material-barra-preenchida ${classeBarra}"
+              style="width: ${percentual}%"
+            ></div>
+          </div>
+
+          <div class="material-rodape">
+            <span class="material-symbols-outlined">
+              update
+            </span>
+
+            Última movimentação:
+            ${material.atualizadoEm ? formatarData(material.atualizadoEm) : "-"}
+          </div>
+        </article>
+      `;
+    })
+    .join("");
 }
 
-document.getElementById("busca").addEventListener("input", renderTabela);
+inputBusca.addEventListener("input", renderTabela);
 
 /* =========================
-   MODAL
+   MODAL DE ENTREGA
 ========================= */
 
-document.getElementById("btnNovaEntrega").addEventListener("click", () => {
+btnNovaEntrega.addEventListener("click", () => {
   modalEntrega.style.display = "flex";
+  inputDestinoEntrega.focus();
 });
 
-document.getElementById("fecharModalEntrega").addEventListener("click", () => {
-  modalEntrega.style.display = "none";
+btnFecharModalEntrega.addEventListener("click", () => {
+  fecharModalEntrega();
 });
 
-window.addEventListener("click", (e) => {
-  if (e.target === modalEntrega) {
-    modalEntrega.style.display = "none";
+window.addEventListener("click", (event) => {
+  if (event.target === modalEntrega) {
+    fecharModalEntrega();
   }
 });
 
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    fecharModalEntrega();
+  }
+});
+
+function fecharModalEntrega() {
+  modalEntrega.style.display = "none";
+}
+
 /* =========================
-   ADICIONAR ITEM ENTREGA
+   ADICIONAR ITEM À ENTREGA
 ========================= */
 
-document.getElementById("btnAdicionarItem").addEventListener("click", () => {
-  const material = inputMaterialEntrega.value;
+btnAdicionarItem.addEventListener("click", () => {
+  const nomeMaterial = padronizarTexto(inputMaterialEntrega.value);
 
   const quantidade = Number(document.getElementById("quantidadeEntrega").value);
 
-  const item = materiais.find((m) => m.nome === material);
+  const material = materiais.find((item) => item.nome === nomeMaterial);
 
-  if (!item) {
-    return mostrarNotificacao("Material não encontrado", "erro");
+  if (!material) {
+    mostrarNotificacao("Material não encontrado.", "erro");
+    return;
   }
 
   if (quantidade <= 0) {
-    return mostrarNotificacao("Quantidade inválida", "erro");
+    mostrarNotificacao("Quantidade inválida.", "erro");
+    return;
   }
 
-  if (quantidade > item.estoque) {
-    return mostrarNotificacao("Estoque insuficiente", "erro");
+  const itemExistente = itensEntrega.find(
+    (item) => item.materialId === material._key,
+  );
+
+  const quantidadeJaAdicionada = itemExistente?.quantidade || 0;
+
+  const quantidadeTotal = quantidadeJaAdicionada + quantidade;
+
+  if (quantidadeTotal > Number(material.estoque || 0)) {
+    mostrarNotificacao("Estoque insuficiente.", "erro");
+    return;
   }
 
-  const jaExiste = itensEntrega.find((i) => i.materialId === item._key);
-
-  if (jaExiste) {
-    jaExiste.quantidade += quantidade;
+  if (itemExistente) {
+    itemExistente.quantidade = quantidadeTotal;
   } else {
     itensEntrega.push({
-      nome: item.nome,
-      unidade: item.unidade,
+      nome: material.nome,
+      unidade: material.unidade,
       quantidade,
-      materialId: item._key,
+      materialId: material._key,
     });
   }
 
   renderItensEntrega();
 
   inputMaterialEntrega.value = "";
-
   document.getElementById("quantidadeEntrega").value = "";
+
+  inputMaterialEntrega.focus();
 });
 
 /* =========================
-   RENDER ITENS ENTREGA
+   RENDERIZAR ITENS DA ENTREGA
 ========================= */
 
 function renderItensEntrega() {
   const tbody = document.querySelector("#tabelaItensEntrega tbody");
 
+  if (!tbody) return;
+
   tbody.innerHTML = "";
+
+  if (!itensEntrega.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="3" style="text-align:center;">
+          Nenhum item adicionado.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
 
   itensEntrega.forEach((item, index) => {
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
       <td class="assunto">
-        ${item.nome}
+        ${escaparHtmlEstoque(item.nome)}
       </td>
 
       <td>
         ${item.quantidade}
-        ${formatarUnidade(item.unidade, item.quantidade)}
+        ${escaparHtmlEstoque(formatarUnidade(item.unidade, item.quantidade))}
       </td>
 
       <td>
         <button
-          class="cancel-btn"
-          onclick="removerItem(${index})"
+          class="cancel-btn btn-remover-item"
+          type="button"
+          data-index="${index}"
+          title="Remover item"
         >
-          ❌
+          <span class="material-symbols-outlined">
+            delete
+          </span>
         </button>
       </td>
     `;
@@ -433,44 +514,77 @@ function renderItensEntrega() {
   });
 }
 
-window.removerItem = function (index) {
-  itensEntrega.splice(index, 1);
+document
+  .querySelector("#tabelaItensEntrega tbody")
+  .addEventListener("click", (event) => {
+    const botao = event.target.closest(".btn-remover-item");
 
-  renderItensEntrega();
-};
+    if (!botao) return;
+
+    const index = Number(botao.dataset.index);
+
+    if (Number.isNaN(index)) return;
+
+    itensEntrega.splice(index, 1);
+
+    renderItensEntrega();
+  });
+
+renderItensEntrega();
 
 /* =========================
    GERAR ROMANEIO
 ========================= */
-const btnGerarRomaneio = document.getElementById("btnGerarRomaneio");
 
 let gerandoRomaneio = false;
 
 btnGerarRomaneio.addEventListener("click", async () => {
   if (gerandoRomaneio) return;
 
+  const destino = padronizarTexto(inputDestinoEntrega.value);
+
+  if (!destino) {
+    mostrarNotificacao("Informe o destino.", "erro");
+    return;
+  }
+
+  if (!itensEntrega.length) {
+    mostrarNotificacao("Adicione pelo menos um item.", "erro");
+    return;
+  }
+
+  for (const item of itensEntrega) {
+    const material = materiais.find(
+      (registro) => registro._key === item.materialId,
+    );
+
+    if (!material) {
+      mostrarNotificacao(
+        `O material "${item.nome}" não foi encontrado.`,
+        "erro",
+      );
+      return;
+    }
+
+    if (Number(item.quantidade) > Number(material.estoque || 0)) {
+      mostrarNotificacao(`Estoque insuficiente para "${item.nome}".`, "erro");
+      return;
+    }
+  }
+
   gerandoRomaneio = true;
 
   btnGerarRomaneio.disabled = true;
   btnGerarRomaneio.textContent = "Gerando...";
 
-  const destino = padronizarTexto(inputDestinoEntrega.value);
-
-  if (!destino) {
-    return mostrarNotificacao("Informe o destino", "erro");
-  }
-
-  if (!itensEntrega.length) {
-    return mostrarNotificacao("Adicione itens", "erro");
-  }
-
   try {
     for (const item of itensEntrega) {
-      const material = materiais.find((m) => m._key === item.materialId);
+      const material = materiais.find(
+        (registro) => registro._key === item.materialId,
+      );
 
       await update(ref(rtdb, `materiais/${item.materialId}`), {
-        estoque: Number(material.estoque) - item.quantidade,
-
+        estoque: Number(material.estoque) - Number(item.quantidade),
         atualizadoEm: new Date().toISOString(),
       });
     }
@@ -478,7 +592,9 @@ btnGerarRomaneio.addEventListener("click", async () => {
     const movimentacao = {
       destino,
       data: new Date().toISOString(),
-      itens: itensEntrega,
+      itens: itensEntrega.map((item) => ({
+        ...item,
+      })),
       responsavel: getNomeResponsavel(),
     };
 
@@ -487,16 +603,20 @@ btnGerarRomaneio.addEventListener("click", async () => {
     gerarPDF(movimentacao);
 
     itensEntrega = [];
-
     renderItensEntrega();
+
+    inputDestinoEntrega.value = "";
+    inputMaterialEntrega.value = "";
+
+    document.getElementById("quantidadeEntrega").value = "";
 
     modalEntrega.style.display = "none";
 
     mostrarNotificacao("Romaneio gerado com sucesso!");
-  } catch (err) {
-    console.error(err);
+  } catch (erro) {
+    console.error("Erro ao gerar romaneio:", erro);
 
-    mostrarNotificacao("Erro ao gerar romaneio", "erro");
+    mostrarNotificacao("Erro ao gerar romaneio.", "erro");
   } finally {
     gerandoRomaneio = false;
 
@@ -506,7 +626,7 @@ btnGerarRomaneio.addEventListener("click", async () => {
 });
 
 /* =========================
-   PDF
+   GERAR PDF
 ========================= */
 
 function gerarPDF(dados) {
@@ -517,133 +637,93 @@ function gerarPDF(dados) {
 
   img.onload = () => {
     const larguraPagina = doc.internal.pageSize.getWidth();
+
     const alturaPagina = doc.internal.pageSize.getHeight();
 
-    // Limites do conteúdo
     const margemEsquerda = 20;
     const margemDireita = 20;
-    const larguraTexto =
-      larguraPagina - margemEsquerda - margemDireita;
 
-    // A lista de itens não deverá ultrapassar esta posição
+    const larguraTexto = larguraPagina - margemEsquerda - margemDireita;
+
     const limiteInferiorItens = 235;
 
     let paginaAtual = 1;
     let y = 0;
 
-    /* =========================
-       CRIAR CABEÇALHO DA PÁGINA
-    ========================= */
-function adicionarCabecalhoPagina(primeiraPagina = false) {
-  // Papel timbrado em todas as páginas
-  doc.addImage(
-    img,
-    "PNG",
-    0,
-    0,
-    larguraPagina,
-    alturaPagina,
-  );
+    function adicionarCabecalhoPagina(primeiraPagina = false) {
+      doc.addImage(img, "PNG", 0, 0, larguraPagina, alturaPagina);
 
-  if (primeiraPagina) {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
+      if (primeiraPagina) {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
 
-    doc.text(
-      "ROMANEIO DE ENTREGA",
-      larguraPagina / 2,
-      48,
-      {
-        align: "center",
-      },
-    );
+        doc.text("ROMANEIO DE ENTREGA", larguraPagina / 2, 48, {
+          align: "center",
+        });
 
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(12);
 
-    doc.text(
-      `Destino: ${dados.destino}`,
-      margemEsquerda,
-      68,
-    );
+        doc.text(`Destino: ${dados.destino}`, margemEsquerda, 68);
 
-    doc.text(
-      `Data: ${formatarData(dados.data)}`,
-      margemEsquerda,
-      76,
-    );
+        doc.text(`Data: ${formatarData(dados.data)}`, margemEsquerda, 76);
 
-    doc.text(
-      `Responsável: ${dados.responsavel || "-"}`,
-      margemEsquerda,
-      84,
-    );
+        doc.text(
+          `Responsável: ${dados.responsavel || "-"}`,
+          margemEsquerda,
+          84,
+        );
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
 
-    doc.text("ITENS:", margemEsquerda, 102);
+        doc.text("ITENS:", margemEsquerda, 102);
 
-    y = 112;
-  } else {
-    // Nas páginas seguintes, começa mais próximo do topo
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
+        y = 112;
+      } else {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
 
-    doc.text("CONTINUAÇÃO DOS ITENS:", margemEsquerda, 48);
+        doc.text("CONTINUAÇÃO DOS ITENS:", margemEsquerda, 48);
 
-    y = 58;
-  }
+        y = 58;
+      }
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
 
-  doc.text(
-    `Página ${paginaAtual}`,
-    larguraPagina - margemDireita,
-    alturaPagina - 10,
-    {
-      align: "right",
-    },
-  );
+      doc.text(
+        `Página ${paginaAtual}`,
+        larguraPagina - margemDireita,
+        alturaPagina - 10,
+        {
+          align: "right",
+        },
+      );
 
-  doc.setFontSize(12);
-}
+      doc.setFontSize(12);
+    }
 
-    /* =========================
-       CRIAR NOVA PÁGINA
-    ========================= */
-function adicionarNovaPagina() {
-  doc.addPage();
+    function adicionarNovaPagina() {
+      doc.addPage();
 
-  paginaAtual++;
+      paginaAtual++;
 
-  adicionarCabecalhoPagina(false);
-}
+      adicionarCabecalhoPagina(false);
+    }
 
-    // Cabeçalho da primeira página
     adicionarCabecalhoPagina(true);
 
-    /* =========================
-       LISTA DE ITENS
-    ========================= */
     dados.itens.forEach((item, index) => {
-      const descricao = `${index + 1}. ${item.nome} - ${
-        item.quantidade
-      } ${formatarUnidade(
-        item.unidade,
-        item.quantidade,
-      )}`;
+      const descricao =
+        `${index + 1}. ${item.nome} - ` +
+        `${item.quantidade} ` +
+        `${formatarUnidade(item.unidade, item.quantidade)}`;
 
-      // Divide nomes grandes em mais de uma linha
-      const linhas = doc.splitTextToSize(
-        descricao,
-        larguraTexto,
-      );
+      const linhas = doc.splitTextToSize(descricao, larguraTexto);
 
       const alturaItem = linhas.length * 7;
 
-      // Verifica se o item cabe na página atual
       if (y + alturaItem > limiteInferiorItens) {
         adicionarNovaPagina();
       }
@@ -653,16 +733,11 @@ function adicionarNovaPagina() {
       y += alturaItem + 3;
     });
 
-    /* =========================
-       TOTAL DE VOLUMES
-    ========================= */
     const totalVolumes = dados.itens.reduce(
-      (total, item) =>
-        total + Number(item.quantidade || 0),
+      (total, item) => total + Number(item.quantidade || 0),
       0,
     );
 
-    // Espaço necessário para total e assinaturas
     const espacoFinalNecessario = 55;
 
     if (y + espacoFinalNecessario > alturaPagina - 20) {
@@ -674,15 +749,8 @@ function adicionarNovaPagina() {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
 
-    doc.text(
-      `Volume total: ${totalVolumes} unidades`,
-      margemEsquerda,
-      y,
-    );
+    doc.text(`Volume total: ${totalVolumes} unidades`, margemEsquerda, y);
 
-    /* =========================
-       ASSINATURAS
-    ========================= */
     y += 35;
 
     doc.setFont("helvetica", "normal");
@@ -691,178 +759,193 @@ function adicionarNovaPagina() {
     doc.line(20, y, 85, y);
     doc.line(125, y, 190, y);
 
-    doc.text(
-      "Responsável pela Entrega",
-      52,
-      y + 7,
-      {
-        align: "center",
-      },
-    );
+    doc.text("Responsável pela Entrega", 52, y + 7, {
+      align: "center",
+    });
 
-    doc.text(
-      "Responsável pelo Recebimento",
-      157,
-      y + 7,
-      {
-        align: "center",
-      },
-    );
+    doc.text("Responsável pelo Recebimento", 157, y + 7, {
+      align: "center",
+    });
 
-    /* =========================
-       ABRIR PDF
-    ========================= */
     const blob = doc.output("blob");
     const url = URL.createObjectURL(blob);
 
     window.open(url, "_blank");
 
-    // Libera a URL temporária após algum tempo
     setTimeout(() => {
       URL.revokeObjectURL(url);
     }, 60000);
   };
 
   img.onerror = () => {
-    console.error(
-      "Não foi possível carregar o papel timbrado.",
-    );
+    console.error("Não foi possível carregar o papel timbrado.");
 
-    mostrarNotificacao(
-      "Erro ao carregar o papel timbrado do PDF",
-      "erro",
-    );
+    mostrarNotificacao("Erro ao carregar o papel timbrado do PDF.", "erro");
   };
 }
 
 /* =========================
-   HISTÓRICO
+   HISTÓRICO DE ROMANEIOS
 ========================= */
 
-onValue(movimentacoesRef, (snap) => {
-  tabelaHistorico.innerHTML = "";
+onValue(
+  movimentacoesRef,
+  (snapshot) => {
+    historicoRomaneios = snapshot.exists()
+      ? Object.entries(snapshot.val())
+          .map(([key, dados]) => ({
+            ...dados,
+            _key: key,
+          }))
+          .sort(
+            (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime(),
+          )
+      : [];
 
-  if (!snap.exists()) return;
+    renderHistorico();
+  },
+  (erro) => {
+    console.error("Erro ao carregar histórico:", erro);
 
-  historicoRomaneios = Object.entries(snap.val())
-    .map(([key, val]) => ({
-      ...val,
-      _key: key,
-    }))
-    .reverse();
+    if (listaHistorico) {
+      listaHistorico.innerHTML = `
+        <div class="estoque-vazio">
+          Não foi possível carregar o histórico.
+        </div>
+      `;
+    }
 
-  renderHistorico();
-  const tr = document.createElement("tr");
-
-  tr.innerHTML = `
-      <td>
-        ${formatarData(mov.data)}
-      </td>
-
-      <td class="assunto">
-        ${mov.destino}
-      </td>
-
-      <td>
-        ${mov.itens.length}
-      </td>
-
-      <td>
-        ${mov.responsavel || "-"}
-      </td>
-
-      <td>
-        <button
-          class="view-btn"
-          data-id="${mov._key}"
-        >
-          <span class="material-symbols-outlined">picture_as_pdf</span>
-        </button>
-      </td>
-    `;
-
-  tabelaHistorico.appendChild(tr);
-});
+    mostrarNotificacao("Erro ao carregar histórico.", "erro");
+  },
+);
 
 function renderHistorico() {
-  tabelaHistorico.innerHTML = "";
+  if (!listaHistorico) return;
 
-  const busca = document.getElementById("buscaHistorico").value.toLowerCase();
+  const busca = inputBuscaHistorico.value.toLowerCase().trim();
 
-  const filtrados = historicoRomaneios.filter((mov) => {
-    return (
-      mov.destino?.toLowerCase().includes(busca) ||
-      mov.responsavel?.toLowerCase().includes(busca) ||
-      formatarData(mov.data).includes(busca)
-    );
+  const filtrados = historicoRomaneios.filter((movimentacao) => {
+    const texto = `
+        ${movimentacao.destino || ""}
+        ${movimentacao.responsavel || ""}
+        ${formatarData(movimentacao.data)}
+      `.toLowerCase();
+
+    return texto.includes(busca);
   });
 
-  filtrados.forEach((mov) => {
-    const tr = document.createElement("tr");
+  if (contadorRomaneios) {
+    contadorRomaneios.textContent = `${filtrados.length} romaneio${
+      filtrados.length === 1 ? "" : "s"
+    }`;
+  }
 
-    tr.innerHTML = `
-      <td>
-        ${formatarData(mov.data)}
-      </td>
-
-      <td class="assunto">
-        ${mov.destino}
-      </td>
-
-      <td>
-        ${mov.itens.length}
-      </td>
-
-      <td>
-        ${mov.responsavel || "-"}
-      </td>
-
-      <td>
-        <button
-          class="view-btn"
-          data-id="${mov._key}"
-        >
-          <span class="material-symbols-outlined">picture_as_pdf</span>
-        </button>
-      </td>
+  if (!filtrados.length) {
+    listaHistorico.innerHTML = `
+      <div class="estoque-vazio">
+        Nenhum romaneio encontrado.
+      </div>
     `;
 
-    tabelaHistorico.appendChild(tr);
-  });
+    return;
+  }
 
-  document.querySelectorAll(".view-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const mov = historicoRomaneios.find((m) => m._key === btn.dataset.id);
+  listaHistorico.innerHTML = filtrados
+    .map((movimentacao) => {
+      const data = separarDataRomaneio(movimentacao.data);
 
-      gerarPDF(mov);
-    });
-  });
+      const quantidadeItens = movimentacao.itens?.length || 0;
+
+      return `
+        <article class="card-romaneio">
+          <div class="romaneio-data">
+            <strong>${data.dia}</strong>
+            <span>${data.mes}</span>
+            <span>${data.ano}</span>
+          </div>
+
+          <div class="romaneio-conteudo">
+            <h3 class="romaneio-destino">
+              ${escaparHtmlEstoque(movimentacao.destino || "Sem destino")}
+            </h3>
+
+            <div class="romaneio-detalhes">
+              <span>
+                <span class="material-symbols-outlined">
+                  inventory_2
+                </span>
+
+                ${quantidadeItens}
+                item${quantidadeItens === 1 ? "" : "s"}
+              </span>
+
+              <span>
+                <span class="material-symbols-outlined">
+                  person
+                </span>
+
+                ${escaparHtmlEstoque(movimentacao.responsavel || "-")}
+              </span>
+            </div>
+          </div>
+
+          <button
+            class="btn-pdf-romaneio"
+            type="button"
+            data-id="${movimentacao._key}"
+            title="Gerar PDF"
+            aria-label="Gerar PDF"
+          >
+            <span class="material-symbols-outlined">
+              picture_as_pdf
+            </span>
+          </button>
+        </article>
+      `;
+    })
+    .join("");
 }
 
-document.querySelectorAll(".view-btn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const mov = lista.find((m) => m._key === btn.dataset.id);
+listaHistorico.addEventListener("click", (event) => {
+  const botao = event.target.closest(".btn-pdf-romaneio");
 
-    gerarPDF(mov);
-  });
+  if (!botao) return;
+
+  const movimentacao = historicoRomaneios.find(
+    (item) => item._key === botao.dataset.id,
+  );
+
+  if (movimentacao) {
+    gerarPDF(movimentacao);
+  }
 });
+
+inputBuscaHistorico.addEventListener("input", renderHistorico);
+
+/* =========================
+   ABAS
+========================= */
 
 const tabBtns = document.querySelectorAll(".tab-btn");
 
 const tabContents = document.querySelectorAll(".tab-content");
 
-tabBtns.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    tabBtns.forEach((b) => b.classList.remove("active"));
+tabBtns.forEach((botao) => {
+  botao.addEventListener("click", () => {
+    tabBtns.forEach((item) => {
+      item.classList.remove("active");
+    });
 
-    tabContents.forEach((tab) => tab.classList.remove("active"));
+    tabContents.forEach((conteudo) => {
+      conteudo.classList.remove("active");
+    });
 
-    btn.classList.add("active");
+    botao.classList.add("active");
 
-    document.getElementById(btn.dataset.tab).classList.add("active");
+    const aba = document.getElementById(botao.dataset.tab);
+
+    if (aba) {
+      aba.classList.add("active");
+    }
   });
 });
-
-document
-  .getElementById("buscaHistorico")
-  .addEventListener("input", renderHistorico);
