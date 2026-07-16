@@ -28,9 +28,7 @@ const contadorEventos = document.getElementById("contadorEventos");
 const btnCadastrar = document.getElementById("btnCadastrarEvento");
 const btnSalvarEdicao = document.getElementById("btnSalvarEdicaoEvento");
 const botoesEdicao = document.getElementById("botoesEdicaoEvento");
-const btnCancelarEdicao = document.getElementById(
-  "btnCancelarEdicaoEvento",
-);
+const btnCancelarEdicao = document.getElementById("btnCancelarEdicaoEvento");
 const msgEdicao = document.getElementById("msgEdicao");
 
 const selectCategoria = document.getElementById("categoria");
@@ -142,10 +140,7 @@ form.addEventListener("submit", async (event) => {
   const descricao = descricaoInput().value.trim();
 
   if (!titulo || !data || !categoria) {
-    notificar(
-      "Preencha o título, a data e a categoria.",
-      "erro",
-    );
+    notificar("Preencha o título, a data e a categoria.", "erro");
     return;
   }
 
@@ -218,20 +213,14 @@ onValue(
 ========================================= */
 
 function renderizarEventos() {
-  const futuros = eventosCache.filter(
-    (evento) => !evento.concluido,
-  );
+  const futuros = eventosCache.filter((evento) => !evento.concluido);
 
-  const concluidos = eventosCache.filter(
-    (evento) => evento.concluido,
-  );
+  const concluidos = eventosCache.filter((evento) => evento.concluido);
 
   if (contadorEventos) {
     contadorEventos.textContent =
       `${futuros.length} futuro${futuros.length === 1 ? "" : "s"} • ` +
-      `${concluidos.length} concluído${
-        concluidos.length === 1 ? "" : "s"
-      }`;
+      `${concluidos.length} concluído${concluidos.length === 1 ? "" : "s"}`;
   }
 
   const eventosFiltrados = eventosCache.filter((evento) => {
@@ -305,9 +294,7 @@ function criarCardEvento(evento) {
           <label
             class="evento-status"
             title="${
-              evento.concluido
-                ? "Marcar como futuro"
-                : "Marcar como concluído"
+              evento.concluido ? "Marcar como futuro" : "Marcar como concluído"
             }"
           >
             <input
@@ -455,8 +442,7 @@ function editarEvento(evento) {
   botoesEdicao.style.display = "flex";
 
   msgEdicao.style.display = "block";
-  msgEdicao.textContent =
-    `✏️ Editando evento de ${formatarData(evento.data)}`;
+  msgEdicao.textContent = `✏️ Editando evento de ${formatarData(evento.data)}`;
 
   window.scrollTo({
     top: 0,
@@ -478,10 +464,7 @@ btnSalvarEdicao.addEventListener("click", async () => {
   const descricao = descricaoInput().value.trim();
 
   if (!titulo || !data || !categoria) {
-    notificar(
-      "Preencha o título, a data e a categoria.",
-      "erro",
-    );
+    notificar("Preencha o título, a data e a categoria.", "erro");
     return;
   }
 
@@ -511,9 +494,7 @@ btnSalvarEdicao.addEventListener("click", async () => {
 ========================================= */
 
 async function excluirEvento(evento) {
-  const confirmou = confirm(
-    `Deseja excluir o evento "${evento.titulo}"?`,
-  );
+  const confirmou = confirm(`Deseja excluir o evento "${evento.titulo}"?`);
 
   if (!confirmou) return;
 
@@ -592,13 +573,9 @@ function bloquearCadastro(bloquear) {
   btnCadastrar.disabled = bloquear;
 
   if (btnCadastrar.tagName === "INPUT") {
-    btnCadastrar.value = bloquear
-      ? "Salvando..."
-      : "Salvar evento";
+    btnCadastrar.value = bloquear ? "Salvando..." : "Salvar evento";
   } else {
-    btnCadastrar.textContent = bloquear
-      ? "Salvando..."
-      : "Salvar evento";
+    btnCadastrar.textContent = bloquear ? "Salvando..." : "Salvar evento";
   }
 }
 
@@ -682,10 +659,7 @@ function escaparHtml(texto) {
 }
 
 function escaparClasse(texto) {
-  return String(texto || "outros").replace(
-    /[^a-zA-Z0-9_-]/g,
-    "",
-  );
+  return String(texto || "outros").replace(/[^a-zA-Z0-9_-]/g, "");
 }
 
 function notificar(mensagem, tipo = "sucesso") {
@@ -703,7 +677,5 @@ function notificar(mensagem, tipo = "sucesso") {
 
 const tituloInput = () => document.getElementById("titulo");
 const dataInput = () => document.getElementById("data");
-const categoriaInput = () =>
-  document.getElementById("categoria");
-const descricaoInput = () =>
-  document.getElementById("descricao");
+const categoriaInput = () => document.getElementById("categoria");
+const descricaoInput = () => document.getElementById("descricao");
