@@ -32,7 +32,7 @@ function ativarLinkAtual() {
 
     // Para páginas internas, ex: /oficios
     if (href !== "/" && path.includes(href.replace("./", ""))) {
-      link.classList.add("active", "glass");
+      link.classList.add("active");
     }
   });
 }

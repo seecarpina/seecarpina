@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tarefas - SEE Carpina</title>
+
+    <link rel="stylesheet" href="./src/css/style.css" />
+    <link rel="stylesheet" href="./src/css/tarefas.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+  </head>
+
+  <body>
+    <button id="btnTopo">↑</button>
+
+    <div class="loading">
+      <svg
+        class="svg-spinner"
+        viewBox="0 0 50 50"
+        role="img"
+        aria-label="Carregando"
+      >
+        <circle
+          class="path"
+          cx="25"
+          cy="25"
+          r="20"
+          fill="none"
+          stroke-width="4"
+        />
+      </svg>
+    </div>
+
+    <div id="notificacao"></div>
+
+    <div class="container">
+      <aside id="sidebar"></aside>
+
+      <main>
+        <h1>Minhas Tarefas</h1>
+
+        <div class="tarefas-grid">
+          <section class="box glass">
+            <form id="formTarefa" class="tarefas-form">
+              <div class="campo-tarefa">
+                <div>
+                  <label for="tituloTarefa">Nova tarefa</label>
+                  <input
+                    id="tituloTarefa"
+                    type="text"
+                    maxlength="180"
+                    placeholder="Digite o que precisa ser feito"
+                    autocomplete="off"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="campos-tarefa">
+                <div class="campo-prazo">
+                  <label for="prazoTarefa">Prazo</label>
+                  <input type="date" id="prazoTarefa" required />
+                </div>
+
+                <div class="campo-prioridade">
+                  <label for="prioridadeTarefa">Prioridade</label>
+                  <select id="prioridadeTarefa">
+                    <option value="baixa">Baixa</option>
+                    <option value="media" selected>Média</option>
+                    <option value="alta">Alta</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="btnAdicionarTarefa"></label>
+                  <input
+                    type="submit"
+                    id="btnAdicionarTarefa"
+                    class="btn"
+                    value="Adicionar"
+                  />
+                </div>
+              </div>
+            </form>
+          </section>
+
+          <section class="box glass">
+            <div class="info-tarefas">
+              <span class="material-symbols-outlined">lock</span>
+
+              <div>
+                <strong>Tarefas pessoais</strong><br />
+                Somente você pode visualizar, editar e concluir estas tarefas.
+              </div>
+            </div>
+          </section>
+
+          <section class="box glass">
+            <div class="tarefas-toolbar">
+              <div
+                class="tarefas-filtros"
+                role="group"
+                aria-label="Filtrar tarefas"
+              >
+                <button
+                  class="filtro-tarefa ativo"
+                  type="button"
+                  data-filtro="todas"
+                >
+                  Todas
+                </button>
+                <button
+                  class="filtro-tarefa"
+                  type="button"
+                  data-filtro="abertas"
+                >
+                  Em aberto
+                </button>
+                <button
+                  class="filtro-tarefa"
+                  type="button"
+                  data-filtro="concluidas"
+                >
+                  Concluídas
+                </button>
+              </div>
+
+              <span id="contadorTarefas" class="tarefas-contador"></span>
+            </div>
+
+            <div id="listaTarefas" class="lista-tarefas">
+              <div class="tarefas-carregando">
+                <svg
+                  class="svg-spinner"
+                  viewBox="0 0 50 50"
+                  role="img"
+                  aria-label="Carregando"
+                >
+                  <circle
+                    class="path"
+                    cx="25"
+                    cy="25"
+                    r="20"
+                    fill="none"
+                    stroke-width="4"
+                  />
+                </svg>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <div class="right"></div>
+    </div>
+
+    <script type="module" src="./src/js/scripts.js"></script>
+    <script type="module" src="./src/js/tarefas.js"></script>
+  </body>
+</html>
