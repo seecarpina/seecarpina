@@ -536,7 +536,7 @@ function renderTabela() {
                   title="Editar ofício"
                 >
                   <span class="material-symbols-outlined">
-                    edit_square
+                    edit_note
                   </span>
                 </button>
 
@@ -751,7 +751,7 @@ function iniciarEdicao(oficio) {
   msgEdicao.innerHTML = `
   <div class="edicao-oficio-info">
     <span class="material-symbols-outlined">
-      edit_square
+      edit_note
     </span>
 
     <div>
