@@ -1735,9 +1735,10 @@ select {
 
 #msgEdicao {
   display: none;
-  margin-top: 10px;
-  font-weight: bold;
-  color: var(--clr-warnig);
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border-radius: 0.9rem;
+  background: var(--clr-light);
 }
 
 /* 📄 Paginação */

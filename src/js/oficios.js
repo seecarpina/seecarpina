@@ -748,10 +748,22 @@ function iniciarEdicao(oficio) {
   btnCadastrar.style.display = "none";
   botoesEdicao.style.display = "flex";
 
-  msgEdicao.textContent = `✏️ Editando ofício nº ${formatarNumeroOficio(
-    oficio.numero,
-    anoSelecionado,
-  )}`;
+  msgEdicao.innerHTML = `
+  <div class="edicao-oficio-info">
+    <span class="material-symbols-outlined">
+      edit_square
+    </span>
+
+    <div>
+      <strong>Modo de edição</strong>
+      <span>
+        Ofício nº ${formatarNumeroOficio(oficio.numero, anoSelecionado)}
+      </span>
+    </div>
+  </div>
+`;
+
+  msgEdicao.style.display = "block";
 
   msgEdicao.style.display = "block";
 

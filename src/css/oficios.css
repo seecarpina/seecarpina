@@ -119,6 +119,44 @@
 }
 
 /* =========================================
+   EDIÇÃO DE OFÍCIO
+========================================= */
+
+.edicao-oficio-info {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.edicao-oficio-info > .material-symbols-outlined {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--clr-primary);
+  color: var(--clr-white);
+}
+
+.edicao-oficio-info div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.edicao-oficio-info strong {
+  font-size: 0.9rem;
+  color: var(--clr-dark);
+}
+
+.edicao-oficio-info span:not(.material-symbols-outlined) {
+  font-size: 0.82rem;
+  opacity: 0.75;
+}
+
+/* =========================================
    FILTROS
 ========================================= */
 
