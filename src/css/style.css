@@ -478,6 +478,30 @@ h5 {
 small {
   font-size: 0.75rem;
 }
+novo {
+  padding: 3px 5px;
+  background: var(--clr-primary);
+  border-radius: 10px;
+  font-size: 0.5em;
+  color: var(--clr-white);
+  box-shadow: 0px 0px 5px var(--clr-primary);
+  animation: pulsar 2s infinite;
+}
+@keyframes pulsar {
+  0% {
+    transform: scale(1);
+    box-shadow: 0px 0px 5px var(--clr-primary);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0px 0px 15px var(--clr-primary);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0px 0px 5px var(--clr-primary);
+  }
+}
+
 .profile-photo img,
 #profile-photo img {
   width: 2.8rem;
