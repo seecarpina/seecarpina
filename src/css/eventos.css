@@ -103,32 +103,6 @@
 }
 
 /* =========================================
-   AVISO
-========================================= */
-
-.info-eventos {
-  display: flex;
-  align-items: center;
-  gap: 0.9rem;
-}
-
-.info-eventos > .material-symbols-outlined {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 2.8rem;
-  height: 2.8rem;
-  border-radius: 50%;
-  background: var(--clr-primary);
-  color: var(--clr-white);
-}
-
-.info-eventos strong {
-  color: var(--clr-dark);
-}
-
-/* =========================================
    FILTROS
 ========================================= */
 
