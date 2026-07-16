@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ofícios - SEE Carpina</title>
     <link rel="stylesheet" href="./src/css/style.css" />
+    <link rel="stylesheet" href="./src/css/oficios.css" />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
@@ -36,119 +37,169 @@
       <main>
         <h1>Cadastro de Ofícios</h1>
 
-        <!-- 📋 Formulário -->
-        <form id="formOficio" class="box glass">
-          <input type="hidden" id="numero" />
-          <input type="hidden" id="responsavel" />
-          <input type="hidden" id="data" />
+        <div class="oficios-grid">
+          <!-- INFORMAÇÃO -->
+          <section class="box glass">
+            <div class="info-card">
+              <span class="material-symbols-outlined">description</span>
 
-          <div>
-            <label for="assunto">Assunto:</label>
-            <input type="text" id="assunto" required placeholder="Assunto" />
-          </div>
-
-          <div class="flex justify-center align-center g-1">
-            <div class="w-100">
-              <div class="autocomplete">
-                <label for="destino">Destino:</label>
-                <input
-                  type="text"
-                  id="destino"
-                  placeholder="Digite para buscar..."
-                />
-                <ul id="autocompleteDestino" class="autocomplete-list"></ul>
+              <div>
+                <strong>Controle de ofícios</strong><br />
+                Cadastre, consulte, edite e acompanhe os ofícios emitidos pelo
+                setor.
               </div>
             </div>
+          </section>
 
-            <div class="w-100">
-              <div class="autocomplete">
-                <label for="copia">Cópia:</label>
+          <!-- FORMULÁRIO -->
+          <section class="box glass">
+            <form id="formOficio" class="oficios-form">
+              <input type="hidden" id="numero" />
+              <input type="hidden" id="responsavel" />
+              <input type="hidden" id="data" />
+
+              <div class="campo-assunto">
+                <label for="assunto">Assunto</label>
+
                 <input
                   type="text"
-                  id="copia"
-                  placeholder="Digite para buscar..."
+                  id="assunto"
+                  required
+                  placeholder="Digite o assunto do ofício"
+                  autocomplete="off"
                 />
-                <ul id="autocompleteCopia" class="autocomplete-list"></ul>
               </div>
-            </div>
-          </div>
 
-          <div id="botoesCadastro">
-            <button class="btn" id="btnCadastrar" type="submit">
-              Cadastrar Ofício
-            </button>
+              <div class="campos-oficio">
+                <div class="autocomplete">
+                  <label for="destino">Destino</label>
 
-            <div id="botoesEdicao" style="display: none; gap: 10px">
-              <button type="button" class="btn" id="btnSalvarEdicao">
-                Salvar edição
+                  <input
+                    type="text"
+                    id="destino"
+                    placeholder="Digite para buscar"
+                    autocomplete="off"
+                  />
+
+                  <ul id="autocompleteDestino" class="autocomplete-list"></ul>
+                </div>
+
+                <div class="autocomplete">
+                  <label for="copia">Cópia</label>
+
+                  <input
+                    type="text"
+                    id="copia"
+                    placeholder="Digite para buscar"
+                    autocomplete="off"
+                  />
+
+                  <ul id="autocompleteCopia" class="autocomplete-list"></ul>
+                </div>
+
+                <div id="botoesCadastro" class="campo-botao-oficio">
+                  <label class="label-invisivel">Ação</label>
+
+                  <button class="btn" id="btnCadastrar" type="submit">
+                    <span class="material-symbols-outlined"> add_circle </span>
+
+                    Cadastrar
+                  </button>
+
+                  <div id="botoesEdicao">
+                    <button type="button" class="btn" id="btnSalvarEdicao">
+                      <span class="material-symbols-outlined"> save </span>
+
+                      Salvar edição
+                    </button>
+
+                    <button
+                      type="button"
+                      class="btn btn-cancelar"
+                      id="btnCancelarEdicao"
+                    >
+                      <span class="material-symbols-outlined"> close </span>
+
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <p id="msgEdicao"></p>
+            </form>
+          </section>
+
+          <!-- LISTAGEM -->
+          <section class="box glass">
+            <div class="oficios-cabecalho">
+              <div>
+                <h2>Ofícios cadastrados</h2>
+                <span id="contadorOficios" class="oficios-contador"></span>
+              </div>
+
+              <button id="btnExportarExcel" class="btn-excel" type="button">
+                <span class="material-symbols-outlined"> table_view </span>
+
+                Exportar para Excel
               </button>
-              <button
-                type="button"
-                class="btn btn-cancelar"
-                id="btnCancelarEdicao"
-              >
-                Cancelar
-              </button>
             </div>
-          </div>
 
-          <p id="msgEdicao"></p>
-        </form>
+            <div class="oficios-filtros">
+              <div class="filtro-ano">
+                <label for="filtroAno">Ano</label>
+                <select id="filtroAno"></select>
+              </div>
 
-        <hr />
+              <div class="campo-busca-oficios">
+                <span class="material-symbols-outlined">search</span>
 
-        <h2>Ofícios cadastrados</h2>
+                <input
+                  type="search"
+                  id="busca"
+                  placeholder="Buscar por número, assunto, destino ou responsável"
+                  autocomplete="off"
+                />
+              </div>
 
-        <div class="flex justify-center g-1">
-          <div class="flex justify-center align-center g-1">
-            <select id="filtroAno"></select>
-          </div>
+              <label class="filtro-disponiveis">
+                <input type="checkbox" id="filtroDisponiveis" />
 
-          <input
-            class="busca"
-            type="text"
-            id="busca"
-            placeholder="🔍 Buscar por número, assunto, destino ou responsável..."
-          />
+                <span class="filtro-checkbox">
+                  <span class="material-symbols-outlined"> check </span>
+                </span>
 
-          <label class="switch">
-            <input type="checkbox" id="filtroDisponiveis" />
-            <span class="slider">
-              <span class="ball"></span>
-            </span>
-            <span>Ver apenas ofícios disponíveis</span>
-          </label>
+                <span>Somente disponíveis</span>
+              </label>
+            </div>
+
+            <div class="table-wrapper tabela-oficios-wrapper">
+              <table id="tabelaOficios">
+                <thead>
+                  <tr>
+                    <th>Número</th>
+                    <th>Assunto</th>
+                    <th>Data</th>
+                    <th>Destino</th>
+                    <th>Cópia</th>
+                    <th>Responsável</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+
+                <tbody></tbody>
+              </table>
+            </div>
+
+            <div class="paginacao" id="paginacao"></div>
+          </section>
         </div>
-
-        <div class="flex justify-center">
-          <button id="btnExportarExcel" class="btn-excel">
-            📊 Exportar para Excel
-          </button>
-        </div>
-        <div class="table-wrapper">
-          <table id="tabelaOficios" class="glass">
-            <thead>
-              <tr>
-                <th>Número</th>
-                <th>Assunto</th>
-                <th>Data</th>
-                <th>Destino</th>
-                <th>Cópia</th>
-                <th>Responsável</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-
-        <!-- 🔢 Paginação -->
-        <div class="paginacao" id="paginacao"></div>
       </main>
 
       <div class="right"></div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script type="module" src="./src/js/scripts.js"></script>
+    <script type="module" src="./src/js/oficios.js"></script>
   </body>
 </html>

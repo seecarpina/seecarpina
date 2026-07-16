@@ -1,0 +1,427 @@
+/* =========================================
+   ESTRUTURA
+========================================= */
+
+.oficios-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.2rem;
+}
+
+/* =========================================
+   FORMULÁRIO
+========================================= */
+
+.oficios-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.campo-assunto,
+.campo-assunto input {
+  width: 100%;
+}
+
+.oficios-form label {
+  display: block;
+  margin-bottom: 0.45rem;
+}
+
+.campos-oficio {
+  display: grid;
+  grid-template-columns:
+    minmax(200px, 1fr)
+    minmax(200px, 1fr)
+    auto;
+  gap: 1rem;
+  align-items: end;
+}
+
+.campos-oficio > div {
+  min-width: 0;
+}
+
+.campos-oficio input {
+  width: 100%;
+}
+
+.campo-botao-oficio {
+  min-width: 170px;
+}
+
+.label-invisivel {
+  visibility: hidden;
+}
+
+#btnCadastrar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  white-space: nowrap;
+}
+
+#botoesEdicao {
+  display: none;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+#botoesEdicao .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+#msgEdicao {
+  display: none;
+  margin: 0;
+  padding: 0.8rem 1rem;
+  border-radius: 0.8rem;
+  background: var(--clr-light);
+  font-weight: 600;
+}
+
+/* =========================================
+   CABEÇALHO DA LISTAGEM
+========================================= */
+
+.oficios-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.oficios-cabecalho h2 {
+  margin: 0;
+}
+
+.oficios-contador {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.btn-excel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+
+/* =========================================
+   FILTROS
+========================================= */
+
+.oficios-filtros {
+  display: grid;
+  grid-template-columns: 130px minmax(260px, 1fr) auto;
+  align-items: end;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.filtro-ano label {
+  display: block;
+  margin-bottom: 0.45rem;
+}
+
+.filtro-ano select {
+  width: 100%;
+  padding: 1rem !important;
+  margin-bottom: 0 !important;
+  border: 0 !important;
+  border-radius: 0.9rem !important;
+}
+
+.campo-busca-oficios {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 1rem;
+  border-radius: 0.9rem;
+  background: var(--clr-white);
+}
+
+.campo-busca-oficios > .material-symbols-outlined {
+  flex-shrink: 0;
+  color: var(--clr-primary);
+}
+
+.campo-busca-oficios input {
+  width: 100%;
+  border: 0;
+  padding-left: 0;
+  background: transparent;
+}
+
+.campo-busca-oficios input:focus {
+  outline: none;
+}
+
+.filtro-disponiveis {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 48px;
+  cursor: pointer;
+  white-space: nowrap;
+  margin: 0;
+}
+
+.filtro-disponiveis input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.filtro-checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border: 2px solid var(--clr-primary);
+  border-radius: 0.4rem;
+  color: transparent;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.filtro-checkbox .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+.filtro-disponiveis input:checked + .filtro-checkbox {
+  background: var(--clr-primary);
+  color: var(--clr-white);
+}
+
+/* =========================================
+   TABELA
+========================================= */
+
+.tabela-oficios-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 1rem;
+}
+
+#tabelaOficios {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--clr-white);
+}
+
+#tabelaOficios thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+#tabelaOficios thead th {
+  background: var(--clr-primary);
+  color: var(--clr-white);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+}
+
+#tabelaOficios th,
+#tabelaOficios td {
+  padding: 0.8rem 0.75rem;
+  vertical-align: middle;
+}
+
+#tabelaOficios tbody tr {
+  transition: background 0.2s ease;
+}
+
+#tabelaOficios tbody tr:nth-child(even) {
+  background: var(--clr-light);
+}
+
+#tabelaOficios tbody tr:hover {
+  background: rgba(115, 128, 236, 0.12);
+}
+
+#tabelaOficios td:first-child {
+  font-weight: 700;
+  color: var(--clr-primary);
+  white-space: nowrap;
+}
+
+#tabelaOficios td:nth-child(2) {
+  min-width: 260px;
+}
+
+#tabelaOficios td:nth-child(3) {
+  white-space: nowrap;
+}
+
+#tabelaOficios td:nth-child(4),
+#tabelaOficios td:nth-child(5) {
+  min-width: 170px;
+}
+
+#tabelaOficios td:nth-child(6) {
+  white-space: nowrap;
+}
+
+#tabelaOficios td:last-child {
+  min-width: 170px;
+}
+
+/* =========================================
+   AÇÕES
+========================================= */
+
+#tabelaOficios .flex {
+  flex-wrap: nowrap;
+  gap: 0.3rem;
+}
+
+#tabelaOficios .icon-btn,
+#tabelaOficios .edit-btn,
+#tabelaOficios .cancel-btn,
+#tabelaOficios .view-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+#tabelaOficios .icon-btn:hover,
+#tabelaOficios .edit-btn:hover,
+#tabelaOficios .cancel-btn:hover,
+#tabelaOficios .view-btn:hover {
+  background: var(--clr-light);
+}
+
+#tabelaOficios .edit-btn {
+  color: var(--clr-primary);
+}
+
+#tabelaOficios .cancel-btn {
+  color: crimson;
+}
+
+#tabelaOficios .view-btn {
+  color: crimson;
+}
+
+#tabelaOficios button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* =========================================
+   PAGINAÇÃO
+========================================= */
+
+.paginacao {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 1.2rem;
+}
+
+.paginacao button {
+  min-width: 2.3rem;
+  height: 2.3rem;
+  border: 1px solid var(--clr-primary);
+  border-radius: 0.6rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.paginacao button:hover,
+.paginacao button.ativo {
+  background: var(--clr-primary);
+  color: var(--clr-white);
+}
+
+/* =========================================
+   RESPONSIVO
+========================================= */
+
+@media (max-width: 1000px) {
+  .campos-oficio {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .campo-botao-oficio {
+    grid-column: 1 / -1;
+  }
+
+  #btnCadastrar {
+    width: 100%;
+  }
+
+  .oficios-filtros {
+    grid-template-columns: 130px minmax(220px, 1fr);
+  }
+
+  .filtro-disponiveis {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 650px) {
+  .campos-oficio {
+    grid-template-columns: 1fr;
+  }
+
+  .campo-botao-oficio {
+    grid-column: auto;
+  }
+
+  .label-invisivel {
+    display: none;
+  }
+
+  #botoesEdicao {
+    flex-direction: column;
+  }
+
+  #botoesEdicao .btn {
+    width: 100%;
+  }
+
+  .oficios-cabecalho {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .btn-excel {
+    width: 100%;
+  }
+
+  .oficios-filtros {
+    grid-template-columns: 1fr;
+  }
+
+  .filtro-disponiveis {
+    grid-column: auto;
+  }
+}
