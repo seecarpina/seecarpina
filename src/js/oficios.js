@@ -28,7 +28,7 @@ let todosOficios = [];
 let destinos = [];
 
 let paginaAtual = 1;
-const porPagina = 100;
+const porPagina = 25;
 
 let editando = false;
 let chaveEdicao = null;
