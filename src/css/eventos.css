@@ -1,0 +1,615 @@
+/* =========================================
+   ESTRUTURA DA PÁGINA
+========================================= */
+
+.eventos-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.2rem;
+}
+
+/* =========================================
+   FORMULÁRIO
+========================================= */
+
+.eventos-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.campo-evento,
+.campo-evento > div,
+.campo-descricao {
+  width: 100%;
+}
+
+.campo-evento label,
+.campos-evento label,
+.campo-descricao label {
+  display: block;
+  margin-bottom: 0.45rem;
+}
+
+.campo-titulo input {
+  width: 100%;
+}
+
+.campos-evento {
+  display: grid;
+  grid-template-columns:
+    minmax(180px, 1fr)
+    minmax(180px, 1fr)
+    auto;
+  gap: 1rem;
+  align-items: end;
+}
+
+.campos-evento > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.campos-evento input,
+.campos-evento select {
+  width: 100%;
+}
+
+.label-invisivel {
+  visibility: hidden;
+}
+
+.campo-botao {
+  min-width: 160px;
+}
+
+#btnCadastrarEvento {
+  width: 100%;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.campo-descricao textarea {
+  width: 100%;
+  min-height: 110px;
+  resize: vertical;
+}
+
+/* =========================================
+   EDIÇÃO
+========================================= */
+
+#botoesEdicaoEvento {
+  display: none;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+#botoesEdicaoEvento .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+#msgEdicao {
+  display: none;
+  padding: 0.8rem 1rem;
+  border-radius: 0.8rem;
+  background: var(--clr-light);
+  font-weight: 600;
+}
+
+/* =========================================
+   AVISO
+========================================= */
+
+.info-eventos {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.info-eventos > .material-symbols-outlined {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 50%;
+  background: var(--clr-primary);
+  color: var(--clr-white);
+}
+
+.info-eventos strong {
+  color: var(--clr-dark);
+}
+
+/* =========================================
+   FILTROS
+========================================= */
+
+.eventos-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.abas-eventos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.abas-eventos .aba {
+  border: 1px solid var(--clr-primary);
+  border-radius: 999px;
+  padding: 0.55rem 0.9rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-weight: 600;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.abas-eventos .aba.ativa {
+  background: var(--clr-primary);
+  color: var(--clr-white);
+  border-color: transparent;
+}
+
+/* =========================================
+   TOOLBAR
+========================================= */
+
+.eventos-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.abas-eventos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.abas-eventos .aba {
+  border: 1px solid var(--clr-primary);
+  border-radius: 999px;
+  padding: 0.55rem 0.9rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.abas-eventos .aba.ativa {
+  background: var(--clr-primary);
+  color: var(--clr-white);
+  border-color: transparent;
+}
+
+.eventos-contador {
+  font-size: 0.9rem;
+  opacity: 0.75;
+}
+
+/* =========================================
+   LISTA
+========================================= */
+
+.lista-eventos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.eventos-vazio {
+  padding: 2.5rem 1rem;
+  text-align: center;
+  opacity: 0.7;
+}
+
+/* =========================================
+   CARD
+========================================= */
+
+.card-evento {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  overflow: hidden;
+  border-radius: 1rem;
+  background: var(--clr-white);
+  border-left: 5px solid var(--clr-primary);
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.card-evento:hover {
+  transform: translateY(-2px);
+}
+
+.card-evento.concluido {
+  opacity: 0.65;
+}
+
+.card-evento.concluido .evento-titulo {
+  text-decoration: line-through;
+}
+
+/* =========================================
+   BLOCO DA DATA
+========================================= */
+
+.evento-data-bloco {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;
+  padding: 1rem 0.5rem;
+  background: var(--clr-light);
+  text-align: center;
+}
+
+.evento-dia {
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.evento-mes {
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08rem;
+}
+
+.evento-ano {
+  margin-top: 0.15rem;
+  font-size: 0.75rem;
+  opacity: 0.65;
+}
+
+/* =========================================
+   CONTEÚDO
+========================================= */
+
+.evento-conteudo {
+  min-width: 0;
+  padding: 1rem 1.1rem;
+}
+
+.evento-cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.evento-titulo {
+  margin: 0.55rem 0 0;
+  font-size: 1.1rem;
+  overflow-wrap: anywhere;
+}
+
+.evento-categoria {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: var(--clr-light);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.evento-categoria .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+.evento-descricao {
+  margin: 0.85rem 0;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.evento-descricao.sem-descricao {
+  font-style: italic;
+  opacity: 0.55;
+}
+
+/* =========================================
+   STATUS
+========================================= */
+
+.evento-status {
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.evento-status input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.evento-status .material-symbols-outlined {
+  font-size: 1.7rem;
+  color: var(--clr-primary);
+}
+
+/* =========================================
+   RODAPÉ
+========================================= */
+
+.evento-rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--clr-light);
+}
+
+.evento-data-completa {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.evento-data-completa .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+.evento-atrasado {
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(220, 20, 60, 0.12);
+  color: crimson;
+  font-weight: 700;
+  opacity: 1;
+}
+
+/* =========================================
+   AÇÕES
+========================================= */
+
+.evento-acoes {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.btn-editar-evento,
+.btn-excluir-evento {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.btn-editar-evento {
+  color: var(--clr-primary);
+}
+
+.btn-excluir-evento {
+  color: crimson;
+}
+
+.btn-editar-evento:hover,
+.btn-excluir-evento:hover {
+  background: var(--clr-light);
+}
+
+/* =========================================
+   CORES DAS CATEGORIAS
+========================================= */
+
+.card-evento.categoria-aniversario {
+  border-left-color: mediumorchid;
+}
+
+.card-evento.categoria-eventos {
+  border-left-color: dodgerblue;
+}
+
+.card-evento.categoria-reuniao {
+  border-left-color: darkorange;
+}
+
+.card-evento.categoria-resposta_mp {
+  border-left-color: slateblue;
+}
+
+.card-evento.categoria-alerta {
+  border-left-color: crimson;
+}
+
+.card-evento.categoria-audiencias {
+  border-left-color: seagreen;
+}
+
+.card-evento.categoria-outros {
+  border-left-color: gray;
+}
+
+.evento-categoria.categoria-aniversario {
+  color: mediumorchid;
+}
+
+.evento-categoria.categoria-eventos {
+  color: dodgerblue;
+}
+
+.evento-categoria.categoria-reuniao {
+  color: darkorange;
+}
+
+.evento-categoria.categoria-resposta_mp {
+  color: slateblue;
+}
+
+.evento-categoria.categoria-alerta {
+  color: crimson;
+}
+
+.evento-categoria.categoria-audiencias {
+  color: seagreen;
+}
+
+.evento-categoria.categoria-outros {
+  color: gray;
+}
+
+/* =========================================
+   EVENTO ATRASADO
+========================================= */
+
+.card-evento.atrasado {
+  background: rgba(220, 20, 60, 0.05);
+}
+
+/* =========================================
+   RESPONSIVO
+========================================= */
+
+@media (max-width: 650px) {
+  .eventos-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .card-evento {
+    grid-template-columns: 70px minmax(0, 1fr);
+  }
+
+  .evento-data-bloco {
+    min-height: 100%;
+  }
+
+  .evento-dia {
+    font-size: 1.6rem;
+  }
+
+  .evento-cabecalho {
+    gap: 0.5rem;
+  }
+
+  .evento-rodape {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .evento-acoes {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 430px) {
+  .abas-eventos {
+    width: 100%;
+  }
+
+  .abas-eventos .aba {
+    flex: 1;
+    padding-inline: 0.6rem;
+  }
+
+  .card-evento {
+    grid-template-columns: 1fr;
+  }
+
+  .evento-data-bloco {
+    min-height: auto;
+    flex-direction: row;
+    gap: 0.35rem;
+    padding: 0.65rem 1rem;
+    justify-content: flex-start;
+  }
+
+  .evento-dia {
+    font-size: 1.2rem;
+  }
+
+  .evento-mes,
+  .evento-ano {
+    margin: 0;
+  }
+}
+
+/* =========================================
+   RESPONSIVO
+========================================= */
+
+@media (max-width: 800px) {
+  .campos-evento {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .campo-botao {
+    grid-column: 1 / -1;
+  }
+
+  #btnCadastrarEvento {
+    width: 100%;
+  }
+}
+
+@media (max-width: 550px) {
+  .campos-evento {
+    grid-template-columns: 1fr;
+  }
+
+  .campo-botao {
+    grid-column: auto;
+  }
+
+  .label-invisivel {
+    display: none;
+  }
+
+  .eventos-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .abas-eventos {
+    width: 100%;
+  }
+
+  .abas-eventos .aba {
+    flex: 1;
+  }
+
+  #botoesEdicaoEvento {
+    flex-direction: column;
+  }
+
+  #botoesEdicaoEvento .btn {
+    width: 100%;
+  }
+}
