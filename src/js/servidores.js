@@ -278,15 +278,31 @@ function renderTabela() {
           </span>
         </button>
 
-        <button
-          class="transfer-btn"
-          type="button"
-          title="Transferir servidor"
-        >
-          <span class="material-symbols-outlined">
-            transfer_within_a_station
-          </span>
-        </button>
+        ${
+          String(s.situacao || "").toLowerCase() === "ativo"
+            ? `
+              <button
+                class="transfer-btn"
+                type="button"
+                title="Transferir servidor"
+              >
+                <span class="material-symbols-outlined">
+                  transfer_within_a_station
+                </span>
+              </button>
+
+              <button
+                class="desligar-btn"
+                type="button"
+                title="Desligar servidor"
+              >
+                <span class="material-symbols-outlined">
+                  cancel
+                </span>
+              </button>
+            `
+            : ""
+        }
       </div>
     </td>
   `;
@@ -295,8 +311,12 @@ function renderTabela() {
         editarServidor(s);
       });
 
-      tr.querySelector(".transfer-btn").addEventListener("click", () => {
+      tr.querySelector(".transfer-btn")?.addEventListener("click", () => {
         abrirTransferencia(s);
+      });
+
+      tr.querySelector(".desligar-btn")?.addEventListener("click", (event) => {
+        desligarServidor(s, event.currentTarget);
       });
 
       tabela.appendChild(tr);
@@ -455,6 +475,122 @@ function editarServidor(s) {
   msgEdicao.style.display = "block";
 
   btnTopo.click();
+}
+
+/* ===============================
+   TRANSFERÊNCIA
+================================ */
+
+async function desligarServidor(servidor, botao) {
+  if (!servidor?._key) {
+    mostrarNotificacao("Servidor não localizado.", "erro");
+
+    return;
+  }
+
+  if (String(servidor.situacao || "").toLowerCase() === "inativo") {
+    mostrarNotificacao("Este servidor já está inativo.", "erro");
+
+    return;
+  }
+
+  const confirmou = confirm(
+    `Confirma o desligamento do servidor ${servidor.nome}?\n\n` +
+      `Ao confirmar:\n` +
+      `• a situação do servidor será alterada para Inativo;\n` +
+      `• será cadastrado automaticamente um ofício de desligamento destinado ao RH.`,
+  );
+
+  if (!confirmou) return;
+
+  const conteudoOriginal = botao.innerHTML;
+
+  botao.disabled = true;
+
+  botao.innerHTML = `
+    <span class="material-symbols-outlined">
+      hourglass_top
+    </span>
+  `;
+
+  try {
+    const anoAtual = String(new Date().getFullYear());
+
+    const oficiosAnoRef = ref(rtdb, `oficios/${anoAtual}`);
+
+    const snapshotOficios = await get(oficiosAnoRef);
+
+    const oficiosExistentes = snapshotOficios.exists()
+      ? snapshotOficios.val()
+      : {};
+
+    let maiorNumero = 0;
+
+    Object.values(oficiosExistentes).forEach((oficio) => {
+      const numero = Number(oficio?.numero);
+
+      if (!Number.isNaN(numero) && numero > maiorNumero) {
+        maiorNumero = numero;
+      }
+    });
+
+    const numeroOficio = maiorNumero + 1;
+
+    const novoOficioRef = push(oficiosAnoRef);
+
+    const agora = new Date();
+
+    const dataISO = agora.toLocaleDateString("sv-SE");
+
+    const responsavel = window.dadosUsuario?.nome?.split(" ")[0] || "Usuário";
+
+    const assunto = `SOLICITA DESLIGAMENTO DE ${servidor.nome}`
+      .trim()
+      .toUpperCase();
+
+    const atualizacoes = {};
+
+    atualizacoes[`servidores/registros/${servidor._key}/situacao`] = "Inativo";
+
+    atualizacoes[`servidores/registros/${servidor._key}/atualizadoEm`] =
+      agora.toISOString();
+
+    atualizacoes[`servidores/registros/${servidor._key}/desligadoEm`] =
+      agora.toISOString();
+
+    atualizacoes[`servidores/registros/${servidor._key}/oficioDesligamento`] =
+      `${String(numeroOficio).padStart(3, "0")}/${anoAtual}`;
+
+    atualizacoes[`oficios/${anoAtual}/${novoOficioRef.key}`] = {
+      numero: numeroOficio,
+      assunto,
+      data: dataISO,
+      destino: "RH",
+      copia: "SISTEMA CARPINA DIGITAL",
+      responsavel,
+      criadoEm: agora.toISOString(),
+      origem: "DESLIGAMENTO_SERVIDOR",
+      servidorId: servidor._key,
+      servidorCodigo: servidor.codigo || "",
+      servidorCPF: servidor.cpf || "",
+    };
+
+    await update(ref(rtdb), atualizacoes);
+
+    mostrarNotificacao(
+      `Servidor desligado e Ofício nº ${String(numeroOficio).padStart(
+        3,
+        "0",
+      )}/${anoAtual} cadastrado com sucesso!`,
+    );
+  } catch (erro) {
+    console.error("Erro ao desligar servidor:", erro);
+
+    mostrarNotificacao("Não foi possível concluir o desligamento.", "erro");
+
+    botao.disabled = false;
+    botao.innerHTML = conteudoOriginal;
+  }
 }
 
 /* ===============================
