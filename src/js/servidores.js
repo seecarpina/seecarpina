@@ -274,7 +274,7 @@ function renderTabela() {
           title="Editar servidor"
         >
           <span class="material-symbols-outlined">
-            edit_square
+            edit_note
           </span>
         </button>
 
@@ -284,7 +284,7 @@ function renderTabela() {
           title="Transferir servidor"
         >
           <span class="material-symbols-outlined">
-            swap_horiz
+            transfer_within_a_station
           </span>
         </button>
       </div>
