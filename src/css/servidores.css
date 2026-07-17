@@ -319,7 +319,7 @@
 }
 
 .acoes-servidor .transfer-btn {
-  color: darkorange;
+  color: var(--clr-warnig);
 }
 
 /* =========================================
