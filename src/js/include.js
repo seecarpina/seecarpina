@@ -4,9 +4,6 @@ export async function carregarSidebar() {
 
   const html = await fetch("/src/template/sidebar.html").then((r) => r.text());
   el.innerHTML = html;
-
-  // 🔥 Depois que o sidebar for carregado, ativar link correto
-  ativarLinkAtual();
 }
 
 export async function carregarRight() {
@@ -17,25 +14,28 @@ export async function carregarRight() {
   el.innerHTML = html;
 }
 
-function ativarLinkAtual() {
+export function ativarLinkAtual() {
   const links = document.querySelectorAll("#sidebar a");
-  const path = window.location.pathname.toLowerCase();
+
+  const pathAtual = window.location.pathname.replace(/\/$/, "").toLowerCase();
 
   links.forEach((link) => {
-    const href = link.getAttribute("href").toLowerCase();
+    link.classList.remove("active");
 
-    // Caso especial: página principal ("/")
-    if (href === "/" && path === "/") {
-      link.classList.add("active");
-      return;
-    }
+    const href = link.getAttribute("href");
 
-    // Para páginas internas, ex: /oficios
-    if (href !== "/" && path.includes(href.replace("./", ""))) {
+    if (!href) return;
+
+    const urlLink = new URL(href, window.location.origin);
+
+    const pathLink = urlLink.pathname.replace(/\/$/, "").toLowerCase();
+
+    if (pathAtual === pathLink) {
       link.classList.add("active");
     }
   });
 }
+
 import { initChat } from "./chat.js";
 
 export async function carregarChat() {

@@ -37,7 +37,12 @@ window.addEventListener("load", () => {
 });
 
 import "./eventosStore.js";
-import { carregarSidebar, carregarRight, carregarChat } from "./include.js";
+import {
+  carregarSidebar,
+  carregarRight,
+  carregarChat,
+  ativarLinkAtual,
+} from "./include.js";
 import { auth, db, rtdb } from "./firebaseConfig.js"; // <<–– CONFIG DO FIREBASE AGORA ESTÁ AQUI
 
 // DESATIVAR/ATIVAR CHAt
@@ -99,6 +104,8 @@ async function montarSidebarDinamica(dadosUsuario) {
 
         menuSidebar.appendChild(link);
       });
+
+      ativarLinkAtual();
     }
 
     // Configurações pode ser controlada pelo Firebase
