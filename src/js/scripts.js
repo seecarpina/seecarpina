@@ -1,8 +1,8 @@
-// document.addEventListener("keyup", (e) => {
-//   if (e.target.tagName === "INPUT" && e.target.type !== "date") {
-//     e.target.value = e.target.value.toUpperCase();
-//   }
-// });
+document.addEventListener("keyup", (e) => {
+  if (e.target.tagName === "INPUT" && e.target.type !== "date") {
+    e.target.value = e.target.value.toUpperCase();
+  }
+});
 
 /* ---------------------------
     Aplicar tema salvo em todas as páginas
