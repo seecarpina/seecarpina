@@ -619,6 +619,49 @@ aside .sidebar a:nth-child(8) span {
 aside .sidebar a:nth-child(9) span {
   background: #5e5ce6;
 }
+aside .sidebar a:nth-child(10) span {
+  background: #ff375f;
+}
+
+aside .sidebar a:nth-child(11) span {
+  background: #00c7be;
+}
+
+aside .sidebar a:nth-child(12) span {
+  background: #ffcc00;
+}
+
+aside .sidebar a:nth-child(13) span {
+  background: #af52de;
+}
+
+aside .sidebar a:nth-child(14) span {
+  background: #32ade6;
+}
+
+aside .sidebar a:nth-child(15) span {
+  background: #ff6482;
+}
+
+aside .sidebar a:nth-child(16) span {
+  background: #0a84ff;
+}
+
+aside .sidebar a:nth-child(17) span {
+  background: #66d4cf;
+}
+
+aside .sidebar a:nth-child(18) span {
+  background: #ac8e68;
+}
+
+aside .sidebar a:nth-child(19) span {
+  background: #ff453a;
+}
+
+aside .sidebar a:nth-child(20) span {
+  background: #5856d6;
+}
 aside .sidebar a:last-child span {
   background: #ff453a;
 }
