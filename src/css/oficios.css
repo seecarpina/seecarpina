@@ -210,7 +210,6 @@
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  min-height: 48px;
   cursor: pointer;
   white-space: nowrap;
   margin: 0;
