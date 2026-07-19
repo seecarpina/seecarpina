@@ -1,0 +1,755 @@
+/* =========================================
+   PAINEL ADMINISTRATIVO
+========================================= */
+
+.admin-tabs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin: 1.5rem 0;
+}
+
+.admin-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+
+  padding: 0.7rem 1rem;
+
+  border: 0;
+  border-radius: 0.7rem;
+
+  background: var(--clr-white);
+  color: var(--clr-dark);
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.admin-tab:hover {
+  background: var(--clr-light);
+}
+
+.admin-tab.active {
+  background: var(--clr-primary);
+  color: white;
+}
+
+.admin-tab-content {
+  display: none;
+}
+
+.admin-tab-content.active {
+  display: block;
+}
+
+/* =========================================
+   CABEÇALHO
+========================================= */
+
+.cabecalho-admin {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.cabecalho-admin h2 {
+  margin: 0;
+}
+
+.cabecalho-admin p {
+  margin: 0.3rem 0 0;
+  opacity: 0.7;
+}
+
+/* =========================================
+   FILTROS
+========================================= */
+
+.admin-filtros {
+  display: grid;
+
+  grid-template-columns:
+    minmax(250px, 1fr)
+    180px
+    180px;
+
+  gap: 1rem;
+
+  margin-bottom: 1rem;
+}
+
+.campo-busca {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  padding: 0 0.8rem;
+
+  border: 1px solid var(--clr-light);
+  border-radius: 0.6rem;
+
+  background: var(--clr-white);
+}
+
+.campo-busca input {
+  width: 100%;
+
+  border: 0;
+  outline: 0;
+
+  background: transparent;
+}
+
+.admin-contador {
+  margin-bottom: 1rem;
+
+  font-size: 0.9rem;
+
+  opacity: 0.75;
+}
+
+/* =========================================
+   USUÁRIOS
+========================================= */
+
+.lista-usuarios-admin {
+  display: grid;
+
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+
+  gap: 1rem;
+}
+
+.usuario-admin-card {
+  position: relative;
+
+  padding: 1.2rem;
+
+  border: 1px solid var(--clr-light);
+  border-radius: 0.8rem;
+
+  background: var(--clr-white);
+}
+
+.usuario-admin-topo {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+
+  margin-bottom: 1rem;
+}
+
+.usuario-admin-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 45px;
+  height: 45px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: var(--clr-light);
+
+  color: var(--clr-primary);
+}
+
+.usuario-admin-dados {
+  min-width: 0;
+}
+
+.usuario-admin-dados strong {
+  display: block;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.usuario-admin-dados span {
+  display: block;
+
+  margin-top: 0.2rem;
+
+  font-size: 0.8rem;
+
+  opacity: 0.7;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.usuario-admin-info {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.usuario-admin-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.usuario-admin-campo label {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.usuario-admin-campo select {
+  width: 100%;
+}
+
+.usuario-admin-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 1rem;
+
+  margin-top: 1rem;
+  padding-top: 1rem;
+
+  border-top: 1px solid var(--clr-light);
+}
+
+.status-usuario {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  padding: 0.35rem 0.65rem;
+
+  border-radius: 999px;
+
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-usuario.ativo {
+  background: rgba(34, 197, 94, 0.12);
+  color: #16a34a;
+}
+
+.status-usuario.inativo {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+}
+
+/* =========================================
+   SWITCH
+========================================= */
+
+.switch {
+  position: relative;
+
+  display: inline-block;
+
+  width: 46px;
+  height: 25px;
+
+  flex-shrink: 0;
+}
+
+.switch input {
+  width: 0;
+  height: 0;
+
+  opacity: 0;
+}
+
+.slider {
+  position: absolute;
+
+  inset: 0;
+
+  border-radius: 999px;
+
+  background: #ccc;
+
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+.slider::before {
+  content: "";
+
+  position: absolute;
+
+  width: 19px;
+  height: 19px;
+
+  left: 3px;
+  bottom: 3px;
+
+  border-radius: 50%;
+
+  background: white;
+
+  transition: 0.3s;
+}
+
+.switch input:checked + .slider {
+  background: var(--clr-primary);
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(21px);
+}
+
+/* =========================================
+   FORM MENU
+========================================= */
+
+.grid-admin-form {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-group small {
+  opacity: 0.65;
+}
+
+.campo-icone {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.campo-icone input {
+  flex: 1;
+}
+
+.preview-icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 45px;
+  height: 45px;
+
+  border-radius: 0.6rem;
+
+  background: var(--clr-light);
+
+  color: var(--clr-primary);
+
+  font-size: 1.6rem;
+}
+
+/* =========================================
+   CONFIG
+========================================= */
+
+.admin-config-bloco {
+  display: grid;
+  gap: 0.8rem;
+
+  margin-top: 1.5rem;
+}
+
+.admin-switch-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  padding: 1rem;
+
+  border: 1px solid var(--clr-light);
+  border-radius: 0.7rem;
+}
+
+.admin-switch-linha strong,
+.admin-switch-linha span {
+  display: block;
+}
+
+.admin-switch-linha span {
+  margin-top: 0.2rem;
+
+  font-size: 0.8rem;
+
+  opacity: 0.7;
+}
+
+/* =========================================
+   PERFIS
+========================================= */
+
+.admin-perfis {
+  margin-top: 1.5rem;
+}
+
+.admin-perfis > label {
+  display: block;
+
+  margin-bottom: 0.7rem;
+
+  font-weight: 600;
+}
+
+.perfis-grid {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 0.7rem;
+}
+
+.perfil-check {
+  cursor: pointer;
+}
+
+.perfil-check input {
+  display: none;
+}
+
+.perfil-check span {
+  display: block;
+
+  padding: 0.55rem 0.8rem;
+
+  border: 1px solid var(--clr-light);
+  border-radius: 999px;
+
+  transition: 0.2s;
+}
+
+.perfil-check input:checked + span {
+  background: var(--clr-primary);
+  border-color: var(--clr-primary);
+
+  color: white;
+}
+
+/* =========================================
+   AÇÕES FORM
+========================================= */
+
+.acoes-form-admin {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+
+  margin-top: 1.5rem;
+}
+
+.acoes-form-admin .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* =========================================
+   MENU CARDS
+========================================= */
+
+.lista-menu-admin {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.menu-admin-card {
+  display: grid;
+
+  grid-template-columns:
+    auto
+    minmax(0, 1fr)
+    auto;
+
+  align-items: center;
+
+  gap: 1rem;
+
+  padding: 1rem;
+
+  border: 1px solid var(--clr-light);
+  border-radius: 0.8rem;
+
+  background: var(--clr-white);
+}
+
+.menu-admin-icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 45px;
+  height: 45px;
+
+  border-radius: 0.6rem;
+
+  background: var(--clr-light);
+
+  color: var(--clr-primary);
+}
+
+.menu-admin-dados strong {
+  display: block;
+}
+
+.menu-admin-link {
+  display: block;
+
+  margin-top: 0.2rem;
+
+  font-size: 0.8rem;
+
+  opacity: 0.7;
+}
+
+.menu-admin-meta {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 0.4rem;
+
+  margin-top: 0.6rem;
+}
+
+.menu-admin-tag {
+  display: inline-flex;
+
+  padding: 0.25rem 0.5rem;
+
+  border-radius: 999px;
+
+  background: var(--clr-light);
+
+  font-size: 0.7rem;
+}
+
+.menu-admin-acoes {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.menu-admin-acoes button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 36px;
+  height: 36px;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.menu-admin-acoes button:hover {
+  background: var(--clr-light);
+}
+
+.menu-admin-acoes .excluir-menu-btn {
+  color: var(--clr-danger);
+}
+
+/* =========================================
+   EDIÇÃO
+========================================= */
+
+.msg-edicao-menu {
+  display: none;
+
+  margin-bottom: 1rem;
+}
+
+.edicao-menu-info {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+
+  padding: 0.8rem 1rem;
+
+  border-radius: 0.7rem;
+
+  background: var(--clr-light);
+}
+
+.edicao-menu-info strong,
+.edicao-menu-info span {
+  display: block;
+}
+
+#previewIconeMenu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* =========================================
+   LOADING
+========================================= */
+
+.admin-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 2rem;
+} /* =========================================
+   LOCAIS DE EXERCÍCIO
+========================================= */
+
+.grid-local-form {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto;
+  align-items: end;
+  gap: 1rem;
+}
+
+.grid-local-form .acoes-form-admin {
+  margin-top: 0;
+}
+
+.busca-local-admin {
+  margin-bottom: 1.2rem;
+}
+
+.lista-locais-admin {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.local-admin-card {
+  display: grid;
+
+  grid-template-columns:
+    auto
+    minmax(0, 1fr)
+    auto;
+
+  align-items: center;
+
+  gap: 1rem;
+
+  padding: 1rem;
+
+  border: 1px solid var(--clr-light);
+  border-radius: 0.8rem;
+
+  background: var(--clr-white);
+}
+
+.local-admin-icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 45px;
+  height: 45px;
+
+  flex-shrink: 0;
+
+  border-radius: 0.6rem;
+
+  background: var(--clr-light);
+  color: var(--clr-primary);
+}
+
+.local-admin-dados {
+  min-width: 0;
+}
+
+.local-admin-dados strong {
+  display: block;
+}
+
+.local-admin-dados span {
+  display: block;
+
+  margin-top: 0.25rem;
+
+  font-size: 0.8rem;
+
+  opacity: 0.7;
+}
+
+.local-admin-acoes {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.local-admin-acoes button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 36px;
+  height: 36px;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.local-admin-acoes button:hover {
+  background: var(--clr-light);
+}
+
+/* =========================================
+   RESPONSIVO
+========================================= */
+
+@media screen and (max-width: 900px) {
+  .admin-filtros {
+    grid-template-columns: 1fr;
+  }
+
+  .grid-admin-form {
+    grid-template-columns: 1fr;
+  }
+
+  .menu-admin-card {
+    grid-template-columns:
+      auto
+      minmax(0, 1fr);
+  }
+
+  .menu-admin-acoes {
+    grid-column: 1 / -1;
+
+    justify-content: flex-end;
+  }
+
+  .grid-local-form {
+    grid-template-columns: 1fr;
+  }
+
+  .grid-local-form .acoes-form-admin {
+    margin-top: 0.5rem;
+  }
+}

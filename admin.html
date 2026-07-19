@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Painel Administrativo - SEE Carpina</title>
+
+    <link rel="stylesheet" href="./src/css/style.css" />
+
+    <link rel="stylesheet" href="./src/css/admin.css" />
+
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+  </head>
+
+  <body>
+    <div id="notificacao"></div>
+
+    <button id="btnTopo">↑</button>
+
+    <div class="loading">
+      <svg
+        class="svg-spinner"
+        viewBox="0 0 50 50"
+        role="img"
+        aria-label="Carregando"
+      >
+        <circle
+          class="path"
+          cx="25"
+          cy="25"
+          r="20"
+          fill="none"
+          stroke-width="4"
+        />
+      </svg>
+    </div>
+
+    <div class="container">
+      <aside id="sidebar"></aside>
+
+      <main>
+        <h1>Painel Administrativo</h1>
+
+        <section class="box glass">
+          <div class="info-card">
+            <span class="material-symbols-outlined">
+              admin_panel_settings
+            </span>
+
+            <div>
+              <strong>Administração do sistema</strong>
+
+              <p>
+                Gerencie usuários, permissões e os itens exibidos no menu
+                lateral do sistema.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================
+             ABAS
+        ========================== -->
+
+        <div class="admin-tabs">
+          <button type="button" class="admin-tab active" data-tab="menuTab">
+            <span class="material-symbols-outlined"> menu </span>
+
+            Menu do sistema
+          </button>
+
+          <button type="button" class="admin-tab" data-tab="usuariosTab">
+            <span class="material-symbols-outlined"> manage_accounts </span>
+
+            Usuários
+          </button>
+
+          <button type="button" class="admin-tab" data-tab="locaisTab">
+            <span class="material-symbols-outlined"> location_on </span>
+
+            Locais de exercício
+          </button>
+        </div>
+        <!-- =========================
+             USUÁRIOS
+        ========================== -->
+
+        <section id="usuariosTab" class="admin-tab-content">
+          <div class="box">
+            <div class="cabecalho-admin">
+              <div>
+                <h2>Usuários</h2>
+
+                <p>Gerencie os acessos e perfis dos usuários cadastrados.</p>
+              </div>
+            </div>
+
+            <div class="admin-filtros">
+              <div class="campo-busca">
+                <span class="material-symbols-outlined"> search </span>
+
+                <input
+                  type="search"
+                  id="buscaUsuarioAdmin"
+                  placeholder="Buscar por nome ou e-mail..."
+                />
+              </div>
+
+              <select id="filtroPerfilUsuario">
+                <option value="">Todos os perfis</option>
+
+                <option value="ADM">ADM</option>
+                <option value="GERENTE">GERENTE</option>
+                <option value="TECNICO">TECNICO</option>
+                <option value="LOGISTICA">LOGISTICA</option>
+                <option value="SECRETÁRIA">SECRETÁRIA</option>
+              </select>
+
+              <select id="filtroSituacaoUsuario">
+                <option value="">Todas as situações</option>
+
+                <option value="ativo">Ativos</option>
+
+                <option value="inativo">Inativos</option>
+              </select>
+            </div>
+
+            <div class="admin-contador">
+              <span id="contadorUsuarios"> Carregando... </span>
+            </div>
+
+            <div id="listaUsuariosAdmin" class="lista-usuarios-admin">
+              <div class="admin-loading">
+                <svg class="svg-spinner" viewBox="0 0 50 50">
+                  <circle
+                    class="path"
+                    cx="25"
+                    cy="25"
+                    r="20"
+                    fill="none"
+                    stroke-width="4"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================
+             MENU / SIDEBAR
+        ========================== -->
+
+        <section id="menuTab" class="admin-tab-content active">
+          <!-- FORMULÁRIO -->
+
+          <div class="box">
+            <div class="cabecalho-admin">
+              <div>
+                <h2 id="tituloFormularioMenu">Novo item do menu</h2>
+
+                <p>Configure links e permissões da sidebar do sistema.</p>
+              </div>
+            </div>
+
+            <div id="msgEdicaoMenu" class="msg-edicao-menu"></div>
+
+            <form id="formMenuAdmin">
+              <div class="grid-admin-form">
+                <div class="form-group">
+                  <label for="tituloMenu"> Título </label>
+
+                  <input
+                    type="text"
+                    id="tituloMenu"
+                    placeholder="Ex: Servidores"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="linkMenu"> Link </label>
+
+                  <input
+                    type="text"
+                    id="linkMenu"
+                    placeholder="./servidores"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="iconeMenu"> Ícone </label>
+
+                  <div class="campo-icone">
+                    <input
+                      type="text"
+                      id="iconeMenu"
+                      placeholder="person_play"
+                      required
+                    />
+
+                    <span
+                      id="previewIconeMenu"
+                      class="material-symbols-outlined preview-icone"
+                    >
+                      link
+                    </span>
+                  </div>
+
+                  <small> Utilize o nome de um ícone Material Symbols. </small>
+                </div>
+
+                <div class="form-group">
+                  <label for="ordemMenu"> Ordem </label>
+
+                  <input
+                    type="number"
+                    id="ordemMenu"
+                    min="1"
+                    value="1"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="admin-config-bloco">
+                <div class="admin-switch-linha">
+                  <div>
+                    <strong> Item ativo </strong>
+
+                    <span> Define se o link está disponível no sistema. </span>
+                  </div>
+
+                  <label class="switch">
+                    <input type="checkbox" id="ativoMenu" checked />
+
+                    <span class="slider"></span>
+                  </label>
+                </div>
+
+                <div class="admin-switch-linha">
+                  <div>
+                    <strong> Exibir badge "Novo" </strong>
+
+                    <span>
+                      Exibe a indicação de novidade ao lado do item no menu.
+                    </span>
+                  </div>
+
+                  <label class="switch">
+                    <input type="checkbox" id="badgeNovoMenu" />
+
+                    <span class="slider"></span>
+                  </label>
+                </div>
+
+                <div class="admin-switch-linha">
+                  <div>
+                    <strong> Disponível para todos </strong>
+
+                    <span>
+                      Todos os usuários ativos poderão acessar este item.
+                    </span>
+                  </div>
+
+                  <label class="switch">
+                    <input type="checkbox" id="acessoTodosMenu" />
+
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div id="blocoPerfisMenu" class="admin-perfis">
+                <label> Perfis permitidos </label>
+
+                <div class="perfis-grid">
+                  <label class="perfil-check">
+                    <input type="checkbox" value="ADM" class="perfil-menu" />
+
+                    <span>ADM</span>
+                  </label>
+
+                  <label class="perfil-check">
+                    <input
+                      type="checkbox"
+                      value="GERENTE"
+                      class="perfil-menu"
+                    />
+
+                    <span>GERENTE</span>
+                  </label>
+
+                  <label class="perfil-check">
+                    <input
+                      type="checkbox"
+                      value="TECNICO"
+                      class="perfil-menu"
+                    />
+
+                    <span>TECNICO</span>
+                  </label>
+
+                  <label class="perfil-check">
+                    <input
+                      type="checkbox"
+                      value="LOGISTICA"
+                      class="perfil-menu"
+                    />
+
+                    <span>LOGISTICA</span>
+                  </label>
+
+                  <label class="perfil-check">
+                    <input
+                      type="checkbox"
+                      value="SECRETÁRIA"
+                      class="perfil-menu"
+                    />
+
+                    <span>SECRETÁRIA</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="acoes-form-admin">
+                <button type="submit" class="btn" id="btnSalvarMenu">
+                  <span class="material-symbols-outlined"> save </span>
+
+                  Salvar item
+                </button>
+
+                <button
+                  type="button"
+                  class="btn secondary"
+                  id="btnCancelarEdicaoMenu"
+                  style="display: none"
+                >
+                  Cancelar edição
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- LISTA -->
+
+          <div class="box">
+            <div class="cabecalho-admin">
+              <div>
+                <h2>Itens do menu</h2>
+
+                <p id="contadorItensMenu">Carregando...</p>
+              </div>
+            </div>
+
+            <div id="listaMenuAdmin" class="lista-menu-admin">
+              <div class="admin-loading">
+                <svg class="svg-spinner" viewBox="0 0 50 50">
+                  <circle
+                    class="path"
+                    cx="25"
+                    cy="25"
+                    r="20"
+                    fill="none"
+                    stroke-width="4"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================
+     LOCAIS DE EXERCÍCIO
+========================== -->
+
+        <section id="locaisTab" class="admin-tab-content">
+          <div class="box">
+            <div class="cabecalho-admin">
+              <div>
+                <h2 id="tituloFormularioLocal">Novo local de exercício</h2>
+
+                <p>
+                  Cadastre e edite os locais utilizados na lotação dos
+                  servidores.
+                </p>
+              </div>
+            </div>
+
+            <div id="msgEdicaoLocal" class="msg-edicao-menu"></div>
+
+            <form id="formLocalAdmin">
+              <div class="grid-local-form">
+                <div class="form-group">
+                  <label for="nomeLocalAdmin"> Nome do local </label>
+
+                  <input
+                    type="text"
+                    id="nomeLocalAdmin"
+                    placeholder="Ex: Escola Municipal São Joaquim"
+                    required
+                  />
+                </div>
+
+                <div class="acoes-form-admin">
+                  <button type="submit" class="btn" id="btnSalvarLocal">
+                    <span class="material-symbols-outlined"> save </span>
+
+                    Salvar local
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn secondary"
+                    id="btnCancelarEdicaoLocal"
+                    style="display: none"
+                  >
+                    Cancelar edição
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div class="box">
+            <div class="cabecalho-admin">
+              <div>
+                <h2>Locais cadastrados</h2>
+
+                <p id="contadorLocaisAdmin">Carregando...</p>
+              </div>
+            </div>
+
+            <div class="campo-busca busca-local-admin">
+              <span class="material-symbols-outlined"> search </span>
+
+              <input
+                type="search"
+                id="buscaLocalAdmin"
+                placeholder="Buscar local de exercício..."
+              />
+            </div>
+
+            <div id="listaLocaisAdmin" class="lista-locais-admin">
+              <div class="admin-loading">
+                <svg class="svg-spinner" viewBox="0 0 50 50">
+                  <circle
+                    class="path"
+                    cx="25"
+                    cy="25"
+                    r="20"
+                    fill="none"
+                    stroke-width="4"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <div class="right"></div>
+    </div>
+
+    <script type="module" src="./src/js/scripts.js"></script>
+
+    <script type="module" src="./src/js/admin.js"></script>
+  </body>
+</html>
