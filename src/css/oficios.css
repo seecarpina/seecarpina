@@ -372,6 +372,32 @@
 }
 
 /* =========================================
+   INPUT CARPINA DIGITAL
+========================================= */
+.carpina-digital {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.carpina-digital .filtro-disponiveis {
+  justify-content: flex-start;
+  margin: 0;
+}
+
+.campo-numero-processo {
+  width: 100%;
+}
+
+.campo-numero-processo input {
+  width: 100%;
+}
+
+.campo-numero-processo input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+/* =========================================
    PAGINAÇÃO
 ========================================= */
 

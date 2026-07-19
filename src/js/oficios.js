@@ -37,6 +37,14 @@ let chaveEdicao = null;
 
 let pararEscutaOficios = null;
 
+const checkboxSistemaCarpinaDigital = document.getElementById(
+  "sistemaCarpinaDigital",
+);
+
+const campoNumeroProcesso = document.getElementById("campoNumeroProcesso");
+
+const inputNumeroProcesso = document.getElementById("numeroProcesso");
+
 /* =========================================
    ELEMENTOS
 ========================================= */
@@ -180,6 +188,25 @@ function oficioDisponivel(oficio) {
   return assunto === "" || assunto.toLowerCase() === "undefined";
 }
 
+function atualizarCampoNumeroProcesso() {
+  const ativo = checkboxSistemaCarpinaDigital.checked;
+
+  inputNumeroProcesso.disabled = !ativo;
+
+  inputNumeroProcesso.required = ativo;
+
+  if (!ativo) {
+    inputNumeroProcesso.value = "";
+  }
+}
+
+checkboxSistemaCarpinaDigital?.addEventListener(
+  "change",
+  atualizarCampoNumeroProcesso,
+);
+
+atualizarCampoNumeroProcesso();
+
 /* =========================================
    DESTINOS E AUTOCOMPLETE
 ========================================= */
@@ -281,6 +308,19 @@ formOficio?.addEventListener("submit", async (event) => {
   const destino = padronizarTexto(inputDestino.value);
   const copia = padronizarTexto(inputCopia.value);
 
+  const sistemaCarpinaDigital = checkboxSistemaCarpinaDigital.checked;
+
+  const numeroProcesso = sistemaCarpinaDigital
+    ? inputNumeroProcesso.value.trim()
+    : "";
+
+  if (sistemaCarpinaDigital && !numeroProcesso) {
+    notificar("Informe o número do processo.", "erro");
+
+    inputNumeroProcesso.focus();
+    return;
+  }
+
   if (!assunto) {
     notificar("Preencha o campo de assunto.", "erro");
 
@@ -335,6 +375,8 @@ formOficio?.addEventListener("submit", async (event) => {
       data: hoje,
       destino,
       copia,
+      sistemaCarpinaDigital,
+      numeroProcesso,
       responsavel: nomeResponsavel,
       criadoEm: new Date().toISOString(),
     });
@@ -358,6 +400,7 @@ formOficio?.addEventListener("submit", async (event) => {
     notificar(`Ofício nº ${numeroGerado} cadastrado com sucesso!`);
 
     formOficio.reset();
+    atualizarCampoNumeroProcesso();
 
     if (inputResponsavel) {
       inputResponsavel.value = nomeResponsavel;
@@ -553,34 +596,29 @@ function formatarAssunto(oficio) {
 
   const assuntoEscapado = escaparHtml(assunto);
 
-  if (
-    normalizarTexto(assunto).includes("processo") &&
-    normalizarTexto(oficio.copia) === "sistema carpina digital"
-  ) {
-    const correspondencia = assunto.match(/processo\s*(?:n[º°o.]*)?\s*(\d+)/i);
+  if (oficio.sistemaCarpinaDigital === true && oficio.numeroProcesso) {
+    const numeroProcesso = String(oficio.numeroProcesso).trim();
 
-    if (correspondencia?.[1]) {
-      const numeroProcesso = correspondencia[1];
+    const link =
+      "https://digital.carpina.pe.gov.br/" +
+      `app/processos/manage/${encodeURIComponent(numeroProcesso)}`;
 
-      const link =
-        "https://digital.carpina.pe.gov.br/" +
-        `app/processos/manage/${numeroProcesso}`;
+    return `
+      <a
+        href="${link}"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Abrir processo nº ${escaparHtml(numeroProcesso)}"
+      >
+        ${assuntoEscapado}
 
-      return `
-        <a
-          href="${link}"
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Abrir processo"
+        <span
+          class="material-symbols-outlined"
         >
-          ${assuntoEscapado}
-
-          <span class="material-symbols-outlined">
-            link_2
-          </span>
-        </a>
-      `;
-    }
+          link_2
+        </span>
+      </a>
+    `;
   }
 
   return assuntoEscapado;
@@ -731,6 +769,12 @@ function iniciarEdicao(oficio) {
   inputDestino.value = oficio.destino || "";
   inputCopia.value = oficio.copia || "";
 
+  checkboxSistemaCarpinaDigital.checked = oficio.sistemaCarpinaDigital === true;
+
+  inputNumeroProcesso.value = oficio.numeroProcesso || "";
+
+  atualizarCampoNumeroProcesso();
+
   btnCadastrar.style.display = "none";
   botoesEdicao.style.display = "flex";
 
@@ -774,6 +818,12 @@ btnSalvarEdicao?.addEventListener("click", async () => {
 
   const copia = padronizarTexto(inputCopia.value);
 
+  const sistemaCarpinaDigital = checkboxSistemaCarpinaDigital.checked;
+
+  const numeroProcesso = sistemaCarpinaDigital
+    ? inputNumeroProcesso.value.trim()
+    : "";
+
   if (!assunto) {
     notificar("Preencha o campo de assunto.", "erro");
 
@@ -782,6 +832,14 @@ btnSalvarEdicao?.addEventListener("click", async () => {
 
   if (!destino) {
     notificar("Informe o destino.", "erro");
+
+    return;
+  }
+
+  if (sistemaCarpinaDigital && !numeroProcesso) {
+    notificar("Informe o número do processo.", "erro");
+
+    inputNumeroProcesso.focus();
 
     return;
   }
@@ -803,6 +861,8 @@ btnSalvarEdicao?.addEventListener("click", async () => {
       assunto,
       destino,
       copia,
+      sistemaCarpinaDigital,
+      numeroProcesso,
       numero: oficioOriginal.numero,
       data: oficioOriginal.data,
       responsavel: oficioOriginal.responsavel?.trim()
@@ -810,7 +870,6 @@ btnSalvarEdicao?.addEventListener("click", async () => {
         : nomeResponsavel,
       atualizadoEm: new Date().toISOString(),
     });
-
     if (
       destino &&
       !destinos.some(
@@ -847,6 +906,8 @@ function resetarFormularioEdicao() {
 
   formOficio.reset();
 
+  atualizarCampoNumeroProcesso();
+
   if (inputResponsavel) {
     inputResponsavel.value = nomeResponsavel;
   }
@@ -877,6 +938,8 @@ async function cancelarOficio(oficio) {
       assunto: "",
       destino: "",
       copia: "",
+      sistemaCarpinaDigital: false,
+      numeroProcesso: "",
       responsavel: "",
       atualizadoEm: new Date().toISOString(),
     });
