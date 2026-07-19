@@ -21,13 +21,14 @@ import {
 
 const ANO_ATUAL = String(new Date().getFullYear());
 
-let dadosCarregados = false;
-
 let anoSelecionado = ANO_ATUAL;
 let nomeResponsavel = "Usuário";
 
 let todosOficios = [];
 let destinos = [];
+
+let destinoIdSelecionado = null;
+let copiaIdSelecionado = null;
 
 let paginaAtual = 1;
 const porPagina = 25;
@@ -40,8 +41,6 @@ let pararEscutaOficios = null;
 const checkboxSistemaCarpinaDigital = document.getElementById(
   "sistemaCarpinaDigital",
 );
-
-const campoNumeroProcesso = document.getElementById("campoNumeroProcesso");
 
 const inputNumeroProcesso = document.getElementById("numeroProcesso");
 
@@ -154,6 +153,81 @@ function normalizarTexto(texto) {
     .trim();
 }
 
+function obterNomeDestino(id) {
+  if (!id) return "";
+
+  const destino = destinos.find((item) => item.id === id);
+
+  return destino?.nome || "";
+}
+
+function obterDestinoOficio(oficio) {
+  if (!oficio?.destinoId) return "";
+
+  return obterNomeDestino(oficio.destinoId);
+}
+
+function obterCopiaOficio(oficio) {
+  if (!oficio?.copiaId) return "";
+
+  return obterNomeDestino(oficio.copiaId);
+}
+
+function mostrarSugestoesDestinos(input, box, aoSelecionar) {
+  if (!input || !box) return;
+
+  const termo = normalizarTexto(input.value);
+
+  box.innerHTML = "";
+
+  if (!termo) {
+    box.style.display = "none";
+    return;
+  }
+
+  const filtrados = destinos.filter((destino) =>
+    normalizarTexto(destino.nome).includes(termo),
+  );
+
+  filtrados.forEach((destino) => {
+    const li = document.createElement("li");
+
+    li.textContent = destino.nome;
+
+    li.addEventListener("click", () => {
+      input.value = destino.nome;
+
+      aoSelecionar(destino.id);
+
+      box.style.display = "none";
+    });
+
+    box.appendChild(li);
+  });
+
+  box.style.display = filtrados.length ? "block" : "none";
+}
+
+async function obterOuCriarDestinoId(nome) {
+  if (!nome) return null;
+
+  const existente = destinos.find(
+    (destino) => normalizarTexto(destino.nome) === normalizarTexto(nome),
+  );
+
+  if (existente) {
+    return existente.id;
+  }
+
+  const novaRef = push(destinosRef);
+
+  await update(novaRef, {
+    nome: padronizarTexto(nome),
+  });
+
+  return novaRef.key;
+}
+
 function escaparHtml(texto) {
   const elemento = document.createElement("div");
 
@@ -210,62 +284,40 @@ atualizarCampoNumeroProcesso();
 /* =========================================
    DESTINOS E AUTOCOMPLETE
 ========================================= */
-
 onValue(destinosRef, (snapshot) => {
   destinos = snapshot.exists()
-    ? [
-        ...new Set(
-          Object.values(snapshot.val())
-            .filter(Boolean)
-            .map((destino) => padronizarTexto(destino)),
-        ),
-      ].sort((a, b) => a.localeCompare(b, "pt-BR"))
+    ? Object.entries(snapshot.val())
+        .map(([id, valor]) => ({
+          id,
+          nome: padronizarTexto(
+            typeof valor === "string" ? valor : valor?.nome,
+          ),
+        }))
+        .filter((destino) => destino.nome)
+        .sort((a, b) =>
+          a.nome.localeCompare(b.nome, "pt-BR", {
+            sensitivity: "base",
+          }),
+        )
     : [];
+
+  renderTabela();
 });
 
-function mostrarSugestoes(input, lista, box) {
-  if (!input || !box) return;
-
-  const termo = normalizarTexto(input.value);
-
-  box.innerHTML = "";
-
-  if (!termo) {
-    box.style.display = "none";
-    return;
-  }
-
-  const filtrados = lista.filter((item) =>
-    normalizarTexto(item).includes(termo),
-  );
-
-  if (!filtrados.length) {
-    box.style.display = "none";
-    return;
-  }
-
-  filtrados.forEach((item) => {
-    const li = document.createElement("li");
-
-    li.textContent = item;
-
-    li.addEventListener("click", () => {
-      input.value = item;
-      box.style.display = "none";
-    });
-
-    box.appendChild(li);
-  });
-
-  box.style.display = "block";
-}
-
 inputDestino?.addEventListener("input", () => {
-  mostrarSugestoes(inputDestino, destinos, boxDestino);
+  destinoIdSelecionado = null;
+
+  mostrarSugestoesDestinos(inputDestino, boxDestino, (id) => {
+    destinoIdSelecionado = id;
+  });
 });
 
 inputCopia?.addEventListener("input", () => {
-  mostrarSugestoes(inputCopia, destinos, boxCopia);
+  copiaIdSelecionado = null;
+
+  mostrarSugestoesDestinos(inputCopia, boxCopia, (id) => {
+    copiaIdSelecionado = id;
+  });
 });
 
 document.addEventListener("click", (event) => {
@@ -305,7 +357,9 @@ formOficio?.addEventListener("submit", async (event) => {
   if (cadastrandoOficio) return;
 
   const assunto = inputAssunto.value.trim();
+
   const destino = padronizarTexto(inputDestino.value);
+
   const copia = padronizarTexto(inputCopia.value);
 
   const sistemaCarpinaDigital = checkboxSistemaCarpinaDigital.checked;
@@ -313,13 +367,6 @@ formOficio?.addEventListener("submit", async (event) => {
   const numeroProcesso = sistemaCarpinaDigital
     ? inputNumeroProcesso.value.trim()
     : "";
-
-  if (sistemaCarpinaDigital && !numeroProcesso) {
-    notificar("Informe o número do processo.", "erro");
-
-    inputNumeroProcesso.focus();
-    return;
-  }
 
   if (!assunto) {
     notificar("Preencha o campo de assunto.", "erro");
@@ -334,6 +381,22 @@ formOficio?.addEventListener("submit", async (event) => {
     inputDestino.focus();
     return;
   }
+
+  if (sistemaCarpinaDigital && !numeroProcesso) {
+    notificar("Informe o número do processo.", "erro");
+
+    inputNumeroProcesso.focus();
+    return;
+  }
+
+  /* Só cria/busca IDs depois das validações */
+
+  const destinoId =
+    destinoIdSelecionado || (await obterOuCriarDestinoId(destino));
+
+  const copiaId = copia
+    ? copiaIdSelecionado || (await obterOuCriarDestinoId(copia))
+    : null;
 
   cadastrandoOficio = true;
 
@@ -373,33 +436,20 @@ formOficio?.addEventListener("submit", async (event) => {
       numero: numeroGerado,
       assunto,
       data: hoje,
-      destino,
-      copia,
+      destinoId,
+      copiaId,
       sistemaCarpinaDigital,
       numeroProcesso,
       responsavel: nomeResponsavel,
       criadoEm: new Date().toISOString(),
     });
 
-    if (
-      destino &&
-      !destinos.some(
-        (item) => normalizarTexto(item) === normalizarTexto(destino),
-      )
-    ) {
-      await push(destinosRef, destino);
-    }
-
-    if (
-      copia &&
-      !destinos.some((item) => normalizarTexto(item) === normalizarTexto(copia))
-    ) {
-      await push(destinosRef, copia);
-    }
-
     notificar(`Ofício nº ${numeroGerado} cadastrado com sucesso!`);
 
     formOficio.reset();
+    destinoIdSelecionado = null;
+
+    copiaIdSelecionado = null;
     atualizarCampoNumeroProcesso();
 
     if (inputResponsavel) {
@@ -433,8 +483,8 @@ function obterOficiosFiltrados() {
         ${oficio.assunto || ""}
         ${oficio.data || ""}
         ${formatarDataBR(oficio.data)}
-        ${oficio.destino || ""}
-        ${oficio.copia || ""}
+        ${obterDestinoOficio(oficio)}
+${obterCopiaOficio(oficio)}
         ${oficio.responsavel || ""}
       `);
 
@@ -516,11 +566,11 @@ function renderTabela() {
       </td>
 
       <td>
-        ${escaparHtml(oficio.destino || "-")}
+        ${escaparHtml(obterDestinoOficio(oficio) || "-")}
       </td>
 
       <td>
-        ${escaparHtml(oficio.copia || "-")}
+        ${escaparHtml(obterCopiaOficio(oficio) || "-")}
       </td>
 
       <td>
@@ -766,8 +816,13 @@ function iniciarEdicao(oficio) {
   chaveEdicao = oficio._key;
 
   inputAssunto.value = oficio.assunto || "";
-  inputDestino.value = oficio.destino || "";
-  inputCopia.value = oficio.copia || "";
+  inputDestino.value = obterDestinoOficio(oficio);
+
+  inputCopia.value = obterCopiaOficio(oficio);
+
+  destinoIdSelecionado = oficio.destinoId || null;
+
+  copiaIdSelecionado = oficio.copiaId || null;
 
   checkboxSistemaCarpinaDigital.checked = oficio.sistemaCarpinaDigital === true;
 
@@ -827,12 +882,14 @@ btnSalvarEdicao?.addEventListener("click", async () => {
   if (!assunto) {
     notificar("Preencha o campo de assunto.", "erro");
 
+    inputAssunto.focus();
     return;
   }
 
   if (!destino) {
     notificar("Informe o destino.", "erro");
 
+    inputDestino.focus();
     return;
   }
 
@@ -840,9 +897,17 @@ btnSalvarEdicao?.addEventListener("click", async () => {
     notificar("Informe o número do processo.", "erro");
 
     inputNumeroProcesso.focus();
-
     return;
   }
+
+  /* Só cria/busca IDs depois das validações */
+
+  const destinoId =
+    destinoIdSelecionado || (await obterOuCriarDestinoId(destino));
+
+  const copiaId = copia
+    ? copiaIdSelecionado || (await obterOuCriarDestinoId(copia))
+    : null;
 
   const oficioOriginal = todosOficios.find(
     (oficio) => oficio._key === chaveEdicao,
@@ -859,8 +924,8 @@ btnSalvarEdicao?.addEventListener("click", async () => {
   try {
     await update(ref(rtdb, `oficios/${anoSelecionado}/${chaveEdicao}`), {
       assunto,
-      destino,
-      copia,
+      destinoId,
+      copiaId,
       sistemaCarpinaDigital,
       numeroProcesso,
       numero: oficioOriginal.numero,
@@ -870,21 +935,6 @@ btnSalvarEdicao?.addEventListener("click", async () => {
         : nomeResponsavel,
       atualizadoEm: new Date().toISOString(),
     });
-    if (
-      destino &&
-      !destinos.some(
-        (item) => normalizarTexto(item) === normalizarTexto(destino),
-      )
-    ) {
-      await push(destinosRef, destino);
-    }
-
-    if (
-      copia &&
-      !destinos.some((item) => normalizarTexto(item) === normalizarTexto(copia))
-    ) {
-      await push(destinosRef, copia);
-    }
 
     notificar("Ofício atualizado com sucesso!");
 
@@ -905,6 +955,10 @@ function resetarFormularioEdicao() {
   chaveEdicao = null;
 
   formOficio.reset();
+
+  destinoIdSelecionado = null;
+
+  copiaIdSelecionado = null;
 
   atualizarCampoNumeroProcesso();
 
@@ -936,8 +990,8 @@ async function cancelarOficio(oficio) {
   try {
     await update(ref(rtdb, `oficios/${anoSelecionado}/${oficio._key}`), {
       assunto: "",
-      destino: "",
-      copia: "",
+      destinoId: null,
+      copiaId: null,
       sistemaCarpinaDigital: false,
       numeroProcesso: "",
       responsavel: "",
@@ -1184,8 +1238,9 @@ btnExportar?.addEventListener("click", () => {
     Número: formatarNumeroOficio(oficio.numero, anoSelecionado),
     Assunto: oficio.assunto || "",
     Data: formatarDataBR(oficio.data),
-    Destino: oficio.destino || "",
-    Cópia: oficio.copia || "",
+    Destino: obterDestinoOficio(oficio),
+
+    Cópia: obterCopiaOficio(oficio),
     Responsável: oficio.responsavel || "",
   }));
 

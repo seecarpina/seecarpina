@@ -85,6 +85,12 @@
 
             Locais de exercício
           </button>
+
+          <button type="button" class="admin-tab" data-tab="destinosTab">
+            <span class="material-symbols-outlined"> forward_to_inbox </span>
+
+            Destinos de ofícios
+          </button>
         </div>
         <!-- =========================
              USUÁRIOS
@@ -383,8 +389,8 @@
         </section>
 
         <!-- =========================
-     LOCAIS DE EXERCÍCIO
-========================== -->
+        LOCAIS DE EXERCÍCIO
+        ========================== -->
 
         <section id="locaisTab" class="admin-tab-content">
           <div class="box">
@@ -454,6 +460,91 @@
             </div>
 
             <div id="listaLocaisAdmin" class="lista-locais-admin">
+              <div class="admin-loading">
+                <svg class="svg-spinner" viewBox="0 0 50 50">
+                  <circle
+                    class="path"
+                    cx="25"
+                    cy="25"
+                    r="20"
+                    fill="none"
+                    stroke-width="4"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================
+     DESTINOS DE OFÍCIOS
+========================== -->
+
+        <section id="destinosTab" class="admin-tab-content">
+          <div class="box">
+            <div class="cabecalho-admin">
+              <div>
+                <h2 id="tituloFormularioDestino">Novo destino de ofício</h2>
+
+                <p>Cadastre e edite os destinos utilizados nos ofícios.</p>
+              </div>
+            </div>
+
+            <div id="msgEdicaoDestino" class="msg-edicao-menu"></div>
+
+            <form id="formDestinoAdmin">
+              <div class="grid-local-form">
+                <div class="form-group">
+                  <label for="nomeDestinoAdmin"> Nome do destino </label>
+
+                  <input
+                    type="text"
+                    id="nomeDestinoAdmin"
+                    placeholder="Ex: Recursos Humanos"
+                    required
+                  />
+                </div>
+
+                <div class="acoes-form-admin">
+                  <button type="submit" class="btn" id="btnSalvarDestino">
+                    <span class="material-symbols-outlined"> save </span>
+
+                    Salvar destino
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn secondary"
+                    id="btnCancelarEdicaoDestino"
+                    style="display: none"
+                  >
+                    Cancelar edição
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div class="box">
+            <div class="cabecalho-admin">
+              <div>
+                <h2>Destinos cadastrados</h2>
+
+                <p id="contadorDestinosAdmin">Carregando...</p>
+              </div>
+            </div>
+
+            <div class="campo-busca busca-local-admin">
+              <span class="material-symbols-outlined"> search </span>
+
+              <input
+                type="search"
+                id="buscaDestinoAdmin"
+                placeholder="Buscar destino de ofício..."
+              />
+            </div>
+
+            <div id="listaDestinosAdmin" class="lista-locais-admin">
               <div class="admin-loading">
                 <svg class="svg-spinner" viewBox="0 0 50 50">
                   <circle
