@@ -62,8 +62,25 @@ onValue(vinculosRef, (s) => {
   vinculos = s.exists() ? Object.values(s.val()).map(padronizarTexto) : [];
 });
 
-onValue(locaisRef, (s) => {
-  locais = s.exists() ? Object.values(s.val()).map(padronizarTexto) : [];
+onValue(locaisRef, (snapshot) => {
+  if (!snapshot.exists()) {
+    locais = [];
+    return;
+  }
+
+  locais = Object.entries(snapshot.val())
+    .map(([id, valor]) => ({
+      id,
+      nome: padronizarTexto(valor?.nome),
+    }))
+    .filter((local) => local.nome)
+    .sort((a, b) =>
+      a.nome.localeCompare(b.nome, "pt-BR", {
+        sensitivity: "base",
+      }),
+    );
+
+  renderTabela();
 });
 
 /* ===============================
@@ -109,6 +126,47 @@ function mostrarSugestoes(input, lista, box) {
   box.style.display = filtrados.length ? "block" : "none";
 }
 
+function mostrarSugestoesLocais() {
+  const texto = normalizarTextoLocal(inputLocal.value);
+
+  boxLocal.innerHTML = "";
+
+  if (!texto) {
+    boxLocal.style.display = "none";
+    return;
+  }
+
+  const filtrados = locais.filter((local) =>
+    normalizarTextoLocal(local.nome).includes(texto),
+  );
+
+  filtrados.forEach((local) => {
+    const li = document.createElement("li");
+
+    li.textContent = local.nome;
+
+    li.addEventListener("click", () => {
+      inputLocal.value = local.nome;
+
+      localExercicioIdSelecionado = local.id;
+
+      boxLocal.style.display = "none";
+    });
+
+    boxLocal.appendChild(li);
+  });
+
+  boxLocal.style.display = filtrados.length ? "block" : "none";
+}
+
+function normalizarTextoLocal(texto) {
+  return String(texto || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
 inputCargo.addEventListener("input", () =>
   mostrarSugestoes(inputCargo, cargos, boxCargo),
 );
@@ -117,10 +175,13 @@ inputVinculo.addEventListener("input", () =>
   mostrarSugestoes(inputVinculo, vinculos, boxVinculo),
 );
 
-inputLocal.addEventListener("input", () =>
-  mostrarSugestoes(inputLocal, locais, boxLocal),
-);
+let localExercicioIdSelecionado = null;
 
+inputLocal.addEventListener("input", () => {
+  localExercicioIdSelecionado = null;
+
+  mostrarSugestoesLocais();
+});
 document.addEventListener("click", (e) => {
   if (!inputCargo.contains(e.target)) boxCargo.style.display = "none";
   if (!inputVinculo.contains(e.target)) boxVinculo.style.display = "none";
@@ -135,6 +196,20 @@ function formatarDataBR(data) {
 
 function padronizarTexto(txt) {
   return txt ? txt.toString().trim() : "";
+}
+
+function obterNomeLocal(localId) {
+  if (!localId) return "";
+
+  const local = locais.find((item) => item.id === localId);
+
+  return local?.nome || "";
+}
+
+function obterLocalServidor(servidor) {
+  if (!servidor?.localExercicioId) return "";
+
+  return obterNomeLocal(servidor.localExercicioId);
 }
 
 function mostrarNotificacao(msg, tipo = "sucesso") {
@@ -198,19 +273,23 @@ onValue(registrosRef, (snap) => {
 function renderTabela() {
   tabela.innerHTML = "";
 
-  const termo = busca.value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
+  const termo = normalizarTextoLocal(busca.value);
 
   const filtrados = servidores
-    .filter((s) =>
-      `${s.codigo} ${s.nome} ${s.cpf} ${s.cargo} ${s.vinculo} ${s.localExercicio}`
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .includes(termo),
-    )
+    .filter((s) => {
+      const nomeLocal = obterLocalServidor(s);
+
+      const textoBusca = normalizarTextoLocal(`
+      ${s.codigo || ""}
+      ${s.nome || ""}
+      ${s.cpf || ""}
+      ${s.cargo || ""}
+      ${s.vinculo || ""}
+      ${nomeLocal || ""}
+    `);
+
+      return textoBusca.includes(termo);
+    })
     .sort((a, b) =>
       a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" }),
     );
@@ -264,7 +343,7 @@ function renderTabela() {
       </span>
     </td>
 
-    <td>${s.localExercicio || "-"}</td>
+    <td>${obterLocalServidor(s) || "-"}</td>
 
     <td>
       <div class="acoes-servidor">
@@ -413,13 +492,17 @@ btnSalvarEdicao.addEventListener("click", salvarServidor);
 btnCancelar.addEventListener("click", resetarFormulario);
 
 async function salvarServidor() {
+  const nomeLocal = padronizarTexto(localExercicio.value);
+
+  const localId = await obterOuCriarLocalId(nomeLocal);
+
   const servidor = {
     codigo: codigo.value.trim(),
     nome: padronizarTexto(nome.value),
     cpf: cpf.value.replace(/\D/g, ""),
     cargo: padronizarTexto(cargo.value),
     vinculo: padronizarTexto(vinculo.value),
-    localExercicio: padronizarTexto(localExercicio.value),
+    localExercicioId: localId,
     dataAdmissao: dataAdmissao.value,
     situacao: situacao.value,
   };
@@ -428,7 +511,6 @@ async function salvarServidor() {
 
   await salvarSeNaoExistir(cargosRef, servidor.cargo);
   await salvarSeNaoExistir(vinculosRef, servidor.vinculo);
-  await salvarSeNaoExistir(locaisRef, servidor.localExercicio);
 
   if (editando && chaveEdicao) {
     await update(ref(rtdb, `servidores/registros/${chaveEdicao}`), servidor);
@@ -439,6 +521,36 @@ async function salvarServidor() {
   }
 
   resetarFormulario();
+}
+
+async function obterOuCriarLocalId(nomeLocal) {
+  if (!nomeLocal) return null;
+
+  // Se o usuário selecionou
+  // pelo autocomplete
+  if (localExercicioIdSelecionado) {
+    return localExercicioIdSelecionado;
+  }
+
+  // Procura um local com o
+  // mesmo nome
+  const existente = locais.find(
+    (local) =>
+      normalizarTextoLocal(local.nome) === normalizarTextoLocal(nomeLocal),
+  );
+
+  if (existente) {
+    return existente.id;
+  }
+
+  // Se não existir, cria
+  const novoLocalRef = push(locaisRef);
+
+  await update(novoLocalRef, {
+    nome: nomeLocal,
+  });
+
+  return novoLocalRef.key;
 }
 
 /* ===============================
@@ -453,7 +565,9 @@ function editarServidor(s) {
   cpf.value = formatarCPF(s.cpf);
   cargo.value = s.cargo;
   vinculo.value = s.vinculo;
-  localExercicio.value = s.localExercicio;
+  localExercicio.value = obterLocalServidor(s);
+
+  localExercicioIdSelecionado = s.localExercicioId || null;
   dataAdmissao.value = s.dataAdmissao;
   situacao.value = s.situacao;
 
@@ -599,6 +713,8 @@ async function desligarServidor(servidor, botao) {
 function resetarFormulario() {
   editando = false;
   chaveEdicao = null;
+  localExercicioIdSelecionado = null;
+
   form.reset();
 
   blocoCadastro.style.display = "block";
@@ -640,7 +756,7 @@ if (btnExportarExcel) {
 
     // Aplica o mesmo filtro da tabela
     const filtrados = servidores.filter((s) =>
-      `${s.codigo} ${s.nome} ${s.cpf} ${s.cargo} ${s.vinculo} ${s.localExercicio}`
+      `${s.codigo} ${s.nome} ${s.cpf} ${s.cargo} ${s.vinculo} ${obterLocalServidor(s)}`
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase()
@@ -666,7 +782,7 @@ if (btnExportarExcel) {
       Vínculo: s.vinculo,
       "Data de Admissão": formatarDataBR(s.dataAdmissao),
       Situação: s.situacao,
-      "Local de Exercício": s.localExercicio,
+      "Local de Exercício": obterLocalServidor(s),
     }));
 
     // Gera Excel
@@ -698,12 +814,14 @@ function abrirTransferencia(servidor) {
 
   locais.forEach((local) => {
     const opt = document.createElement("option");
-    opt.value = local;
-    opt.textContent = local;
+
+    opt.value = local.id;
+    opt.textContent = local.nome;
+
     select.appendChild(opt);
   });
 
-  select.value = servidor.localExercicio;
+  select.value = servidor.localExercicioId || "";
 
   // Data atual
   document.getElementById("dataTransferencia").value = new Date()
@@ -741,7 +859,9 @@ document.getElementById("btnGerarTransferencia").onclick = async () => {
 async function transferirServidor() {
   if (!servidorSelecionado) return;
 
-  const novoLocal = document.getElementById("selectNovoLocal").value;
+  const novoLocalId = document.getElementById("selectNovoLocal").value;
+
+  const novoLocal = obterNomeLocal(novoLocalId);
   const dataTransferencia = document.getElementById("dataTransferencia").value;
   const observacao = document.getElementById("obsTransferencia").value.trim();
   const protocolo = gerarNumeroProtocolo();
@@ -758,7 +878,7 @@ async function transferirServidor() {
 
   // 🔄 Atualiza o local do servidor
   await update(servidorRef, {
-    localExercicio: novoLocal,
+    localExercicioId: novoLocalId,
   });
 
   // 📜 Histórico (opcional, mas recomendado)
@@ -768,11 +888,11 @@ async function transferirServidor() {
   );
 
   await push(historicoRef, {
-    protocolo: protocolo,
-    de: servidorSelecionado.localExercicio,
+    protocolo,
+    de: obterLocalServidor(servidorSelecionado),
     para: novoLocal,
     data: dataTransferencia,
-    observacao: observacao,
+    observacao,
     criadoEm: new Date().toISOString(),
   });
 
@@ -786,7 +906,7 @@ async function transferirServidor() {
   });
 
   // Atualiza visualmente
-  servidorSelecionado.localExercicio = novoLocal;
+  servidorSelecionado.localExercicioId = novoLocalId;
 
   // Fecha modal
   document.getElementById("modalTransferencia").style.display = "none";

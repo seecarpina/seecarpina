@@ -1,8 +1,8 @@
-document.addEventListener("keyup", (e) => {
-  if (e.target.tagName === "INPUT" && e.target.type !== "date") {
-    e.target.value = e.target.value.toUpperCase();
-  }
-});
+// document.addEventListener("keyup", (e) => {
+//   if (e.target.tagName === "INPUT" && e.target.type !== "date") {
+//     e.target.value = e.target.value.toUpperCase();
+//   }
+// });
 
 /* ---------------------------
     Aplicar tema salvo em todas as páginas
@@ -38,26 +38,112 @@ window.addEventListener("load", () => {
 
 import "./eventosStore.js";
 import { carregarSidebar, carregarRight, carregarChat } from "./include.js";
-import { auth, db } from "./firebaseConfig.js"; // <<–– CONFIG DO FIREBASE AGORA ESTÁ AQUI
+import { auth, db, rtdb } from "./firebaseConfig.js"; // <<–– CONFIG DO FIREBASE AGORA ESTÁ AQUI
 
 // DESATIVAR/ATIVAR CHAt
 // carregarChat();
 
-carregarSidebar().then(() => {
-  // 🚪 Logout
-  const logoutLink = document.getElementById("logout");
-  if (logoutLink) {
-    logoutLink.addEventListener("click", async (e) => {
-      e.preventDefault();
+async function montarSidebarDinamica(dadosUsuario) {
+  await sidebarCarregada;
+
+  const menuSidebar = document.getElementById("menuSidebar");
+
+  if (!menuSidebar) {
+    console.error("Elemento #menuSidebar não encontrado.");
+    return;
+  }
+
+  const cargoUsuario = String(dadosUsuario?.cargo || "")
+    .trim()
+    .toUpperCase();
+
+  try {
+    const snapshot = await get(ref(rtdb, "configuracoes/sidebar"));
+
+    menuSidebar.innerHTML = "";
+
+    if (snapshot.exists()) {
+      const itens = Object.entries(snapshot.val())
+        .map(([key, dados]) => ({
+          ...dados,
+          _key: key,
+        }))
+        .filter((item) => item.ativo !== false)
+        .filter((item) => {
+          // Liberado para todos
+          if (item.acessoTodos === true) {
+            return true;
+          }
+
+          // Verifica o cargo do usuário
+          return item.perfis?.[cargoUsuario] === true;
+        })
+        .sort((a, b) => Number(a.ordem || 999) - Number(b.ordem || 999));
+
+      itens.forEach((item) => {
+        const link = document.createElement("a");
+
+        link.href = item.link || "#";
+
+        link.innerHTML = `
+          <span class="material-symbols-outlined">
+            ${item.icone || "link"}
+          </span>
+
+          <h3>
+            ${item.titulo || "Sem título"}
+          </h3>
+
+          ${item.badgeNovo === true ? "<novo>Novo</novo>" : ""}
+        `;
+
+        menuSidebar.appendChild(link);
+      });
+    }
+
+    // Configurações pode ser controlada pelo Firebase
+    // Logout fica sempre disponível
+    const logout = document.createElement("a");
+
+    logout.href = "#";
+    logout.id = "logout";
+
+    logout.innerHTML = `
+      <span class="material-symbols-outlined">
+        logout
+      </span>
+
+      <h3>
+        Logout
+      </h3>
+    `;
+
+    menuSidebar.appendChild(logout);
+
+    logout.addEventListener("click", async (event) => {
+      event.preventDefault();
+
       try {
         await signOut(auth);
         window.location.href = "./login";
-      } catch (error) {
-        alert("Erro ao sair: " + error.message);
+      } catch (erro) {
+        console.error("Erro ao sair:", erro);
+
+        mostrarNotificacao("Erro ao sair do sistema.", "erro");
       }
     });
+  } catch (erro) {
+    console.error("Erro ao carregar menu:", erro);
+
+    menuSidebar.innerHTML = `
+      <div style="padding: 1rem;">
+        Não foi possível carregar o menu.
+      </div>
+    `;
   }
-});
+}
+
+const sidebarCarregada = carregarSidebar();
 
 carregarRight().then(() => {
   async function carregarLinksUteis() {
@@ -457,23 +543,19 @@ onAuthStateChanged(auth, async (user) => {
     window.dadosUsuario = userSnap.data();
     window.usuarioAuth = user;
 
-    // 🔐 Controle de acesso por cargo (sidebar)
-    function controlarAcessoSidebar() {
-      const cargoUsuario = window.dadosUsuario?.cargo?.trim().toUpperCase();
+    if (window.dadosUsuario?.ativo === false) {
+      await signOut(auth);
 
-      document.querySelectorAll("[data-role]").forEach((item) => {
-        const cargosPermitidos = item
-          .getAttribute("data-role")
-          .split(",")
-          .map((c) => c.trim().toUpperCase());
+      alert(
+        "Seu acesso ao sistema está desativado. Entre em contato com o administrador.",
+      );
 
-        // Se o cargo do usuário NÃO estiver na lista → esconde
-        if (!cargosPermitidos.includes(cargoUsuario)) {
-          item.style.display = "none";
-        }
-      });
+      window.location.href = "./login";
+
+      return;
     }
-    controlarAcessoSidebar();
+
+    await montarSidebarDinamica(window.dadosUsuario);
 
     const campoResp = document.getElementById("responsavel");
     if (campoResp) campoResp.value = nomeResponsavel;
