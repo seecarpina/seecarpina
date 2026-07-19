@@ -6,32 +6,40 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.7rem;
+  gap: 0.5rem;
   margin: 1.5rem 0;
 }
 
 .admin-tab {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.45rem;
 
-  padding: 0.7rem 1rem;
+  border: 1px solid var(--clr-primary);
+  border-radius: 999px;
 
-  border: 0;
-  border-radius: 0.7rem;
+  padding: 0.55rem 0.9rem;
 
-  background: var(--clr-white);
+  background: transparent;
   color: var(--clr-dark);
 
+  cursor: pointer;
   font-weight: 600;
 
-  cursor: pointer;
-
-  transition: 0.2s;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
-.admin-tab:hover {
-  background: var(--clr-light);
+.admin-tab.active {
+  background: var(--clr-primary);
+  color: var(--clr-white);
+  border-color: transparent;
+}
+
+.admin-tab .material-symbols-outlined {
+  font-size: 1.2rem;
 }
 
 .admin-tab.active {
@@ -562,10 +570,6 @@
   cursor: pointer;
 }
 
-.menu-admin-acoes button:hover {
-  background: var(--clr-light);
-}
-
 .menu-admin-acoes .excluir-menu-btn {
   color: var(--clr-danger);
 }
@@ -714,10 +718,6 @@
   background: transparent;
 
   cursor: pointer;
-}
-
-.local-admin-acoes button:hover {
-  background: var(--clr-light);
 }
 
 /* =========================================
