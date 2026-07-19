@@ -40,6 +40,12 @@ let servidoresAdmin = [];
 let editandoLocal = false;
 let chaveLocalEdicao = null;
 
+let destinosOficios = [];
+let oficiosAdmin = [];
+
+let editandoDestino = false;
+let chaveDestinoEdicao = null;
+
 /* =========================================
    ELEMENTOS - ABAS
 ========================================= */
@@ -117,6 +123,34 @@ const btnCancelarEdicaoLocal = document.getElementById(
 );
 
 const msgEdicaoLocal = document.getElementById("msgEdicaoLocal");
+
+/* =========================================
+   ELEMENTOS - DESTINOS
+========================================= */
+
+const formDestinoAdmin = document.getElementById("formDestinoAdmin");
+
+const nomeDestinoAdmin = document.getElementById("nomeDestinoAdmin");
+
+const buscaDestinoAdmin = document.getElementById("buscaDestinoAdmin");
+
+const listaDestinosAdmin = document.getElementById("listaDestinosAdmin");
+
+const contadorDestinosAdmin = document.getElementById("contadorDestinosAdmin");
+
+const tituloFormularioDestino = document.getElementById(
+  "tituloFormularioDestino",
+);
+
+const btnCancelarEdicaoDestino = document.getElementById(
+  "btnCancelarEdicaoDestino",
+);
+
+const msgEdicaoDestino = document.getElementById("msgEdicaoDestino");
+
+const destinosOficiosRef = ref(rtdb, "destinos");
+
+const oficiosAdminRef = ref(rtdb, "oficios");
 
 /* =========================================
    UTILITÁRIOS
@@ -1138,4 +1172,293 @@ function resetarFormularioLocal() {
   msgEdicaoLocal.style.display = "none";
 
   msgEdicaoLocal.innerHTML = "";
+}
+
+/* =========================================
+   DESTINOS DE OFÍCIOS
+========================================= */
+
+onValue(destinosOficiosRef, (snapshot) => {
+  destinosOficios = snapshot.exists()
+    ? Object.entries(snapshot.val())
+        .map(([id, valor]) => ({
+          id,
+          nome: typeof valor === "string" ? valor : valor?.nome || "",
+        }))
+        .filter((destino) => destino.nome)
+        .sort((a, b) =>
+          a.nome.localeCompare(b.nome, "pt-BR", {
+            sensitivity: "base",
+          }),
+        )
+    : [];
+
+  renderDestinos();
+});
+
+onValue(oficiosAdminRef, (snapshot) => {
+  oficiosAdmin = [];
+
+  if (snapshot.exists()) {
+    Object.values(snapshot.val()).forEach((registrosAno) => {
+      if (!registrosAno || typeof registrosAno !== "object") {
+        return;
+      }
+
+      Object.values(registrosAno).forEach((oficio) => {
+        if (oficio && typeof oficio === "object") {
+          oficiosAdmin.push(oficio);
+        }
+      });
+    });
+  }
+
+  renderDestinos();
+});
+
+function renderDestinos() {
+  if (!listaDestinosAdmin) return;
+
+  const termo = normalizarTexto(buscaDestinoAdmin?.value || "");
+
+  const filtrados = destinosOficios
+    .filter((destino) => normalizarTexto(destino.nome).includes(termo))
+    .sort((a, b) =>
+      a.nome.localeCompare(b.nome, "pt-BR", {
+        sensitivity: "base",
+      }),
+    );
+
+  contadorDestinosAdmin.textContent = `${filtrados.length} destino${
+    filtrados.length === 1 ? "" : "s"
+  } encontrado${filtrados.length === 1 ? "" : "s"}`;
+
+  listaDestinosAdmin.innerHTML = "";
+
+  if (!filtrados.length) {
+    listaDestinosAdmin.innerHTML = `
+      <p>
+        Nenhum destino encontrado.
+      </p>
+    `;
+
+    return;
+  }
+
+  filtrados.forEach((destino) => {
+    const totalOficios = oficiosAdmin.filter((oficio) => {
+      const usadoComoDestino = oficio.destinoId === destino.id;
+
+      const usadoComoCopia = oficio.copiaId === destino.id;
+
+      return usadoComoDestino || usadoComoCopia;
+    }).length;
+
+    const card = document.createElement("div");
+
+    card.className = "local-admin-card";
+
+    card.innerHTML = `
+        <div
+          class="local-admin-icone"
+        >
+          <span
+            class="material-symbols-outlined"
+          >
+            forward_to_inbox
+          </span>
+        </div>
+
+        <div
+          class="local-admin-dados"
+        >
+          <strong>
+            ${escaparHtml(destino.nome)}
+          </strong>
+
+          <span>
+            ${totalOficios}
+            ofício${totalOficios === 1 ? "" : "s"}
+            vinculado${totalOficios === 1 ? "" : "s"}
+          </span>
+        </div>
+
+        <div
+          class="local-admin-acoes"
+        >
+          <button
+            type="button"
+            class="editar-destino-btn"
+            title="Editar destino"
+          >
+            <span
+              class="material-symbols-outlined"
+            >
+              edit_note
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="excluir-destino-btn"
+            title="Excluir destino"
+          >
+            <span
+              class="material-symbols-outlined"
+            >
+              delete
+            </span>
+          </button>
+        </div>
+      `;
+
+    card.querySelector(".editar-destino-btn").addEventListener("click", () => {
+      editarDestino(destino);
+    });
+
+    card.querySelector(".excluir-destino-btn").addEventListener("click", () => {
+      excluirDestino(destino, totalOficios);
+    });
+
+    listaDestinosAdmin.appendChild(card);
+  });
+}
+
+buscaDestinoAdmin?.addEventListener("input", renderDestinos);
+
+formDestinoAdmin?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const nome = nomeDestinoAdmin.value.trim();
+
+  if (!nome) {
+    notificar("Informe o nome do destino.", "erro");
+
+    return;
+  }
+
+  const duplicado = destinosOficios.find(
+    (destino) =>
+      normalizarTexto(destino.nome) === normalizarTexto(nome) &&
+      destino.id !== chaveDestinoEdicao,
+  );
+
+  if (duplicado) {
+    notificar("Já existe um destino com este nome.", "erro");
+
+    return;
+  }
+
+  try {
+    if (editandoDestino && chaveDestinoEdicao) {
+      await update(ref(rtdb, `destinos/${chaveDestinoEdicao}`), {
+        nome,
+      });
+
+      notificar("Destino atualizado com sucesso!");
+    } else {
+      await push(destinosOficiosRef, {
+        nome,
+      });
+
+      notificar("Destino cadastrado com sucesso!");
+    }
+
+    resetarFormularioDestino();
+  } catch (erro) {
+    console.error("Erro ao salvar destino:", erro);
+
+    notificar("Não foi possível salvar o destino.", "erro");
+  }
+});
+
+function editarDestino(destino) {
+  editandoDestino = true;
+
+  chaveDestinoEdicao = destino.id;
+
+  nomeDestinoAdmin.value = destino.nome;
+
+  tituloFormularioDestino.textContent = "Editar destino de ofício";
+
+  btnCancelarEdicaoDestino.style.display = "inline-flex";
+
+  msgEdicaoDestino.innerHTML = `
+    <div
+      class="edicao-menu-info"
+    >
+      <span
+        class="material-symbols-outlined"
+      >
+        edit_note
+      </span>
+
+      <div>
+        <strong>
+          Modo de edição
+        </strong>
+
+        <span>
+          ${escaparHtml(destino.nome)}
+        </span>
+      </div>
+    </div>
+  `;
+
+  msgEdicaoDestino.style.display = "block";
+
+  document.getElementById("btnTopo")?.click();
+
+  nomeDestinoAdmin.focus();
+}
+
+async function excluirDestino(destino, totalOficios) {
+  if (totalOficios > 0) {
+    notificar(
+      `Não é possível excluir "${destino.nome}", pois existem ${totalOficios} ofício${
+        totalOficios === 1 ? "" : "s"
+      } vinculado${totalOficios === 1 ? "" : "s"} a este destino.`,
+      "erro",
+    );
+
+    return;
+  }
+
+  const confirmou = confirm(
+    `Tem certeza que deseja excluir o destino "${destino.nome}"?`,
+  );
+
+  if (!confirmou) return;
+
+  try {
+    await remove(ref(rtdb, `destinos/${destino.id}`));
+
+    notificar("Destino excluído com sucesso!");
+
+    if (chaveDestinoEdicao === destino.id) {
+      resetarFormularioDestino();
+    }
+  } catch (erro) {
+    console.error("Erro ao excluir destino:", erro);
+
+    notificar("Não foi possível excluir o destino.", "erro");
+  }
+}
+
+btnCancelarEdicaoDestino?.addEventListener("click", resetarFormularioDestino);
+
+function resetarFormularioDestino() {
+  editandoDestino = false;
+
+  chaveDestinoEdicao = null;
+
+  formDestinoAdmin.reset();
+
+  tituloFormularioDestino.textContent = "Novo destino de ofício";
+
+  btnCancelarEdicaoDestino.style.display = "none";
+
+  msgEdicaoDestino.style.display = "none";
+
+  msgEdicaoDestino.innerHTML = "";
 }
