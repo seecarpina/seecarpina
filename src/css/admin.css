@@ -338,6 +338,10 @@
   opacity: 0.65;
 }
 
+.form-group small a {
+  color: var(--clr-primary);
+}
+
 .campo-icone {
   display: flex;
   align-items: center;
