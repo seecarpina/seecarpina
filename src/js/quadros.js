@@ -32,26 +32,47 @@ onValue(ref(rtdb, "servidores/locaisExercicio"), (snap) => {
   selectLocal.innerHTML = "";
 
   if (!snap.exists()) {
-    selectLocal.innerHTML = `<option>Nenhuma lotação encontrada</option>`;
+    selectLocal.innerHTML = `
+      <option>
+        Nenhum local de exercício encontrado
+      </option>
+    `;
+
     selectLocal.disabled = true;
     return;
   }
 
-  locais = Object.values(snap.val());
+  locais = Object.entries(snap.val())
+    .map(([id, dados]) => ({
+      id,
+      nome: dados?.nome || "",
+    }))
+    .filter((local) => local.nome)
+    .sort((a, b) =>
+      a.nome.localeCompare(b.nome, "pt-BR", {
+        sensitivity: "base",
+      }),
+    );
 
-  // opção padrão
   const optDefault = document.createElement("option");
+
   optDefault.value = "";
-  optDefault.textContent = "Selecione uma lotação";
+  optDefault.textContent = "Selecione um local de exercício";
+
   optDefault.disabled = true;
   optDefault.selected = true;
+
   selectLocal.appendChild(optDefault);
 
-  // opções
-  locais.forEach((l) => {
+  locais.forEach((local) => {
     const opt = document.createElement("option");
-    opt.value = l;
-    opt.textContent = l;
+
+    // O value agora é o ID
+    opt.value = local.id;
+
+    // O usuário continua vendo o nome
+    opt.textContent = local.nome;
+
     selectLocal.appendChild(opt);
   });
 
@@ -62,23 +83,40 @@ onValue(ref(rtdb, "servidores/locaisExercicio"), (snap) => {
 // 📄 GERAR PDF
 // ===============================
 btnGerar.addEventListener("click", () => {
-  const local = selectLocal.value;
+  const localId = selectLocal.value;
 
-  if (!local) {
-    mostrarNotificacao("Selecione uma lotação.", "erro");
+  if (!localId) {
+    mostrarNotificacao("Selecione um local de exercício.", "erro");
+
     return;
   }
 
-  const filtrados = servidores.filter(
-    (s) => s.localExercicio === local && s.situacao === "Ativo",
-  );
+  const localSelecionado = locais.find((local) => local.id === localId);
+
+  if (!localSelecionado) {
+    mostrarNotificacao("Local de exercício não encontrado.", "erro");
+
+    return;
+  }
+
+  const filtrados = servidores.filter((servidor) => {
+    const mesmoLocal = servidor.localExercicioId === localId;
+
+    const ativo =
+      String(servidor.situacao || "")
+        .trim()
+        .toLowerCase() === "ativo";
+
+    return mesmoLocal && ativo;
+  });
 
   if (!filtrados.length) {
-    mostrarNotificacao("Nenhum servidor encontrado.", "erro");
+    mostrarNotificacao("Nenhum servidor ativo encontrado neste local.", "erro");
+
     return;
   }
 
-  gerarPDF(local, filtrados);
+  gerarPDF(localSelecionado.nome, filtrados);
 });
 
 // ===============================
