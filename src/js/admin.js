@@ -340,11 +340,7 @@ function renderUsuarios() {
         <div class="usuario-admin-topo">
 
           <div class="usuario-admin-avatar">
-            <span
-              class="material-symbols-outlined"
-            >
-              person
-            </span>
+            <img src="${escaparHtml(usuario.foto || "./src/images/profile.webp")}">
           </div>
 
           <div class="usuario-admin-dados">
