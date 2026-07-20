@@ -24,6 +24,8 @@ const ANO_ATUAL = String(new Date().getFullYear());
 let anoSelecionado = ANO_ATUAL;
 let nomeResponsavel = "Usuário";
 
+let carregandoOficios = true;
+
 let todosOficios = [];
 let destinos = [];
 
@@ -108,6 +110,32 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
+  // ==============================
+  // USA CACHE PRIMEIRO
+  // ==============================
+
+  try {
+    const cache = localStorage.getItem("usuarioCache");
+
+    if (cache) {
+      const dadosCache = JSON.parse(cache);
+
+      if (dadosCache?.nome) {
+        nomeResponsavel = dadosCache.nome.split(" ")[0];
+
+        if (inputResponsavel) {
+          inputResponsavel.value = nomeResponsavel;
+        }
+      }
+    }
+  } catch (erro) {
+    console.error("Erro ao ler cache do usuário:", erro);
+  }
+
+  // ==============================
+  // ATUALIZA PELO FIRESTORE
+  // ==============================
+
   try {
     const usuarioSnap = await getDoc(doc(db, "usuarios", user.uid));
 
@@ -120,10 +148,18 @@ onAuthStateChanged(auth, async (user) => {
     if (inputResponsavel) {
       inputResponsavel.value = nomeResponsavel;
     }
+
+    // Atualiza permissões dos botões
+    // caso o nome tenha chegado depois
+    if (!carregandoOficios) {
+      renderTabela();
+    }
   } catch (erro) {
     console.error("Erro ao identificar responsável:", erro);
 
-    nomeResponsavel = user.displayName?.split(" ")[0] || "Usuário";
+    if (nomeResponsavel === "Usuário") {
+      nomeResponsavel = user.displayName?.split(" ")[0] || "Usuário";
+    }
 
     if (inputResponsavel) {
       inputResponsavel.value = nomeResponsavel;
@@ -284,25 +320,36 @@ atualizarCampoNumeroProcesso();
 /* =========================================
    DESTINOS E AUTOCOMPLETE
 ========================================= */
-onValue(destinosRef, (snapshot) => {
-  destinos = snapshot.exists()
-    ? Object.entries(snapshot.val())
-        .map(([id, valor]) => ({
-          id,
-          nome: padronizarTexto(
-            typeof valor === "string" ? valor : valor?.nome,
-          ),
-        }))
-        .filter((destino) => destino.nome)
-        .sort((a, b) =>
-          a.nome.localeCompare(b.nome, "pt-BR", {
-            sensitivity: "base",
-          }),
-        )
-    : [];
+async function carregarDestinos() {
+  try {
+    const snapshot = await get(destinosRef);
 
-  renderTabela();
-});
+    destinos = snapshot.exists()
+      ? Object.entries(snapshot.val())
+          .map(([id, valor]) => ({
+            id,
+
+            nome: padronizarTexto(
+              typeof valor === "string" ? valor : valor?.nome,
+            ),
+          }))
+          .filter((destino) => destino.nome)
+          .sort((a, b) =>
+            a.nome.localeCompare(b.nome, "pt-BR", {
+              sensitivity: "base",
+            }),
+          )
+      : [];
+
+    // Atualiza a tabela para exibir
+    // os nomes dos destinos
+    renderTabela();
+  } catch (erro) {
+    console.error("Erro ao carregar destinos:", erro);
+  }
+}
+
+carregarDestinos();
 
 inputDestino?.addEventListener("input", () => {
   destinoIdSelecionado = null;
@@ -505,8 +552,37 @@ ${obterCopiaOficio(oficio)}
 function renderTabela() {
   if (!tabela) return;
 
+  // Enquanto os ofícios ainda estão carregando,
+  // mostra apenas o spinner
+  if (carregandoOficios) {
+    tabela.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align:center;">
+          <svg class="svg-spinner" viewBox="0 0 50 50">
+            <circle
+              class="path"
+              cx="25"
+              cy="25"
+              r="20"
+              fill="none"
+              stroke-width="4"
+            />
+          </svg>
+        </td>
+      </tr>
+    `;
+
+    if (contadorOficios) {
+      contadorOficios.textContent = "";
+    }
+
+    return;
+  }
+
+  // Aplica busca e filtros
   const filtrados = obterOficiosFiltrados();
 
+  // Atualiza contador
   if (contadorOficios) {
     const total = filtrados.length;
 
@@ -515,6 +591,7 @@ function renderTabela() {
       `encontrado${total === 1 ? "" : "s"}`;
   }
 
+  // Calcula paginação
   const totalPaginas = Math.ceil(filtrados.length / porPagina);
 
   if (paginaAtual > totalPaginas) {
@@ -527,6 +604,8 @@ function renderTabela() {
 
   tabela.innerHTML = "";
 
+  // Só mostra "Nenhum ofício encontrado"
+  // depois que o carregamento terminou
   if (!pagina.length) {
     tabela.innerHTML = `
       <tr>
@@ -537,6 +616,7 @@ function renderTabela() {
     `;
 
     renderizarPaginacao(0);
+
     return;
   }
 
@@ -1084,50 +1164,38 @@ function visualizarPdf(oficio) {
    ANOS
 ========================================= */
 
-async function carregarAnosDisponiveis() {
+function carregarAnosDisponiveis() {
   if (!filtroAno) return;
 
-  try {
-    const snapshot = await get(ref(rtdb, "oficios"));
+  const anoAtual = new Date().getFullYear();
 
-    const anos = snapshot.exists()
-      ? Object.keys(snapshot.val())
-          .filter((ano) => /^\d{4}$/.test(ano))
-          .sort((a, b) => Number(b) - Number(a))
-      : [];
+  // Primeiro ano do sistema
+  const primeiroAno = 2025;
 
-    if (!anos.includes(ANO_ATUAL)) {
-      anos.unshift(ANO_ATUAL);
+  const anos = [];
+
+  for (let ano = anoAtual; ano >= primeiroAno; ano--) {
+    anos.push(String(ano));
+  }
+
+  filtroAno.innerHTML = "";
+
+  anos.forEach((ano) => {
+    const option = document.createElement("option");
+
+    option.value = ano;
+    option.textContent = ano;
+
+    if (ano === ANO_ATUAL) {
+      option.selected = true;
     }
 
-    filtroAno.innerHTML = "";
+    filtroAno.appendChild(option);
+  });
 
-    anos.forEach((ano) => {
-      const option = document.createElement("option");
+  anoSelecionado = filtroAno.value || ANO_ATUAL;
 
-      option.value = ano;
-      option.textContent = ano;
-      option.selected = ano === ANO_ATUAL;
-
-      filtroAno.appendChild(option);
-    });
-
-    anoSelecionado = filtroAno.value || ANO_ATUAL;
-
-    carregarOficiosPorAno();
-  } catch (erro) {
-    console.error("Erro ao carregar anos:", erro);
-
-    filtroAno.innerHTML = `
-      <option value="${ANO_ATUAL}">
-        ${ANO_ATUAL}
-      </option>
-    `;
-
-    anoSelecionado = ANO_ATUAL;
-
-    carregarOficiosPorAno();
-  }
+  carregarOficiosPorAno();
 }
 
 filtroAno?.addEventListener("change", () => {
@@ -1147,27 +1215,13 @@ function carregarOficiosPorAno() {
     pararEscutaOficios();
   }
 
-  if (tabela) {
-    tabela.innerHTML = `
-      <tr>
-        <td colspan="7" style="text-align:center;">
-          <svg class="svg-spinner" viewBox="0 0 50 50">
-            <circle
-              class="path"
-              cx="25"
-              cy="25"
-              r="20"
-              fill="none"
-              stroke-width="4"
-            />
-          </svg>
-        </td>
-      </tr>
-    `;
-  }
+  carregandoOficios = true;
+
+  renderTabela();
 
   pararEscutaOficios = onValue(
     getOficiosRef(),
+
     (snapshot) => {
       todosOficios = snapshot.exists()
         ? Object.entries(snapshot.val())
@@ -1179,10 +1233,15 @@ function carregarOficiosPorAno() {
             .sort((a, b) => Number(b.numero) - Number(a.numero))
         : [];
 
+      carregandoOficios = false;
+
       renderTabela();
     },
+
     (erro) => {
       console.error("Erro ao carregar ofícios:", erro);
+
+      carregandoOficios = false;
 
       tabela.innerHTML = `
         <tr>
