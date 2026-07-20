@@ -179,16 +179,24 @@ const inputBuscaHistorico = document.getElementById("buscaHistorico");
 
 onValue(destinosRef, (snapshot) => {
   destinos = snapshot.exists()
-    ? [
-        ...new Set(
-          Object.values(snapshot.val())
-            .filter(Boolean)
-            .map((destino) => padronizarTexto(destino)),
-        ),
-      ].sort((a, b) => a.localeCompare(b, "pt-BR"))
+    ? Object.entries(snapshot.val())
+        .map(([id, dados]) => ({
+          id,
+          nome: padronizarTexto(
+            typeof dados === "string" ? dados : dados?.nome,
+          ),
+        }))
+        .filter((destino) => destino.nome)
+        .sort((a, b) =>
+          a.nome.localeCompare(b.nome, "pt-BR", {
+            sensitivity: "base",
+          }),
+        )
     : [];
 
-  mostrarSugestoes(inputDestinoEntrega, destinos, boxDestinoEntrega);
+  const nomesDestinos = destinos.map((destino) => destino.nome);
+
+  mostrarSugestoes(inputDestinoEntrega, nomesDestinos, boxDestinoEntrega);
 });
 
 /* =========================
@@ -766,6 +774,88 @@ function gerarPDF(dados) {
     doc.text("Responsável pelo Recebimento", 157, y + 7, {
       align: "center",
     });
+
+    // ===============================
+    // ÁREA DE CONFORMIDADE
+    // ===============================
+
+    y += 20;
+
+    const alturaCaixa = 63;
+    const larguraCaixa = larguraPagina - margemEsquerda - margemDireita;
+
+    // Verifica se há espaço na página
+    if (y + alturaCaixa > alturaPagina - 20) {
+      adicionarNovaPagina();
+
+      y += 5;
+    }
+
+    // Caixa externa
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.3);
+
+    doc.rect(margemEsquerda, y, larguraCaixa, alturaCaixa);
+
+    // Título
+    doc.setFont("helvetica", "bold");
+
+    doc.setFontSize(11);
+
+    doc.text("CONFORMIDADE", margemEsquerda + 5, y + 8);
+
+    // Opções
+    doc.setFont("helvetica", "normal");
+
+    doc.setFontSize(10);
+
+    doc.text("Conformidade:", margemEsquerda + 5, y + 18);
+
+    // Checkbox SIM
+    doc.rect(margemEsquerda + 32, y + 14, 4, 4);
+
+    doc.text("Sim", margemEsquerda + 39, y + 18);
+
+    // Checkbox NÃO
+    doc.rect(margemEsquerda + 55, y + 14, 4, 4);
+
+    doc.text("Não", margemEsquerda + 62, y + 18);
+
+    // Descrição
+    doc.text(
+      "Em caso de desconformidade, descrever:",
+      margemEsquerda + 5,
+      y + 29,
+    );
+
+    // Linhas para preenchimento
+    doc.line(
+      margemEsquerda + 5,
+      y + 37,
+      larguraPagina - margemDireita - 5,
+      y + 37,
+    );
+
+    doc.line(
+      margemEsquerda + 5,
+      y + 44,
+      larguraPagina - margemDireita - 5,
+      y + 44,
+    );
+
+    doc.line(
+      margemEsquerda + 5,
+      y + 51,
+      larguraPagina - margemDireita - 5,
+      y + 51,
+    );
+
+    doc.line(
+      margemEsquerda + 5,
+      y + 58,
+      larguraPagina - margemDireita - 5,
+      y + 58,
+    );
 
     const blob = doc.output("blob");
     const url = URL.createObjectURL(blob);
