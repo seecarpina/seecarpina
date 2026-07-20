@@ -62,54 +62,50 @@ async function montarSidebarDinamica(dadosUsuario) {
     .trim()
     .toUpperCase();
 
-  try {
-    const snapshot = await get(ref(rtdb, "configuracoes/sidebar"));
-
+  // ==============================
+  // FUNÇÃO PARA RENDERIZAR O MENU
+  // ==============================
+  function renderizarMenu(configuracao) {
     menuSidebar.innerHTML = "";
 
-    if (snapshot.exists()) {
-      const itens = Object.entries(snapshot.val())
-        .map(([key, dados]) => ({
-          ...dados,
-          _key: key,
-        }))
-        .filter((item) => item.ativo !== false)
-        .filter((item) => {
-          // Liberado para todos
-          if (item.acessoTodos === true) {
-            return true;
-          }
+    const itens = Object.entries(configuracao || {})
+      .map(([key, dados]) => ({
+        ...dados,
+        _key: key,
+      }))
+      .filter((item) => item.ativo !== false)
+      .filter((item) => {
+        if (item.acessoTodos === true) {
+          return true;
+        }
 
-          // Verifica o cargo do usuário
-          return item.perfis?.[cargoUsuario] === true;
-        })
-        .sort((a, b) => Number(a.ordem || 999) - Number(b.ordem || 999));
+        return item.perfis?.[cargoUsuario] === true;
+      })
+      .sort((a, b) => Number(a.ordem || 999) - Number(b.ordem || 999));
 
-      itens.forEach((item) => {
-        const link = document.createElement("a");
+    const fragment = document.createDocumentFragment();
 
-        link.href = item.link || "#";
+    itens.forEach((item) => {
+      const link = document.createElement("a");
 
-        link.innerHTML = `
-          <span class="material-symbols-outlined">
-            ${item.icone || "link"}
-          </span>
+      link.href = item.link || "#";
 
-          <h3>
-            ${item.titulo || "Sem título"}
-          </h3>
+      link.innerHTML = `
+        <span class="material-symbols-outlined">
+          ${item.icone || "link"}
+        </span>
 
-          ${item.badgeNovo === true ? "<novo>Novo</novo>" : ""}
-        `;
+        <h3>
+          ${item.titulo || "Sem título"}
+        </h3>
 
-        menuSidebar.appendChild(link);
-      });
+        ${item.badgeNovo === true ? "<novo>Novo</novo>" : ""}
+      `;
 
-      ativarLinkAtual();
-    }
+      fragment.appendChild(link);
+    });
 
-    // Configurações pode ser controlada pelo Firebase
-    // Logout fica sempre disponível
+    // Logout
     const logout = document.createElement("a");
 
     logout.href = "#";
@@ -125,7 +121,11 @@ async function montarSidebarDinamica(dadosUsuario) {
       </h3>
     `;
 
-    menuSidebar.appendChild(logout);
+    fragment.appendChild(logout);
+
+    menuSidebar.appendChild(fragment);
+
+    ativarLinkAtual();
 
     logout.addEventListener("click", async (event) => {
       event.preventDefault();
@@ -135,18 +135,52 @@ async function montarSidebarDinamica(dadosUsuario) {
         window.location.href = "./login";
       } catch (erro) {
         console.error("Erro ao sair:", erro);
-
         mostrarNotificacao("Erro ao sair do sistema.", "erro");
       }
     });
+  }
+
+  // ==============================
+  // 1. CARREGA CACHE IMEDIATAMENTE
+  // ==============================
+  const cacheSidebar = localStorage.getItem("configuracaoSidebar");
+
+  if (cacheSidebar) {
+    try {
+      renderizarMenu(JSON.parse(cacheSidebar));
+    } catch (erro) {
+      console.error("Erro ao carregar cache da sidebar:", erro);
+    }
+  }
+
+  // ==============================
+  // 2. ATUALIZA PELO FIREBASE
+  // ==============================
+  try {
+    const snapshot = await get(ref(rtdb, "configuracoes/sidebar"));
+
+    if (snapshot.exists()) {
+      const configuracao = snapshot.val();
+
+      // Salva para próximas páginas
+      localStorage.setItem("configuracaoSidebar", JSON.stringify(configuracao));
+
+      // Atualiza menu
+      renderizarMenu(configuracao);
+    } else if (!cacheSidebar) {
+      renderizarMenu({});
+    }
   } catch (erro) {
     console.error("Erro ao carregar menu:", erro);
 
-    menuSidebar.innerHTML = `
-      <div style="padding: 1rem;">
-        Não foi possível carregar o menu.
-      </div>
-    `;
+    // Só mostra erro se também não tiver cache
+    if (!cacheSidebar) {
+      menuSidebar.innerHTML = `
+        <div style="padding: 1rem;">
+          Não foi possível carregar o menu.
+        </div>
+      `;
+    }
   }
 }
 
