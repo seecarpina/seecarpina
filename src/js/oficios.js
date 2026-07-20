@@ -34,11 +34,10 @@ let copiaIdSelecionado = null;
 
 let paginaAtual = 1;
 const porPagina = 25;
+let pararEscutaOficios = null;
 
 let editando = false;
 let chaveEdicao = null;
-
-let pararEscutaOficios = null;
 
 const checkboxSistemaCarpinaDigital = document.getElementById(
   "sistemaCarpinaDigital",
@@ -550,15 +549,25 @@ ${obterCopiaOficio(oficio)}
 ========================================= */
 
 function renderTabela() {
-  if (!tabela) return;
+  if (!tabela) {
+    return;
+  }
 
-  // Enquanto os ofícios ainda estão carregando,
-  // mostra apenas o spinner
+  // ==============================
+  // CARREGANDO
+  // ==============================
+
   if (carregandoOficios) {
     tabela.innerHTML = `
       <tr>
-        <td colspan="7" style="text-align:center;">
-          <svg class="svg-spinner" viewBox="0 0 50 50">
+        <td
+          colspan="7"
+          style="text-align:center;"
+        >
+          <svg
+            class="svg-spinner"
+            viewBox="0 0 50 50"
+          >
             <circle
               class="path"
               cx="25"
@@ -579,19 +588,28 @@ function renderTabela() {
     return;
   }
 
-  // Aplica busca e filtros
+  // ==============================
+  // FILTROS E BUSCA
+  // ==============================
+
   const filtrados = obterOficiosFiltrados();
 
-  // Atualiza contador
+  // ==============================
+  // CONTADOR
+  // ==============================
+
   if (contadorOficios) {
     const total = filtrados.length;
 
-    contadorOficios.textContent =
-      `${total} ofício${total === 1 ? "" : "s"} ` +
-      `encontrado${total === 1 ? "" : "s"}`;
+    contadorOficios.textContent = `${total} ofício${
+      total === 1 ? "" : "s"
+    } encontrado${total === 1 ? "" : "s"}`;
   }
 
-  // Calcula paginação
+  // ==============================
+  // PAGINAÇÃO LOCAL
+  // ==============================
+
   const totalPaginas = Math.ceil(filtrados.length / porPagina);
 
   if (paginaAtual > totalPaginas) {
@@ -604,12 +622,17 @@ function renderTabela() {
 
   tabela.innerHTML = "";
 
-  // Só mostra "Nenhum ofício encontrado"
-  // depois que o carregamento terminou
+  // ==============================
+  // NENHUM RESULTADO
+  // ==============================
+
   if (!pagina.length) {
     tabela.innerHTML = `
       <tr>
-        <td colspan="7" style="text-align:center;">
+        <td
+          colspan="7"
+          style="text-align:center;"
+        >
           Nenhum ofício encontrado.
         </td>
       </tr>
@@ -619,6 +642,10 @@ function renderTabela() {
 
     return;
   }
+
+  // ==============================
+  // RENDERIZAÇÃO
+  // ==============================
 
   pagina.forEach((oficio) => {
     const tr = document.createElement("tr");
@@ -633,87 +660,66 @@ function renderTabela() {
       !oficio.responsavel;
 
     tr.innerHTML = `
-      <td>
-        ${formatarNumeroOficio(oficio.numero, anoSelecionado)}
-      </td>
+        <td>
+          ${formatarNumeroOficio(oficio.numero, anoSelecionado)}
+        </td>
 
-      <td class="assunto">
-        ${assuntoFormatado}
-      </td>
+        <td class="assunto">
+          ${assuntoFormatado}
+        </td>
 
-      <td>
-        ${formatarDataBR(oficio.data)}
-      </td>
+        <td>
+          ${formatarDataBR(oficio.data)}
+        </td>
 
-      <td>
-        ${escaparHtml(obterDestinoOficio(oficio) || "-")}
-      </td>
+        <td>
+          ${escaparHtml(obterDestinoOficio(oficio) || "-")}
+        </td>
 
-      <td>
-        ${escaparHtml(obterCopiaOficio(oficio) || "-")}
-      </td>
+        <td>
+          ${escaparHtml(obterCopiaOficio(oficio) || "-")}
+        </td>
 
-      <td>
-        ${escaparHtml(oficio.responsavel || "-")}
-      </td>
+        <td>
+          ${escaparHtml(oficio.responsavel || "-")}
+        </td>
 
-      <td>
-        <div>
-          <label
-            class="icon-btn upload-btn"
-            title="Enviar PDF"
-          >
-            <input
-              type="file"
-              accept="application/pdf"
-              hidden
-              class="input-pdf"
-            />
+        <td>
+          <div>
 
-            <span class="material-symbols-outlined">
-              upload_file
-            </span>
-          </label>
+            ${
+              podeEditar
+                ? `
+                  <button
+                    class="edit-btn"
+                    type="button"
+                    title="Editar ofício"
+                  >
+                    <span
+                      class="material-symbols-outlined"
+                    >
+                      edit_note
+                    </span>
+                  </button>
 
-          <button
-            class="icon-btn view-btn"
-            type="button"
-            title="Visualizar PDF"
-            ${oficio.pdf ? "" : "disabled"}
-          >
-            <span class="material-symbols-outlined">
-              picture_as_pdf
-            </span>
-          </button>
+                  <button
+                    class="cancel-btn"
+                    type="button"
+                    title="Cancelar ofício"
+                  >
+                    <span
+                      class="material-symbols-outlined"
+                    >
+                      cancel
+                    </span>
+                  </button>
+                `
+                : ""
+            }
 
-          ${
-            podeEditar
-              ? `
-                <button
-                  class="edit-btn"
-                  type="button"
-                  title="Editar ofício"
-                >
-                  <span class="material-symbols-outlined">
-                    edit_note
-                  </span>
-                </button>
-
-                <button
-                  class="cancel-btn"
-                  type="button"
-                  title="Cancelar ofício"
-                >
-                  <span class="material-symbols-outlined">
-                    cancel
-                  </span>
-                </button>
-              `
-              : ""
-          }
-        </div>
-      </td>
-    `;
+          </div>
+        </td>
+      `;
 
     tabela.appendChild(tr);
   });
@@ -759,11 +765,15 @@ function formatarAssunto(oficio) {
 ========================================= */
 
 function renderizarPaginacao(totalPaginas) {
-  if (!paginacao) return;
+  if (!paginacao) {
+    return;
+  }
 
   paginacao.innerHTML = "";
 
-  if (totalPaginas <= 1) return;
+  if (totalPaginas <= 1) {
+    return;
+  }
 
   const maxPaginasVisiveis = 10;
 
@@ -775,25 +785,33 @@ function renderizarPaginacao(totalPaginas) {
     inicioPagina = Math.max(1, fimPagina - maxPaginasVisiveis + 1);
   }
 
+  // ANTERIOR
+
   if (paginaAtual > 1) {
     const anterior = document.createElement("button");
 
     anterior.type = "button";
+
     anterior.textContent = "‹";
+
     anterior.title = "Página anterior";
 
     anterior.addEventListener("click", () => {
       paginaAtual--;
+
       renderTabela();
     });
 
     paginacao.appendChild(anterior);
   }
 
+  // NÚMEROS
+
   for (let pagina = inicioPagina; pagina <= fimPagina; pagina++) {
     const botao = document.createElement("button");
 
     botao.type = "button";
+
     botao.textContent = pagina;
 
     if (pagina === paginaAtual) {
@@ -802,21 +820,27 @@ function renderizarPaginacao(totalPaginas) {
 
     botao.addEventListener("click", () => {
       paginaAtual = pagina;
+
       renderTabela();
     });
 
     paginacao.appendChild(botao);
   }
 
+  // PRÓXIMA
+
   if (paginaAtual < totalPaginas) {
     const proxima = document.createElement("button");
 
     proxima.type = "button";
+
     proxima.textContent = "›";
+
     proxima.title = "Próxima página";
 
     proxima.addEventListener("click", () => {
       paginaAtual++;
+
       renderTabela();
     });
 
@@ -843,8 +867,6 @@ tabela?.addEventListener("click", async (event) => {
 
   const btnCancelar = event.target.closest(".cancel-btn");
 
-  const btnVisualizar = event.target.closest(".view-btn");
-
   if (btnEditar) {
     iniciarEdicao(oficio);
     return;
@@ -854,37 +876,6 @@ tabela?.addEventListener("click", async (event) => {
     await cancelarOficio(oficio);
     return;
   }
-
-  if (btnVisualizar) {
-    visualizarPdf(oficio);
-  }
-});
-
-tabela?.addEventListener("change", async (event) => {
-  const inputArquivo = event.target.closest(".input-pdf");
-
-  if (!inputArquivo) return;
-
-  const linha = inputArquivo.closest("tr");
-
-  const chave = linha?.dataset.key;
-
-  if (!chave) return;
-
-  const arquivo = inputArquivo.files?.[0];
-
-  if (!arquivo) return;
-
-  if (arquivo.type !== "application/pdf") {
-    notificar("Envie apenas arquivos PDF.", "erro");
-
-    inputArquivo.value = "";
-    return;
-  }
-
-  await enviarPdf(chave, arquivo);
-
-  inputArquivo.value = "";
 });
 
 /* =========================================
@@ -1092,75 +1083,6 @@ async function cancelarOficio(oficio) {
 }
 
 /* =========================================
-   PDF
-========================================= */
-
-async function enviarPdf(chave, arquivo) {
-  try {
-    const base64 = await arquivoParaBase64(arquivo);
-
-    await update(ref(rtdb, `oficios/${anoSelecionado}/${chave}`), {
-      pdf: base64,
-      pdfAtualizadoEm: new Date().toISOString(),
-    });
-
-    notificar("PDF enviado com sucesso!");
-  } catch (erro) {
-    console.error("Erro ao enviar PDF:", erro);
-
-    notificar("Erro ao enviar o PDF.", "erro");
-  }
-}
-
-function arquivoParaBase64(arquivo) {
-  return new Promise((resolve, reject) => {
-    const leitor = new FileReader();
-
-    leitor.onload = () => {
-      const resultado = String(leitor.result);
-
-      resolve(resultado.split(",")[1]);
-    };
-
-    leitor.onerror = () => {
-      reject(new Error("Não foi possível ler o arquivo."));
-    };
-
-    leitor.readAsDataURL(arquivo);
-  });
-}
-
-function visualizarPdf(oficio) {
-  if (!oficio.pdf) return;
-
-  try {
-    const caracteres = atob(oficio.pdf);
-
-    const numeros = new Uint8Array(caracteres.length);
-
-    for (let indice = 0; indice < caracteres.length; indice++) {
-      numeros[indice] = caracteres.charCodeAt(indice);
-    }
-
-    const blob = new Blob([numeros], {
-      type: "application/pdf",
-    });
-
-    const url = URL.createObjectURL(blob);
-
-    window.open(url, "_blank");
-
-    setTimeout(() => {
-      URL.revokeObjectURL(url);
-    }, 60000);
-  } catch (erro) {
-    console.error("Erro ao abrir o PDF:", erro);
-
-    notificar("Não foi possível abrir o PDF.", "erro");
-  }
-}
-
-/* =========================================
    ANOS
 ========================================= */
 
@@ -1211,11 +1133,14 @@ filtroAno?.addEventListener("change", () => {
 ========================================= */
 
 function carregarOficiosPorAno() {
+  // Encerra a escuta do ano anterior
   if (typeof pararEscutaOficios === "function") {
     pararEscutaOficios();
   }
 
   carregandoOficios = true;
+
+  paginaAtual = 1;
 
   renderTabela();
 
@@ -1245,7 +1170,10 @@ function carregarOficiosPorAno() {
 
       tabela.innerHTML = `
         <tr>
-          <td colspan="7" style="text-align:center;">
+          <td
+            colspan="7"
+            style="text-align:center;"
+          >
             Não foi possível carregar os ofícios.
           </td>
         </tr>
