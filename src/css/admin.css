@@ -38,10 +38,6 @@
   border-color: transparent;
 }
 
-.admin-tab .material-symbols-outlined {
-  font-size: 1.2rem;
-}
-
 .admin-tab.active {
   background: var(--clr-primary);
   color: white;
@@ -724,6 +720,14 @@
   background: transparent;
 
   cursor: pointer;
+}
+
+.local-admin-inicial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  font-size: 24px;
 }
 
 /* =========================================

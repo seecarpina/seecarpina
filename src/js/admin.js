@@ -1012,14 +1012,8 @@ function renderLocais() {
     card.className = "local-admin-card";
 
     card.innerHTML = `
-        <div
-          class="local-admin-icone"
-        >
-          <span
-            class="material-symbols-outlined"
-          >
-            location_on
-          </span>
+        <div class="local-admin-icone local-admin-inicial">
+          ${escaparHtml(local.nome.charAt(0).toUpperCase())}
         </div>
 
         <div
@@ -1255,14 +1249,8 @@ function renderDestinos() {
     card.className = "local-admin-card";
 
     card.innerHTML = `
-        <div
-          class="local-admin-icone"
-        >
-          <span
-            class="material-symbols-outlined"
-          >
-            forward_to_inbox
-          </span>
+        <div class="local-admin-icone local-admin-inicial">
+          ${escaparHtml(destino.nome.charAt(0).toUpperCase())}
         </div>
 
         <div
