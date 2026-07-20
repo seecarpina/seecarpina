@@ -538,6 +538,11 @@ aside {
   min-height: 100vh;
   top: 0;
 }
+aside .aside-container {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
 aside .top {
   display: flex;
   justify-content: space-around;
@@ -2301,13 +2306,18 @@ select {
 
   aside {
     position: fixed;
-    width: 100%;
-    padding: 0 1rem;
+    width: 70%;
+    padding: 0 1rem 5rem 0;
     z-index: 3;
     background-color: var(--clr-white);
     display: none;
     left: -100px;
     animation: menuAni 0.5s forwards;
+  }
+
+  aside .sidebar {
+    border-radius: 0;
+    box-shadow: none;
   }
 
   @keyframes menuAni {
@@ -2332,9 +2342,12 @@ select {
   aside .top div.close span {
     display: inline;
     position: absolute;
-    right: 0;
-    /* margin-right: -30px; */
+    top: 1rem;
+    right: 1rem;
+    padding: 1rem;
     font-size: 35px;
+    cursor: pointer;
+    z-index: 999;
   }
 
   .right .top {
