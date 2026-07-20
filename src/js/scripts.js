@@ -108,7 +108,7 @@ async function montarSidebarDinamica(dadosUsuario) {
     // Logout
     const logout = document.createElement("a");
 
-    logout.href = "#";
+    logout.href = "./logout";
     logout.id = "logout";
 
     logout.innerHTML = `
