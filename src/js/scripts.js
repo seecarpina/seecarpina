@@ -539,6 +539,12 @@ import {
 // 🧍‍♂️ Controle do usuário logado
 let nomeResponsavel = "Usuário";
 
+const usuarioCache = obterUsuarioCache();
+
+if (usuarioCache?.nome) {
+  nomeResponsavel = usuarioCache.nome.split(" ")[0];
+}
+
 // controle de alteração do lembrete
 let lembreteOriginal = "";
 
@@ -565,26 +571,125 @@ function saudacao() {
   return mensagem;
 }
 
+function obterUsuarioCache() {
+  try {
+    const cache = localStorage.getItem("usuarioCache");
+
+    if (!cache) return null;
+
+    return JSON.parse(cache);
+  } catch (erro) {
+    console.error("Erro ao ler cache do usuário:", erro);
+    return null;
+  }
+}
+
+function salvarUsuarioCache(usuario) {
+  if (!usuario) return;
+
+  const dadosCache = {
+    nome: usuario.nome || "",
+    cargo: usuario.cargo || "",
+    foto: usuario.foto || "",
+    ativo: usuario.ativo,
+  };
+
+  localStorage.setItem("usuarioCache", JSON.stringify(dadosCache));
+}
+
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
+    localStorage.removeItem("usuarioCache");
     window.location.href = "./login";
     return;
   }
 
+  window.usuarioAuth = user;
+
+  // ==================================
+  // 1. USA CACHE IMEDIATAMENTE
+  // ==================================
+
+  const usuarioCache = obterUsuarioCache();
+
+  if (usuarioCache) {
+    window.dadosUsuario = usuarioCache;
+
+    if (usuarioCache.nome) {
+      nomeResponsavel = usuarioCache.nome.split(" ")[0];
+    }
+
+    // Sidebar já pode ser montada usando o cargo salvo
+    montarSidebarDinamica(usuarioCache);
+
+    const campoResp = document.getElementById("responsavel");
+
+    if (campoResp) {
+      campoResp.value = nomeResponsavel;
+    }
+
+    const boasVindas = document.getElementById("boasVindas");
+
+    if (boasVindas) {
+      boasVindas.textContent = `${saudacao()}, ${nomeResponsavel}!`;
+    }
+
+    const nomeUsuario = document.querySelector("#nomeUsuario");
+
+    if (nomeUsuario) {
+      nomeUsuario.textContent = nomeResponsavel;
+    }
+
+    const cargoUsuario = document.querySelector("#cargoUsuario");
+
+    if (cargoUsuario && usuarioCache.cargo) {
+      cargoUsuario.textContent = usuarioCache.cargo;
+    }
+
+    const fotoTopo = document.querySelector(".profile-photo img");
+
+    if (fotoTopo) {
+      fotoTopo.src = usuarioCache.foto || "./src/images/profile.webp";
+    }
+  }
+
+  // ==================================
+  // 2. BUSCA DADOS ATUALIZADOS
+  // ==================================
+
   try {
     const userRef = doc(db, "usuarios", user.uid);
+
     const userSnap = await getDoc(userRef);
 
+    let dadosUsuario = {};
+
     if (userSnap.exists()) {
-      nomeResponsavel = userSnap.data().nome.split(" ")[0];
+      dadosUsuario = userSnap.data();
+    } else {
+      dadosUsuario = {
+        nome: user.displayName || "Usuário",
+        foto: user.photoURL || "",
+      };
+    }
+
+    window.dadosUsuario = dadosUsuario;
+
+    if (dadosUsuario.nome) {
+      nomeResponsavel = dadosUsuario.nome.split(" ")[0];
     } else if (user.displayName) {
       nomeResponsavel = user.displayName.split(" ")[0];
     }
 
-    window.dadosUsuario = userSnap.data();
-    window.usuarioAuth = user;
+    // ==================================
+    // USUÁRIO DESATIVADO
+    // ==================================
 
-    if (window.dadosUsuario?.ativo === false) {
+    if (dadosUsuario?.ativo === false) {
+      localStorage.removeItem("usuarioCache");
+
+      localStorage.removeItem("configuracaoSidebar");
+
       await signOut(auth);
 
       alert(
@@ -596,53 +701,78 @@ onAuthStateChanged(auth, async (user) => {
       return;
     }
 
-    await montarSidebarDinamica(window.dadosUsuario);
+    // ==================================
+    // ATUALIZA CACHE
+    // ==================================
+
+    salvarUsuarioCache(dadosUsuario);
+
+    // Atualiza sidebar caso o cargo tenha mudado
+    await montarSidebarDinamica(dadosUsuario);
+
+    // ==================================
+    // ATUALIZA INTERFACE
+    // ==================================
 
     const campoResp = document.getElementById("responsavel");
-    if (campoResp) campoResp.value = nomeResponsavel;
+
+    if (campoResp) {
+      campoResp.value = nomeResponsavel;
+    }
 
     const boasVindas = document.getElementById("boasVindas");
-    if (boasVindas)
+
+    if (boasVindas) {
       boasVindas.textContent = `${saudacao()}, ${nomeResponsavel}!`;
-
-    if (window.dadosUsuario?.nome) {
-      document.querySelector("#nomeUsuario").textContent = nomeResponsavel;
     }
 
-    if (window.dadosUsuario?.cargo) {
-      document.querySelector("#cargoUsuario").textContent =
-        window.dadosUsuario.cargo;
+    const nomeUsuario = document.querySelector("#nomeUsuario");
+
+    if (nomeUsuario && dadosUsuario?.nome) {
+      nomeUsuario.textContent = nomeResponsavel;
     }
 
-    // Foto do usuário no topo
+    const cargoUsuario = document.querySelector("#cargoUsuario");
+
+    if (cargoUsuario && dadosUsuario?.cargo) {
+      cargoUsuario.textContent = dadosUsuario.cargo;
+    }
+
     const fotoTopo = document.querySelector(".profile-photo img");
 
-    if (window.dadosUsuario?.foto) {
-      fotoTopo.src = window.dadosUsuario.foto;
-    } else {
-      fotoTopo.src = "./src/images/profile.webp"; // fallback padrão
+    if (fotoTopo) {
+      fotoTopo.src = dadosUsuario?.foto || "./src/images/profile.webp";
     }
   } catch (err) {
-    console.error("Erro ao buscar nome:", err);
+    console.error("Erro ao buscar dados do usuário:", err);
   }
 
-  // lembretes
+  // ==================================
+  // LEMBRETES
+  // ==================================
+
   if (window.dadosUsuario?.lembretes) {
     const textarea = document.getElementById("lembretes");
+
     if (textarea) {
       lembreteOriginal = window.dadosUsuario.lembretes;
+
       textarea.value = lembreteOriginal;
     }
   }
 
-  // salvar somente se mudar
   const textareaLembretes = document.getElementById("lembretes");
+
   if (textareaLembretes) {
     textareaLembretes.addEventListener("blur", async () => {
       const novoTexto = textareaLembretes.value.trim();
-      if (novoTexto === lembreteOriginal) return;
+
+      if (novoTexto === lembreteOriginal) {
+        return;
+      }
 
       const user = window.usuarioAuth;
+
       if (!user) return;
 
       try {
@@ -652,6 +782,7 @@ onAuthStateChanged(auth, async (user) => {
         });
 
         lembreteOriginal = novoTexto;
+
         mostrarNotificacao("Lembrete salvo");
       } catch {
         mostrarNotificacao("Erro ao salvar lembrete", "erro");
