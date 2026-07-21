@@ -135,6 +135,12 @@
                 <div class="estoque-toolbar-acoes">
                   <span id="contadorMateriais" class="estoque-contador"></span>
 
+                  <button class="btn" id="btnExportarExcel" type="button">
+                    <span class="material-symbols-outlined"> table_view </span>
+
+                    Exportar Excel
+                  </button>
+
                   <button class="btn" id="btnNovaEntrega" type="button">
                     <span class="material-symbols-outlined">
                       local_shipping
@@ -267,6 +273,7 @@
         </div>
       </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script type="module" src="./src/js/scripts.js"></script>
     <script type="module" src="./src/js/estoque.js"></script>
   </body>

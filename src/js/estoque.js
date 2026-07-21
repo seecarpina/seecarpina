@@ -165,6 +165,9 @@ const formMaterial = document.getElementById("formMaterial");
 const btnAdicionarEstoque = document.getElementById("btnAdicionarEstoque");
 
 const btnNovaEntrega = document.getElementById("btnNovaEntrega");
+
+const btnExportarExcel = document.getElementById("btnExportarExcel");
+
 const btnFecharModalEntrega = document.getElementById("fecharModalEntrega");
 
 const btnAdicionarItem = document.getElementById("btnAdicionarItem");
@@ -385,6 +388,47 @@ function renderTabela() {
 }
 
 inputBusca.addEventListener("input", renderTabela);
+
+/* =========================
+   EXPORTAR ESTOQUE PARA EXCEL
+========================= */
+
+btnExportarExcel?.addEventListener("click", () => {
+  if (!materiais.length) {
+    mostrarNotificacao("Não há materiais para exportar.", "erro");
+
+    return;
+  }
+
+  const dadosExcel = materiais.map((material) => ({
+    Material: material.nome || "",
+    Unidade: material.unidade || "Unidade",
+    "Quantidade em Estoque": Number(material.estoque || 0),
+    "Última Movimentação": material.atualizadoEm
+      ? formatarData(material.atualizadoEm)
+      : "",
+  }));
+
+  const planilha = XLSX.utils.json_to_sheet(dadosExcel);
+
+  const workbook = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(workbook, planilha, "Estoque");
+
+  planilha["!cols"] = [{ wch: 45 }, { wch: 15 }, { wch: 22 }, { wch: 22 }];
+
+  const hoje = new Date();
+
+  const dataArquivo = [
+    hoje.getFullYear(),
+    String(hoje.getMonth() + 1).padStart(2, "0"),
+    String(hoje.getDate()).padStart(2, "0"),
+  ].join("-");
+
+  XLSX.writeFile(workbook, `estoque_${dataArquivo}.xlsx`);
+
+  mostrarNotificacao("Estoque exportado com sucesso!");
+});
 
 /* =========================
    MODAL DE ENTREGA
