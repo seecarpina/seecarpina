@@ -3,34 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>Configurações - SEE Carpina</title>
 
     <link rel="stylesheet" href="./src/css/style.css" />
+    <link rel="stylesheet" href="./src/css/configuracoes.css" />
+
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
     />
-
-    <style>
-      #previewFoto {
-        width: 120px;
-        height: 120px;
-        object-fit: cover;
-        border-radius: 50%;
-        margin-top: 10px;
-        display: none;
-      }
-      .email {
-        cursor: not-allowed;
-      }
-    </style>
   </head>
 
   <body>
     <button id="btnTopo">↑</button>
 
     <div class="loading">
-      <svg class="svg-spinner" viewBox="0 0 50 50">
+      <svg
+        class="svg-spinner"
+        viewBox="0 0 50 50"
+        role="img"
+        aria-label="Carregando"
+      >
         <circle
           class="path"
           cx="25"
@@ -48,187 +42,115 @@
       <main>
         <h1>Configurações de Usuário</h1>
 
-        <!-- FORMULÁRIO COMPLETO -->
-        <form id="formUsuario" class="form-config box glass">
-          <div class="campo">
-            <label>Nome:</label>
-            <input type="text" id="userNome" />
-          </div>
+        <div class="configuracoes-grid">
+          <!-- INFORMAÇÃO -->
+          <section class="box glass">
+            <div class="info-card">
+              <span class="material-symbols-outlined"> manage_accounts </span>
 
-          <div class="campo">
-            <label>Cargo:</label>
-            <input type="text" id="userCargo" />
-          </div>
+              <div>
+                <strong>Perfil do usuário</strong><br />
+                Atualize seus dados pessoais e preferências do sistema.
+              </div>
+            </div>
+          </section>
 
-          <div class="campo">
-            <label>Email:</label>
-            <input type="text" class="email" id="userEmail" readonly />
-          </div>
+          <!-- PERFIL -->
+          <section class="box glass">
+            <div class="configuracoes-cabecalho">
+              <div>
+                <h2>Dados do perfil</h2>
 
-          <div class="campo">
-            <label>Foto de Perfil:</label>
-            <input type="file" id="userFoto" accept="image/*" />
-            <img id="previewFoto" />
-          </div>
+                <p>Mantenha suas informações de usuário atualizadas.</p>
+              </div>
+            </div>
 
-          <div class="campo" style="display: none">
-            <label>Esquema de cores:</label>
-            <select id="temaCores">
-              <option value="">Padrão</option>
-              <option value="paleta_1">Paleta 1</option>
-              <option value="paleta_2">Paleta 2</option>
-              <option value="paleta_3">Paleta 3</option>
-              <option value="paleta_4">Paleta 4</option>
-            </select>
-          </div>
+            <form id="formUsuario" class="configuracoes-form">
+              <div class="configuracoes-foto">
+                <div class="foto-preview-container">
+                  <img id="previewFoto" alt="Foto de perfil" />
 
-          <button type="button" id="btnSalvar" class="btn">Salvar</button>
-        </form>
+                  <div id="fotoPlaceholder" class="foto-placeholder">
+                    <span class="material-symbols-outlined"> person </span>
+                  </div>
+                </div>
+
+                <div class="foto-acoes">
+                  <label for="userFoto" class="btn btn-upload-foto">
+                    <span class="material-symbols-outlined"> add_a_photo </span>
+
+                    Alterar foto
+                  </label>
+
+                  <input type="file" id="userFoto" accept="image/*" hidden />
+                </div>
+              </div>
+
+              <div class="configuracoes-campos">
+                <div class="campo-configuracao">
+                  <label for="userNome"> Nome </label>
+
+                  <input type="text" id="userNome" autocomplete="name" />
+                </div>
+
+                <div class="campo-configuracao">
+                  <label for="userCargo"> Cargo </label>
+
+                  <input type="text" id="userCargo" autocomplete="off" />
+                </div>
+
+                <div class="campo-configuracao">
+                  <label for="userEmail"> Email </label>
+
+                  <input type="email" id="userEmail" readonly />
+                </div>
+              </div>
+            </form>
+          </section>
+
+          <!-- APARÊNCIA -->
+          <section class="box glass">
+            <div class="configuracoes-cabecalho">
+              <div>
+                <h2>Aparência</h2>
+
+                <p>Escolha suas preferências visuais.</p>
+              </div>
+            </div>
+
+            <div class="campo-configuracao">
+              <label for="temaCores"> Esquema de cores </label>
+
+              <select id="temaCores">
+                <option value="">Padrão</option>
+
+                <option value="paleta_1">Paleta 1</option>
+
+                <option value="paleta_2">Paleta 2</option>
+
+                <option value="paleta_3">Paleta 3</option>
+
+                <option value="paleta_4">Paleta 4</option>
+              </select>
+            </div>
+          </section>
+
+          <!-- AÇÕES -->
+          <section class="box glass configuracoes-acoes">
+            <button type="button" id="btnSalvar" class="btn">
+              <span class="material-symbols-outlined"> save </span>
+
+              Salvar alterações
+            </button>
+          </section>
+        </div>
       </main>
 
       <div class="right"></div>
     </div>
 
-    <!-- IMPORTA SEU SCRIPT PRINCIPAL -->
     <script type="module" src="./src/js/scripts.js"></script>
 
-    <!-- SCRIPT PARA CARREGAR DADOS E SALVAR EDIÇÕES -->
-    <script type="module">
-      const seletorTema = document.getElementById("temaCores");
-
-      // Quando abrir a página, marcar a opção correta
-      document.addEventListener("DOMContentLoaded", () => {
-        const temaSalvo = localStorage.getItem("temaCores");
-
-        if (temaSalvo) {
-          seletorTema.value = temaSalvo;
-        }
-      });
-
-      // Troca tema
-      seletorTema.addEventListener("change", function () {
-        document.body.classList.remove("paleta_1", "paleta_2", "paleta_3");
-
-        const temaEscolhido = this.value;
-
-        if (temaEscolhido) {
-          document.body.classList.add(temaEscolhido);
-        }
-
-        localStorage.setItem("temaCores", temaEscolhido);
-      });
-
-      // 💬 Notificações
-      function mostrarNotificacao(msg, tipo = "sucesso") {
-        const c = document.getElementById("notificacao");
-        if (!c) return alert(msg);
-
-        const div = document.createElement("div");
-        div.className = `msg ${tipo}`;
-        div.textContent = msg;
-        c.appendChild(div);
-
-        setTimeout(() => {
-          div.style.animation = "desaparecer 0.4s forwards";
-          setTimeout(() => div.remove(), 400);
-        }, 5000);
-      }
-
-      import { db } from "./src/js/firebaseConfig.js";
-      import {
-        doc,
-        updateDoc,
-      } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-
-      /* ---------------------------
-          1. Carregar dados do usuário
-      ---------------------------- */
-      document.addEventListener("DOMContentLoaded", () => {
-        const intervalo = setInterval(() => {
-          if (window.dadosUsuario) {
-            clearInterval(intervalo);
-
-            const u = window.dadosUsuario;
-
-            // Preenche os campos
-            document.getElementById("userNome").value = u.nome;
-            document.getElementById("userEmail").value = u.email;
-            document.getElementById("userCargo").value = u.cargo;
-
-            // Foto
-            if (u.foto) {
-              const img = document.getElementById("previewFoto");
-              img.src = u.foto;
-              img.style.display = "block";
-            }
-          }
-        }, 100);
-      });
-
-      /* ---------------------------
-          2. Preview da imagem
-      ---------------------------- */
-      document
-        .getElementById("userFoto")
-        .addEventListener("change", function () {
-          const file = this.files[0];
-          if (!file) return;
-
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            const img = document.getElementById("previewFoto");
-            img.src = e.target.result;
-            img.style.display = "block";
-          };
-          reader.readAsDataURL(file); // ← Converte para Base64
-        });
-
-      /* ---------------------------
-          3. Botão SALVAR
-      ---------------------------- */
-      const btnSalvar = document.getElementById("btnSalvar");
-
-      btnSalvar.addEventListener("click", async () => {
-        if (!window.usuarioAuth) {
-          mostrarNotificacao("Usuário não autenticado!", "erro");
-          return;
-        }
-
-        const novoNome = document.getElementById("userNome").value.trim();
-        const novoCargo = document.getElementById("userCargo").value.trim();
-        const preview = document.getElementById("previewFoto").src;
-
-        if (!novoNome) {
-          mostrarNotificacao("O nome não pode estar vazio!", "erro");
-          return;
-        }
-
-        // Se a imagem é base64, salva. Se não for, mantém a atual.
-        const novaFoto = preview.startsWith("data:image")
-          ? preview
-          : (window.dadosUsuario.foto ?? null);
-
-        try {
-          const refUsuario = doc(db, "usuarios", window.usuarioAuth.uid);
-
-          await updateDoc(refUsuario, {
-            nome: novoNome,
-            foto: novaFoto,
-            cargo: novoCargo,
-          });
-
-          const fotoTopo = document.querySelector(".profile-photo img");
-          if (fotoTopo) fotoTopo.src = novaFoto;
-
-          mostrarNotificacao("Dados atualizados com sucesso!");
-
-          // Atualiza dados em memória
-          window.dadosUsuario.nome = novoNome;
-          window.dadosUsuario.foto = novaFoto;
-        } catch (erro) {
-          mostrarNotificacao("Erro ao atualizar: " + erro.message, "erro");
-        }
-      });
-    </script>
+    <script type="module" src="./src/js/configuracoes.js"></script>
   </body>
 </html>
