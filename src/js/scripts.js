@@ -8,10 +8,6 @@ document.addEventListener("keyup", (e) => {
     Aplicar tema salvo em todas as páginas
 ---------------------------- */
 
-if (localStorage.getItem("temaCores")) {
-  localStorage.removeItem("temaCores");
-}
-
 document.addEventListener("DOMContentLoaded", () => {
   const temaSalvo = localStorage.getItem("temaCores");
 
