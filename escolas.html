@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Escolas - SEE Carpina</title>
+
+    <link rel="stylesheet" href="./src/css/style.css" />
+    <link rel="stylesheet" href="./src/css/escolas.css" />
+
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+  </head>
+
+  <body>
+    <button id="btnTopo">↑</button>
+
+    <div class="loading">
+      <svg
+        class="svg-spinner"
+        viewBox="0 0 50 50"
+        role="img"
+        aria-label="Carregando"
+      >
+        <circle
+          class="path"
+          cx="25"
+          cy="25"
+          r="20"
+          fill="none"
+          stroke-width="4"
+        />
+      </svg>
+    </div>
+
+    <div class="container">
+      <aside id="sidebar"></aside>
+
+      <main>
+        <h1>Escolas</h1>
+
+        <div class="escolas-grid">
+          <!-- =========================
+               INFORMAÇÃO
+          ========================== -->
+
+          <section class="box glass">
+            <div class="info-card">
+              <span class="material-symbols-outlined"> school </span>
+
+              <div>
+                <strong>Cadastro de escolas</strong>
+
+                <p>
+                  Cadastre e mantenha atualizadas as informações das unidades
+                  escolares.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- =========================
+               ABAS
+          ========================== -->
+
+          <div class="escolas-tabs">
+            <button
+              type="button"
+              class="escolas-tab active"
+              data-tab="listaEscolasTab"
+            >
+              <span class="material-symbols-outlined"> school </span>
+
+              Escolas cadastradas
+            </button>
+
+            <button
+              type="button"
+              class="escolas-tab"
+              data-tab="cadastroEscolaTab"
+            >
+              <span class="material-symbols-outlined"> add_business </span>
+
+              Cadastrar escola
+            </button>
+          </div>
+
+          <!-- =========================
+               ESCOLAS CADASTRADAS
+          ========================== -->
+
+          <section id="listaEscolasTab" class="escolas-tab-content active">
+            <div class="box glass">
+              <div class="escolas-cabecalho">
+                <div>
+                  <h2>Escolas cadastradas</h2>
+
+                  <span id="contadorEscolas" class="escolas-contador">
+                    Carregando...
+                  </span>
+                </div>
+
+                <button type="button" id="btnExportarExcel" class="btn-excel">
+                  <span class="material-symbols-outlined"> table_view </span>
+
+                  Exportar para Excel
+                </button>
+              </div>
+
+              <div class="campo-busca-escolas">
+                <span class="material-symbols-outlined"> search </span>
+
+                <input
+                  type="search"
+                  id="buscaEscolas"
+                  placeholder="Buscar por escola, INEP ou responsável"
+                  autocomplete="off"
+                />
+              </div>
+
+              <div id="listaEscolas" class="lista-escolas">
+                <div class="escolas-carregando">
+                  <svg
+                    class="svg-spinner"
+                    viewBox="0 0 50 50"
+                    role="img"
+                    aria-label="Carregando escolas"
+                  >
+                    <circle
+                      class="path"
+                      cx="25"
+                      cy="25"
+                      r="20"
+                      fill="none"
+                      stroke-width="4"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- =========================
+               CADASTRAR ESCOLA
+          ========================== -->
+
+          <section id="cadastroEscolaTab" class="escolas-tab-content">
+            <div class="box glass">
+              <div class="cabecalho-escolas">
+                <div>
+                  <h2 id="tituloFormularioEscola">Nova escola</h2>
+
+                  <p>Informe os dados da unidade escolar.</p>
+                </div>
+              </div>
+
+              <form id="formEscola" class="escolas-form">
+                <!-- =========================
+                     LOCAL + INEP
+                ========================== -->
+
+                <div class="escolas-form-grid">
+                  <div class="campo-escola">
+                    <label for="localExercicio"> Local de exercício </label>
+
+                    <select id="localExercicio" required>
+                      <option value="">Selecione o local de exercício</option>
+                    </select>
+                  </div>
+
+                  <div class="campo-escola">
+                    <label for="codigoInep"> Código INEP </label>
+
+                    <input
+                      type="text"
+                      id="codigoInep"
+                      inputmode="numeric"
+                      autocomplete="off"
+                      placeholder="Digite o código INEP"
+                      required
+                    />
+                  </div>
+
+                  <!-- =========================
+                       ENDEREÇO
+                  ========================== -->
+
+                  <div class="campo-escola campo-escola-linha-inteira">
+                    <label for="endereco"> Endereço </label>
+
+                    <input
+                      type="text"
+                      id="endereco"
+                      autocomplete="off"
+                      placeholder="Digite o endereço da unidade"
+                    />
+                  </div>
+
+                  <!-- =========================
+                       GESTOR
+                  ========================== -->
+
+                  <div class="campo-escola campo-escola-linha-inteira">
+                    <label for="gestor"> Gestor </label>
+
+                    <select id="gestor">
+                      <option value="">Selecione o gestor</option>
+                    </select>
+                  </div>
+
+                  <!-- =========================
+                       SECRETÁRIO
+                  ========================== -->
+
+                  <div class="campo-escola campo-escola-linha-inteira">
+                    <label for="secretario"> Secretário </label>
+
+                    <select id="secretario">
+                      <option value="">Selecione o secretário</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- =========================
+                     COORDENADORES
+                ========================== -->
+
+                <div class="bloco-coordenadores">
+                  <label for="coordenador"> Coordenadores </label>
+
+                  <div class="coordenador-adicionar">
+                    <select id="coordenador">
+                      <option value="">Selecione um coordenador</option>
+                    </select>
+
+                    <button
+                      type="button"
+                      id="btnAdicionarCoordenador"
+                      class="btn"
+                    >
+                      <span class="material-symbols-outlined">
+                        person_add
+                      </span>
+
+                      Adicionar
+                    </button>
+                  </div>
+
+                  <div
+                    id="listaCoordenadoresSelecionados"
+                    class="lista-coordenadores-selecionados"
+                  ></div>
+                </div>
+
+                <!-- =========================
+     MODALIDADES
+========================== -->
+
+                <div class="bloco-modalidades">
+                  <label> Modalidades de ensino </label>
+
+                  <div class="modalidades-grid">
+                    <label class="modalidade-check">
+                      <input type="checkbox" id="modalidadeCreche" />
+
+                      <span> Creche </span>
+                    </label>
+
+                    <label class="modalidade-check">
+                      <input type="checkbox" id="modalidadeEducacaoInfantil" />
+
+                      <span> Educação Infantil </span>
+                    </label>
+
+                    <label class="modalidade-check">
+                      <input type="checkbox" id="modalidadeFundamentalI" />
+
+                      <span> Fundamental I </span>
+                    </label>
+
+                    <label class="modalidade-check">
+                      <input type="checkbox" id="modalidadeFundamentalII" />
+
+                      <span> Fundamental II </span>
+                    </label>
+
+                    <label class="modalidade-check">
+                      <input type="checkbox" id="modalidadeEja" />
+
+                      <span> EJA </span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- =========================
+                     MODO DE EDIÇÃO
+                ========================== -->
+
+                <div id="msgEdicaoEscola" class="msg-edicao-escola"></div>
+
+                <!-- =========================
+                     AÇÕES
+                ========================== -->
+
+                <div class="acoes-escola">
+                  <button type="submit" id="btnSalvarEscola" class="btn">
+                    <span class="material-symbols-outlined"> add_circle </span>
+
+                    Cadastrar escola
+                  </button>
+
+                  <button
+                    type="button"
+                    id="btnCancelarEdicaoEscola"
+                    class="btn"
+                    style="display: none"
+                  >
+                    <span class="material-symbols-outlined"> close </span>
+
+                    Cancelar edição
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <div class="right"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script type="module" src="./src/js/scripts.js"></script>
+    <script type="module" src="./src/js/escolas.js"></script>
+  </body>
+</html>

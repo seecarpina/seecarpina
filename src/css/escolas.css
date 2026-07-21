@@ -1,0 +1,539 @@
+/* =========================================
+   ESCOLAS
+========================================= */
+
+.escolas-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.2rem;
+}
+
+/* =========================================
+   ABAS
+========================================= */
+
+.escolas-tabs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.3rem 0;
+}
+
+.escolas-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+
+  border: 1px solid var(--clr-primary);
+  border-radius: 999px;
+
+  padding: 0.55rem 0.9rem;
+
+  background: transparent;
+  color: var(--clr-dark);
+
+  cursor: pointer;
+  font-weight: 600;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.escolas-tab.active {
+  background: var(--clr-primary);
+  color: var(--clr-white);
+  border-color: transparent;
+}
+
+.escolas-tab-content {
+  display: none;
+}
+
+.escolas-tab-content.active {
+  display: block;
+}
+
+/* =========================================
+   CABEÇALHO DO FORMULÁRIO
+========================================= */
+
+.cabecalho-escolas {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.cabecalho-escolas h2 {
+  margin: 0;
+}
+
+.cabecalho-escolas p {
+  margin: 0.3rem 0 0;
+  opacity: 0.7;
+}
+
+/* =========================================
+   FORMULÁRIO
+========================================= */
+
+.escolas-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.escolas-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.campo-escola {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.campo-escola-linha-inteira {
+  grid-column: 1 / -1;
+}
+
+.campo-escola input,
+.campo-escola select {
+  width: 100%;
+}
+
+/* =========================================
+   COORDENADORES
+========================================= */
+
+.bloco-coordenadores {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.coordenador-adicionar {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto;
+
+  gap: 0.8rem;
+  align-items: end;
+}
+
+.coordenador-adicionar select {
+  width: 100%;
+}
+
+.lista-coordenadores-selecionados {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.coordenador-selecionado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  padding: 0.45rem 0.7rem;
+
+  border-radius: 999px;
+
+  background: var(--clr-light);
+}
+
+.coordenador-selecionado button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+
+  background: transparent;
+  color: var(--clr-danger);
+
+  cursor: pointer;
+}
+
+.coordenador-selecionado .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+/* =========================================
+   MODALIDADES
+========================================= */
+
+.bloco-modalidades {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.bloco-modalidades > label {
+  font-weight: 500;
+}
+
+.modalidades-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.modalidade-check {
+  cursor: pointer;
+}
+
+.modalidade-check input {
+  display: none;
+}
+
+.modalidade-check span {
+  display: block;
+
+  padding: 0.55rem 0.8rem;
+
+  border: 1px solid var(--clr-light);
+  border-radius: 999px;
+
+  transition: 0.2s;
+}
+
+.modalidade-check input:checked + span {
+  background: var(--clr-primary);
+  border-color: var(--clr-primary);
+
+  color: var(--clr-white);
+}
+
+/* =========================================
+   EDIÇÃO
+========================================= */
+
+.msg-edicao-escola {
+  display: none;
+
+  margin: 0;
+
+  padding: 0.85rem 1rem;
+
+  border-radius: 0.9rem;
+
+  background: var(--clr-light);
+}
+
+/* =========================================
+   AÇÕES DO FORMULÁRIO
+========================================= */
+
+.acoes-escola {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.acoes-escola .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+/* =========================================
+   CABEÇALHO DA LISTAGEM
+========================================= */
+
+.escolas-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 1rem;
+
+  margin-bottom: 1rem;
+}
+
+.escolas-cabecalho h2 {
+  margin: 0;
+}
+
+.escolas-contador {
+  display: block;
+
+  margin-top: 0.3rem;
+
+  font-size: 0.85rem;
+
+  opacity: 0.7;
+}
+
+.btn-excel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.4rem;
+
+  border: 0;
+  border-radius: 0.7rem;
+
+  padding: 0.7rem 1rem;
+
+  background: var(--clr-primary);
+  color: var(--clr-white);
+
+  cursor: pointer;
+
+  font-weight: 600;
+}
+
+/* =========================================
+   BUSCA
+========================================= */
+
+.campo-busca-escolas {
+  display: flex;
+  align-items: center;
+
+  gap: 0.6rem;
+
+  width: 100%;
+
+  margin-bottom: 1rem;
+
+  padding: 0 1rem;
+
+  border-radius: 0.9rem;
+
+  background: var(--clr-white);
+}
+
+.campo-busca-escolas > .material-symbols-outlined {
+  flex-shrink: 0;
+
+  color: var(--clr-primary);
+}
+
+.campo-busca-escolas input {
+  width: 100%;
+
+  border: 0;
+
+  padding-left: 0;
+
+  background: transparent;
+}
+
+.campo-busca-escolas input:focus {
+  outline: none;
+}
+
+/* =========================================
+   LISTA DE ESCOLAS
+========================================= */
+
+.lista-escolas {
+  display: grid;
+
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+
+  gap: 1rem;
+}
+
+/* =========================================
+   CARD DA ESCOLA
+========================================= */
+
+.card-escola {
+  display: flex;
+  flex-direction: column;
+
+  gap: 1rem;
+
+  padding: 1.2rem;
+
+  border: 1px solid var(--clr-light);
+  border-radius: 0.8rem;
+
+  background: var(--clr-white);
+}
+
+.card-escola-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 1rem;
+}
+
+.card-escola-topo h3 {
+  margin: 0;
+
+  font-size: 1rem;
+}
+
+.escola-inep {
+  display: block;
+
+  margin-top: 0.25rem;
+
+  font-size: 0.78rem;
+
+  opacity: 0.65;
+}
+
+/* =========================================
+   DADOS DA ESCOLA
+========================================= */
+
+.escola-dados {
+  display: flex;
+  flex-direction: column;
+
+  gap: 0.5rem;
+
+  font-size: 0.85rem;
+}
+
+.escola-dados span {
+  display: block;
+}
+
+.escola-dados strong {
+  margin-right: 0.25rem;
+}
+
+/* =========================================
+   MODALIDADES DO CARD
+========================================= */
+
+.escola-modalidades {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 0.4rem;
+}
+
+.escola-modalidade {
+  display: inline-flex;
+
+  padding: 0.3rem 0.6rem;
+
+  border-radius: 999px;
+
+  background: var(--clr-light);
+
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+/* =========================================
+   AÇÕES DOS CARDS
+========================================= */
+
+.escola-acoes {
+  display: flex;
+  justify-content: flex-end;
+
+  margin-top: auto;
+}
+
+.btn-editar-escola {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 36px;
+  height: 36px;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: transparent;
+
+  color: var(--clr-primary);
+
+  cursor: pointer;
+}
+
+.btn-editar-escola:hover {
+  background: var(--clr-light);
+}
+
+/* =========================================
+   VAZIO / CARREGANDO
+========================================= */
+
+.escolas-vazio,
+.escolas-carregando {
+  grid-column: 1 / -1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 120px;
+
+  text-align: center;
+
+  opacity: 0.7;
+}
+
+/* =========================================
+   RESPONSIVO
+========================================= */
+
+@media screen and (max-width: 700px) {
+  .escolas-cabecalho {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .btn-excel {
+    width: 100%;
+  }
+
+  .escolas-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .campo-escola-linha-inteira {
+    grid-column: auto;
+  }
+
+  .coordenador-adicionar {
+    grid-template-columns: 1fr;
+  }
+
+  .coordenador-adicionar .btn {
+    width: 100%;
+  }
+
+  .acoes-escola {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .acoes-escola .btn {
+    width: 100%;
+  }
+
+  .campo-busca-escolas {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .lista-escolas {
+    grid-template-columns: 1fr;
+  }
+}
