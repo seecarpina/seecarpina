@@ -490,6 +490,57 @@
 }
 
 /* =========================================
+   AUTOCOMPLETE
+========================================= */
+
+.autocomplete-container {
+  position: relative;
+}
+
+.autocomplete-list {
+  display: none;
+
+  position: absolute;
+
+  top: calc(100% + 0.3rem);
+  left: 0;
+  right: 0;
+
+  z-index: 50;
+
+  max-height: 240px;
+
+  margin: 0;
+  padding: 0.4rem;
+
+  overflow-y: auto;
+
+  list-style: none;
+
+  border-radius: 0.8rem;
+
+  background: var(--clr-white);
+
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.autocomplete-list li {
+  padding: 0.7rem 0.8rem;
+
+  border-radius: 0.6rem;
+
+  cursor: pointer;
+
+  font-size: 0.85rem;
+}
+
+.autocomplete-list li:hover {
+  background: var(--clr-light);
+
+  color: var(--clr-primary);
+}
+
+/* =========================================
    RESPONSIVO
 ========================================= */
 

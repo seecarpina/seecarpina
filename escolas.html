@@ -163,12 +163,21 @@
                 ========================== -->
 
                 <div class="escolas-form-grid">
-                  <div class="campo-escola">
-                    <label for="localExercicio"> Local de exercício </label>
+                  <div class="campo-escola autocomplete-container">
+                    <label for="localExercicio">Local de exercício</label>
 
-                    <select id="localExercicio" required>
-                      <option value="">Selecione o local de exercício</option>
-                    </select>
+                    <input
+                      type="text"
+                      id="localExercicio"
+                      placeholder="Digite para buscar o local..."
+                      autocomplete="off"
+                      required
+                    />
+
+                    <ul
+                      id="autocompleteLocalExercicio"
+                      class="autocomplete-list"
+                    ></ul>
                   </div>
 
                   <div class="campo-escola">
@@ -203,24 +212,37 @@
                        GESTOR
                   ========================== -->
 
-                  <div class="campo-escola campo-escola-linha-inteira">
-                    <label for="gestor"> Gestor </label>
+                  <div class="campo-escola autocomplete-container">
+                    <label for="gestor">Gestor</label>
 
-                    <select id="gestor">
-                      <option value="">Selecione o gestor</option>
-                    </select>
+                    <input
+                      type="text"
+                      id="gestor"
+                      placeholder="Digite para buscar o gestor..."
+                      autocomplete="off"
+                    />
+
+                    <ul id="autocompleteGestor" class="autocomplete-list"></ul>
                   </div>
 
                   <!-- =========================
                        SECRETÁRIO
                   ========================== -->
 
-                  <div class="campo-escola campo-escola-linha-inteira">
-                    <label for="secretario"> Secretário </label>
+                  <div class="campo-escola autocomplete-container">
+                    <label for="secretario">Secretário</label>
 
-                    <select id="secretario">
-                      <option value="">Selecione o secretário</option>
-                    </select>
+                    <input
+                      type="text"
+                      id="secretario"
+                      placeholder="Digite para buscar o secretário..."
+                      autocomplete="off"
+                    />
+
+                    <ul
+                      id="autocompleteSecretario"
+                      class="autocomplete-list"
+                    ></ul>
                   </div>
                 </div>
 
@@ -229,12 +251,22 @@
                 ========================== -->
 
                 <div class="bloco-coordenadores">
-                  <label for="coordenador"> Coordenadores </label>
+                  <label for="coordenadorSelect"> Coordenadores </label>
 
                   <div class="coordenador-adicionar">
-                    <select id="coordenador">
-                      <option value="">Selecione um coordenador</option>
-                    </select>
+                    <div class="autocomplete-container">
+                      <input
+                        type="text"
+                        id="coordenadorSelect"
+                        placeholder="Digite para buscar um coordenador..."
+                        autocomplete="off"
+                      />
+
+                      <ul
+                        id="autocompleteCoordenador"
+                        class="autocomplete-list"
+                      ></ul>
+                    </div>
 
                     <button
                       type="button"

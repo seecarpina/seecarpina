@@ -23,17 +23,25 @@ const servidoresRef = ref(rtdb, "servidores/registros");
 
 const formEscola = document.getElementById("formEscola");
 
-const selectLocal = document.getElementById("localExercicio");
+const inputLocalExercicio = document.getElementById("localExercicio");
+
+const boxLocalExercicio = document.getElementById("autocompleteLocalExercicio");
 
 const inputCodigoInep = document.getElementById("codigoInep");
 
 const inputEndereco = document.getElementById("endereco");
 
-const selectGestor = document.getElementById("gestor");
+const inputGestor = document.getElementById("gestor");
 
-const selectSecretario = document.getElementById("secretario");
+const boxGestor = document.getElementById("autocompleteGestor");
 
-const selectCoordenador = document.getElementById("coordenador");
+const inputSecretario = document.getElementById("secretario");
+
+const boxSecretario = document.getElementById("autocompleteSecretario");
+
+const inputCoordenador = document.getElementById("coordenadorSelect");
+
+const boxCoordenador = document.getElementById("autocompleteCoordenador");
 
 const btnAdicionarCoordenador = document.getElementById(
   "btnAdicionarCoordenador",
@@ -95,6 +103,11 @@ let escolas = [];
 let locais = [];
 let servidores = [];
 
+let localExercicioIdSelecionado = null;
+let gestorIdSelecionado = null;
+let secretarioIdSelecionado = null;
+let coordenadorIdSelecionado = null;
+
 let coordenadoresSelecionados = [];
 
 let editando = false;
@@ -128,6 +141,49 @@ function normalizarTexto(texto) {
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .trim();
+}
+
+function mostrarSugestoesAutocomplete(
+  input,
+  box,
+  itens,
+  obterNome,
+  aoSelecionar,
+) {
+  if (!input || !box) return;
+
+  const termo = normalizarTexto(input.value);
+
+  box.innerHTML = "";
+
+  if (!termo) {
+    box.style.display = "none";
+    return;
+  }
+
+  const filtrados = itens
+    .filter((item) => normalizarTexto(obterNome(item)).includes(termo))
+    .slice(0, 10);
+
+  filtrados.forEach((item) => {
+    const nome = obterNome(item);
+
+    const li = document.createElement("li");
+
+    li.textContent = nome;
+
+    li.addEventListener("click", () => {
+      input.value = nome;
+
+      aoSelecionar(item);
+
+      box.style.display = "none";
+    });
+
+    box.appendChild(li);
+  });
+
+  box.style.display = filtrados.length ? "block" : "none";
 }
 
 function obterNomeLocal(id) {
@@ -190,36 +246,22 @@ onValue(locaisRef, (snapshot) => {
         )
     : [];
 
-  preencherLocais();
-
   renderEscolas();
 });
 
-function preencherLocais() {
-  if (!selectLocal) return;
+inputLocalExercicio?.addEventListener("input", () => {
+  localExercicioIdSelecionado = null;
 
-  const valorAtual = selectLocal.value;
-
-  selectLocal.innerHTML = `
-    <option value="">
-      Selecione o local de exercício
-    </option>
-  `;
-
-  locais.forEach((local) => {
-    const option = document.createElement("option");
-
-    option.value = local.id;
-
-    option.textContent = local.nome;
-
-    selectLocal.appendChild(option);
-  });
-
-  if (valorAtual && locais.some((local) => local.id === valorAtual)) {
-    selectLocal.value = valorAtual;
-  }
-}
+  mostrarSugestoesAutocomplete(
+    inputLocalExercicio,
+    boxLocalExercicio,
+    locais,
+    (local) => local.nome,
+    (local) => {
+      localExercicioIdSelecionado = local.id;
+    },
+  );
+});
 
 /* =========================================
    SERVIDORES
@@ -240,73 +282,64 @@ onValue(servidoresRef, (snapshot) => {
         )
     : [];
 
-  preencherServidores();
-
   renderCoordenadoresSelecionados();
 
   renderEscolas();
 });
 
-function preencherServidores() {
-  const selects = [
-    {
-      elemento: selectGestor,
+inputGestor?.addEventListener("input", () => {
+  gestorIdSelecionado = null;
 
-      texto: "Selecione o gestor",
+  mostrarSugestoesAutocomplete(
+    inputGestor,
+    boxGestor,
+    servidores,
+    (servidor) => servidor.nome || "",
+    (servidor) => {
+      gestorIdSelecionado = servidor.id;
     },
+  );
+});
 
-    {
-      elemento: selectSecretario,
+inputSecretario?.addEventListener("input", () => {
+  secretarioIdSelecionado = null;
 
-      texto: "Selecione o secretário",
+  mostrarSugestoesAutocomplete(
+    inputSecretario,
+    boxSecretario,
+    servidores,
+    (servidor) => servidor.nome || "",
+    (servidor) => {
+      secretarioIdSelecionado = servidor.id;
     },
+  );
+});
 
-    {
-      elemento: selectCoordenador,
+inputCoordenador?.addEventListener("input", () => {
+  coordenadorIdSelecionado = null;
 
-      texto: "Selecione um coordenador",
+  mostrarSugestoesAutocomplete(
+    inputCoordenador,
+    boxCoordenador,
+    servidores,
+    (servidor) => servidor.nome || "",
+    (servidor) => {
+      coordenadorIdSelecionado = servidor.id;
     },
-  ];
-
-  selects.forEach(({ elemento, texto }) => {
-    if (!elemento) return;
-
-    const valorAtual = elemento.value;
-
-    elemento.innerHTML = `
-        <option value="">
-          ${texto}
-        </option>
-      `;
-
-    servidores.forEach((servidor) => {
-      const option = document.createElement("option");
-
-      option.value = servidor.id;
-
-      option.textContent = servidor.nome || "Sem nome";
-
-      elemento.appendChild(option);
-    });
-
-    if (
-      valorAtual &&
-      servidores.some((servidor) => servidor.id === valorAtual)
-    ) {
-      elemento.value = valorAtual;
-    }
-  });
-}
+  );
+});
 
 /* =========================================
    COORDENADORES
 ========================================= */
 
 btnAdicionarCoordenador?.addEventListener("click", () => {
-  const servidorId = selectCoordenador.value;
+  const servidorId = coordenadorIdSelecionado;
 
   if (!servidorId) {
-    notificar("Selecione um coordenador.", "erro");
+    notificar("Selecione um coordenador entre as sugestões.", "erro");
+
+    inputCoordenador.focus();
 
     return;
   }
@@ -317,13 +350,13 @@ btnAdicionarCoordenador?.addEventListener("click", () => {
     return;
   }
 
-  if (servidorId === selectGestor.value) {
+  if (servidorId === gestorIdSelecionado) {
     notificar("O gestor não pode ser adicionado como coordenador.", "erro");
 
     return;
   }
 
-  if (servidorId === selectSecretario.value) {
+  if (servidorId === secretarioIdSelecionado) {
     notificar("O secretário não pode ser adicionado como coordenador.", "erro");
 
     return;
@@ -331,9 +364,35 @@ btnAdicionarCoordenador?.addEventListener("click", () => {
 
   coordenadoresSelecionados.push(servidorId);
 
-  selectCoordenador.value = "";
+  inputCoordenador.value = "";
+
+  coordenadorIdSelecionado = null;
+
+  if (boxCoordenador) {
+    boxCoordenador.style.display = "none";
+  }
 
   renderCoordenadoresSelecionados();
+});
+
+document.addEventListener("click", (event) => {
+  const autocompletes = [
+    [inputLocalExercicio, boxLocalExercicio],
+    [inputGestor, boxGestor],
+    [inputSecretario, boxSecretario],
+    [inputCoordenador, boxCoordenador],
+  ];
+
+  autocompletes.forEach(([input, box]) => {
+    if (
+      input &&
+      box &&
+      !input.contains(event.target) &&
+      !box.contains(event.target)
+    ) {
+      box.style.display = "none";
+    }
+  });
 });
 
 function renderCoordenadoresSelecionados() {
@@ -401,24 +460,24 @@ onValue(escolasRef, (snapshot) => {
 formEscola?.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  const localExercicioId = selectLocal.value;
+  const localExercicioId = localExercicioIdSelecionado;
 
   const codigoInep = inputCodigoInep.value.trim();
 
   const endereco = inputEndereco.value.trim();
 
-  const gestorId = selectGestor.value || null;
+  const gestorId = gestorIdSelecionado;
 
-  const secretarioId = selectSecretario.value || null;
+  const secretarioId = secretarioIdSelecionado;
 
   /* =====================================
        VALIDAÇÕES
     ===================================== */
 
   if (!localExercicioId) {
-    notificar("Selecione o local de exercício.", "erro");
+    notificar("Selecione um local de exercício entre as sugestões.", "erro");
 
-    selectLocal.focus();
+    inputLocalExercicio.focus();
 
     return;
   }
@@ -427,6 +486,22 @@ formEscola?.addEventListener("submit", async (event) => {
     notificar("Informe o código INEP.", "erro");
 
     inputCodigoInep.focus();
+
+    return;
+  }
+
+  if (inputGestor.value.trim() && !gestorId) {
+    notificar("Selecione o gestor entre as sugestões.", "erro");
+
+    inputGestor.focus();
+
+    return;
+  }
+
+  if (inputSecretario.value.trim() && !secretarioId) {
+    notificar("Selecione o secretário entre as sugestões.", "erro");
+
+    inputSecretario.focus();
 
     return;
   }
@@ -761,15 +836,25 @@ function editarEscola(escola) {
 
   chaveEdicao = escola.id;
 
-  selectLocal.value = escola.localExercicioId || "";
+  localExercicioIdSelecionado = escola.localExercicioId || null;
+
+  gestorIdSelecionado = escola.gestorId || null;
+
+  secretarioIdSelecionado = escola.secretarioId || null;
+
+  coordenadorIdSelecionado = null;
+
+  inputLocalExercicio.value = obterNomeLocal(escola.localExercicioId);
 
   inputCodigoInep.value = escola.codigoInep || "";
 
   inputEndereco.value = escola.endereco || "";
 
-  selectGestor.value = escola.gestorId || "";
+  inputGestor.value = obterNomeServidor(escola.gestorId);
 
-  selectSecretario.value = escola.secretarioId || "";
+  inputSecretario.value = obterNomeServidor(escola.secretarioId);
+
+  inputCoordenador.value = "";
 
   coordenadoresSelecionados = Array.isArray(escola.coordenadoresIds)
     ? [...escola.coordenadoresIds]
@@ -829,9 +914,26 @@ function resetarFormulario() {
 
   chaveEdicao = null;
 
+  localExercicioIdSelecionado = null;
+
+  gestorIdSelecionado = null;
+
+  secretarioIdSelecionado = null;
+
+  coordenadorIdSelecionado = null;
+
   coordenadoresSelecionados = [];
 
   formEscola.reset();
+
+  [boxLocalExercicio, boxGestor, boxSecretario, boxCoordenador].forEach(
+    (box) => {
+      if (box) {
+        box.style.display = "none";
+        box.innerHTML = "";
+      }
+    },
+  );
 
   renderCoordenadoresSelecionados();
 
