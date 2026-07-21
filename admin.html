@@ -74,6 +74,12 @@
             Menu do sistema
           </button>
 
+          <button type="button" class="admin-tab" data-tab="gruposMenuTab">
+            <span class="material-symbols-outlined"> segment </span>
+
+            Grupos do menu
+          </button>
+
           <button type="button" class="admin-tab" data-tab="usuariosTab">
             <span class="material-symbols-outlined"> manage_accounts </span>
 
@@ -92,6 +98,79 @@
             Destinos de ofícios
           </button>
         </div>
+
+        <section id="gruposMenuTab" class="admin-tab-content">
+          <!-- CADASTRO -->
+          <div class="box">
+            <div class="cabecalho-admin">
+              <div>
+                <h2 id="tituloFormularioGrupoMenu">Novo grupo do menu</h2>
+
+                <p>Crie seções para organizar os links da sidebar.</p>
+              </div>
+            </div>
+
+            <div id="msgEdicaoGrupoMenu" class="msg-edicao-menu"></div>
+
+            <form id="formGrupoMenuAdmin">
+              <div class="grid-local-form">
+                <div class="form-group">
+                  <label for="tituloGrupoMenu"> Título do grupo </label>
+
+                  <input
+                    type="text"
+                    id="tituloGrupoMenu"
+                    placeholder="Ex: RH"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="ordemGrupoMenu"> Ordem </label>
+
+                  <input
+                    type="number"
+                    id="ordemGrupoMenu"
+                    min="1"
+                    value="1"
+                    required
+                  />
+                </div>
+
+                <div class="acoes-form-admin">
+                  <button type="submit" class="btn">
+                    <span class="material-symbols-outlined"> save </span>
+
+                    Salvar grupo
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn secondary"
+                    id="btnCancelarEdicaoGrupoMenu"
+                    style="display: none"
+                  >
+                    Cancelar edição
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- LISTA -->
+          <div class="box">
+            <div class="cabecalho-admin">
+              <div>
+                <h2>Grupos cadastrados</h2>
+
+                <p id="contadorGruposMenuAdmin">Carregando...</p>
+              </div>
+            </div>
+
+            <div id="listaGruposMenuAdmin" class="lista-locais-admin"></div>
+          </div>
+        </section>
+
         <!-- =========================
              USUÁRIOS
         ========================== -->
@@ -226,6 +305,14 @@
                       >Clique para escolher</a
                     ></small
                   >
+                </div>
+
+                <div class="form-group">
+                  <label for="grupoMenu"> Grupo / seção </label>
+
+                  <select id="grupoMenu">
+                    <option value="">Sem grupo</option>
+                  </select>
                 </div>
 
                 <div class="form-group">

@@ -534,7 +534,7 @@ b {
 
 /* aside */
 aside {
-  height: 100vh;
+  min-height: 100vh;
   min-height: 100vh;
   top: 0;
 }
@@ -679,6 +679,12 @@ aside .sidebar a:last-child span {
   background: #ff453a;
 }
 
+aside .sidebar a:last-child {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--clr-light);
+}
+
 aside .sidebar a.active {
   background: var(--clr-light);
   color: var(--clr-primary);
@@ -690,6 +696,17 @@ aside .sidebar a:hover {
 aside .sidebar a:hover span {
   margin-left: 1rem;
   transition: 0.4s ease;
+}
+
+.sidebar-grupo-titulo {
+  padding: 1.2rem 1rem 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--clr-dark-variant);
+  opacity: 0.75;
+  user-select: none;
 }
 
 main {

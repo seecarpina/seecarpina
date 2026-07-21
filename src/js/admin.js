@@ -31,6 +31,11 @@ const PERFIS = ["ADM", "GERENTE", "TECNICO", "LOGISTICA", "SECRETÁRIA"];
 let usuarios = [];
 let itensMenu = [];
 
+let gruposMenu = [];
+
+let editandoGrupoMenu = false;
+let chaveGrupoMenuEdicao = null;
+
 let editandoMenu = false;
 let chaveMenuEdicao = null;
 
@@ -71,6 +76,34 @@ const contadorUsuarios = document.getElementById("contadorUsuarios");
 /* =========================================
    ELEMENTOS - MENU
 ========================================= */
+
+const grupoMenu = document.getElementById("grupoMenu");
+
+/* =========================================
+   ELEMENTOS - GRUPOS DO MENU
+========================================= */
+
+const formGrupoMenuAdmin = document.getElementById("formGrupoMenuAdmin");
+
+const tituloGrupoMenu = document.getElementById("tituloGrupoMenu");
+
+const ordemGrupoMenu = document.getElementById("ordemGrupoMenu");
+
+const listaGruposMenuAdmin = document.getElementById("listaGruposMenuAdmin");
+
+const contadorGruposMenuAdmin = document.getElementById(
+  "contadorGruposMenuAdmin",
+);
+
+const tituloFormularioGrupoMenu = document.getElementById(
+  "tituloFormularioGrupoMenu",
+);
+
+const btnCancelarEdicaoGrupoMenu = document.getElementById(
+  "btnCancelarEdicaoGrupoMenu",
+);
+
+const msgEdicaoGrupoMenu = document.getElementById("msgEdicaoGrupoMenu");
 
 const formMenu = document.getElementById("formMenuAdmin");
 
@@ -511,9 +544,26 @@ filtroSituacao.addEventListener("change", renderUsuarios);
 
 const menuRef = ref(rtdb, "configuracoes/sidebar");
 
+const gruposMenuRef = ref(rtdb, "configuracoes/sidebarGrupos");
+
 const locaisExercicioRef = ref(rtdb, "servidores/locaisExercicio");
 
 const servidoresRef = ref(rtdb, "servidores/registros");
+
+onValue(gruposMenuRef, (snapshot) => {
+  gruposMenu = snapshot.exists()
+    ? Object.entries(snapshot.val()).map(([id, dados]) => ({
+        id,
+        ...dados,
+      }))
+    : [];
+
+  gruposMenu.sort((a, b) => Number(a.ordem || 999) - Number(b.ordem || 999));
+
+  atualizarSelectGruposMenu();
+
+  renderGruposMenu();
+});
 
 onValue(menuRef, (snapshot) => {
   itensMenu = snapshot.exists()
@@ -529,6 +579,34 @@ onValue(menuRef, (snapshot) => {
 /* =========================================
    RENDER MENU
 ========================================= */
+
+function atualizarSelectGruposMenu() {
+  if (!grupoMenu) return;
+
+  const valorAtual = grupoMenu.value;
+
+  grupoMenu.innerHTML = `
+    <option value="">
+      Sem grupo
+    </option>
+  `;
+
+  gruposMenu
+    .filter((grupo) => grupo.ativo !== false)
+    .forEach((grupo) => {
+      const option = document.createElement("option");
+
+      option.value = grupo.id;
+
+      option.textContent = grupo.titulo;
+
+      grupoMenu.appendChild(option);
+    });
+
+  if (valorAtual && gruposMenu.some((grupo) => grupo.id === valorAtual)) {
+    grupoMenu.value = valorAtual;
+  }
+}
 
 function renderMenu() {
   listaMenuAdmin.innerHTML = "";
@@ -734,6 +812,8 @@ formMenu.addEventListener("submit", async (event) => {
 
   const ordem = Number(ordemMenu.value);
 
+  const grupoId = grupoMenu.value || null;
+
   const ativo = ativoMenu.checked;
 
   const badgeNovo = badgeNovoMenu.checked;
@@ -765,6 +845,7 @@ formMenu.addEventListener("submit", async (event) => {
     link,
     icone,
     ordem,
+    grupoId,
     ativo,
     badgeNovo,
     acessoTodos,
@@ -814,6 +895,8 @@ function editarMenu(item) {
   iconeMenu.value = item.icone || "";
 
   ordemMenu.value = item.ordem || 1;
+
+  grupoMenu.value = item.grupoId || "";
 
   ativoMenu.checked = item.ativo !== false;
 
@@ -883,6 +966,8 @@ function resetarFormularioMenu() {
 
   ordemMenu.value = 1;
 
+  grupoMenu.value = "";
+
   previewIconeMenu.textContent = "link";
 
   blocoPerfisMenu.style.display = "block";
@@ -947,6 +1032,253 @@ async function excluirMenu(item) {
     console.error("Erro ao excluir item:", erro);
 
     notificar("Erro ao excluir item.", "erro");
+  }
+}
+
+/* =========================================
+   GRUPOS DO MENU
+========================================= */
+
+function renderGruposMenu() {
+  if (!listaGruposMenuAdmin) return;
+
+  listaGruposMenuAdmin.innerHTML = "";
+
+  contadorGruposMenuAdmin.textContent = `${gruposMenu.length} grupo${
+    gruposMenu.length === 1 ? "" : "s"
+  } cadastrado${gruposMenu.length === 1 ? "" : "s"}`;
+
+  if (!gruposMenu.length) {
+    listaGruposMenuAdmin.innerHTML = `
+      <p>
+        Nenhum grupo cadastrado.
+      </p>
+    `;
+
+    return;
+  }
+
+  gruposMenu.forEach((grupo) => {
+    const totalLinks = itensMenu.filter(
+      (item) => item.grupoId === grupo.id,
+    ).length;
+
+    const card = document.createElement("div");
+
+    card.className = "local-admin-card";
+
+    card.innerHTML = `
+      <div
+        class="local-admin-icone local-admin-inicial"
+      >
+        ${escaparHtml(grupo.titulo?.charAt(0).toUpperCase() || "?")}
+      </div>
+
+      <div
+        class="local-admin-dados"
+      >
+        <strong>
+          ${escaparHtml(grupo.titulo)}
+        </strong>
+
+        <span>
+          Ordem:
+          ${grupo.ordem || "-"}
+          •
+          ${totalLinks}
+          link${totalLinks === 1 ? "" : "s"}
+        </span>
+      </div>
+
+      <div
+        class="local-admin-acoes"
+      >
+        <button
+          type="button"
+          class="editar-grupo-menu-btn"
+          title="Editar grupo"
+        >
+          <span
+            class="material-symbols-outlined"
+          >
+            edit_note
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="excluir-grupo-menu-btn"
+          title="Excluir grupo"
+        >
+          <span
+            class="material-symbols-outlined"
+          >
+            delete
+          </span>
+        </button>
+      </div>
+    `;
+
+    card
+      .querySelector(".editar-grupo-menu-btn")
+      .addEventListener("click", () => editarGrupoMenu(grupo));
+
+    card
+      .querySelector(".excluir-grupo-menu-btn")
+      .addEventListener("click", () => excluirGrupoMenu(grupo, totalLinks));
+
+    listaGruposMenuAdmin.appendChild(card);
+  });
+}
+
+formGrupoMenuAdmin?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const titulo = tituloGrupoMenu.value.trim();
+
+  const ordem = Number(ordemGrupoMenu.value);
+
+  if (!titulo) {
+    notificar("Informe o título do grupo.", "erro");
+
+    return;
+  }
+
+  const duplicado = gruposMenu.find(
+    (grupo) =>
+      normalizarTexto(grupo.titulo) === normalizarTexto(titulo) &&
+      grupo.id !== chaveGrupoMenuEdicao,
+  );
+
+  if (duplicado) {
+    notificar("Já existe um grupo com este título.", "erro");
+
+    return;
+  }
+
+  try {
+    if (editandoGrupoMenu && chaveGrupoMenuEdicao) {
+      await update(
+        ref(rtdb, `configuracoes/sidebarGrupos/${chaveGrupoMenuEdicao}`),
+        {
+          titulo,
+          ordem,
+          ativo: true,
+        },
+      );
+
+      notificar("Grupo atualizado com sucesso!");
+    } else {
+      await push(gruposMenuRef, {
+        titulo,
+        ordem,
+        ativo: true,
+      });
+
+      notificar("Grupo criado com sucesso!");
+    }
+
+    resetarFormularioGrupoMenu();
+  } catch (erro) {
+    console.error("Erro ao salvar grupo:", erro);
+
+    notificar("Não foi possível salvar o grupo.", "erro");
+  }
+});
+
+function editarGrupoMenu(grupo) {
+  editandoGrupoMenu = true;
+
+  chaveGrupoMenuEdicao = grupo.id;
+
+  tituloGrupoMenu.value = grupo.titulo || "";
+
+  ordemGrupoMenu.value = grupo.ordem || 1;
+
+  tituloFormularioGrupoMenu.textContent = "Editar grupo do menu";
+
+  btnCancelarEdicaoGrupoMenu.style.display = "inline-flex";
+
+  msgEdicaoGrupoMenu.innerHTML = `
+    <div
+      class="edicao-menu-info"
+    >
+      <span
+        class="material-symbols-outlined"
+      >
+        edit_note
+      </span>
+
+      <div>
+        <strong>
+          Modo de edição
+        </strong>
+
+        <span>
+          ${escaparHtml(grupo.titulo)}
+        </span>
+      </div>
+    </div>
+  `;
+
+  msgEdicaoGrupoMenu.style.display = "block";
+
+  document.getElementById("btnTopo")?.click();
+
+  tituloGrupoMenu.focus();
+}
+
+btnCancelarEdicaoGrupoMenu?.addEventListener(
+  "click",
+  resetarFormularioGrupoMenu,
+);
+
+function resetarFormularioGrupoMenu() {
+  editandoGrupoMenu = false;
+
+  chaveGrupoMenuEdicao = null;
+
+  formGrupoMenuAdmin.reset();
+
+  ordemGrupoMenu.value = 1;
+
+  tituloFormularioGrupoMenu.textContent = "Novo grupo do menu";
+
+  btnCancelarEdicaoGrupoMenu.style.display = "none";
+
+  msgEdicaoGrupoMenu.style.display = "none";
+
+  msgEdicaoGrupoMenu.innerHTML = "";
+}
+
+async function excluirGrupoMenu(grupo, totalLinks) {
+  if (totalLinks > 0) {
+    notificar(
+      `Não é possível excluir "${grupo.titulo}", pois existem ${totalLinks} link${
+        totalLinks === 1 ? "" : "s"
+      } vinculado${totalLinks === 1 ? "" : "s"} a este grupo.`,
+      "erro",
+    );
+
+    return;
+  }
+
+  const confirmou = confirm(`Deseja excluir o grupo "${grupo.titulo}"?`);
+
+  if (!confirmou) return;
+
+  try {
+    await remove(ref(rtdb, `configuracoes/sidebarGrupos/${grupo.id}`));
+
+    notificar("Grupo excluído com sucesso!");
+
+    if (chaveGrupoMenuEdicao === grupo.id) {
+      resetarFormularioGrupoMenu();
+    }
+  } catch (erro) {
+    console.error("Erro ao excluir grupo:", erro);
+
+    notificar("Não foi possível excluir o grupo.", "erro");
   }
 }
 

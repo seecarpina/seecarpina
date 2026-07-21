@@ -61,7 +61,7 @@ async function montarSidebarDinamica(dadosUsuario) {
   // ==============================
   // FUNÇÃO PARA RENDERIZAR O MENU
   // ==============================
-  function renderizarMenu(configuracao) {
+  function renderizarMenu(configuracao, configuracaoGrupos = {}) {
     menuSidebar.innerHTML = "";
 
     const itens = Object.entries(configuracao || {})
@@ -79,26 +79,64 @@ async function montarSidebarDinamica(dadosUsuario) {
       })
       .sort((a, b) => Number(a.ordem || 999) - Number(b.ordem || 999));
 
+    const grupos = Object.entries(configuracaoGrupos || {})
+      .map(([id, dados]) => ({
+        id,
+        ...dados,
+      }))
+      .filter((grupo) => grupo.ativo !== false)
+      .sort((a, b) => Number(a.ordem || 999) - Number(b.ordem || 999));
+
     const fragment = document.createDocumentFragment();
 
-    itens.forEach((item) => {
+    function criarLinkMenu(item) {
       const link = document.createElement("a");
 
       link.href = item.link || "#";
 
       link.innerHTML = `
-        <span class="material-symbols-outlined">
-          ${item.icone || "link"}
-        </span>
+    <span
+      class="material-symbols-outlined"
+    >
+      ${item.icone || "link"}
+    </span>
 
-        <h3>
-          ${item.titulo || "Sem título"}
-        </h3>
+    <h3>
+      ${item.titulo || "Sem título"}
+    </h3>
 
-        ${item.badgeNovo === true ? "<novo>Novo</novo>" : ""}
-      `;
+    ${item.badgeNovo === true ? "<novo>Novo</novo>" : ""}
+  `;
 
-      fragment.appendChild(link);
+      return link;
+    }
+
+    /* LINKS SEM GRUPO */
+    itens
+      .filter((item) => !item.grupoId)
+      .forEach((item) => {
+        fragment.appendChild(criarLinkMenu(item));
+      });
+
+    /* LINKS AGRUPADOS */
+    grupos.forEach((grupo) => {
+      const linksGrupo = itens.filter((item) => item.grupoId === grupo.id);
+
+      if (!linksGrupo.length) {
+        return;
+      }
+
+      const tituloGrupo = document.createElement("div");
+
+      tituloGrupo.className = "sidebar-grupo-titulo";
+
+      tituloGrupo.textContent = grupo.titulo;
+
+      fragment.appendChild(tituloGrupo);
+
+      linksGrupo.forEach((item) => {
+        fragment.appendChild(criarLinkMenu(item));
+      });
     });
 
     // Logout
@@ -140,10 +178,14 @@ async function montarSidebarDinamica(dadosUsuario) {
   // 1. CARREGA CACHE IMEDIATAMENTE
   // ==============================
   const cacheSidebar = localStorage.getItem("configuracaoSidebar");
+  const cacheGrupos = localStorage.getItem("configuracaoSidebarGrupos");
 
   if (cacheSidebar) {
     try {
-      renderizarMenu(JSON.parse(cacheSidebar));
+      renderizarMenu(
+        JSON.parse(cacheSidebar),
+        cacheGrupos ? JSON.parse(cacheGrupos) : {},
+      );
     } catch (erro) {
       console.error("Erro ao carregar cache da sidebar:", erro);
     }
@@ -153,6 +195,12 @@ async function montarSidebarDinamica(dadosUsuario) {
   // 2. ATUALIZA PELO FIREBASE
   // ==============================
   try {
+    const snapshotGrupos = await get(ref(rtdb, "configuracoes/sidebarGrupos"));
+
+    const configuracaoGrupos = snapshotGrupos.exists()
+      ? snapshotGrupos.val()
+      : {};
+
     const snapshot = await get(ref(rtdb, "configuracoes/sidebar"));
 
     if (snapshot.exists()) {
@@ -161,8 +209,13 @@ async function montarSidebarDinamica(dadosUsuario) {
       // Salva para próximas páginas
       localStorage.setItem("configuracaoSidebar", JSON.stringify(configuracao));
 
+      localStorage.setItem(
+        "configuracaoSidebarGrupos",
+        JSON.stringify(configuracaoGrupos),
+      );
+
       // Atualiza menu
-      renderizarMenu(configuracao);
+      renderizarMenu(configuracao, configuracaoGrupos);
     } else if (!cacheSidebar) {
       renderizarMenu({});
     }
