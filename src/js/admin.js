@@ -28,6 +28,11 @@ let PERFIS = ["ADM"];
    ESTADO
 ========================================= */
 
+let categoriasEstoque = [];
+
+let editandoCategoriaEstoque = false;
+let chaveCategoriaEstoqueEdicao = null;
+
 let usuarios = [];
 let itensMenu = [];
 
@@ -185,7 +190,280 @@ const msgEdicaoDestino = document.getElementById("msgEdicaoDestino");
 
 const destinosOficiosRef = ref(rtdb, "destinos");
 
+const categoriasEstoqueRef = ref(rtdb, "configuracoes/estoque/categorias");
+
 const oficiosAdminRef = ref(rtdb, "oficios");
+
+/* =========================================
+   ELEMENTOS - CATEGORIAS DO ESTOQUE
+========================================= */
+
+const formCategoriaEstoqueAdmin = document.getElementById(
+  "formCategoriaEstoqueAdmin",
+);
+
+const nomeCategoriaEstoque = document.getElementById("nomeCategoriaEstoque");
+
+const buscaCategoriaEstoque = document.getElementById("buscaCategoriaEstoque");
+
+const listaCategoriasEstoque = document.getElementById(
+  "listaCategoriasEstoque",
+);
+
+const contadorCategoriasEstoque = document.getElementById(
+  "contadorCategoriasEstoque",
+);
+
+const tituloFormularioCategoriaEstoque = document.getElementById(
+  "tituloFormularioCategoriaEstoque",
+);
+
+const btnCancelarEdicaoCategoriaEstoque = document.getElementById(
+  "btnCancelarEdicaoCategoriaEstoque",
+);
+
+const msgEdicaoCategoriaEstoque = document.getElementById(
+  "msgEdicaoCategoriaEstoque",
+);
+
+/* =========================================
+   CATEGORIAS DO ESTOQUE
+========================================= */
+
+onValue(categoriasEstoqueRef, (snapshot) => {
+  categoriasEstoque = snapshot.exists()
+    ? Object.entries(snapshot.val()).map(([id, dados]) => ({
+        id,
+        ...dados,
+      }))
+    : [];
+
+  categoriasEstoque.sort((a, b) =>
+    String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR", {
+      sensitivity: "base",
+    }),
+  );
+
+  renderCategoriasEstoque();
+});
+
+function renderCategoriasEstoque() {
+  if (!listaCategoriasEstoque) return;
+
+  const termo = normalizarTexto(buscaCategoriaEstoque?.value || "");
+
+  const filtradas = categoriasEstoque.filter((categoria) =>
+    normalizarTexto(categoria.nome).includes(termo),
+  );
+
+  contadorCategoriasEstoque.textContent = `${filtradas.length} categoria${
+    filtradas.length === 1 ? "" : "s"
+  } encontrada${filtradas.length === 1 ? "" : "s"}`;
+
+  listaCategoriasEstoque.innerHTML = "";
+
+  if (!filtradas.length) {
+    listaCategoriasEstoque.innerHTML = `
+      <p>
+        Nenhuma categoria encontrada.
+      </p>
+    `;
+
+    return;
+  }
+
+  filtradas.forEach((categoria) => {
+    const card = document.createElement("div");
+
+    card.className = "local-admin-card";
+
+    card.innerHTML = `
+        <div
+          class="local-admin-icone local-admin-inicial"
+        >
+          ${escaparHtml(categoria.nome?.charAt(0).toUpperCase() || "?")}
+        </div>
+
+        <div class="local-admin-dados">
+          <strong>
+            ${escaparHtml(categoria.nome)}
+          </strong>
+        </div>
+
+        <div class="local-admin-acoes">
+          <button
+            type="button"
+            class="editar-categoria-estoque-btn"
+            title="Editar categoria"
+          >
+            <span
+              class="material-symbols-outlined"
+            >
+              edit_note
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="excluir-categoria-estoque-btn"
+            title="Excluir categoria"
+          >
+            <span
+              class="material-symbols-outlined"
+            >
+              delete
+            </span>
+          </button>
+        </div>
+      `;
+
+    card
+      .querySelector(".editar-categoria-estoque-btn")
+      .addEventListener("click", () => editarCategoriaEstoque(categoria));
+
+    card
+      .querySelector(".excluir-categoria-estoque-btn")
+      .addEventListener("click", () => excluirCategoriaEstoque(categoria));
+
+    listaCategoriasEstoque.appendChild(card);
+  });
+}
+
+buscaCategoriaEstoque?.addEventListener("input", renderCategoriasEstoque);
+
+formCategoriaEstoqueAdmin?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const nome = nomeCategoriaEstoque.value.trim();
+
+  if (!nome) {
+    notificar("Informe o nome da categoria.", "erro");
+
+    return;
+  }
+
+  const duplicada = categoriasEstoque.find(
+    (categoria) =>
+      normalizarTexto(categoria.nome) === normalizarTexto(nome) &&
+      categoria.id !== chaveCategoriaEstoqueEdicao,
+  );
+
+  if (duplicada) {
+    notificar("Já existe uma categoria com este nome.", "erro");
+
+    return;
+  }
+
+  try {
+    if (editandoCategoriaEstoque && chaveCategoriaEstoqueEdicao) {
+      await update(
+        ref(
+          rtdb,
+          `configuracoes/estoque/categorias/${chaveCategoriaEstoqueEdicao}`,
+        ),
+        {
+          nome,
+          atualizadoEm: new Date().toISOString(),
+        },
+      );
+
+      notificar("Categoria atualizada com sucesso!");
+    } else {
+      await push(categoriasEstoqueRef, {
+        nome,
+        criadoEm: new Date().toISOString(),
+        atualizadoEm: new Date().toISOString(),
+      });
+
+      notificar("Categoria cadastrada com sucesso!");
+    }
+
+    resetarFormularioCategoriaEstoque();
+  } catch (erro) {
+    console.error("Erro ao salvar categoria:", erro);
+
+    notificar("Não foi possível salvar a categoria.", "erro");
+  }
+});
+
+function editarCategoriaEstoque(categoria) {
+  editandoCategoriaEstoque = true;
+
+  chaveCategoriaEstoqueEdicao = categoria.id;
+
+  nomeCategoriaEstoque.value = categoria.nome || "";
+
+  tituloFormularioCategoriaEstoque.textContent = "Editar categoria do estoque";
+
+  btnCancelarEdicaoCategoriaEstoque.style.display = "inline-flex";
+
+  msgEdicaoCategoriaEstoque.innerHTML = `
+    <div class="edicao-menu-info">
+      <span
+        class="material-symbols-outlined"
+      >
+        edit_note
+      </span>
+
+      <div>
+        <strong>
+          Modo de edição
+        </strong>
+
+        <span>
+          ${escaparHtml(categoria.nome)}
+        </span>
+      </div>
+    </div>
+  `;
+
+  msgEdicaoCategoriaEstoque.style.display = "block";
+
+  document.getElementById("btnTopo")?.click();
+
+  nomeCategoriaEstoque.focus();
+}
+
+btnCancelarEdicaoCategoriaEstoque?.addEventListener(
+  "click",
+  resetarFormularioCategoriaEstoque,
+);
+
+function resetarFormularioCategoriaEstoque() {
+  editandoCategoriaEstoque = false;
+
+  chaveCategoriaEstoqueEdicao = null;
+
+  formCategoriaEstoqueAdmin.reset();
+
+  tituloFormularioCategoriaEstoque.textContent = "Nova categoria do estoque";
+
+  btnCancelarEdicaoCategoriaEstoque.style.display = "none";
+
+  msgEdicaoCategoriaEstoque.style.display = "none";
+
+  msgEdicaoCategoriaEstoque.innerHTML = "";
+}
+
+async function excluirCategoriaEstoque(categoria) {
+  const confirmou = confirm(`Deseja excluir a categoria "${categoria.nome}"?`);
+
+  if (!confirmou) return;
+
+  try {
+    await remove(ref(rtdb, `configuracoes/estoque/categorias/${categoria.id}`));
+
+    notificar("Categoria excluída com sucesso!");
+
+    if (chaveCategoriaEstoqueEdicao === categoria.id) {
+      resetarFormularioCategoriaEstoque();
+    }
+  } catch (erro) {
+    console.error("Erro ao excluir categoria:", erro);
+
+    notificar("Não foi possível excluir a categoria.", "erro");
+  }
+}
 
 /* =========================================
    UTILITÁRIOS
@@ -915,11 +1193,11 @@ formMenu.addEventListener("submit", async (event) => {
 
   const perfis = {};
 
-  const perfisSelecionados = Object.entries(item.perfis || {})
-    .filter(([, permitido]) => permitido === true)
-    .map(([perfil]) => perfil);
-
-  renderPerfisMenu(perfisSelecionados);
+  document.querySelectorAll(".perfil-menu").forEach((checkbox) => {
+    if (checkbox.checked) {
+      perfis[checkbox.value] = true;
+    }
+  });
 
   if (!titulo || !link || !icone) {
     notificar("Preencha os campos obrigatórios.", "erro");
@@ -999,9 +1277,11 @@ function editarMenu(item) {
 
   previewIconeMenu.textContent = item.icone || "link";
 
-  document.querySelectorAll(".perfil-menu").forEach((checkbox) => {
-    checkbox.checked = item.perfis?.[checkbox.value] === true;
-  });
+  const perfisSelecionados = Object.entries(item.perfis || {})
+    .filter(([, permitido]) => permitido === true)
+    .map(([perfil]) => perfil);
+
+  renderPerfisMenu(perfisSelecionados);
 
   blocoPerfisMenu.style.display = acessoTodosMenu.checked ? "none" : "block";
 

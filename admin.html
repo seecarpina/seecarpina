@@ -97,6 +97,16 @@
 
             Destinos de ofícios
           </button>
+
+          <button
+            type="button"
+            class="admin-tab"
+            data-tab="categoriasEstoqueTab"
+          >
+            <span class="material-symbols-outlined"> category </span>
+
+            Categorias do estoque
+          </button>
         </div>
 
         <section id="gruposMenuTab" class="admin-tab-content">
@@ -580,6 +590,100 @@
             </div>
 
             <div id="listaDestinosAdmin" class="lista-locais-admin">
+              <div class="admin-loading">
+                <svg class="svg-spinner" viewBox="0 0 50 50">
+                  <circle
+                    class="path"
+                    cx="25"
+                    cy="25"
+                    r="20"
+                    fill="none"
+                    stroke-width="4"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================
+     CATEGORIAS DO ESTOQUE
+========================== -->
+
+        <section id="categoriasEstoqueTab" class="admin-tab-content">
+          <div class="box">
+            <div class="cabecalho-admin">
+              <div>
+                <h2 id="tituloFormularioCategoriaEstoque">
+                  Nova categoria do estoque
+                </h2>
+
+                <p>
+                  Cadastre e edite as categorias utilizadas na classificação dos
+                  materiais.
+                </p>
+              </div>
+            </div>
+
+            <div id="msgEdicaoCategoriaEstoque" class="msg-edicao-menu"></div>
+
+            <form id="formCategoriaEstoqueAdmin">
+              <div class="grid-local-form">
+                <div class="form-group">
+                  <label for="nomeCategoriaEstoque"> Nome da categoria </label>
+
+                  <input
+                    type="text"
+                    id="nomeCategoriaEstoque"
+                    placeholder="Ex: Expediente"
+                    required
+                  />
+                </div>
+
+                <div class="acoes-form-admin">
+                  <button
+                    type="submit"
+                    class="btn"
+                    id="btnSalvarCategoriaEstoque"
+                  >
+                    <span class="material-symbols-outlined"> save </span>
+
+                    Salvar categoria
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn secondary"
+                    id="btnCancelarEdicaoCategoriaEstoque"
+                    style="display: none"
+                  >
+                    Cancelar edição
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div class="box">
+            <div class="cabecalho-admin">
+              <div>
+                <h2>Categorias cadastradas</h2>
+
+                <p id="contadorCategoriasEstoque">Carregando...</p>
+              </div>
+            </div>
+
+            <div class="campo-busca busca-local-admin">
+              <span class="material-symbols-outlined"> search </span>
+
+              <input
+                type="search"
+                id="buscaCategoriaEstoque"
+                placeholder="Buscar categoria..."
+              />
+            </div>
+
+            <div id="listaCategoriasEstoque" class="lista-locais-admin">
               <div class="admin-loading">
                 <svg class="svg-spinner" viewBox="0 0 50 50">
                   <circle
