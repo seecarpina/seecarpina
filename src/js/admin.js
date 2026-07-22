@@ -22,7 +22,7 @@ import {
    CONFIGURAÇÕES
 ========================================= */
 
-const PERFIS = ["ADM", "GERENTE", "TECNICO", "LOGISTICA", "SECRETÁRIA"];
+let PERFIS = ["ADM"];
 
 /* =========================================
    ESTADO
@@ -78,6 +78,8 @@ const contadorUsuarios = document.getElementById("contadorUsuarios");
 ========================================= */
 
 const grupoMenu = document.getElementById("grupoMenu");
+
+const perfisMenuContainer = document.getElementById("perfisMenuContainer");
 
 /* =========================================
    ELEMENTOS - GRUPOS DO MENU
@@ -270,6 +272,93 @@ tabs.forEach((tab) => {
   });
 });
 
+function atualizarPerfisDisponiveis() {
+  const perfisEncontrados = new Set(["ADM"]);
+
+  usuarios.forEach((usuario) => {
+    const cargo = String(usuario.cargo || "").trim();
+
+    if (cargo) {
+      perfisEncontrados.add(cargo);
+    }
+  });
+
+  PERFIS = Array.from(perfisEncontrados).sort((a, b) =>
+    a.localeCompare(b, "pt-BR", {
+      sensitivity: "base",
+    }),
+  );
+
+  atualizarFiltroPerfis();
+
+  renderPerfisMenu();
+}
+
+function atualizarFiltroPerfis() {
+  if (!filtroPerfil) return;
+
+  const valorAtual = filtroPerfil.value;
+
+  filtroPerfil.innerHTML = `
+    <option value="">
+      Todos os perfis
+    </option>
+  `;
+
+  PERFIS.forEach((perfil) => {
+    const option = document.createElement("option");
+
+    option.value = perfil;
+
+    option.textContent = perfil;
+
+    filtroPerfil.appendChild(option);
+  });
+
+  if (valorAtual && PERFIS.includes(valorAtual)) {
+    filtroPerfil.value = valorAtual;
+  }
+}
+
+function obterPerfisMenuMarcados() {
+  return Array.from(document.querySelectorAll(".perfil-menu:checked")).map(
+    (checkbox) => checkbox.value,
+  );
+}
+
+function renderPerfisMenu(perfisSelecionados = null) {
+  if (!perfisMenuContainer) {
+    return;
+  }
+
+  const selecionados = perfisSelecionados || obterPerfisMenuMarcados();
+
+  perfisMenuContainer.innerHTML = "";
+
+  PERFIS.forEach((perfil) => {
+    const label = document.createElement("label");
+
+    label.className = "perfil-check";
+
+    const marcado = selecionados.includes(perfil);
+
+    label.innerHTML = `
+      <input
+        type="checkbox"
+        value="${escaparHtml(perfil)}"
+        class="perfil-menu"
+        ${marcado ? "checked" : ""}
+      />
+
+      <span>
+        ${escaparHtml(perfil)}
+      </span>
+    `;
+
+    perfisMenuContainer.appendChild(label);
+  });
+}
+
 /* =========================================
    CARREGAR USUÁRIOS
 ========================================= */
@@ -282,6 +371,8 @@ async function carregarUsuarios() {
       ...documento.data(),
       _uid: documento.id,
     }));
+
+    atualizarPerfisDisponiveis();
 
     renderUsuarios();
   } catch (erro) {
@@ -477,6 +568,8 @@ async function alterarPerfilUsuario(usuario, novoPerfil) {
     });
 
     usuario.cargo = novoPerfil;
+
+    atualizarPerfisDisponiveis();
 
     notificar("Perfil atualizado com sucesso!");
 
@@ -822,11 +915,11 @@ formMenu.addEventListener("submit", async (event) => {
 
   const perfis = {};
 
-  document.querySelectorAll(".perfil-menu").forEach((checkbox) => {
-    if (checkbox.checked) {
-      perfis[checkbox.value] = true;
-    }
-  });
+  const perfisSelecionados = Object.entries(item.perfis || {})
+    .filter(([, permitido]) => permitido === true)
+    .map(([perfil]) => perfil);
+
+  renderPerfisMenu(perfisSelecionados);
 
   if (!titulo || !link || !icone) {
     notificar("Preencha os campos obrigatórios.", "erro");
@@ -959,6 +1052,8 @@ function resetarFormularioMenu() {
   chaveMenuEdicao = null;
 
   formMenu.reset();
+
+  renderPerfisMenu([]);
 
   ativoMenu.checked = true;
 

@@ -198,12 +198,6 @@
 
               <select id="filtroPerfilUsuario">
                 <option value="">Todos os perfis</option>
-
-                <option value="ADM">ADM</option>
-                <option value="GERENTE">GERENTE</option>
-                <option value="TECNICO">TECNICO</option>
-                <option value="LOGISTICA">LOGISTICA</option>
-                <option value="SECRETÁRIA">SECRETÁRIA</option>
               </select>
 
               <select id="filtroSituacaoUsuario">
@@ -379,53 +373,7 @@
               <div id="blocoPerfisMenu" class="admin-perfis">
                 <label> Perfis permitidos </label>
 
-                <div class="perfis-grid">
-                  <label class="perfil-check">
-                    <input type="checkbox" value="ADM" class="perfil-menu" />
-
-                    <span>ADM</span>
-                  </label>
-
-                  <label class="perfil-check">
-                    <input
-                      type="checkbox"
-                      value="GERENTE"
-                      class="perfil-menu"
-                    />
-
-                    <span>GERENTE</span>
-                  </label>
-
-                  <label class="perfil-check">
-                    <input
-                      type="checkbox"
-                      value="TECNICO"
-                      class="perfil-menu"
-                    />
-
-                    <span>TECNICO</span>
-                  </label>
-
-                  <label class="perfil-check">
-                    <input
-                      type="checkbox"
-                      value="LOGISTICA"
-                      class="perfil-menu"
-                    />
-
-                    <span>LOGISTICA</span>
-                  </label>
-
-                  <label class="perfil-check">
-                    <input
-                      type="checkbox"
-                      value="SECRETÁRIA"
-                      class="perfil-menu"
-                    />
-
-                    <span>SECRETÁRIA</span>
-                  </label>
-                </div>
+                <div id="perfisMenuContainer" class="perfis-grid"></div>
               </div>
 
               <div class="acoes-form-admin">
