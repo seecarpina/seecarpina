@@ -693,6 +693,7 @@ onAuthStateChanged(auth, async (user) => {
 
     if (cargoUsuario && usuarioCache.cargo) {
       cargoUsuario.textContent = usuarioCache.cargo;
+      cargoUsuario.title = usuarioCache.cargo;
     }
 
     const fotoTopo = document.querySelector(".profile-photo img");
@@ -785,6 +786,7 @@ onAuthStateChanged(auth, async (user) => {
 
     if (cargoUsuario && dadosUsuario?.cargo) {
       cargoUsuario.textContent = dadosUsuario.cargo;
+      cargoUsuario.title = dadosUsuario.cargo;
     }
 
     const fotoTopo = document.querySelector(".profile-photo img");

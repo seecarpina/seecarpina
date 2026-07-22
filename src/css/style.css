@@ -887,7 +887,7 @@ main .recent_order a {
   display: flex;
   justify-content: start;
   align-items: center;
-  gap: 2rem;
+  gap: 0.8rem;
 }
 
 .right .top button {
@@ -899,6 +899,7 @@ main .recent_order a {
   display: flex;
   gap: 0.2rem;
   justify-content: space-between;
+  flex-shrink: 0;
   height: 1.6rem;
   width: 6.3rem;
   cursor: pointer;
@@ -923,6 +924,33 @@ main .recent_order a {
   color: #fff;
   border-radius: var(--border-radius-1);
   padding: 0.1rem;
+}
+
+.right .top .profile {
+  min-width: 0;
+  flex: 1;
+}
+
+.right .top .profile p {
+  min-width: 0;
+}
+
+.right .top #nomeUsuario,
+.right .top #cargoUsuario {
+  display: block;
+  max-width: 6rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.right .top #cargoUsuario {
+  font-size: 0.8rem;
+}
+
+.right .top .profile-photo {
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 /* .right .top .profile {
