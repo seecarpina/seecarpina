@@ -2349,6 +2349,33 @@ select {
 }
 
 @media screen and (max-width: 786px) {
+  .right .top .profile-photo {
+    margin-left: 0;
+  }
+
+  .right .top {
+    justify-content: flex-start;
+    gap: 0.6rem;
+  }
+
+  .right .top .profile {
+    flex: 0 1 auto;
+    min-width: 0;
+    margin-left: 0;
+  }
+
+  .right .top .theme-toggler {
+    flex-shrink: 0;
+  }
+
+  .right .top button {
+    position: static;
+    flex-shrink: 0;
+  }
+
+  .right .top .profile-photo {
+    flex-shrink: 0;
+  }
   .container {
     width: 100%;
     grid-template-columns: repeat(1, 1fr);
@@ -2359,18 +2386,55 @@ select {
 
   aside {
     position: fixed;
-    width: 70%;
-    padding: 0 1rem 5rem 0;
-    z-index: 3;
-    background-color: var(--clr-white);
-    display: none;
+    top: 0;
+    bottom: 0;
     left: -100px;
+
+    width: 70%;
+    height: 100dvh;
+
+    padding: 0;
+
+    z-index: 3000;
+
+    background-color: var(--clr-white);
+
+    display: none;
+
+    overflow: hidden;
+
     animation: menuAni 0.5s forwards;
   }
 
+  aside .aside-container {
+    width: 100%;
+    height: 100dvh;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    -webkit-overflow-scrolling: touch;
+
+    padding: 0 1rem 2rem 0;
+  }
+
   aside .sidebar {
+    position: relative;
+    top: 0;
+
+    min-height: 100%;
+    height: auto;
+
+    padding: 4.5rem 0 2rem;
+
     border-radius: 0;
     box-shadow: none;
+
+    overflow: visible;
+  }
+
+  aside .sidebar #logout {
+    margin-bottom: 2rem;
   }
 
   @keyframes menuAni {
@@ -2392,6 +2456,10 @@ select {
     height: 3.4rem;
   }
 
+  aside .top div.close {
+    background: red !important;
+  }
+
   aside .top div.close span {
     display: inline;
     position: absolute;
@@ -2399,6 +2467,7 @@ select {
     right: 1rem;
     padding: 1rem;
     font-size: 35px;
+    color: var(--clr-dark);
     cursor: pointer;
     z-index: 999;
   }
