@@ -29,6 +29,7 @@ let PERFIS = ["ADM"];
 ========================================= */
 
 let categoriasEstoque = [];
+let permissoesEstoque = {};
 
 let editandoCategoriaEstoque = false;
 let chaveCategoriaEstoqueEdicao = null;
@@ -192,6 +193,8 @@ const destinosOficiosRef = ref(rtdb, "destinos");
 
 const categoriasEstoqueRef = ref(rtdb, "configuracoes/estoque/categorias");
 
+const permissoesEstoqueRef = ref(rtdb, "configuracoes/estoque/permissoes");
+
 const oficiosAdminRef = ref(rtdb, "oficios");
 
 /* =========================================
@@ -227,6 +230,34 @@ const msgEdicaoCategoriaEstoque = document.getElementById(
 );
 
 /* =========================================
+   ELEMENTOS - PERMISSÕES DO ESTOQUE
+========================================= */
+
+const perfilPermissaoEstoque = document.getElementById(
+  "perfilPermissaoEstoque",
+);
+
+const configuracaoPermissaoEstoque = document.getElementById(
+  "configuracaoPermissaoEstoque",
+);
+
+const todasCategoriasEstoque = document.getElementById(
+  "todasCategoriasEstoque",
+);
+
+const blocoCategoriasPermitidasEstoque = document.getElementById(
+  "blocoCategoriasPermitidasEstoque",
+);
+
+const categoriasPermitidasEstoque = document.getElementById(
+  "categoriasPermitidasEstoque",
+);
+
+const btnSalvarPermissoesEstoque = document.getElementById(
+  "btnSalvarPermissoesEstoque",
+);
+
+/* =========================================
    CATEGORIAS DO ESTOQUE
 ========================================= */
 
@@ -245,6 +276,13 @@ onValue(categoriasEstoqueRef, (snapshot) => {
   );
 
   renderCategoriasEstoque();
+  renderPermissoesEstoque();
+});
+
+onValue(permissoesEstoqueRef, (snapshot) => {
+  permissoesEstoque = snapshot.exists() ? snapshot.val() : {};
+
+  renderPermissoesEstoque();
 });
 
 function renderCategoriasEstoque() {
@@ -466,6 +504,120 @@ async function excluirCategoriaEstoque(categoria) {
 }
 
 /* =========================================
+   PERMISSÕES DO ESTOQUE
+========================================= */
+
+function renderPermissoesEstoque() {
+  if (
+    !perfilPermissaoEstoque ||
+    !configuracaoPermissaoEstoque ||
+    !categoriasPermitidasEstoque
+  ) {
+    return;
+  }
+
+  const perfil = perfilPermissaoEstoque.value;
+
+  if (!perfil) {
+    configuracaoPermissaoEstoque.style.display = "none";
+
+    return;
+  }
+
+  configuracaoPermissaoEstoque.style.display = "block";
+
+  const permissao = permissoesEstoque[perfil] || {};
+
+  const acessoTodas = permissao.todas === true;
+
+  todasCategoriasEstoque.checked = acessoTodas;
+
+  categoriasPermitidasEstoque.innerHTML = "";
+
+  categoriasEstoque.forEach((categoria) => {
+    const label = document.createElement("label");
+
+    label.className = "perfil-check";
+
+    const permitido = permissao.categorias?.[categoria.id] === true;
+
+    label.innerHTML = `
+        <input
+          type="checkbox"
+          class="categoria-permissao-estoque"
+          value="${escaparHtml(categoria.id)}"
+          ${permitido ? "checked" : ""}
+          ${acessoTodas ? "disabled" : ""}
+        />
+
+        <span>
+          ${escaparHtml(categoria.nome)}
+        </span>
+      `;
+
+    categoriasPermitidasEstoque.appendChild(label);
+  });
+
+  blocoCategoriasPermitidasEstoque.style.opacity = acessoTodas ? "0.5" : "1";
+}
+
+perfilPermissaoEstoque?.addEventListener("change", renderPermissoesEstoque);
+
+todasCategoriasEstoque?.addEventListener("change", () => {
+  const acessoTodas = todasCategoriasEstoque.checked;
+
+  document
+    .querySelectorAll(".categoria-permissao-estoque")
+    .forEach((checkbox) => {
+      checkbox.disabled = acessoTodas;
+    });
+
+  blocoCategoriasPermitidasEstoque.style.opacity = acessoTodas ? "0.5" : "1";
+});
+
+btnSalvarPermissoesEstoque?.addEventListener("click", async () => {
+  const perfil = perfilPermissaoEstoque.value;
+
+  if (!perfil) {
+    notificar("Selecione um perfil.", "erro");
+
+    return;
+  }
+
+  const todas = todasCategoriasEstoque.checked;
+
+  const categorias = {};
+
+  if (!todas) {
+    document
+      .querySelectorAll(".categoria-permissao-estoque:checked")
+      .forEach((checkbox) => {
+        categorias[checkbox.value] = true;
+      });
+
+    if (!Object.keys(categorias).length) {
+      notificar("Selecione pelo menos uma categoria.", "erro");
+
+      return;
+    }
+  }
+
+  try {
+    await update(ref(rtdb, `configuracoes/estoque/permissoes/${perfil}`), {
+      todas,
+      categorias: todas ? null : categorias,
+      atualizadoEm: new Date().toISOString(),
+    });
+
+    notificar("Permissões do estoque salvas com sucesso!");
+  } catch (erro) {
+    console.error("Erro ao salvar permissões do estoque:", erro);
+
+    notificar("Não foi possível salvar as permissões.", "erro");
+  }
+});
+
+/* =========================================
    UTILITÁRIOS
 ========================================= */
 
@@ -570,6 +722,8 @@ function atualizarPerfisDisponiveis() {
   atualizarFiltroPerfis();
 
   renderPerfisMenu();
+
+  atualizarSelectPerfisEstoque();
 }
 
 function atualizarFiltroPerfis() {
@@ -595,6 +749,31 @@ function atualizarFiltroPerfis() {
 
   if (valorAtual && PERFIS.includes(valorAtual)) {
     filtroPerfil.value = valorAtual;
+  }
+}
+
+function atualizarSelectPerfisEstoque() {
+  if (!perfilPermissaoEstoque) return;
+
+  const valorAtual = perfilPermissaoEstoque.value;
+
+  perfilPermissaoEstoque.innerHTML = `
+    <option value="">
+      Selecione um perfil
+    </option>
+  `;
+
+  PERFIS.forEach((perfil) => {
+    const option = document.createElement("option");
+
+    option.value = perfil;
+    option.textContent = perfil;
+
+    perfilPermissaoEstoque.appendChild(option);
+  });
+
+  if (valorAtual && PERFIS.includes(valorAtual)) {
+    perfilPermissaoEstoque.value = valorAtual;
   }
 }
 

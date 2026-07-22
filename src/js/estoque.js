@@ -20,6 +20,10 @@ const materiaisRef = ref(rtdb, "materiais");
 const movimentacoesRef = ref(rtdb, "movimentacoes");
 const destinosRef = ref(rtdb, "servidores/locaisExercicio");
 
+const categoriasEstoqueRef = ref(rtdb, "configuracoes/estoque/categorias");
+
+const permissoesEstoqueRef = ref(rtdb, "configuracoes/estoque/permissoes");
+
 const modalEntrega = document.getElementById("modalEntrega");
 
 let materiais = [];
@@ -27,12 +31,57 @@ let historicoRomaneios = [];
 let destinos = [];
 let itensEntrega = [];
 
+let destinoIdSelecionado = null;
+
+let categoriasEstoque = [];
+let permissoesEstoque = {};
+
+let perfilUsuario = "";
+let permissaoEstoqueUsuario = null;
+
 /* =========================
    FUNÇÕES AUXILIARES
 ========================= */
 
 function getNomeResponsavel() {
   return window.dadosUsuario?.nome?.split(" ")[0] || "Usuário";
+}
+
+function obterNomeDestino(destinoId) {
+  if (!destinoId) {
+    return "";
+  }
+
+  const destino = destinos.find(
+    (item) => String(item.id) === String(destinoId),
+  );
+
+  return destino?.nome || "";
+}
+
+function obterDestinoRomaneio(movimentacao) {
+  if (!movimentacao) {
+    return "-";
+  }
+
+  /*
+   * Romaneios novos:
+   * usa destinoId como referência.
+   */
+  if (movimentacao.destinoId) {
+    const nomeAtual = obterNomeDestino(movimentacao.destinoId);
+
+    if (nomeAtual) {
+      return nomeAtual;
+    }
+  }
+
+  /*
+   * Romaneios antigos ou caso
+   * o local tenha sido removido:
+   * usa o nome histórico salvo.
+   */
+  return movimentacao.destino || "-";
 }
 
 function formatarUnidade(unidade, quantidade) {
@@ -45,6 +94,15 @@ function formatarUnidade(unidade, quantidade) {
     Fardo: "Fardos",
     Caixa: "Caixas",
     Kit: "Kits",
+
+    Quilograma: "Quilogramas",
+    Grama: "Gramas",
+    Litro: "Litros",
+    Mililitro: "Mililitros",
+    Saco: "Sacos",
+    Lata: "Latas",
+    Garrafa: "Garrafas",
+    Pote: "Potes",
   };
 
   return plurais[unidade] || `${unidade}s`;
@@ -96,13 +154,110 @@ function separarDataRomaneio(dataISO) {
 }
 
 /* =========================
+   PERMISSÕES DO ESTOQUE
+========================= */
+
+function atualizarPerfilUsuario() {
+  perfilUsuario = String(window.dadosUsuario?.cargo || "")
+    .trim()
+    .toUpperCase();
+
+  permissaoEstoqueUsuario = permissoesEstoque[perfilUsuario] || null;
+}
+
+function categoriaPermitida(categoriaId) {
+  if (!categoriaId) return false;
+
+  atualizarPerfilUsuario();
+
+  if (!permissaoEstoqueUsuario) {
+    return false;
+  }
+
+  if (permissaoEstoqueUsuario.todas === true) {
+    return true;
+  }
+
+  return permissaoEstoqueUsuario.categorias?.[categoriaId] === true;
+}
+
+function obterCategoriasPermitidas() {
+  atualizarPerfilUsuario();
+
+  if (!permissaoEstoqueUsuario) {
+    return [];
+  }
+
+  if (permissaoEstoqueUsuario.todas === true) {
+    return [...categoriasEstoque];
+  }
+
+  return categoriasEstoque.filter(
+    (categoria) => permissaoEstoqueUsuario.categorias?.[categoria.id] === true,
+  );
+}
+
+function obterMateriaisPermitidos() {
+  return materiais.filter((material) =>
+    categoriaPermitida(material.categoriaId),
+  );
+}
+
+function obterNomeCategoria(categoriaId) {
+  const categoria = categoriasEstoque.find((item) => item.id === categoriaId);
+
+  return categoria?.nome || "-";
+}
+
+function preencherCategoriasMaterial() {
+  if (!selectCategoriaMaterial) return;
+
+  const valorAtual = selectCategoriaMaterial.value;
+
+  const categoriasPermitidas = obterCategoriasPermitidas();
+
+  selectCategoriaMaterial.innerHTML = `
+    <option value="">
+      Selecione a categoria
+    </option>
+  `;
+
+  categoriasPermitidas.forEach((categoria) => {
+    const option = document.createElement("option");
+
+    option.value = categoria.id;
+
+    option.textContent = categoria.nome;
+
+    selectCategoriaMaterial.appendChild(option);
+  });
+
+  if (
+    valorAtual &&
+    categoriasPermitidas.some((categoria) => categoria.id === valorAtual)
+  ) {
+    selectCategoriaMaterial.value = valorAtual;
+  }
+}
+
+/* =========================
    AUTOCOMPLETE
 ========================= */
 
-function mostrarSugestoes(input, lista, box) {
+function mostrarSugestoes(
+  input,
+  lista,
+  box,
+  aoSelecionar = null,
+  aoDigitar = null,
+) {
   if (!input || !box) return;
 
   input.oninput = () => {
+    if (typeof aoDigitar === "function") {
+      aoDigitar();
+    }
+
     const valor = input.value.toLowerCase().trim();
 
     box.innerHTML = "";
@@ -128,7 +283,12 @@ function mostrarSugestoes(input, lista, box) {
 
       li.addEventListener("click", () => {
         input.value = item;
+
         box.style.display = "none";
+
+        if (typeof aoSelecionar === "function") {
+          aoSelecionar(item);
+        }
       });
 
       box.appendChild(li);
@@ -154,6 +314,7 @@ document.addEventListener("click", (event) => {
 
 const inputMaterial = document.getElementById("nomeMaterial");
 const boxMaterial = document.getElementById("autocompleteMaterial");
+const selectCategoriaMaterial = document.getElementById("categoriaMaterial");
 
 const inputDestinoEntrega = document.getElementById("destinoEntrega");
 const boxDestinoEntrega = document.getElementById("autocompleteDestinoEntrega");
@@ -175,6 +336,43 @@ const btnGerarRomaneio = document.getElementById("btnGerarRomaneio");
 
 const inputBusca = document.getElementById("busca");
 const inputBuscaHistorico = document.getElementById("buscaHistorico");
+
+/* =========================
+   CATEGORIAS E PERMISSÕES
+========================= */
+
+onValue(categoriasEstoqueRef, (snapshot) => {
+  categoriasEstoque = snapshot.exists()
+    ? Object.entries(snapshot.val()).map(([id, dados]) => ({
+        id,
+        ...dados,
+      }))
+    : [];
+
+  categoriasEstoque.sort((a, b) =>
+    String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR", {
+      sensitivity: "base",
+    }),
+  );
+
+  preencherCategoriasMaterial();
+
+  renderTabela();
+});
+
+onValue(permissoesEstoqueRef, (snapshot) => {
+  permissoesEstoque = snapshot.exists() ? snapshot.val() : {};
+
+  atualizarPerfilUsuario();
+
+  preencherCategoriasMaterial();
+
+  renderTabela();
+
+  atualizarAutocompletesMateriais();
+
+  renderHistorico();
+});
 
 /* =========================
    DESTINOS
@@ -199,8 +397,32 @@ onValue(destinosRef, (snapshot) => {
 
   const nomesDestinos = destinos.map((destino) => destino.nome);
 
-  mostrarSugestoes(inputDestinoEntrega, nomesDestinos, boxDestinoEntrega);
+  mostrarSugestoes(
+    inputDestinoEntrega,
+    nomesDestinos,
+    boxDestinoEntrega,
+
+    (nomeSelecionado) => {
+      const destino = destinos.find((item) => item.nome === nomeSelecionado);
+
+      destinoIdSelecionado = destino?.id || null;
+    },
+
+    () => {
+      destinoIdSelecionado = null;
+    },
+  );
 });
+
+function atualizarAutocompletesMateriais() {
+  const permitidos = obterMateriaisPermitidos();
+
+  const nomes = permitidos.map((material) => material.nome).filter(Boolean);
+
+  mostrarSugestoes(inputMaterial, nomes, boxMaterial);
+
+  mostrarSugestoes(inputMaterialEntrega, nomes, boxEntrega);
+}
 
 /* =========================
    MATERIAIS
@@ -222,11 +444,7 @@ onValue(
 
     renderTabela();
 
-    const nomes = materiais.map((material) => material.nome).filter(Boolean);
-
-    mostrarSugestoes(inputMaterial, nomes, boxMaterial);
-
-    mostrarSugestoes(inputMaterialEntrega, nomes, boxEntrega);
+    atualizarAutocompletesMateriais();
   },
   (erro) => {
     console.error("Erro ao carregar materiais:", erro);
@@ -255,11 +473,25 @@ formMaterial.addEventListener("submit", async (event) => {
   if (salvandoMaterial) return;
 
   const nome = padronizarTexto(inputMaterial.value);
+
+  const categoriaId = selectCategoriaMaterial.value;
+
   const unidade = document.getElementById("unidade").value;
+
   const quantidade = Number(document.getElementById("quantidade").value);
 
-  if (!nome || quantidade <= 0) {
+  if (!nome || !categoriaId || quantidade <= 0) {
     mostrarNotificacao("Preencha os campos corretamente.", "erro");
+
+    return;
+  }
+
+  if (!categoriaPermitida(categoriaId)) {
+    mostrarNotificacao(
+      "Você não possui permissão para esta categoria.",
+      "erro",
+    );
+
     return;
   }
 
@@ -271,6 +503,17 @@ formMaterial.addEventListener("submit", async (event) => {
   try {
     const existente = materiais.find((material) => material.nome === nome);
 
+    if (existente && existente.categoriaId !== categoriaId) {
+      mostrarNotificacao(
+        `Este material já está cadastrado na categoria "${obterNomeCategoria(
+          existente.categoriaId,
+        )}".`,
+        "erro",
+      );
+
+      return;
+    }
+
     if (existente) {
       await update(ref(rtdb, `materiais/${existente._key}`), {
         estoque: Number(existente.estoque || 0) + quantidade,
@@ -279,6 +522,7 @@ formMaterial.addEventListener("submit", async (event) => {
     } else {
       await push(materiaisRef, {
         nome,
+        categoriaId,
         unidade,
         estoque: quantidade,
         criadoEm: new Date().toISOString(),
@@ -311,7 +555,7 @@ function renderTabela() {
 
   const busca = inputBusca.value.toLowerCase().trim();
 
-  const filtrados = materiais.filter((material) =>
+  const filtrados = obterMateriaisPermitidos().filter((material) =>
     (material.nome || "").toLowerCase().includes(busca),
   );
 
@@ -354,6 +598,8 @@ function renderTabela() {
               </h3>
 
               <span class="material-unidade">
+                ${escaparHtmlEstoque(obterNomeCategoria(material.categoriaId))}
+                •
                 ${escaparHtmlEstoque(material.unidade || "Unidade")}
               </span>
             </div>
@@ -394,14 +640,17 @@ inputBusca.addEventListener("input", renderTabela);
 ========================= */
 
 btnExportarExcel?.addEventListener("click", () => {
-  if (!materiais.length) {
-    mostrarNotificacao("Não há materiais para exportar.", "erro");
+  const materiaisExportar = obterMateriaisPermitidos();
+
+  if (!materiaisExportar.length) {
+    mostrarNotificacao("Não há materiais disponíveis para exportar.", "erro");
 
     return;
   }
 
-  const dadosExcel = materiais.map((material) => ({
+  const dadosExcel = materiaisExportar.map((material) => ({
     Material: material.nome || "",
+    Categoria: obterNomeCategoria(material.categoriaId),
     Unidade: material.unidade || "Unidade",
     "Quantidade em Estoque": Number(material.estoque || 0),
     "Última Movimentação": material.atualizadoEm
@@ -415,7 +664,13 @@ btnExportarExcel?.addEventListener("click", () => {
 
   XLSX.utils.book_append_sheet(workbook, planilha, "Estoque");
 
-  planilha["!cols"] = [{ wch: 45 }, { wch: 15 }, { wch: 22 }, { wch: 22 }];
+  planilha["!cols"] = [
+    { wch: 45 },
+    { wch: 22 },
+    { wch: 15 },
+    { wch: 22 },
+    { wch: 22 },
+  ];
 
   const hoje = new Date();
 
@@ -468,7 +723,9 @@ btnAdicionarItem.addEventListener("click", () => {
 
   const quantidade = Number(document.getElementById("quantidadeEntrega").value);
 
-  const material = materiais.find((item) => item.nome === nomeMaterial);
+  const material = obterMateriaisPermitidos().find(
+    (item) => item.nome === nomeMaterial,
+  );
 
   if (!material) {
     mostrarNotificacao("Material não encontrado.", "erro");
@@ -498,6 +755,7 @@ btnAdicionarItem.addEventListener("click", () => {
   } else {
     itensEntrega.push({
       nome: material.nome,
+      categoriaId: material.categoriaId,
       unidade: material.unidade,
       quantidade,
       materialId: material._key,
@@ -597,6 +855,31 @@ btnGerarRomaneio.addEventListener("click", async () => {
 
   if (!destino) {
     mostrarNotificacao("Informe o destino.", "erro");
+
+    inputDestinoEntrega.focus();
+
+    return;
+  }
+
+  if (!destinoIdSelecionado) {
+    mostrarNotificacao("Selecione o destino entre as sugestões.", "erro");
+
+    inputDestinoEntrega.focus();
+
+    return;
+  }
+
+  const destinoSelecionado = destinos.find(
+    (item) => String(item.id) === String(destinoIdSelecionado),
+  );
+
+  if (!destinoSelecionado) {
+    mostrarNotificacao("O destino selecionado não foi encontrado.", "erro");
+
+    destinoIdSelecionado = null;
+
+    inputDestinoEntrega.focus();
+
     return;
   }
 
@@ -615,11 +898,22 @@ btnGerarRomaneio.addEventListener("click", async () => {
         `O material "${item.nome}" não foi encontrado.`,
         "erro",
       );
+
+      return;
+    }
+
+    if (!categoriaPermitida(material.categoriaId)) {
+      mostrarNotificacao(
+        `Você não possui permissão para movimentar "${item.nome}".`,
+        "erro",
+      );
+
       return;
     }
 
     if (Number(item.quantidade) > Number(material.estoque || 0)) {
       mostrarNotificacao(`Estoque insuficiente para "${item.nome}".`, "erro");
+
       return;
     }
   }
@@ -642,11 +936,16 @@ btnGerarRomaneio.addEventListener("click", async () => {
     }
 
     const movimentacao = {
-      destino,
+      destinoId: destinoSelecionado.id,
+
+      destino: destinoSelecionado.nome,
+
       data: new Date().toISOString(),
+
       itens: itensEntrega.map((item) => ({
         ...item,
       })),
+
       responsavel: getNomeResponsavel(),
     };
 
@@ -659,6 +958,7 @@ btnGerarRomaneio.addEventListener("click", async () => {
 
     inputDestinoEntrega.value = "";
     inputMaterialEntrega.value = "";
+    destinoIdSelecionado = null;
 
     document.getElementById("quantidadeEntrega").value = "";
 
@@ -716,7 +1016,7 @@ function gerarPDF(dados) {
         doc.setFont("helvetica", "normal");
         doc.setFontSize(12);
 
-        doc.text(`Destino: ${dados.destino}`, margemEsquerda, 68);
+        doc.text(`Destino: ${obterDestinoRomaneio(dados)}`, margemEsquerda, 68);
 
         doc.text(`Data: ${formatarData(dados.data)}`, margemEsquerda, 76);
 
@@ -958,15 +1258,29 @@ function renderHistorico() {
 
   const busca = inputBuscaHistorico.value.toLowerCase().trim();
 
-  const filtrados = historicoRomaneios.filter((movimentacao) => {
-    const texto = `
-        ${movimentacao.destino || ""}
+  const filtrados = historicoRomaneios
+    .filter((movimentacao) => {
+      if (permissaoEstoqueUsuario?.todas === true) {
+        return true;
+      }
+
+      if (!Array.isArray(movimentacao.itens)) {
+        return false;
+      }
+
+      return movimentacao.itens.some((item) =>
+        categoriaPermitida(item.categoriaId),
+      );
+    })
+    .filter((movimentacao) => {
+      const texto = `
+        ${obterDestinoRomaneio(movimentacao)}
         ${movimentacao.responsavel || ""}
         ${formatarData(movimentacao.data)}
       `.toLowerCase();
 
-    return texto.includes(busca);
-  });
+      return texto.includes(busca);
+    });
 
   if (contadorRomaneios) {
     contadorRomaneios.textContent = `${filtrados.length} romaneio${
@@ -988,7 +1302,14 @@ function renderHistorico() {
     .map((movimentacao) => {
       const data = separarDataRomaneio(movimentacao.data);
 
-      const quantidadeItens = movimentacao.itens?.length || 0;
+      const itensVisiveis =
+        permissaoEstoqueUsuario?.todas === true
+          ? movimentacao.itens || []
+          : (movimentacao.itens || []).filter((item) =>
+              categoriaPermitida(item.categoriaId),
+            );
+
+      const quantidadeItens = itensVisiveis.length;
 
       return `
         <article class="card-romaneio">
@@ -1000,7 +1321,7 @@ function renderHistorico() {
 
           <div class="romaneio-conteudo">
             <h3 class="romaneio-destino">
-              ${escaparHtmlEstoque(movimentacao.destino || "Sem destino")}
+              ${escaparHtmlEstoque(obterDestinoRomaneio(movimentacao))}
             </h3>
 
             <div class="romaneio-detalhes">
@@ -1050,7 +1371,29 @@ listaHistorico.addEventListener("click", (event) => {
   );
 
   if (movimentacao) {
-    gerarPDF(movimentacao);
+    if (permissaoEstoqueUsuario?.todas === true) {
+      gerarPDF(movimentacao);
+
+      return;
+    }
+
+    const itensPermitidos = (movimentacao.itens || []).filter((item) =>
+      categoriaPermitida(item.categoriaId),
+    );
+
+    if (!itensPermitidos.length) {
+      mostrarNotificacao(
+        "Você não possui permissão para visualizar os itens deste romaneio.",
+        "erro",
+      );
+
+      return;
+    }
+
+    gerarPDF({
+      ...movimentacao,
+      itens: itensPermitidos,
+    });
   }
 });
 

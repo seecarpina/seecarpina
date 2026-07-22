@@ -698,6 +698,67 @@
               </div>
             </div>
           </div>
+
+          <div class="box">
+            <div class="cabecalho-admin">
+              <div>
+                <h2>Permissões do estoque</h2>
+
+                <p>
+                  Defina quais categorias de materiais cada perfil pode acessar.
+                </p>
+              </div>
+            </div>
+
+            <div class="grid-local-form">
+              <div class="form-group">
+                <label for="perfilPermissaoEstoque"> Perfil de acesso </label>
+
+                <select id="perfilPermissaoEstoque">
+                  <option value="">Selecione um perfil</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="configuracaoPermissaoEstoque" style="display: none">
+              <div class="admin-config-bloco">
+                <div class="admin-switch-linha">
+                  <div>
+                    <strong> Acesso a todas as categorias </strong>
+
+                    <span>
+                      O perfil poderá visualizar e movimentar materiais de
+                      qualquer categoria.
+                    </span>
+                  </div>
+
+                  <label class="switch">
+                    <input type="checkbox" id="todasCategoriasEstoque" />
+
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div id="blocoCategoriasPermitidasEstoque" class="admin-perfis">
+                <label> Categorias permitidas </label>
+
+                <div id="categoriasPermitidasEstoque" class="perfis-grid"></div>
+              </div>
+
+              <div class="acoes-form-admin">
+                <button
+                  type="button"
+                  id="btnSalvarPermissoesEstoque"
+                  class="btn"
+                >
+                  <span class="material-symbols-outlined"> save </span>
+
+                  Salvar permissões
+                </button>
+              </div>
+            </div>
+          </div>
         </section>
       </main>
 
