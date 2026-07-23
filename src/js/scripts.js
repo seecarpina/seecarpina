@@ -687,6 +687,7 @@ onAuthStateChanged(auth, async (user) => {
 
     if (nomeUsuario) {
       nomeUsuario.textContent = nomeResponsavel;
+      nomeUsuario.title = nomeResponsavel;
     }
 
     const cargoUsuario = document.querySelector("#cargoUsuario");
@@ -780,6 +781,7 @@ onAuthStateChanged(auth, async (user) => {
 
     if (nomeUsuario && dadosUsuario?.nome) {
       nomeUsuario.textContent = nomeResponsavel;
+      nomeUsuario.title = nomeResponsavel;
     }
 
     const cargoUsuario = document.querySelector("#cargoUsuario");
