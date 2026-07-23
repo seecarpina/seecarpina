@@ -209,6 +209,23 @@ function obterNomeCategoria(categoriaId) {
   return categoria?.nome || "-";
 }
 
+function obterIconeCategoria(categoriaId) {
+  const nome = obterNomeCategoria(categoriaId).trim().toUpperCase();
+
+  const icones = {
+    ALIMENTAÇÃO: "restaurant",
+    BANDA: "music_note",
+    EXPEDIENTE: "attach_file",
+    FARDAMENTO: "apparel",
+    LIMPEZA: "cleaning_services",
+    MOBILIÁRIO: "chair",
+    PEDAGÓGICO: "menu_book",
+    UTENSÍLIOS: "flatware",
+  };
+
+  return icones[nome] || "inventory_2";
+}
+
 function preencherCategoriasMaterial() {
   if (!selectCategoriaMaterial) return;
 
@@ -592,23 +609,38 @@ function renderTabela() {
       return `
         <article class="card-material">
           <div class="material-cabecalho">
-            <div>
-              <h3 class="material-nome">
-                ${escaparHtmlEstoque(material.nome || "-")}
-              </h3>
-
-              <span class="material-unidade">
-                ${escaparHtmlEstoque(obterNomeCategoria(material.categoriaId))}
-                •
-                ${escaparHtmlEstoque(material.unidade || "Unidade")}
-              </span>
-            </div>
+            <h3 class="material-nome">
+              ${escaparHtmlEstoque(material.nome || "-")}
+            </h3>
 
             <div
               class="material-estoque ${estoque <= 5 ? "baixo" : ""}"
             >
-              <strong>${estoque}</strong>
-              <span>em estoque</span>
+              <strong>
+                ${estoque}
+              </strong>
+            </div>
+          </div>
+
+          <div class="material-info">
+            <div class="material-categoria">
+              <span class="material-symbols-outlined">
+                ${obterIconeCategoria(material.categoriaId)}
+              </span>
+
+              <span>
+                ${escaparHtmlEstoque(obterNomeCategoria(material.categoriaId))}
+              </span>
+            </div>
+
+            <div class="material-unidade-estoque">
+              <span>
+                ${escaparHtmlEstoque(
+                  formatarUnidade(material.unidade || "Unidade", estoque),
+                )}
+              </span>
+
+              <small>em estoque</small>
             </div>
           </div>
 
@@ -621,11 +653,13 @@ function renderTabela() {
 
           <div class="material-rodape">
             <span class="material-symbols-outlined">
-              update
+              history
             </span>
 
-            Última movimentação:
-            ${material.atualizadoEm ? formatarData(material.atualizadoEm) : "-"}
+            <span>
+              Última movimentação:
+              ${material.atualizadoEm ? formatarData(material.atualizadoEm) : "-"}
+            </span>
           </div>
         </article>
       `;

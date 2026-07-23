@@ -72,6 +72,23 @@
   width: 100%;
 }
 
+.material-categoria {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+
+  color: var(--clr-primary);
+}
+
+.material-categoria .material-symbols-outlined {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
 .label-invisivel {
   visibility: hidden;
 }
