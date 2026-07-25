@@ -287,8 +287,14 @@ function liberarDadosMaterialCadastro() {
   materialCadastroSelecionadoId = null;
 
   selectCategoriaMaterial.disabled = false;
-
   selectUnidadeMaterial.disabled = false;
+
+  // Se o campo Material estiver vazio,
+  // volta Categoria e Unidade ao padrão
+  if (!inputMaterial.value.trim()) {
+    selectCategoriaMaterial.value = "";
+    selectUnidadeMaterial.value = "Unidade";
+  }
 }
 
 /* =========================
