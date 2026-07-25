@@ -176,6 +176,7 @@ function mostrarLoadingTabela() {
 
 const busca = document.getElementById("busca");
 const filtroTipoContrato = document.getElementById("filtroTipoContrato");
+const contadorContratos = document.getElementById("contadorContratos");
 const btnTopo = document.getElementById("btnTopo");
 const msgEdicao = document.getElementById("msgEdicao");
 
@@ -302,7 +303,7 @@ function corSaldo(percentual) {
 }
 
 function renderTabela() {
-  const filtroTexto = busca.value.toLowerCase();
+  const filtroTexto = busca.value.trim().toLowerCase();
   const filtroTipo = filtroTipoContrato.value;
 
   let filtrados = contratos.filter((c) =>
@@ -315,6 +316,14 @@ function renderTabela() {
     filtrados = filtrados.filter((c) => c.tipoContrato === filtroTipo);
   }
 
+  if (contadorContratos) {
+    const total = filtrados.length;
+
+    contadorContratos.textContent = `${total} contrato${total === 1 ? "" : "s"} encontrado${
+      total === 1 ? "" : "s"
+    }`;
+  }
+
   tabela.innerHTML = "";
 
   filtrados.forEach((c) => {
@@ -324,8 +333,12 @@ function renderTabela() {
     const cor = corSaldo(percentual);
 
     tr.innerHTML = `
-      <td title="${c.situacao}">
-        <div class="bdg ${
+      <td data-key="${c._key}" class="contrato-numero">
+        <strong>
+          ${c.numero}
+        </strong>
+
+        <span class="status-contrato ${
           c.situacao === "DISTRATADO"
             ? "distratado"
             : c.situacao === "EM EXECUÇÃO"
@@ -336,11 +349,11 @@ function renderTabela() {
                   ? "finalizado"
                   : c.situacao === "ASSINADO"
                     ? "assinado"
-                    : ""
-        }"></div>
-
+                    : "sem-status"
+        }">
+          ${c.situacao || "NÃO INFORMADO"}
+        </span>
       </td>
-      <td data-key="${c._key}">${c.numero}</td>
       <td>${c.credor}</td>
       <td>${c.modalidade}</td>
       <td>${c.gestor}</td>
@@ -359,12 +372,11 @@ function renderTabela() {
       </div>
       </td>
 
-      <td style="display:none">${c.situacao}</td>
       <td>${formatarDataBR(c.vigencia)}</td>
       <td>${c.tipoContrato}</td>
       <td>
         <button class="edit-btn">
-          <span class="material-symbols-outlined">edit_square</span>
+          <span class="material-symbols-outlined">edit_note</span>
         </button>
       </td>
     `;
@@ -372,8 +384,16 @@ function renderTabela() {
   });
 
   if (!filtrados.length) {
-    tabela.innerHTML =
-      '<tr><td colspan="10" style="text-align:center;">Nenhum resultado encontrado</td></tr>';
+    tabela.innerHTML = `
+    <tr>
+      <td
+        colspan="10"
+        class="contratos-vazio"
+      >
+        Nenhum contrato encontrado.
+      </td>
+    </tr>
+  `;
   }
 }
 
@@ -442,8 +462,23 @@ tabela.onclick = (e) => {
   btnCadastrar.style.display = "none";
   document.getElementById("botoesEdicao").style.display = "flex";
 
-  msgEdicao.textContent = `✏️ Editando ${contrato.tipoContrato} número ${contrato.numero}`;
-  msgEdicao.style.display = "block";
+  msgEdicao.innerHTML = `
+    <span class="material-symbols-outlined">
+      edit_note
+    </span>
+
+    <div>
+      <strong>Modo de edição</strong>
+      <span>
+        Nº ${contrato.numero}
+      </span>
+      <span>
+        ${contrato.tipoContrato} 
+      </span>
+    </div>
+  `;
+
+  msgEdicao.classList.add("ativo");
 
   if (btnTopo) btnTopo.click();
 };
@@ -516,8 +551,8 @@ function resetarEdicao() {
   form.reset();
   btnCadastrar.style.display = "block";
   document.getElementById("botoesEdicao").style.display = "none";
-  msgEdicao.textContent = "";
-  msgEdicao.style.display = "none";
+  msgEdicao.innerHTML = "";
+  msgEdicao.classList.remove("ativo");
   blocoDeducoes.style.display = "none";
   deducoesTemp = [];
   listaDeducoes.innerHTML = "";

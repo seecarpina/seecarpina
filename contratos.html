@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fiscais de Contrato - SEE Carpina</title>
     <link rel="stylesheet" href="./src/css/style.css" />
+    <link rel="stylesheet" href="./src/css/contratos.css" />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
@@ -35,47 +36,67 @@
       <aside id="sidebar"></aside>
 
       <main>
-        <h1>Cadastro de Contratos e ARPS</h1>
+        <h1>Gestão de Contratos</h1>
 
-        <form id="formFiscalContrato" class="box glass">
+        <section class="box glass">
+          <div class="info-card">
+            <span class="material-symbols-outlined"> contract </span>
+
+            <div>
+              <strong>Gestão de contratos</strong><br />
+              Cadastre e acompanhe contratos, ARPs, fiscais, vigências e saldos.
+            </div>
+          </div>
+        </section>
+
+        <form id="formFiscalContrato" class="box glass contratos-form">
           <input type="hidden" id="responsavel" />
 
-          <div class="flex g-1">
-            <div class="w-100">
-              <label>Número</label>
+          <div class="contratos-grid contratos-grid-3">
+            <div>
+              <label for="numero">Número</label>
               <input type="text" id="numero" required />
             </div>
-            <div class="w-100">
-              <label>Credor</label>
+
+            <div>
+              <label for="credor">Credor</label>
               <input type="text" id="credor" required />
             </div>
 
-            <div class="autocomplete w-100">
-              <label>Modalidade</label>
-              <input type="text" id="modalidade" />
+            <div class="autocomplete">
+              <label for="modalidade">Modalidade</label>
+
+              <input type="search" id="modalidade" autocomplete="off" />
+
               <ul id="autoModalidade" class="autocomplete-list"></ul>
             </div>
           </div>
 
-          <div class="flex g-1">
-            <div class="autocomplete w-100">
-              <label>Gestor</label>
-              <input type="text" id="gestor" />
+          <div class="contratos-grid contratos-grid-2">
+            <div class="autocomplete">
+              <label for="gestor">Gestor</label>
+
+              <input type="search" id="gestor" autocomplete="off" />
+
               <ul id="autoGestor" class="autocomplete-list"></ul>
             </div>
 
-            <div class="autocomplete w-100">
-              <label>Fiscal</label>
-              <input type="text" id="fiscal" />
+            <div class="autocomplete">
+              <label for="fiscal">Fiscal</label>
+
+              <input type="search" id="fiscal" autocomplete="off" />
+
               <ul id="autoFiscal" class="autocomplete-list"></ul>
             </div>
           </div>
 
-          <div class="flex g-1">
-            <div class="w-100">
-              <label>Situação</label>
+          <div class="contratos-grid contratos-grid-4">
+            <div>
+              <label for="situacao">Situação</label>
+
               <select id="situacao">
                 <option selected disabled>SELECIONE</option>
+
                 <option>EM EXECUÇÃO</option>
                 <option>EXECUTADO</option>
                 <option>FINALIZADO</option>
@@ -84,18 +105,23 @@
               </select>
             </div>
 
-            <div class="w-100">
-              <label>Tipo de Contrato</label>
+            <div>
+              <label for="tipoContrato"> Tipo de contrato </label>
+
               <select id="tipoContrato">
                 <option selected disabled>SELECIONE</option>
+
                 <option>Contratos CNPJ nº 30.784.957/0001-37</option>
+
                 <option>Contratos CNPJ nº 59.593.430/0001-07</option>
+
                 <option>ARPS - CNPJ nº 59.593.430/0001-07</option>
               </select>
             </div>
 
-            <div class="w-100">
-              <label>Valor global do contrato</label>
+            <div>
+              <label for="valorGlobal"> Valor global </label>
+
               <input
                 type="text"
                 id="valorGlobal"
@@ -103,48 +129,73 @@
                 inputmode="decimal"
               />
             </div>
-            <div class="w-100">
-              <label for="vigencia">Vigência</label>
+
+            <div>
+              <label for="vigencia"> Vigência </label>
+
               <input type="date" id="vigencia" />
             </div>
           </div>
-          <div class="w-100" id="blocoDeducoes" style="display: none">
+
+          <div
+            id="blocoDeducoes"
+            class="contrato-detalhes"
+            style="display: none"
+          >
             <details>
-              <summary><h3>Dedução de valores</h3></summary>
-              <div class="flex g-1">
+              <summary>
+                <span class="material-symbols-outlined"> remove_circle </span>
+
+                <span>Dedução de valores</span>
+              </summary>
+
+              <div class="contratos-grid contratos-grid-deducao">
                 <input type="date" id="deducaoData" />
+
                 <input
                   type="text"
                   id="deducaoValor"
                   placeholder="Valor"
                   inputmode="decimal"
                 />
+
                 <input
                   type="text"
                   id="deducaoDescricao"
                   placeholder="Descrição"
                 />
-                <button type="button" class="btn" id="btnAddDeducao">OK</button>
+
+                <button type="button" class="btn" id="btnAddDeducao">
+                  Adicionar
+                </button>
               </div>
 
-              <ul id="listaDeducoes" style="margin-top: 1rem"></ul>
+              <ul id="listaDeducoes"></ul>
             </details>
           </div>
-          <div class="w-100" id="blocoDeducoes" style="display: none"></div>
-          <div class="w-100" id="blocoAditivo" style="display: none">
-            <details>
-              <summary><h3>Aditivo</h3></summary>
 
-              <div style="margin-top: 1rem">
-                <label style="display: flex; align-items: center; gap: 10px">
-                  <input type="checkbox" id="temAditivo" />
-                  Possui aditivo
-                </label>
-              </div>
+          <div
+            id="blocoAditivo"
+            class="contrato-detalhes"
+            style="display: none"
+          >
+            <details>
+              <summary>
+                <span class="material-symbols-outlined"> add_circle </span>
+
+                <span>Aditivo</span>
+              </summary>
+
+              <label class="contrato-checkbox">
+                <input type="checkbox" id="temAditivo" />
+
+                <span>Possui aditivo</span>
+              </label>
 
               <div
                 id="campoValorAditivo"
-                style="display: none; margin-top: 1rem"
+                class="campo-valor-aditivo"
+                style="display: none"
               >
                 <input
                   type="text"
@@ -155,20 +206,31 @@
               </div>
             </details>
           </div>
-          <div id="botoesCadastro">
-            <button class="btn" id="btnCadastrar" type="submit">
-              Cadastrar
-            </button>
 
-            <div id="botoesEdicao" style="display: none; gap: 10px">
+          <div id="botoesCadastro" class="contratos-acoes">
+            <div class="campo-botao-contrato">
+              <label class="label-invisivel">Ação</label>
+
+              <button class="btn" id="btnCadastrar" type="submit">
+                <span class="material-symbols-outlined"> add_circle </span>
+                Cadastrar
+              </button>
+            </div>
+
+            <div
+              id="botoesEdicao"
+              class="contratos-acoes-edicao"
+              style="display: none"
+            >
               <button type="button" class="btn" id="btnSalvarEdicao">
+                <span class="material-symbols-outlined"> save </span>
+
                 Salvar edição
               </button>
-              <button
-                type="button"
-                class="btn btn-cancelar"
-                id="btnCancelarEdicao"
-              >
+
+              <button type="button" class="btn" id="btnCancelarEdicao">
+                <span class="material-symbols-outlined"> close </span>
+
                 Cancelar
               </button>
             </div>
@@ -178,58 +240,77 @@
         </form>
 
         <h2>Contratos cadastrados</h2>
-        <br />
-        <div class="flex justify-center g-1">
-          <input
-            class="busca"
-            type="text"
-            id="busca"
-            placeholder="🔍 Buscar por número, credor, gestor, fiscal ou situação..."
-          />
+        <section class="box glass contratos-listagem">
+          <div class="contratos-listagem-cabecalho">
+            <div>
+              <h2>Contratos cadastrados</h2>
 
-          <select id="filtroTipoContrato" class="busca">
-            <option value="">Exibir todos</option>
-            <option value="Contratos CNPJ nº 30.784.957/0001-37">
-              Apenas Contratos CNPJ nº 30.784.957/0001-37
-            </option>
-            <option value="Contratos CNPJ nº 59.593.430/0001-07">
-              Apenas Contratos CNPJ nº 59.593.430/0001-07
-            </option>
-            <option value="ARPS - CNPJ nº 59.593.430/0001-07">
-              Apenas ARPS - CNPJ nº 59.593.430/0001-07
-            </option>
-          </select>
-        </div>
+              <span id="contadorContratos" class="contratos-contador"></span>
+            </div>
 
-        <div class="flex justify-center">
-          <button id="btnExportarContratos" class="btn-excel">
-            📊 Exportar para Excel
-          </button>
-        </div>
-        <div class="table-wrapper">
-          <table id="tabelaContratos" class="glass">
-            <thead>
-              <tr>
-                <th></th>
-                <th>Número</th>
-                <th>Credor</th>
-                <th>Modalidade</th>
-                <th>Gestor</th>
-                <th>Fiscal</th>
-                <th>Valor Global</th>
-                <th>Saldo</th>
-                <th style="display: none">Situação</th>
-                <th>Vigência</th>
-                <th>Tipo</th>
-                <th></th>
-              </tr>
-            </thead>
+            <button id="btnExportarContratos" class="btn" type="button">
+              <span class="material-symbols-outlined"> table_view </span>
 
-            <tbody></tbody>
-          </table>
-        </div>
+              Exportar para Excel
+            </button>
+          </div>
 
-        <div class="paginacao" id="paginacao"></div>
+          <div class="contratos-toolbar">
+            <div class="campo-busca-contratos">
+              <span class="material-symbols-outlined"> search </span>
+
+              <input
+                type="search"
+                id="busca"
+                placeholder="Buscar por número, credor, gestor, fiscal ou situação"
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="filtro-tipo-contrato">
+              <span class="material-symbols-outlined"> filter_list </span>
+
+              <select id="filtroTipoContrato">
+                <option value="">Todos os tipos</option>
+
+                <option value="Contratos CNPJ nº 30.784.957/0001-37">
+                  Contratos CNPJ nº 30.784.957/0001-37
+                </option>
+
+                <option value="Contratos CNPJ nº 59.593.430/0001-07">
+                  Contratos CNPJ nº 59.593.430/0001-07
+                </option>
+
+                <option value="ARPS - CNPJ nº 59.593.430/0001-07">
+                  ARPS - CNPJ nº 59.593.430/0001-07
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-wrapper tabela-contratos-wrapper">
+            <table id="tabelaContratos">
+              <thead>
+                <tr>
+                  <th>Número</th>
+                  <th>Credor</th>
+                  <th>Modalidade</th>
+                  <th>Gestor</th>
+                  <th>Fiscal</th>
+                  <th>Valor Global</th>
+                  <th>Saldo</th>
+                  <th>Vigência</th>
+                  <th>Tipo</th>
+                  <th></th>
+                </tr>
+              </thead>
+
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="paginacao" id="paginacao"></div>
+        </section>
       </main>
 
       <div class="right"></div>

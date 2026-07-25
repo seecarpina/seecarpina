@@ -1,0 +1,612 @@
+.contratos-form {
+  gap: 1.2rem;
+}
+
+.contratos-form label {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: var(--clr-dark);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.contratos-grid {
+  display: grid;
+  gap: 1rem;
+  align-items: end;
+}
+
+.contratos-grid > div {
+  min-width: 0;
+}
+
+.contratos-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.contratos-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.contratos-grid-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.contratos-form input,
+.contratos-form select {
+  width: 100%;
+}
+
+.contrato-numero {
+  text-align: center;
+  vertical-align: middle !important;
+  white-space: nowrap;
+}
+
+.contrato-numero strong {
+  display: block;
+
+  color: var(--clr-primary);
+  font-size: 0.9rem;
+  font-weight: 700;
+
+  text-align: center;
+  white-space: nowrap;
+}
+
+.contrato-numero .status-contrato {
+  margin: 0.35rem auto 0;
+}
+
+#tabelaContratos th:first-child,
+#tabelaContratos td:first-child {
+  min-width: 115px;
+  width: 115px;
+
+  text-align: center;
+}
+
+/* =========================================
+   MODO DE EDIÇÃO
+========================================= */
+
+#msgEdicao {
+  display: none;
+  width: 100%;
+  margin: 0;
+}
+
+#msgEdicao.ativo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  width: 100%;
+  padding: 1rem 1.2rem;
+
+  border-radius: 0.9rem;
+
+  background: var(--clr-light);
+  color: var(--clr-dark);
+}
+
+#msgEdicao > .material-symbols-outlined {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 3rem;
+
+  width: 3rem;
+  height: 3rem;
+
+  border-radius: 50%;
+
+  background: var(--clr-primary);
+  color: #fff;
+
+  font-size: 1.35rem;
+}
+
+#msgEdicao > div {
+  min-width: 0;
+}
+
+#msgEdicao strong {
+  display: block;
+
+  color: var(--clr-dark);
+
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+#msgEdicao div span {
+  display: block;
+
+  margin-top: 0.15rem;
+
+  color: var(--clr-dark-variant);
+
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* Dedução e aditivo */
+.contrato-detalhes {
+  width: 100%;
+  padding: 0.2rem 0;
+}
+
+.contrato-detalhes details {
+  overflow: hidden;
+  border: 1px solid var(--clr-light);
+  border-radius: 0.9rem;
+  background: var(--clr-white);
+}
+
+.contrato-detalhes summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  margin: 0;
+  padding: 0.9rem 1rem;
+
+  color: var(--clr-dark);
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.contrato-detalhes summary .material-symbols-outlined {
+  color: var(--clr-primary);
+  font-size: 1.2rem;
+}
+
+.contrato-detalhes details[open] summary {
+  border-bottom: 1px solid var(--clr-light);
+}
+
+.contrato-detalhes details > div,
+.contrato-detalhes details > label,
+.contrato-detalhes details > ul {
+  margin: 1rem;
+}
+
+.contratos-grid-deducao {
+  grid-template-columns:
+    150px
+    160px
+    minmax(200px, 1fr)
+    auto;
+}
+
+#listaDeducoes {
+  padding-left: 1.2rem;
+  color: var(--clr-dark);
+}
+
+/* Checkbox */
+
+.contrato-checkbox {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.6rem;
+
+  cursor: pointer;
+}
+
+.contrato-checkbox input {
+  width: auto;
+}
+
+.campo-valor-aditivo {
+  max-width: 300px;
+}
+
+/* Ações */
+
+.campo-botao-contrato {
+  width: 100%;
+  max-width: 420px;
+}
+
+.campo-botao-contrato .label-invisivel {
+  visibility: hidden;
+}
+
+#btnCadastrar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+
+  width: 100%;
+
+  white-space: nowrap;
+}
+
+#btnCadastrar .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
+.contratos-acoes-edicao {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+/* =========================================
+   SALDO DO CONTRATO
+========================================= */
+
+.barra-saldo {
+  width: 100%;
+  min-width: 90px;
+  height: 6px;
+
+  margin-top: 0.4rem;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  background: var(--clr-light);
+}
+
+.barra-saldo-preenchida {
+  height: 100%;
+  border-radius: inherit;
+
+  transition: width 0.4s ease;
+}
+
+.barra-saldo-preenchida.verde {
+  background: var(--clr-success);
+}
+
+.barra-saldo-preenchida.amarelo {
+  background: #f1c40f;
+}
+
+.barra-saldo-preenchida.laranja {
+  background: var(--clr-warnig);
+}
+
+.barra-saldo-preenchida.vermelho {
+  background: var(--clr-danger);
+}
+
+/* =========================================
+   LISTAGEM
+========================================= */
+
+.contratos-listagem {
+  gap: 1.2rem;
+}
+
+.contratos-listagem-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.contratos-listagem-cabecalho h2 {
+  margin: 0;
+  color: var(--clr-dark);
+}
+
+.contratos-contador {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--clr-dark-variant);
+}
+
+.contratos-listagem-cabecalho .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+/* Toolbar */
+
+.contratos-toolbar {
+  display: grid;
+  grid-template-columns:
+    minmax(280px, 1fr)
+    minmax(260px, 380px);
+
+  gap: 1rem;
+  align-items: center;
+}
+
+.campo-busca-contratos,
+.filtro-tipo-contrato {
+  display: flex;
+  align-items: center;
+
+  min-width: 0;
+  height: 3.2rem;
+
+  padding: 0 1rem;
+
+  border-radius: 0.9rem;
+
+  background: var(--clr-white);
+}
+
+.campo-busca-contratos .material-symbols-outlined,
+.filtro-tipo-contrato .material-symbols-outlined {
+  flex-shrink: 0;
+  color: var(--clr-primary);
+}
+
+.campo-busca-contratos {
+  gap: 0.6rem;
+}
+
+.filtro-tipo-contrato {
+  gap: 0.4rem;
+}
+
+.campo-busca-contratos input {
+  width: 100%;
+
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+  color: var(--clr-dark);
+}
+
+.filtro-tipo-contrato select {
+  width: 100%;
+
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+  color: var(--clr-dark);
+
+  cursor: pointer;
+}
+
+.contratos-vazio {
+  padding: 2.5rem 1rem !important;
+  text-align: center;
+  color: var(--clr-dark-variant);
+}
+
+/* =========================================
+   TABELA
+========================================= */
+
+.tabela-contratos-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 1rem;
+}
+
+#tabelaContratos {
+  width: 100%;
+  margin: 0;
+
+  border-collapse: separate;
+  border-spacing: 0;
+
+  background: var(--clr-white);
+
+  text-transform: none;
+}
+
+#tabelaContratos thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+#tabelaContratos thead th {
+  padding: 0.8rem 0.75rem;
+
+  background: var(--clr-primary);
+  color: var(--clr-white);
+
+  font-size: 0.82rem;
+  font-weight: 700;
+
+  text-align: left;
+  white-space: nowrap;
+
+  vertical-align: middle;
+}
+
+#tabelaContratos td {
+  padding: 0.8rem 0.75rem;
+
+  color: var(--clr-dark);
+
+  vertical-align: middle;
+}
+
+#tabelaContratos tbody tr {
+  transition: background 0.2s ease;
+}
+
+#tabelaContratos tbody tr:nth-child(even) {
+  background: var(--clr-light);
+}
+
+#tabelaContratos tbody tr:hover {
+  background: rgba(115, 128, 236, 0.12);
+}
+
+/* =========================================
+   AÇÕES DA TABELA
+========================================= */
+
+#tabelaContratos .flex {
+  flex-wrap: nowrap;
+  gap: 0.3rem;
+}
+
+#tabelaContratos .edit-btn,
+#tabelaContratos .cancel-btn,
+#tabelaContratos .view-btn,
+#tabelaContratos .icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  width: 2.2rem;
+  height: 2.2rem;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: transparent;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+#tabelaContratos .edit-btn:hover,
+#tabelaContratos .cancel-btn:hover,
+#tabelaContratos .view-btn:hover,
+#tabelaContratos .icon-btn:hover {
+  background: var(--clr-light);
+}
+
+#tabelaContratos .edit-btn {
+  color: var(--clr-primary);
+}
+
+#tabelaContratos .cancel-btn {
+  color: crimson;
+}
+
+#tabelaContratos .view-btn {
+  color: var(--clr-primary);
+}
+
+#tabelaContratos button .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
+/* =========================================
+   STATUS DOS CONTRATOS
+========================================= */
+
+.status-contrato {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0.28rem 0.55rem;
+
+  border-radius: 999px;
+
+  font-size: 0.62rem;
+  font-weight: 600;
+
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Em execução */
+.status-contrato.em-execucao {
+  background: rgba(52, 199, 89, 0.12);
+  color: var(--clr-success);
+}
+
+/* Assinado */
+.status-contrato.assinado {
+  background: rgba(52, 199, 89, 0.12);
+  color: var(--clr-success);
+}
+
+/* Executado */
+.status-contrato.executado {
+  background: rgba(10, 132, 255, 0.12);
+  color: var(--clr-primary);
+}
+
+/* Finalizado */
+.status-contrato.finalizado {
+  background: rgba(142, 142, 147, 0.14);
+  color: var(--clr-dark-variant);
+}
+
+/* Distratado */
+.status-contrato.distratado {
+  background: rgba(255, 59, 48, 0.12);
+  color: var(--clr-danger);
+}
+
+/* Sem situação */
+.status-contrato.sem-status {
+  background: var(--clr-light);
+  color: var(--clr-dark-variant);
+}
+
+@media (max-width: 1100px) {
+  .contratos-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .contratos-grid-deducao {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 750px) {
+  .contratos-grid-2,
+  .contratos-grid-3,
+  .contratos-grid-4,
+  .contratos-grid-deducao {
+    grid-template-columns: 1fr;
+  }
+
+  .contratos-acoes,
+  .contratos-acoes-edicao {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .contratos-acoes .btn,
+  .contratos-acoes-edicao .btn,
+  .contratos-acoes-edicao .btn-cancelar {
+    width: 100%;
+  }
+
+  .contratos-listagem-cabecalho {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .contratos-listagem-cabecalho .btn {
+    width: 100%;
+  }
+
+  .contratos-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .campo-busca-contratos,
+  .filtro-tipo-contrato {
+    width: 100%;
+  }
+}
