@@ -72,6 +72,12 @@
   width: 100%;
 }
 
+.campos-material select:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+  background: var(--clr-light);
+}
+
 .material-categoria {
   display: flex;
   align-items: center;

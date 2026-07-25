@@ -32,6 +32,7 @@ let destinos = [];
 let itensEntrega = [];
 
 let destinoIdSelecionado = null;
+let materialCadastroSelecionadoId = null;
 
 let categoriasEstoque = [];
 let permissoesEstoque = {};
@@ -257,6 +258,39 @@ function preencherCategoriasMaterial() {
   }
 }
 
+function selecionarMaterialCadastro(nomeSelecionado) {
+  const material = obterMateriaisPermitidos().find(
+    (item) => item.nome === nomeSelecionado,
+  );
+
+  if (!material) {
+    materialCadastroSelecionadoId = null;
+
+    return;
+  }
+
+  materialCadastroSelecionadoId = material._key;
+
+  // Categoria já cadastrada
+  selectCategoriaMaterial.value = material.categoriaId || "";
+
+  // Unidade já cadastrada
+  selectUnidadeMaterial.value = material.unidade || "Unidade";
+
+  // Impede alteração acidental
+  selectCategoriaMaterial.disabled = true;
+
+  selectUnidadeMaterial.disabled = true;
+}
+
+function liberarDadosMaterialCadastro() {
+  materialCadastroSelecionadoId = null;
+
+  selectCategoriaMaterial.disabled = false;
+
+  selectUnidadeMaterial.disabled = false;
+}
+
 /* =========================
    AUTOCOMPLETE
 ========================= */
@@ -332,6 +366,7 @@ document.addEventListener("click", (event) => {
 const inputMaterial = document.getElementById("nomeMaterial");
 const boxMaterial = document.getElementById("autocompleteMaterial");
 const selectCategoriaMaterial = document.getElementById("categoriaMaterial");
+const selectUnidadeMaterial = document.getElementById("unidade");
 
 const inputDestinoEntrega = document.getElementById("destinoEntrega");
 const boxDestinoEntrega = document.getElementById("autocompleteDestinoEntrega");
@@ -436,8 +471,24 @@ function atualizarAutocompletesMateriais() {
 
   const nomes = permitidos.map((material) => material.nome).filter(Boolean);
 
-  mostrarSugestoes(inputMaterial, nomes, boxMaterial);
+  /* CADASTRO / ENTRADA NO ESTOQUE */
+  mostrarSugestoes(
+    inputMaterial,
+    nomes,
+    boxMaterial,
 
+    // Ao clicar em uma sugestão
+    (nomeSelecionado) => {
+      selecionarMaterialCadastro(nomeSelecionado);
+    },
+
+    // Ao voltar a digitar
+    () => {
+      liberarDadosMaterialCadastro();
+    },
+  );
+
+  /* ROMANEIO */
   mostrarSugestoes(inputMaterialEntrega, nomes, boxEntrega);
 }
 
@@ -518,13 +569,15 @@ formMaterial.addEventListener("submit", async (event) => {
   btnAdicionarEstoque.value = "Salvando...";
 
   try {
-    const existente = materiais.find((material) => material.nome === nome);
+    const existente = materialCadastroSelecionadoId
+      ? materiais.find(
+          (material) => material._key === materialCadastroSelecionadoId,
+        )
+      : materiais.find((material) => material.nome === nome);
 
-    if (existente && existente.categoriaId !== categoriaId) {
+    if (existente && existente.unidade !== unidade) {
       mostrarNotificacao(
-        `Este material já está cadastrado na categoria "${obterNomeCategoria(
-          existente.categoriaId,
-        )}".`,
+        `Este material já está cadastrado com a unidade "${existente.unidade}".`,
         "erro",
       );
 
@@ -550,6 +603,7 @@ formMaterial.addEventListener("submit", async (event) => {
     mostrarNotificacao("Material salvo com sucesso!");
 
     formMaterial.reset();
+    liberarDadosMaterialCadastro();
     inputMaterial.focus();
   } catch (erro) {
     console.error("Erro ao salvar material:", erro);
