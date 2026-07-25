@@ -282,72 +282,104 @@
       <div class="right"></div>
     </div>
 
-    <!-- MODAL ENTREGA -->
-    <div class="modal" id="modalEntrega">
-      <div class="modal-content box">
-        <div class="flex justify-between align-center">
-          <h2>Nova Entrega</h2>
+    <div id="drawerOverlay" class="drawer-overlay"></div>
 
-          <button id="fecharModalEntrega" class="btn-cancelar">✖</button>
+    <aside id="drawerEntrega" class="drawer-entrega">
+      <div class="drawer-cabecalho">
+        <div class="drawer-titulo">
+          <div class="drawer-titulo-icone">
+            <span class="material-symbols-outlined"> shopping_cart </span>
+          </div>
+
+          <div>
+            <h2>Nova entrega</h2>
+            <span> Selecione o destino e adicione os materiais. </span>
+          </div>
         </div>
 
-        <div class="autocomplete">
-          <label>Destino:</label>
+        <button
+          id="fecharDrawerEntrega"
+          class="drawer-fechar"
+          type="button"
+          title="Fechar"
+          aria-label="Fechar"
+        >
+          <span class="material-symbols-outlined"> close </span>
+        </button>
+      </div>
+
+      <div class="drawer-conteudo">
+        <div class="autocomplete drawer-campo">
+          <label for="destinoEntrega"> Destino </label>
 
           <input
-            type="text"
+            type="search"
             id="destinoEntrega"
-            placeholder="Digite o destino..."
+            placeholder="Digite para buscar o destino"
+            autocomplete="off"
           />
 
           <ul id="autocompleteDestinoEntrega" class="autocomplete-list"></ul>
         </div>
 
-        <hr />
+        <div class="drawer-divisor"></div>
 
-        <div class="flex justify-center align-center g-1">
-          <div class="w-100">
-            <div class="autocomplete">
-              <label>Material:</label>
+        <div class="drawer-adicionar-item">
+          <div class="autocomplete drawer-campo">
+            <label for="materialEntrega"> Material </label>
 
-              <input
-                type="text"
-                id="materialEntrega"
-                placeholder="Digite o material..."
-              />
+            <input
+              type="search"
+              id="materialEntrega"
+              placeholder="Digite para buscar o material"
+              autocomplete="off"
+            />
 
-              <ul id="autocompleteEntrega" class="autocomplete-list"></ul>
-            </div>
+            <ul id="autocompleteEntrega" class="autocomplete-list"></ul>
           </div>
 
-          <div class="w-100">
-            <label>Quantidade:</label>
+          <div class="drawer-quantidade">
+            <label for="quantidadeEntrega"> Quantidade </label>
 
             <input type="number" id="quantidadeEntrega" min="1" />
           </div>
 
           <button class="btn" type="button" id="btnAdicionarItem">
+            <span class="material-symbols-outlined"> add </span>
+
             Adicionar
           </button>
         </div>
 
-        <table id="tabelaItensEntrega">
-          <thead>
-            <tr>
-              <th>Material</th>
-              <th>Quantidade</th>
-              <th></th>
-            </tr>
-          </thead>
+        <div class="drawer-itens">
+          <div class="drawer-itens-titulo">
+            <h3>Itens da entrega</h3>
+          </div>
 
-          <tbody></tbody>
-        </table>
+          <div class="table-wrapper">
+            <table id="tabelaItensEntrega">
+              <thead>
+                <tr>
+                  <th>Material</th>
+                  <th>Quantidade</th>
+                  <th></th>
+                </tr>
+              </thead>
 
-        <div class="flex justify-center">
-          <button class="btn" id="btnGerarRomaneio">Gerar Romaneio</button>
+              <tbody></tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
+
+      <div class="drawer-rodape">
+        <button class="btn" id="btnGerarRomaneio" type="button">
+          <span class="material-symbols-outlined"> description </span>
+
+          Gerar Romaneio
+        </button>
+      </div>
+    </aside>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script type="module" src="./src/js/scripts.js"></script>
     <script type="module" src="./src/js/estoque.js"></script>

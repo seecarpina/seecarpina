@@ -25,8 +25,6 @@ const categoriasEstoqueRef = ref(rtdb, "configuracoes/estoque/categorias");
 
 const permissoesEstoqueRef = ref(rtdb, "configuracoes/estoque/permissoes");
 
-const modalEntrega = document.getElementById("modalEntrega");
-
 let materiais = [];
 let historicoRomaneios = [];
 let historicoEstoque = [];
@@ -429,7 +427,11 @@ const btnNovaEntrega = document.getElementById("btnNovaEntrega");
 
 const btnExportarExcel = document.getElementById("btnExportarExcel");
 
-const btnFecharModalEntrega = document.getElementById("fecharModalEntrega");
+const drawerEntrega = document.getElementById("drawerEntrega");
+
+const drawerOverlay = document.getElementById("drawerOverlay");
+
+const btnFecharDrawerEntrega = document.getElementById("fecharDrawerEntrega");
 
 const btnAdicionarItem = document.getElementById("btnAdicionarItem");
 const btnGerarRomaneio = document.getElementById("btnGerarRomaneio");
@@ -863,33 +865,38 @@ btnExportarExcel?.addEventListener("click", () => {
 });
 
 /* =========================
-   MODAL DE ENTREGA
+   DRAWER DE ENTREGA
 ========================= */
 
-btnNovaEntrega.addEventListener("click", () => {
-  modalEntrega.style.display = "flex";
-  inputDestinoEntrega.focus();
-});
+function abrirDrawerEntrega() {
+  drawerEntrega?.classList.add("ativo");
+  drawerOverlay?.classList.add("ativo");
 
-btnFecharModalEntrega.addEventListener("click", () => {
-  fecharModalEntrega();
-});
+  document.body.classList.add("drawer-aberto");
 
-window.addEventListener("click", (event) => {
-  if (event.target === modalEntrega) {
-    fecharModalEntrega();
-  }
-});
+  setTimeout(() => {
+    inputDestinoEntrega?.focus();
+  }, 250);
+}
+
+function fecharDrawerEntrega() {
+  drawerEntrega?.classList.remove("ativo");
+  drawerOverlay?.classList.remove("ativo");
+
+  document.body.classList.remove("drawer-aberto");
+}
+
+btnNovaEntrega?.addEventListener("click", abrirDrawerEntrega);
+
+btnFecharDrawerEntrega?.addEventListener("click", fecharDrawerEntrega);
+
+drawerOverlay?.addEventListener("click", fecharDrawerEntrega);
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    fecharModalEntrega();
+  if (event.key === "Escape" && drawerEntrega?.classList.contains("ativo")) {
+    fecharDrawerEntrega();
   }
 });
-
-function fecharModalEntrega() {
-  modalEntrega.style.display = "none";
-}
 
 /* =========================
    ADICIONAR ITEM À ENTREGA
@@ -1157,7 +1164,7 @@ btnGerarRomaneio.addEventListener("click", async () => {
 
     document.getElementById("quantidadeEntrega").value = "";
 
-    modalEntrega.style.display = "none";
+    fecharDrawerEntrega();
 
     mostrarNotificacao("Romaneio gerado com sucesso!");
   } catch (erro) {
