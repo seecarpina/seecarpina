@@ -167,28 +167,58 @@
               </button>
             </div>
 
-            <div class="oficios-filtros">
+            <div class="oficios-filtros box glass">
               <div class="filtro-ano">
                 <label for="filtroAno">Ano</label>
                 <select id="filtroAno"></select>
               </div>
 
-              <div class="campo-busca-oficios">
-                <span class="material-symbols-outlined">search</span>
+              <div class="filtro-periodo">
+                <label>Período</label>
 
-                <input
-                  type="search"
-                  id="busca"
-                  placeholder="Buscar por número, assunto, destino ou responsável"
-                  autocomplete="off"
-                />
+                <div class="periodo-campos">
+                  <div class="campo-data">
+                    <span>De</span>
+                    <input
+                      type="date"
+                      id="filtroDataInicio"
+                      aria-label="Data inicial"
+                    />
+                  </div>
+
+                  <span class="periodo-separador">→</span>
+
+                  <div class="campo-data">
+                    <span>Até</span>
+                    <input
+                      type="date"
+                      id="filtroDataFim"
+                      aria-label="Data final"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="filtro-busca">
+                <label for="busca">Buscar</label>
+
+                <div class="campo-busca-oficios">
+                  <span class="material-symbols-outlined">search</span>
+
+                  <input
+                    type="search"
+                    id="busca"
+                    placeholder="Número, assunto, destino ou responsável"
+                    autocomplete="off"
+                  />
+                </div>
               </div>
 
               <label class="filtro-disponiveis">
                 <input type="checkbox" id="filtroDisponiveis" />
 
                 <span class="filtro-checkbox">
-                  <span class="material-symbols-outlined"> check </span>
+                  <span class="material-symbols-outlined">check</span>
                 </span>
 
                 <span>Somente disponíveis</span>

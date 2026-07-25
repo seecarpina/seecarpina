@@ -70,6 +70,10 @@ const filtroDisponiveis = document.getElementById("filtroDisponiveis");
 
 const filtroAno = document.getElementById("filtroAno");
 
+const filtroDataInicio = document.getElementById("filtroDataInicio");
+
+const filtroDataFim = document.getElementById("filtroDataFim");
+
 const contadorOficios = document.getElementById("contadorOficios");
 
 const btnCadastrar = document.getElementById("btnCadastrar");
@@ -522,21 +526,39 @@ formOficio?.addEventListener("submit", async (event) => {
 function obterOficiosFiltrados() {
   const termo = normalizarTexto(inputBusca?.value || "");
 
+  const dataInicio = filtroDataInicio?.value || "";
+  const dataFim = filtroDataFim?.value || "";
+
   let filtrados = todosOficios.filter((oficio) => {
     const texto = normalizarTexto(`
-        ${oficio.numero || ""}
-        ${formatarNumeroOficio(oficio.numero, anoSelecionado)}
-        ${oficio.assunto || ""}
-        ${oficio.data || ""}
-        ${formatarDataBR(oficio.data)}
-        ${obterDestinoOficio(oficio)}
-${obterCopiaOficio(oficio)}
-        ${oficio.responsavel || ""}
-      `);
+      ${oficio.numero || ""}
+      ${formatarNumeroOficio(oficio.numero, anoSelecionado)}
+      ${oficio.assunto || ""}
+      ${oficio.data || ""}
+      ${formatarDataBR(oficio.data)}
+      ${obterDestinoOficio(oficio)}
+      ${obterCopiaOficio(oficio)}
+      ${oficio.responsavel || ""}
+    `);
 
     return texto.includes(termo);
   });
 
+  // Data inicial
+  if (dataInicio) {
+    filtrados = filtrados.filter((oficio) => {
+      return oficio.data && oficio.data >= dataInicio;
+    });
+  }
+
+  // Data final
+  if (dataFim) {
+    filtrados = filtrados.filter((oficio) => {
+      return oficio.data && oficio.data <= dataFim;
+    });
+  }
+
+  // Somente disponíveis
   if (filtroDisponiveis?.checked) {
     filtrados = filtrados.filter(oficioDisponivel);
   }
@@ -1117,16 +1139,54 @@ function carregarAnosDisponiveis() {
 
   anoSelecionado = filtroAno.value || ANO_ATUAL;
 
+  atualizarLimitesPeriodo();
+
+  const hoje = new Date().toLocaleDateString("sv-SE");
+
+  if (filtroDataFim && anoSelecionado === ANO_ATUAL) {
+    filtroDataFim.value = hoje;
+  }
+
   carregarOficiosPorAno();
 }
 
 filtroAno?.addEventListener("change", () => {
   anoSelecionado = filtroAno.value;
+
   paginaAtual = 1;
 
+  if (filtroDataInicio) {
+    filtroDataInicio.value = "";
+  }
+
+  if (filtroDataFim) {
+    filtroDataFim.value = "";
+  }
+
+  atualizarLimitesPeriodo();
+
   resetarFormularioEdicao();
+
   carregarOficiosPorAno();
 });
+
+function atualizarLimitesPeriodo() {
+  if (!filtroDataInicio || !filtroDataFim) {
+    return;
+  }
+
+  const inicioAno = `${anoSelecionado}-01-01`;
+
+  const fimAno = `${anoSelecionado}-12-31`;
+
+  filtroDataInicio.min = inicioAno;
+
+  filtroDataInicio.max = fimAno;
+
+  filtroDataFim.min = inicioAno;
+
+  filtroDataFim.max = fimAno;
+}
 
 /* =========================================
    CARREGAMENTO POR ANO
@@ -1184,6 +1244,20 @@ function carregarOficiosPorAno() {
   );
 }
 
+function validarPeriodo() {
+  const inicio = filtroDataInicio?.value;
+
+  const fim = filtroDataFim?.value;
+
+  if (inicio && fim && inicio > fim) {
+    notificar("A data inicial não pode ser posterior à data final.", "erro");
+
+    return false;
+  }
+
+  return true;
+}
+
 /* =========================================
    BUSCA E FILTROS
 ========================================= */
@@ -1195,6 +1269,26 @@ inputBusca?.addEventListener("input", () => {
 
 filtroDisponiveis?.addEventListener("change", () => {
   paginaAtual = 1;
+  renderTabela();
+});
+
+filtroDataInicio?.addEventListener("change", () => {
+  if (!validarPeriodo()) {
+    filtroDataInicio.value = "";
+  }
+
+  paginaAtual = 1;
+
+  renderTabela();
+});
+
+filtroDataFim?.addEventListener("change", () => {
+  if (!validarPeriodo()) {
+    filtroDataFim.value = "";
+  }
+
+  paginaAtual = 1;
+
   renderTabela();
 });
 

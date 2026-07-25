@@ -114,8 +114,22 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
+  gap: 0.45rem;
+
+  padding: 0.75rem 1rem;
+
+  border-radius: 0.7rem;
+  background: var(--clr-primary);
+  color: #fff;
+
+  font-size: 0.82rem;
+  font-weight: 500;
+
   cursor: pointer;
+}
+
+.btn-excel .material-symbols-outlined {
+  font-size: 1.2rem;
 }
 
 /* =========================================
@@ -162,57 +176,145 @@
 
 .oficios-filtros {
   display: grid;
-  grid-template-columns: 130px minmax(260px, 1fr) auto;
+  grid-template-columns: 120px auto minmax(280px, 1fr);
+  gap: 0.8rem 1rem;
   align-items: end;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  padding: 1rem;
+  margin: 1.2rem 0;
+  border-radius: var(--border-radius-3);
 }
 
-.filtro-ano label {
+/* Labels */
+
+.oficios-filtros label,
+.filtro-periodo > label {
   display: block;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.4rem;
+
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--clr-dark-variant);
 }
+
+/* ANO */
 
 .filtro-ano select {
   width: 100%;
-  padding: 1rem !important;
-  margin-bottom: 0 !important;
-  border: 0 !important;
-  border-radius: 0.9rem !important;
+  height: 46px;
+
+  padding: 0 0.9rem !important;
+  margin: 0 !important;
+
+  background: var(--clr-white);
+  color: var(--clr-dark);
+
+  border: 1px solid transparent !important;
+  border-radius: 0.75rem !important;
+
+  cursor: pointer;
+}
+
+/* PERÍODO */
+
+.periodo-campos {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.campo-data {
+  display: flex;
+  align-items: center;
+
+  height: 46px;
+  padding: 0 0.75rem;
+
+  background: var(--clr-white);
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+}
+
+.campo-data > span {
+  margin-right: 0.4rem;
+
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--clr-dark-variant);
+}
+
+.campo-data input {
+  width: 135px;
+  padding: 0;
+
+  background: transparent;
+  color: var(--clr-dark);
+  border: none;
+}
+
+.periodo-separador {
+  color: var(--clr-dark-variant);
+}
+
+/* BUSCA */
+
+.filtro-busca {
+  min-width: 0;
 }
 
 .campo-busca-oficios {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  padding: 0 1rem;
-  border-radius: 0.9rem;
+
+  width: 100%;
+  height: 46px;
+  padding: 0 0.9rem;
+
   background: var(--clr-white);
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+
+  transition: border-color 0.2s ease;
+}
+
+.campo-busca-oficios:focus-within,
+.campo-data:focus-within {
+  border-color: var(--clr-primary);
 }
 
 .campo-busca-oficios > .material-symbols-outlined {
   flex-shrink: 0;
+
+  font-size: 1.3rem;
   color: var(--clr-primary);
 }
 
 .campo-busca-oficios input {
   width: 100%;
+  padding: 0;
+
   border: 0;
-  padding-left: 0;
   background: transparent;
+  color: var(--clr-dark);
 }
 
-.campo-busca-oficios input:focus {
-  outline: none;
-}
+/* SOMENTE DISPONÍVEIS */
 
-.filtro-disponiveis {
+.oficios-filtros > .filtro-disponiveis {
+  grid-column: 1 / -1;
+
   display: flex;
   align-items: center;
   gap: 0.55rem;
+
+  width: max-content;
+  margin: 0.1rem 0 0;
+
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--clr-dark);
+
   cursor: pointer;
-  white-space: nowrap;
-  margin: 0;
 }
 
 .filtro-disponiveis input {
@@ -225,23 +327,63 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.4rem;
-  height: 1.4rem;
+
+  width: 1.3rem;
+  height: 1.3rem;
+
   border: 1px solid var(--clr-primary);
-  border-radius: 0.4rem;
+  border-radius: 0.35rem;
+
   color: transparent;
+
   transition:
     background 0.2s ease,
     color 0.2s ease;
 }
 
 .filtro-checkbox .material-symbols-outlined {
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .filtro-disponiveis input:checked + .filtro-checkbox {
   background: var(--clr-primary);
-  color: var(--clr-white);
+  color: #fff;
+}
+
+/* RESPONSIVO */
+
+@media (max-width: 1100px) {
+  .oficios-filtros {
+    grid-template-columns: 120px 1fr;
+  }
+
+  .filtro-busca {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 650px) {
+  .oficios-filtros {
+    grid-template-columns: 1fr;
+  }
+
+  .filtro-busca,
+  .oficios-filtros > .filtro-disponiveis {
+    grid-column: auto;
+  }
+
+  .periodo-campos {
+    width: 100%;
+  }
+
+  .campo-data {
+    flex: 1;
+  }
+
+  .campo-data input {
+    width: 100%;
+    min-width: 0;
+  }
 }
 
 /* =========================================
@@ -447,6 +589,21 @@
 
   .filtro-disponiveis {
     grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 750px) {
+  .filtro-periodo {
+    width: 100%;
+  }
+
+  .filtro-periodo > div {
+    flex: 1;
+  }
+
+  .filtro-periodo input {
+    width: 100%;
+    min-width: 0;
   }
 }
 
