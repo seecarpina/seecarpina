@@ -18,6 +18,7 @@ const contadorRomaneios = document.getElementById("contadorRomaneios");
 
 const materiaisRef = ref(rtdb, "materiais");
 const movimentacoesRef = ref(rtdb, "movimentacoes");
+const historicoEstoqueRef = ref(rtdb, "historicoEstoque");
 const destinosRef = ref(rtdb, "servidores/locaisExercicio");
 
 const categoriasEstoqueRef = ref(rtdb, "configuracoes/estoque/categorias");
@@ -28,6 +29,7 @@ const modalEntrega = document.getElementById("modalEntrega");
 
 let materiais = [];
 let historicoRomaneios = [];
+let historicoEstoque = [];
 let destinos = [];
 let itensEntrega = [];
 
@@ -46,6 +48,46 @@ let permissaoEstoqueUsuario = null;
 
 function getNomeResponsavel() {
   return window.dadosUsuario?.nome?.split(" ")[0] || "Usuário";
+}
+
+async function registrarMovimentacaoEstoque({
+  tipo,
+  acao,
+  materialId,
+  material,
+  categoriaId,
+  unidade,
+  quantidade,
+  estoqueAnterior,
+  estoquePosterior,
+  destinoId = null,
+  destino = null,
+}) {
+  await push(historicoEstoqueRef, {
+    tipo,
+    acao,
+
+    materialId: materialId || null,
+
+    material: material || "",
+
+    categoriaId: categoriaId || null,
+
+    unidade: unidade || "Unidade",
+
+    quantidade: Number(quantidade || 0),
+
+    estoqueAnterior: Number(estoqueAnterior || 0),
+
+    estoquePosterior: Number(estoquePosterior || 0),
+
+    destinoId,
+    destino,
+
+    usuario: getNomeResponsavel(),
+
+    data: new Date().toISOString(),
+  });
 }
 
 function obterNomeDestino(destinoId) {
@@ -394,6 +436,15 @@ const btnGerarRomaneio = document.getElementById("btnGerarRomaneio");
 
 const inputBusca = document.getElementById("busca");
 const inputBuscaHistorico = document.getElementById("buscaHistorico");
+const inputBuscaMovimentacoes = document.getElementById("buscaMovimentacoes");
+
+const filtroTipoMovimentacao = document.getElementById(
+  "filtroTipoMovimentacao",
+);
+
+const listaMovimentacoes = document.getElementById("listaMovimentacoes");
+
+const contadorMovimentacoes = document.getElementById("contadorMovimentacoes");
 
 /* =========================
    CATEGORIAS E PERMISSÕES
@@ -591,18 +642,50 @@ formMaterial.addEventListener("submit", async (event) => {
     }
 
     if (existente) {
+      const estoqueAnterior = Number(existente.estoque || 0);
+
+      const estoquePosterior = estoqueAnterior + quantidade;
+
       await update(ref(rtdb, `materiais/${existente._key}`), {
-        estoque: Number(existente.estoque || 0) + quantidade,
+        estoque: estoquePosterior,
         atualizadoEm: new Date().toISOString(),
       });
+
+      await registrarMovimentacaoEstoque({
+        tipo: "entrada",
+        acao: "adicao",
+
+        materialId: existente._key,
+        material: existente.nome,
+        categoriaId: existente.categoriaId,
+        unidade: existente.unidade,
+
+        quantidade,
+        estoqueAnterior,
+        estoquePosterior,
+      });
     } else {
-      await push(materiaisRef, {
+      const novoMaterialRef = await push(materiaisRef, {
         nome,
         categoriaId,
         unidade,
         estoque: quantidade,
         criadoEm: new Date().toISOString(),
         atualizadoEm: new Date().toISOString(),
+      });
+
+      await registrarMovimentacaoEstoque({
+        tipo: "entrada",
+        acao: "cadastro",
+
+        materialId: novoMaterialRef.key,
+        material: nome,
+        categoriaId,
+        unidade,
+
+        quantidade,
+        estoqueAnterior: 0,
+        estoquePosterior: quantidade,
       });
     }
 
@@ -1023,9 +1106,27 @@ btnGerarRomaneio.addEventListener("click", async () => {
         (registro) => registro._key === item.materialId,
       );
 
+      const estoqueAnterior = Number(material.estoque || 0);
+
+      const estoquePosterior = estoqueAnterior - Number(item.quantidade);
+
       await update(ref(rtdb, `materiais/${item.materialId}`), {
-        estoque: Number(material.estoque) - Number(item.quantidade),
+        estoque: estoquePosterior,
         atualizadoEm: new Date().toISOString(),
+      });
+
+      await registrarMovimentacaoEstoque({
+        tipo: "saida",
+        acao: "romaneio",
+        materialId: material._key,
+        material: material.nome,
+        categoriaId: material.categoriaId,
+        unidade: material.unidade,
+        quantidade: item.quantidade,
+        estoqueAnterior,
+        estoquePosterior,
+        destinoId: destinoSelecionado.id,
+        destino: destinoSelecionado.nome,
       });
     }
 
@@ -1492,6 +1593,171 @@ listaHistorico.addEventListener("click", (event) => {
 });
 
 inputBuscaHistorico.addEventListener("input", renderHistorico);
+
+/* =========================
+   HISTÓRICO DE MOVIMENTAÇÕES
+========================= */
+
+onValue(
+  historicoEstoqueRef,
+  (snapshot) => {
+    historicoEstoque = snapshot.exists()
+      ? Object.entries(snapshot.val())
+          .map(([key, dados]) => ({
+            ...dados,
+            _key: key,
+          }))
+          .sort(
+            (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime(),
+          )
+      : [];
+
+    renderMovimentacoes();
+  },
+  (erro) => {
+    console.error("Erro ao carregar movimentações:", erro);
+
+    if (listaMovimentacoes) {
+      listaMovimentacoes.innerHTML = `
+        <div class="estoque-vazio">
+          Não foi possível carregar as movimentações.
+        </div>
+      `;
+    }
+  },
+);
+
+function renderMovimentacoes() {
+  if (!listaMovimentacoes) return;
+
+  const busca = (inputBuscaMovimentacoes?.value || "").toLowerCase().trim();
+
+  const tipo = filtroTipoMovimentacao?.value || "";
+
+  const filtrados = historicoEstoque
+    .filter((movimentacao) => categoriaPermitida(movimentacao.categoriaId))
+    .filter((movimentacao) => {
+      if (tipo && movimentacao.tipo !== tipo) {
+        return false;
+      }
+
+      const texto = `
+          ${movimentacao.material || ""}
+          ${movimentacao.usuario || ""}
+          ${movimentacao.destino || ""}
+        `.toLowerCase();
+
+      return texto.includes(busca);
+    });
+
+  if (contadorMovimentacoes) {
+    contadorMovimentacoes.textContent = `${filtrados.length} movimentação${
+      filtrados.length === 1 ? "" : "ões"
+    }`;
+  }
+
+  if (!filtrados.length) {
+    listaMovimentacoes.innerHTML = `
+      <div class="estoque-vazio">
+        Nenhuma movimentação encontrada.
+      </div>
+    `;
+
+    return;
+  }
+
+  listaMovimentacoes.innerHTML = filtrados
+    .map((movimentacao) => {
+      const data = new Date(movimentacao.data);
+
+      const dataFormatada = data.toLocaleDateString("pt-BR");
+
+      const horaFormatada = data.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+
+      const entrada = movimentacao.tipo === "entrada";
+
+      const verbo =
+        movimentacao.acao === "cadastro"
+          ? "cadastrou"
+          : entrada
+            ? "adicionou"
+            : "retirou";
+
+      return `
+            <article class="card-movimentacao">
+              <div
+                class="movimentacao-icone ${entrada ? "entrada" : "saida"}"
+              >
+                <span
+                  class="material-symbols-outlined"
+                >
+                  ${entrada ? "south" : "north"}
+                </span>
+              </div>
+
+              <div class="movimentacao-conteudo">
+                <div class="movimentacao-topo">
+                  <strong>
+                    ${escaparHtmlEstoque(movimentacao.usuario || "Usuário")}
+                  </strong>
+
+                  <span>
+                    ${dataFormatada}
+                    às
+                    ${horaFormatada}
+                  </span>
+                </div>
+
+                <p>
+                  ${verbo}
+                  <strong>
+                    ${movimentacao.quantidade}
+                    ${escaparHtmlEstoque(
+                      formatarUnidade(
+                        movimentacao.unidade || "Unidade",
+                        Number(movimentacao.quantidade || 0),
+                      ),
+                    )}
+                  </strong>
+                  de
+                  <strong>
+                    ${escaparHtmlEstoque(movimentacao.material || "-")}
+                  </strong>.
+                </p>
+
+                <div class="movimentacao-detalhes">
+                  <span>
+                    Estoque:
+                    ${Number(movimentacao.estoqueAnterior || 0)}
+                    →
+                    ${Number(movimentacao.estoquePosterior || 0)}
+                  </span>
+
+                  ${
+                    movimentacao.destino
+                      ? `
+                        <span>
+                          Destino:
+                          ${escaparHtmlEstoque(movimentacao.destino)}
+                        </span>
+                      `
+                      : ""
+                  }
+                </div>
+              </div>
+            </article>
+          `;
+    })
+    .join("");
+}
+
+inputBuscaMovimentacoes?.addEventListener("input", renderMovimentacoes);
+
+filtroTipoMovimentacao?.addEventListener("change", renderMovimentacoes);
 
 /* =========================
    ABAS

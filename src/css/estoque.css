@@ -286,6 +286,119 @@
   gap: 0.9rem;
 }
 
+.lista-movimentacoes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+#filtroTipoMovimentacao {
+  width: auto;
+  min-width: 210px;
+  height: 3.2rem;
+
+  padding: 0 0.9rem;
+
+  border: 1px solid var(--clr-primary);
+  border-radius: 0.8rem;
+
+  background: var(--clr-white);
+  color: var(--clr-dark);
+
+  cursor: pointer;
+}
+
+#movimentacoesTab .historico-toolbar {
+  display: grid;
+  grid-template-columns:
+    minmax(280px, 1fr)
+    auto
+    auto;
+
+  align-items: center;
+  gap: 1rem;
+}
+
+#movimentacoesTab .estoque-toolbar-acoes {
+  display: contents;
+}
+
+#contadorMovimentacoes {
+  white-space: nowrap;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+#movimentacoesTab .campo-busca-estoque {
+  min-width: 0;
+  height: 3.2rem;
+}
+
+.card-movimentacao {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 0.9rem;
+  align-items: flex-start;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: var(--clr-white);
+  border: 1px solid var(--clr-light);
+}
+
+.movimentacao-icone {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.movimentacao-icone.entrada {
+  background: rgba(52, 199, 89, 0.12);
+  color: var(--clr-success);
+}
+
+.movimentacao-icone.saida {
+  background: rgba(255, 159, 10, 0.12);
+  color: var(--clr-danger);
+}
+
+.movimentacao-icone .material-symbols-outlined {
+  font-size: 1.2rem;
+}
+
+.movimentacao-conteudo {
+  min-width: 0;
+}
+
+.movimentacao-topo {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.movimentacao-topo span {
+  font-size: 0.75rem;
+  opacity: 0.65;
+  white-space: nowrap;
+}
+
+.movimentacao-conteudo p {
+  margin-top: 0.35rem;
+  line-height: 1.5;
+}
+
+.movimentacao-detalhes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 0.45rem;
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
 .card-romaneio {
   display: grid;
   grid-template-columns: 80px minmax(0, 1fr) auto;
@@ -374,6 +487,26 @@
 }
 
 @media (max-width: 750px) {
+  #movimentacoesTab .historico-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  #movimentacoesTab .estoque-toolbar-acoes {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+  }
+
+  #filtroTipoMovimentacao {
+    flex: 1;
+    min-width: 0;
+  }
+
+  #contadorMovimentacoes {
+    flex-shrink: 0;
+  }
   .campos-material {
     grid-template-columns: 1fr 1fr;
   }
@@ -399,6 +532,16 @@
 }
 
 @media (max-width: 520px) {
+  .movimentacao-topo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+  }
+
+  .movimentacao-topo span {
+    white-space: normal;
+  }
+
   .campos-material {
     grid-template-columns: 1fr;
   }

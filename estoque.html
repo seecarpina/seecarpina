@@ -59,6 +59,10 @@
             <button class="tab-btn" type="button" data-tab="historicoTab">
               Histórico de romaneios
             </button>
+
+            <button class="tab-btn" type="button" data-tab="movimentacoesTab">
+              Movimentações
+            </button>
           </div>
 
           <div id="estoqueTab" class="tab-content active">
@@ -210,6 +214,53 @@
               </div>
 
               <div id="listaHistorico" class="lista-historico">
+                <div class="estoque-carregando">
+                  <svg class="svg-spinner" viewBox="0 0 50 50">
+                    <circle
+                      class="path"
+                      cx="25"
+                      cy="25"
+                      r="20"
+                      fill="none"
+                      stroke-width="4"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <div id="movimentacoesTab" class="tab-content">
+            <section class="box glass">
+              <div class="historico-toolbar">
+                <div class="campo-busca-estoque">
+                  <span class="material-symbols-outlined"> search </span>
+
+                  <input
+                    type="search"
+                    id="buscaMovimentacoes"
+                    placeholder="Buscar por material ou responsável"
+                    autocomplete="off"
+                  />
+                </div>
+
+                <div class="estoque-toolbar-acoes">
+                  <select id="filtroTipoMovimentacao">
+                    <option value="">Todas as movimentações</option>
+
+                    <option value="entrada">Entradas</option>
+
+                    <option value="saida">Saídas</option>
+                  </select>
+
+                  <span
+                    id="contadorMovimentacoes"
+                    class="estoque-contador"
+                  ></span>
+                </div>
+              </div>
+
+              <div id="listaMovimentacoes" class="lista-movimentacoes">
                 <div class="estoque-carregando">
                   <svg class="svg-spinner" viewBox="0 0 50 50">
                     <circle
