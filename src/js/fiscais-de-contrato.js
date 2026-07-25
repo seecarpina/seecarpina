@@ -1,6 +1,3 @@
-// ♻️ Reutiliza tudo que já é comum no scripts.js
-// scripts.js DEVE ser carregado antes deste arquivo
-
 import { rtdb } from "./firebaseConfig.js";
 import {
   ref,
@@ -177,6 +174,7 @@ function mostrarLoadingTabela() {
 const busca = document.getElementById("busca");
 const filtroTipoContrato = document.getElementById("filtroTipoContrato");
 const contadorContratos = document.getElementById("contadorContratos");
+const paginacao = document.getElementById("paginacao");
 const btnTopo = document.getElementById("btnTopo");
 const msgEdicao = document.getElementById("msgEdicao");
 
@@ -272,6 +270,9 @@ form.addEventListener("submit", async (e) => {
 // ===============================
 let contratos = [];
 
+let paginaAtual = 1;
+const ITENS_POR_PAGINA = 20;
+
 function calcularSaldo(contrato) {
   const valor = Number(contrato.valorGlobal || 0);
 
@@ -325,8 +326,22 @@ function renderTabela() {
   }
 
   tabela.innerHTML = "";
+  const totalPaginas = Math.max(
+    1,
+    Math.ceil(filtrados.length / ITENS_POR_PAGINA),
+  );
 
-  filtrados.forEach((c) => {
+  if (paginaAtual > totalPaginas) {
+    paginaAtual = totalPaginas;
+  }
+
+  const inicio = (paginaAtual - 1) * ITENS_POR_PAGINA;
+
+  const fim = inicio + ITENS_POR_PAGINA;
+
+  const contratosPagina = filtrados.slice(inicio, fim);
+
+  contratosPagina.forEach((c) => {
     const tr = document.createElement("tr");
     const saldo = calcularSaldo(c);
     const percentual = calcularPercentualSaldo(c);
@@ -395,6 +410,83 @@ function renderTabela() {
     </tr>
   `;
   }
+  renderPaginacao(totalPaginas);
+}
+
+function renderPaginacao(totalPaginas) {
+  if (!paginacao) return;
+
+  paginacao.innerHTML = "";
+
+  if (totalPaginas <= 1) {
+    return;
+  }
+
+  /* ANTERIOR */
+
+  const btnAnterior = document.createElement("button");
+
+  btnAnterior.type = "button";
+  btnAnterior.innerHTML = "‹";
+
+  btnAnterior.disabled = paginaAtual === 1;
+
+  btnAnterior.addEventListener("click", () => {
+    if (paginaAtual > 1) {
+      paginaAtual--;
+      renderTabela();
+    }
+  });
+
+  paginacao.appendChild(btnAnterior);
+
+  /* PÁGINAS */
+
+  const MAX_BOTOES = 10;
+
+  let inicioPagina = Math.max(1, paginaAtual - Math.floor(MAX_BOTOES / 2));
+
+  let fimPagina = Math.min(totalPaginas, inicioPagina + MAX_BOTOES - 1);
+
+  if (fimPagina - inicioPagina + 1 < MAX_BOTOES) {
+    inicioPagina = Math.max(1, fimPagina - MAX_BOTOES + 1);
+  }
+
+  for (let pagina = inicioPagina; pagina <= fimPagina; pagina++) {
+    const botao = document.createElement("button");
+
+    botao.type = "button";
+    botao.textContent = pagina;
+
+    if (pagina === paginaAtual) {
+      botao.classList.add("ativo");
+    }
+
+    botao.addEventListener("click", () => {
+      paginaAtual = pagina;
+      renderTabela();
+    });
+
+    paginacao.appendChild(botao);
+  }
+
+  /* PRÓXIMA */
+
+  const btnProximo = document.createElement("button");
+
+  btnProximo.type = "button";
+  btnProximo.innerHTML = "›";
+
+  btnProximo.disabled = paginaAtual === totalPaginas;
+
+  btnProximo.addEventListener("click", () => {
+    if (paginaAtual < totalPaginas) {
+      paginaAtual++;
+      renderTabela();
+    }
+  });
+
+  paginacao.appendChild(btnProximo);
 }
 
 mostrarLoadingTabela();
@@ -406,8 +498,15 @@ onValue(fiscaisContratoRef, (snap) => {
   renderTabela();
 });
 
-busca.addEventListener("input", renderTabela);
-filtroTipoContrato.addEventListener("change", renderTabela);
+busca.addEventListener("input", () => {
+  paginaAtual = 1;
+  renderTabela();
+});
+
+filtroTipoContrato.addEventListener("change", () => {
+  paginaAtual = 1;
+  renderTabela();
+});
 
 // ===============================
 // ✏️ Editar
