@@ -482,22 +482,77 @@ carregarRight().then(() => {
     initCalendario();
   }
 
-  // menu
-  const sideMenu = document.querySelector("aside");
-  const menuBtn = document.querySelector("#menu_bar");
-  const closeBtn = document.querySelector("#close_btn");
+  // ==============================
+  // MENU MOBILE / SIDEBAR
+  // ==============================
 
-  if (menuBtn) {
-    menuBtn.addEventListener("click", () => {
-      sideMenu.style.display = "block";
-    });
-  }
+  sidebarCarregada.then(() => {
+    const sideMenu = document.querySelector("aside");
 
-  if (closeBtn) {
-    closeBtn.addEventListener("click", () => {
-      sideMenu.style.display = "none";
+    const menuBtn = document.querySelector("#menu_bar");
+
+    const closeBtn = document.querySelector("#close_btn");
+
+    if (!sideMenu) {
+      console.warn("Sidebar não encontrada.");
+      return;
+    }
+
+    // Cria o overlay fora do aside
+    let sidebarOverlay = document.querySelector("#sidebarOverlay");
+
+    if (!sidebarOverlay) {
+      sidebarOverlay = document.createElement("div");
+
+      sidebarOverlay.id = "sidebarOverlay";
+
+      sidebarOverlay.className = "sidebar-overlay";
+
+      document.body.appendChild(sidebarOverlay);
+    }
+
+    function abrirSidebar() {
+      sideMenu.classList.add("ativo");
+
+      sidebarOverlay.classList.add("ativo");
+
+      document.body.classList.add("sidebar-aberta");
+    }
+
+    function fecharSidebar() {
+      sideMenu.classList.remove("ativo");
+
+      sidebarOverlay.classList.remove("ativo");
+
+      document.body.classList.remove("sidebar-aberta");
+    }
+
+    menuBtn?.addEventListener("click", abrirSidebar);
+
+    closeBtn?.addEventListener("click", fecharSidebar);
+
+    sidebarOverlay.addEventListener("click", fecharSidebar);
+
+    sideMenu.addEventListener("click", (event) => {
+      const link = event.target.closest("#menuSidebar a");
+
+      if (link && window.innerWidth <= 786) {
+        fecharSidebar();
+      }
     });
-  }
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && sideMenu.classList.contains("ativo")) {
+        fecharSidebar();
+      }
+    });
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 786) {
+        fecharSidebar();
+      }
+    });
+  });
 
   // pegar elementos pelo id (usei ids para ser explícito)
   const themeToggler = document.getElementById("themeToggler");
