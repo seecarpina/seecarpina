@@ -44,6 +44,14 @@ let permissaoEstoqueUsuario = null;
    FUNÇÕES AUXILIARES
 ========================= */
 
+function normalizarBusca(texto) {
+  return String(texto || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
 function getNomeResponsavel() {
   return window.dadosUsuario?.nome?.split(" ")[0] || "Usuário";
 }
@@ -359,7 +367,7 @@ function mostrarSugestoes(
       aoDigitar();
     }
 
-    const valor = input.value.toLowerCase().trim();
+    const valor = normalizarBusca(input.value);
 
     box.innerHTML = "";
 
@@ -369,7 +377,7 @@ function mostrarSugestoes(
     }
 
     const filtrados = lista.filter((item) =>
-      item.toLowerCase().includes(valor),
+      normalizarBusca(item).includes(valor),
     );
 
     if (!filtrados.length) {
@@ -719,11 +727,28 @@ formMaterial.addEventListener("submit", async (event) => {
 function renderTabela() {
   if (!listaMateriais) return;
 
-  const busca = inputBusca.value.toLowerCase().trim();
+  const busca = normalizarBusca(inputBusca.value);
 
-  const filtrados = obterMateriaisPermitidos().filter((material) =>
-    (material.nome || "").toLowerCase().includes(busca),
-  );
+  const filtrados = obterMateriaisPermitidos()
+    .filter((material) => normalizarBusca(material.nome).includes(busca))
+    .sort((a, b) => {
+      const estoqueA = Number(a.estoque) || 0;
+      const estoqueB = Number(b.estoque) || 0;
+
+      // Sem estoque sempre por último
+      if (estoqueA === 0 && estoqueB > 0) {
+        return 1;
+      }
+
+      if (estoqueA > 0 && estoqueB === 0) {
+        return -1;
+      }
+
+      // Dentro de cada grupo, ordem alfabética
+      return String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR", {
+        sensitivity: "base",
+      });
+    });
 
   if (contadorMateriais) {
     const total = filtrados.length;
@@ -1462,7 +1487,7 @@ onValue(
 function renderHistorico() {
   if (!listaHistorico) return;
 
-  const busca = inputBuscaHistorico.value.toLowerCase().trim();
+  const busca = normalizarBusca(inputBuscaHistorico.value);
 
   const filtrados = historicoRomaneios
     .filter((movimentacao) => {
@@ -1479,11 +1504,11 @@ function renderHistorico() {
       );
     })
     .filter((movimentacao) => {
-      const texto = `
+      const texto = normalizarBusca(`
         ${obterDestinoRomaneio(movimentacao)}
         ${movimentacao.responsavel || ""}
         ${formatarData(movimentacao.data)}
-      `.toLowerCase();
+      `);
 
       return texto.includes(busca);
     });
@@ -1641,7 +1666,7 @@ onValue(
 function renderMovimentacoes() {
   if (!listaMovimentacoes) return;
 
-  const busca = (inputBuscaMovimentacoes?.value || "").toLowerCase().trim();
+  const busca = normalizarBusca(inputBuscaMovimentacoes?.value);
 
   const tipo = filtroTipoMovimentacao?.value || "";
 
@@ -1652,11 +1677,11 @@ function renderMovimentacoes() {
         return false;
       }
 
-      const texto = `
-          ${movimentacao.material || ""}
-          ${movimentacao.usuario || ""}
-          ${movimentacao.destino || ""}
-        `.toLowerCase();
+      const texto = normalizarBusca(`
+          ${obterDestinoRomaneio(movimentacao)}
+          ${movimentacao.responsavel || ""}
+          ${formatarData(movimentacao.data)}
+        `);
 
       return texto.includes(busca);
     });
