@@ -126,16 +126,18 @@ function obterDestinoRomaneio(movimentacao) {
 }
 
 function formatarUnidade(unidade, quantidade) {
-  if (quantidade === 1) return unidade;
+  if (quantidade === 1) {
+    return unidade;
+  }
 
   const plurais = {
     Unidade: "Unidades",
+    Caixa: "Caixas",
     Resma: "Resmas",
     Pacote: "Pacotes",
     Fardo: "Fardos",
-    Caixa: "Caixas",
     Kit: "Kits",
-
+    Kg: "Kg",
     Quilograma: "Quilogramas",
     Grama: "Gramas",
     Litro: "Litros",
@@ -144,9 +146,11 @@ function formatarUnidade(unidade, quantidade) {
     Lata: "Latas",
     Garrafa: "Garrafas",
     Pote: "Potes",
+    Frasco: "Frascos",
+    "Mão (50 unidades)": "Mãos (50 unidades)",
   };
 
-  return plurais[unidade] || `${unidade}s`;
+  return plurais[unidade] || unidade;
 }
 
 function padronizarTexto(str) {
