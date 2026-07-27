@@ -323,36 +323,25 @@ atualizarCampoNumeroProcesso();
 /* =========================================
    DESTINOS E AUTOCOMPLETE
 ========================================= */
-async function carregarDestinos() {
-  try {
-    const snapshot = await get(destinosRef);
+onValue(destinosRef, (snapshot) => {
+  destinos = snapshot.exists()
+    ? Object.entries(snapshot.val())
+        .map(([id, valor]) => ({
+          id,
+          nome: padronizarTexto(
+            typeof valor === "string" ? valor : valor?.nome,
+          ),
+        }))
+        .filter((destino) => destino.nome)
+        .sort((a, b) =>
+          a.nome.localeCompare(b.nome, "pt-BR", {
+            sensitivity: "base",
+          }),
+        )
+    : [];
 
-    destinos = snapshot.exists()
-      ? Object.entries(snapshot.val())
-          .map(([id, valor]) => ({
-            id,
-
-            nome: padronizarTexto(
-              typeof valor === "string" ? valor : valor?.nome,
-            ),
-          }))
-          .filter((destino) => destino.nome)
-          .sort((a, b) =>
-            a.nome.localeCompare(b.nome, "pt-BR", {
-              sensitivity: "base",
-            }),
-          )
-      : [];
-
-    // Atualiza a tabela para exibir
-    // os nomes dos destinos
-    renderTabela();
-  } catch (erro) {
-    console.error("Erro ao carregar destinos:", erro);
-  }
-}
-
-carregarDestinos();
+  renderTabela();
+});
 
 inputDestino?.addEventListener("input", () => {
   destinoIdSelecionado = null;
