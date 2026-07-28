@@ -1317,10 +1317,7 @@ function gerarPDF(dados) {
       y += alturaItem + 3;
     });
 
-    const totalVolumes = dados.itens.reduce(
-      (total, item) => total + Number(item.quantidade || 0),
-      0,
-    );
+    const totalItens = dados.itens.length;
 
     const espacoFinalNecessario = 55;
 
@@ -1333,7 +1330,11 @@ function gerarPDF(dados) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
 
-    doc.text(`Volume total: ${totalVolumes} unidades`, margemEsquerda, y);
+    doc.text(
+      `Total: ${totalItens} ${totalItens === 1 ? "item" : "itens"}`,
+      margemEsquerda,
+      y,
+    );
 
     y += 35;
 
