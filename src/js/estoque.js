@@ -645,7 +645,10 @@ formMaterial.addEventListener("submit", async (event) => {
       ? materiais.find(
           (material) => material._key === materialCadastroSelecionadoId,
         )
-      : materiais.find((material) => material.nome === nome);
+      : materiais.find(
+          (material) =>
+            normalizarBusca(material.nome) === normalizarBusca(nome),
+        );
 
     if (existente && existente.unidade !== unidade) {
       mostrarNotificacao(
@@ -933,12 +936,12 @@ document.addEventListener("keydown", (event) => {
 ========================= */
 
 btnAdicionarItem.addEventListener("click", () => {
-  const nomeMaterial = padronizarTexto(inputMaterialEntrega.value);
+  const nomeMaterial = inputMaterialEntrega.value.trim();
 
   const quantidade = Number(document.getElementById("quantidadeEntrega").value);
 
   const material = obterMateriaisPermitidos().find(
-    (item) => item.nome === nomeMaterial,
+    (item) => normalizarBusca(item.nome) === normalizarBusca(nomeMaterial),
   );
 
   if (!material) {
