@@ -5,6 +5,7 @@ import {
   push,
   onValue,
   update,
+  increment,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 const { jsPDF } = window.jspdf;
@@ -1484,6 +1485,134 @@ onValue(
   },
 );
 
+/* =========================
+   CANCELAR ROMANEIO
+========================= */
+
+let cancelandoRomaneio = false;
+
+async function cancelarRomaneio(romaneioId) {
+  if (cancelandoRomaneio) return;
+
+  const movimentacao = historicoRomaneios.find(
+    (item) => item._key === romaneioId,
+  );
+
+  if (!movimentacao) {
+    mostrarNotificacao("Romaneio não encontrado.", "erro");
+    return;
+  }
+
+  if (movimentacao.cancelado === true) {
+    mostrarNotificacao("Este romaneio já foi cancelado.", "erro");
+    return;
+  }
+
+  if (!Array.isArray(movimentacao.itens) || !movimentacao.itens.length) {
+    mostrarNotificacao("Este romaneio não possui itens.", "erro");
+    return;
+  }
+
+  // Confere permissão para todos os itens
+  for (const item of movimentacao.itens) {
+    if (!categoriaPermitida(item.categoriaId)) {
+      mostrarNotificacao(
+        `Você não possui permissão para cancelar a movimentação de "${item.nome}".`,
+        "erro",
+      );
+      return;
+    }
+  }
+
+  const destino = obterDestinoRomaneio(movimentacao);
+
+  const confirmar = window.confirm(
+    `Deseja realmente cancelar o romaneio para "${destino}"?\n\n` +
+      `Todos os itens serão devolvidos ao estoque.`,
+  );
+
+  if (!confirmar) return;
+
+  cancelandoRomaneio = true;
+
+  try {
+    const agora = new Date().toISOString();
+
+    /*
+     * Uma única atualização no Firebase:
+     * - devolve todos os itens;
+     * - marca o romaneio como cancelado;
+     * - atualiza os materiais;
+     * - registra o estorno no histórico.
+     */
+    const atualizacoes = {};
+
+    for (const item of movimentacao.itens) {
+      const quantidade = Number(item.quantidade || 0);
+
+      if (!item.materialId || quantidade <= 0) {
+        throw new Error(`Item inválido no romaneio: ${item.nome || "-"}`);
+      }
+
+      const material = materiais.find(
+        (registro) => registro._key === item.materialId,
+      );
+
+      if (!material) {
+        throw new Error(
+          `O material "${item.nome}" não foi encontrado no estoque.`,
+        );
+      }
+
+      atualizacoes[`materiais/${item.materialId}/estoque`] =
+        increment(quantidade);
+
+      atualizacoes[`materiais/${item.materialId}/atualizadoEm`] = agora;
+    }
+
+    const historicoRef = push(historicoEstoqueRef);
+    const historicoId = historicoRef.key;
+
+    atualizacoes[`historicoEstoque/${historicoId}`] = {
+      tipo: "entrada",
+      acao: "cancelamento_romaneio",
+
+      romaneioId,
+
+      destinoId: movimentacao.destinoId || null,
+      destino: movimentacao.destino || destino,
+
+      itens: movimentacao.itens.map((item) => ({
+        materialId: item.materialId,
+        material: item.nome || "",
+        categoriaId: item.categoriaId || null,
+        unidade: item.unidade || "Unidade",
+        quantidade: Number(item.quantidade || 0),
+      })),
+
+      usuario: getNomeResponsavel(),
+
+      data: agora,
+    };
+
+    // Marca o romaneio como cancelado
+    atualizacoes[`movimentacoes/${romaneioId}/cancelado`] = true;
+    atualizacoes[`movimentacoes/${romaneioId}/canceladoEm`] = agora;
+    atualizacoes[`movimentacoes/${romaneioId}/canceladoPor`] =
+      getNomeResponsavel();
+
+    await update(ref(rtdb), atualizacoes);
+
+    mostrarNotificacao("Romaneio cancelado e itens devolvidos ao estoque!");
+  } catch (erro) {
+    console.error("Erro ao cancelar romaneio:", erro);
+
+    mostrarNotificacao(erro.message || "Erro ao cancelar romaneio.", "erro");
+  } finally {
+    cancelandoRomaneio = false;
+  }
+}
+
 function renderHistorico() {
   if (!listaHistorico) return;
 
@@ -1571,61 +1700,108 @@ function renderHistorico() {
                 </span>
 
                 ${escaparHtmlEstoque(movimentacao.responsavel || "-")}
+                ${
+                  movimentacao.cancelado === true
+                    ? `
+                      <span class="romaneio-status-cancelado">
+                        <span class="material-symbols-outlined">
+                          cancel
+                        </span>
+
+                        Cancelado
+                      </span>
+                    `
+                    : ""
+                }
               </span>
             </div>
           </div>
 
-          <button
-            class="btn-pdf-romaneio"
-            type="button"
-            data-id="${movimentacao._key}"
-            title="Gerar PDF"
-            aria-label="Gerar PDF"
-          >
-            <span class="material-symbols-outlined">
-              picture_as_pdf
-            </span>
-          </button>
+          <div class="romaneio-acoes">
+            <button
+              class="btn-pdf-romaneio"
+              type="button"
+              data-id="${movimentacao._key}"
+              title="Gerar PDF"
+              aria-label="Gerar PDF"
+            >
+              <span class="material-symbols-outlined">
+                picture_as_pdf
+              </span>
+            </button>
+
+            ${
+              movimentacao.cancelado !== true
+                ? `
+                  <button
+                    class="btn-cancelar-romaneio"
+                    type="button"
+                    data-id="${movimentacao._key}"
+                    title="Cancelar romaneio"
+                    aria-label="Cancelar romaneio"
+                  >
+                    <span class="material-symbols-outlined">
+                      cancel
+                    </span>
+                  </button>
+                `
+                : ""
+            }
+          </div>
         </article>
       `;
     })
     .join("");
 }
 
-listaHistorico.addEventListener("click", (event) => {
-  const botao = event.target.closest(".btn-pdf-romaneio");
+listaHistorico.addEventListener("click", async (event) => {
+  /* =========================
+     CANCELAR ROMANEIO
+  ========================= */
 
-  if (!botao) return;
+  const btnCancelar = event.target.closest(".btn-cancelar-romaneio");
+
+  if (btnCancelar) {
+    await cancelarRomaneio(btnCancelar.dataset.id);
+    return;
+  }
+
+  /* =========================
+     GERAR PDF
+  ========================= */
+
+  const btnPDF = event.target.closest(".btn-pdf-romaneio");
+
+  if (!btnPDF) return;
 
   const movimentacao = historicoRomaneios.find(
-    (item) => item._key === botao.dataset.id,
+    (item) => item._key === btnPDF.dataset.id,
   );
 
-  if (movimentacao) {
-    if (permissaoEstoqueUsuario?.todas === true) {
-      gerarPDF(movimentacao);
+  if (!movimentacao) return;
 
-      return;
-    }
+  if (permissaoEstoqueUsuario?.todas === true) {
+    gerarPDF(movimentacao);
+    return;
+  }
 
-    const itensPermitidos = (movimentacao.itens || []).filter((item) =>
-      categoriaPermitida(item.categoriaId),
+  const itensPermitidos = (movimentacao.itens || []).filter((item) =>
+    categoriaPermitida(item.categoriaId),
+  );
+
+  if (!itensPermitidos.length) {
+    mostrarNotificacao(
+      "Você não possui permissão para visualizar os itens deste romaneio.",
+      "erro",
     );
 
-    if (!itensPermitidos.length) {
-      mostrarNotificacao(
-        "Você não possui permissão para visualizar os itens deste romaneio.",
-        "erro",
-      );
-
-      return;
-    }
-
-    gerarPDF({
-      ...movimentacao,
-      itens: itensPermitidos,
-    });
+    return;
   }
+
+  gerarPDF({
+    ...movimentacao,
+    itens: itensPermitidos,
+  });
 });
 
 inputBuscaHistorico.addEventListener("input", renderHistorico);
@@ -1671,17 +1847,31 @@ function renderMovimentacoes() {
   const tipo = filtroTipoMovimentacao?.value || "";
 
   const filtrados = historicoEstoque
-    .filter((movimentacao) => categoriaPermitida(movimentacao.categoriaId))
+    .filter((movimentacao) => {
+      if (movimentacao.acao === "cancelamento_romaneio") {
+        return (movimentacao.itens || []).some((item) =>
+          categoriaPermitida(item.categoriaId),
+        );
+      }
+
+      return categoriaPermitida(movimentacao.categoriaId);
+    })
     .filter((movimentacao) => {
       if (tipo && movimentacao.tipo !== tipo) {
         return false;
       }
 
+      const nomesItens = (movimentacao.itens || [])
+        .map((item) => item.material || item.nome || "")
+        .join(" ");
+
       const texto = normalizarBusca(`
-          ${obterDestinoRomaneio(movimentacao)}
-          ${movimentacao.responsavel || ""}
-          ${formatarData(movimentacao.data)}
-        `);
+        ${obterDestinoRomaneio(movimentacao)}
+        ${movimentacao.usuario || ""}
+        ${movimentacao.responsavel || ""}
+        ${nomesItens}
+        ${formatarData(movimentacao.data)}
+      `);
 
       return texto.includes(busca);
     });
@@ -1713,6 +1903,69 @@ function renderMovimentacoes() {
         minute: "2-digit",
         second: "2-digit",
       });
+
+      if (movimentacao.acao === "cancelamento_romaneio") {
+        const itensPermitidos = (movimentacao.itens || []).filter((item) =>
+          categoriaPermitida(item.categoriaId),
+        );
+
+        const listaItens = itensPermitidos
+          .map((item) => {
+            const quantidade = Number(item.quantidade || 0);
+
+            return `
+        <li>
+          <strong>
+            ${quantidade}
+            ${escaparHtmlEstoque(
+              formatarUnidade(item.unidade || "Unidade", quantidade),
+            )}
+          </strong>
+          de
+          <strong>
+            ${escaparHtmlEstoque(item.material || item.nome || "-")}
+          </strong>
+        </li>
+      `;
+          })
+          .join("");
+
+        return `
+    <article class="card-movimentacao movimentacao-cancelamento">
+      <div class="movimentacao-icone cancelamento">
+        <span class="material-symbols-outlined">
+          undo
+        </span>
+      </div>
+
+      <div class="movimentacao-conteudo">
+        <div class="movimentacao-topo">
+          <strong>
+            ${escaparHtmlEstoque(movimentacao.usuario || "Usuário")}
+          </strong>
+
+          <span>
+            ${dataFormatada}
+            às
+            ${horaFormatada}
+          </span>
+        </div>
+
+        <p>
+          cancelou o romaneio destinado à
+          <strong>
+            ${escaparHtmlEstoque(obterDestinoRomaneio(movimentacao))}
+          </strong>,
+          devolvendo ao estoque:
+        </p>
+
+        <ul class="movimentacao-itens-devolvidos">
+          ${listaItens}
+        </ul>
+      </div>
+    </article>
+  `;
+      }
 
       const entrada = movimentacao.tipo === "entrada";
 
