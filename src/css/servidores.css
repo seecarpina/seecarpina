@@ -359,105 +359,350 @@
 }
 
 /* =========================================
-   MODAL DE TRANSFERÊNCIA
+   DRAWER DE TRANSFERÊNCIA
 ========================================= */
 
-.modal-transferencia-content {
-  width: min(600px, calc(100% - 2rem));
+.drawer-transferencia-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3998;
+
+  background: rgba(0, 0, 0, 0.28);
+
+  opacity: 0;
+  visibility: hidden;
+
+  transition:
+    opacity 0.25s ease,
+    visibility 0.25s ease;
 }
 
-.modal-transferencia-cabecalho {
+.drawer-transferencia-overlay.ativo {
+  opacity: 1;
+  visibility: visible;
+}
+
+.drawer-transferencia {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 3999;
+
   display: flex;
+  flex-direction: column;
+
+  width: min(480px, 100%);
+  height: 100dvh;
+
+  color: var(--clr-dark);
+  background: var(--clr-white);
+
+  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.12);
+
+  transform: translateX(100%);
+
+  transition: transform 0.3s ease;
+}
+
+.drawer-transferencia.ativo {
+  transform: translateX(0);
+}
+
+body.drawer-transferencia-aberto {
+  overflow: hidden;
+}
+
+/* Cabeçalho */
+
+.drawer-transferencia-cabecalho {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: flex-start;
   gap: 1rem;
-  margin-bottom: 1rem;
+
+  flex-shrink: 0;
+
+  padding: 1.2rem 1.4rem;
+
+  border-bottom: 1px solid var(--clr-light);
+  background: var(--clr-white);
 }
 
-.modal-transferencia-cabecalho h2 {
-  margin: 0.2rem 0 0;
+.drawer-transferencia-titulo {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+
+  min-width: 0;
 }
 
-.modal-transferencia-label {
-  font-size: 0.75rem;
+.drawer-transferencia-titulo > div:last-child {
+  min-width: 0;
+}
+
+.drawer-transferencia-titulo h2 {
+  margin: 0;
+
+  color: var(--clr-dark);
+
+  font-size: 1.15rem;
+}
+
+.drawer-transferencia-titulo > div:last-child > span {
+  display: block;
+
+  margin-top: 0.2rem;
+
+  color: var(--clr-dark-variant);
+
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.drawer-transferencia-icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  width: 2.8rem;
+  height: 2.8rem;
+
+  border-radius: 0.8rem;
+
+  background: var(--clr-light);
   color: var(--clr-primary);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04rem;
 }
 
-.btn-fechar-transferencia {
+.drawer-transferencia-icone .material-symbols-outlined {
+  font-size: 1.45rem;
+}
+
+.drawer-transferencia-fechar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  width: 2.4rem;
-  height: 2.4rem;
+
+  flex: 0 0 2.5rem;
+
+  width: 2.5rem;
+  height: 2.5rem;
+
   border: 0;
   border-radius: 50%;
-  background: transparent;
-  color: inherit;
+
+  background: var(--clr-light);
+  color: var(--clr-dark);
+
   cursor: pointer;
+
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s ease;
 }
 
-.btn-fechar-transferencia:hover {
-  background: var(--clr-light);
+.drawer-transferencia-fechar:hover {
+  background: var(--clr-primary);
+  color: var(--clr-white);
+
+  transform: rotate(90deg);
+}
+
+.drawer-transferencia-fechar .material-symbols-outlined {
+  font-size: 1.15rem;
+}
+
+/* Conteúdo */
+
+.drawer-transferencia-conteudo {
+  flex: 1;
+
+  overflow-y: auto;
+
+  padding: 1.4rem;
+
+  -webkit-overflow-scrolling: touch;
 }
 
 .servidor-transferencia-info {
   display: flex;
   align-items: center;
   gap: 0.8rem;
-  margin-bottom: 1rem;
-  padding: 0.85rem 1rem;
-  border-radius: 0.9rem;
+
+  padding: 0.9rem 1rem;
+
+  border-radius: var(--border-radius-1);
+
   background: var(--clr-light);
 }
 
 .servidor-transferencia-info > .material-symbols-outlined {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  width: 2.5rem;
+  height: 2.5rem;
+
+  border-radius: 50%;
+
+  background: var(--clr-white);
   color: var(--clr-primary);
 }
 
 .servidor-transferencia-info div {
   display: flex;
   flex-direction: column;
+
+  min-width: 0;
 }
 
 .servidor-transferencia-info small {
+  color: var(--clr-dark-variant);
+
+  font-size: 0.75rem;
+}
+
+.servidor-transferencia-info strong {
+  margin-top: 0.15rem;
+
+  color: var(--clr-dark);
+
+  font-size: 0.95rem;
+
+  overflow-wrap: anywhere;
+}
+
+.drawer-transferencia-divisor {
+  height: 1px;
+
+  margin: 1.3rem 0;
+
+  background: var(--clr-light);
+}
+
+.drawer-transferencia-campo {
+  width: 100%;
+
+  margin-bottom: 1.1rem;
+}
+
+.drawer-transferencia-campo:last-child {
+  margin-bottom: 0;
+}
+
+.drawer-transferencia-campo label {
+  display: block;
+
+  margin-bottom: 0.45rem;
+
+  color: var(--clr-dark);
+
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.drawer-transferencia input,
+.drawer-transferencia select {
+  height: 3.2rem;
+}
+
+.drawer-transferencia input,
+.drawer-transferencia select,
+.drawer-transferencia textarea {
+  width: 100%;
+  min-width: 0;
+
+  padding: 0 1rem;
+
+  border: 1px solid var(--clr-primary);
+  border-radius: var(--border-radius-1);
+
+  background: var(--clr-white);
+  color: var(--clr-dark);
+
+  font: inherit;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.drawer-transferencia textarea {
+  min-height: 110px;
+
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+
+  resize: vertical;
+}
+
+.drawer-transferencia input:focus,
+.drawer-transferencia select:focus,
+.drawer-transferencia textarea:focus {
+  outline: none;
+
+  border-color: var(--clr-primary);
+
+  box-shadow: 0 0 0 3px rgba(115, 128, 236, 0.12);
+}
+
+.drawer-transferencia textarea::placeholder {
+  color: var(--clr-dark-variant);
+
   opacity: 0.7;
 }
 
-.campos-transferencia {
+/* Rodapé */
+
+.drawer-transferencia-rodape {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-  margin-bottom: 1rem;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.8rem;
+
+  flex-shrink: 0;
+
+  padding: 1rem 1.4rem;
+
+  border-top: 1px solid var(--clr-light);
+  background: var(--clr-white);
 }
 
-.modal-transferencia-content label {
-  display: block;
-  margin-bottom: 0.45rem;
-}
-
-.modal-transferencia-content select,
-.modal-transferencia-content input,
-.modal-transferencia-content textarea {
-  width: 100%;
-}
-
-.acoes-transferencia {
-  display: flex;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: 0.7rem;
-  margin-top: 1rem;
-}
-
-.acoes-transferencia .btn {
+.drawer-transferencia-rodape .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
+  min-height: 3.2rem;
+  padding: 0 1.1rem;
+  border: 1px solid var(--clr-primary);
+  border-radius: var(--border-radius-1);
+  background: var(--clr-primary);
+  color: #fff;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease;
+}
+
+.drawer-transferencia-rodape .btn:hover {
+  border-color: var(--clr-warnig);
+  background: var(--clr-warnig);
+}
+
+.drawer-transferencia-rodape #btnGerarTransferencia {
+  width: 100%;
+}
+
+.drawer-transferencia-rodape #btnCancelarTransferencia {
+  min-width: 110px;
 }
 
 /* =========================================
@@ -466,8 +711,7 @@
 
 @media (max-width: 700px) {
   .linha-identificacao-servidor,
-  .linha-dados-servidor,
-  .campos-transferencia {
+  .linha-dados-servidor {
     grid-template-columns: 1fr;
   }
 
@@ -490,12 +734,43 @@
   #botoesEdicaoServidor .btn {
     width: 100%;
   }
+}
 
-  .acoes-transferencia {
-    flex-direction: column;
+@media (max-width: 900px) {
+  .drawer-transferencia {
+    width: 100%;
+    max-width: none;
+
+    box-shadow: none;
   }
 
-  .acoes-transferencia .btn {
+  .drawer-transferencia-overlay {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .drawer-transferencia-cabecalho {
+    padding: 1rem;
+  }
+
+  .drawer-transferencia-conteudo {
+    padding: 1rem;
+  }
+
+  .drawer-transferencia-rodape {
+    grid-template-columns: 1fr;
+
+    padding: 1rem;
+  }
+
+  .drawer-transferencia-rodape #btnCancelarTransferencia {
+    order: 2;
+
     width: 100%;
+  }
+
+  .drawer-transferencia-rodape #btnGerarTransferencia {
+    order: 1;
   }
 }

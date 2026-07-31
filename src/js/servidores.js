@@ -800,54 +800,144 @@ if (btnExportarExcel) {
 
 let servidorSelecionado = null;
 
-function abrirTransferencia(servidor) {
-  servidorSelecionado = servidor;
+const drawerTransferencia = document.getElementById("drawerTransferencia");
 
-  document.getElementById("modalTransferencia").style.display = "flex";
-  document.getElementById("nomeServidorTransferencia").textContent =
-    servidor.nome;
-
-  // Preencher locais
-  const select = document.getElementById("selectNovoLocal");
-  select.innerHTML = "";
-
-  locais.forEach((local) => {
-    const opt = document.createElement("option");
-
-    opt.value = local.id;
-    opt.textContent = local.nome;
-
-    select.appendChild(opt);
-  });
-
-  select.value = servidor.localExercicioId || "";
-
-  // Data atual
-  document.getElementById("dataTransferencia").value = new Date()
-    .toISOString()
-    .split("T")[0];
-}
+const transferenciaOverlay = document.getElementById("transferenciaOverlay");
 
 const btnFecharTransferencia = document.getElementById(
   "btnFecharTransferencia",
 );
 
-function fecharModalTransferencia() {
-  document.getElementById("modalTransferencia").style.display = "none";
+const btnCancelarTransferencia = document.getElementById(
+  "btnCancelarTransferencia",
+);
 
-  document.getElementById("obsTransferencia").value = "";
+const inputNovoLocal = document.getElementById("inputNovoLocal");
+
+const boxNovoLocal = document.getElementById("autocompleteNovoLocal");
+
+let novoLocalIdSelecionado = null;
+
+const inputDataTransferencia = document.getElementById("dataTransferencia");
+
+const inputObsTransferencia = document.getElementById("obsTransferencia");
+
+const nomeServidorTransferencia = document.getElementById(
+  "nomeServidorTransferencia",
+);
+
+function mostrarSugestoesNovoLocal() {
+  const texto = normalizarTextoLocal(inputNovoLocal.value);
+
+  boxNovoLocal.innerHTML = "";
+
+  /*
+   * Ao digitar novamente, desfaz a seleção anterior.
+   * O ID só volta a existir quando o usuário clicar
+   * em uma opção válida.
+   */
+  novoLocalIdSelecionado = null;
+
+  if (!texto) {
+    boxNovoLocal.style.display = "none";
+
+    return;
+  }
+
+  const filtrados = locais.filter((local) => {
+    const mesmoLocalAtual =
+      String(local.id) === String(servidorSelecionado?.localExercicioId || "");
+
+    return !mesmoLocalAtual && normalizarTextoLocal(local.nome).includes(texto);
+  });
+
+  filtrados.forEach((local) => {
+    const li = document.createElement("li");
+
+    li.textContent = local.nome;
+
+    li.addEventListener("click", () => {
+      inputNovoLocal.value = local.nome;
+
+      novoLocalIdSelecionado = local.id;
+
+      boxNovoLocal.style.display = "none";
+    });
+
+    boxNovoLocal.appendChild(li);
+  });
+
+  boxNovoLocal.style.display = filtrados.length ? "block" : "none";
+}
+
+inputNovoLocal?.addEventListener("input", mostrarSugestoesNovoLocal);
+
+document.addEventListener("click", (event) => {
+  const autocomplete = boxNovoLocal?.closest(".autocomplete");
+
+  if (autocomplete && !autocomplete.contains(event.target)) {
+    boxNovoLocal.style.display = "none";
+  }
+});
+
+function abrirTransferencia(servidor) {
+  servidorSelecionado = servidor;
+
+  novoLocalIdSelecionado = null;
+
+  nomeServidorTransferencia.textContent = servidor.nome || "Servidor";
+
+  inputNovoLocal.value = "";
+  boxNovoLocal.innerHTML = "";
+  boxNovoLocal.style.display = "none";
+
+  inputDataTransferencia.value = new Date().toLocaleDateString("sv-SE");
+
+  inputObsTransferencia.value = "";
+
+  drawerTransferencia?.classList.add("ativo");
+  transferenciaOverlay?.classList.add("ativo");
+
+  document.body.classList.add("drawer-transferencia-aberto");
+
+  setTimeout(() => {
+    inputNovoLocal?.focus();
+  }, 250);
+}
+
+function fecharDrawerTransferencia() {
+  drawerTransferencia?.classList.remove("ativo");
+
+  transferenciaOverlay?.classList.remove("ativo");
+
+  document.body.classList.remove("drawer-transferencia-aberto");
+
+  inputNovoLocal.value = "";
+
+  boxNovoLocal.innerHTML = "";
+  boxNovoLocal.style.display = "none";
+
+  novoLocalIdSelecionado = null;
+  inputDataTransferencia.value = "";
+  inputObsTransferencia.value = "";
+
+  nomeServidorTransferencia.textContent = "";
 
   servidorSelecionado = null;
 }
 
-btnFecharTransferencia?.addEventListener("click", fecharModalTransferencia);
+btnFecharTransferencia?.addEventListener("click", fecharDrawerTransferencia);
 
-document.getElementById("btnCancelarTransferencia").onclick =
-  fecharModalTransferencia;
+btnCancelarTransferencia?.addEventListener("click", fecharDrawerTransferencia);
+
+transferenciaOverlay?.addEventListener("click", fecharDrawerTransferencia);
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    fecharModalTransferencia();
+  if (
+    event.key === "Escape" &&
+    drawerTransferencia?.classList.contains("ativo")
+  ) {
+    fecharDrawerTransferencia();
   }
 });
 
@@ -858,17 +948,49 @@ document.getElementById("btnGerarTransferencia").onclick = async () => {
 async function transferirServidor() {
   if (!servidorSelecionado) return;
 
-  const novoLocalId = document.getElementById("selectNovoLocal").value;
+  const novoLocalId = novoLocalIdSelecionado;
 
-  const novoLocal = obterNomeLocal(novoLocalId);
-  const dataTransferencia = document.getElementById("dataTransferencia").value;
-  const observacao = document.getElementById("obsTransferencia").value.trim();
-  const protocolo = gerarNumeroProtocolo();
+  const dataTransferencia = inputDataTransferencia.value;
 
-  if (!novoLocal || !dataTransferencia) {
-    alert("Preencha todos os campos.");
+  const observacao = inputObsTransferencia.value.trim();
+
+  if (!inputNovoLocal.value.trim()) {
+    mostrarNotificacao("Digite o novo local de exercício.", "erro");
+
+    inputNovoLocal.focus();
+
     return;
   }
+
+  if (!novoLocalId) {
+    mostrarNotificacao("Selecione um local válido na lista.", "erro");
+
+    inputNovoLocal.focus();
+
+    return;
+  }
+
+  if (!dataTransferencia) {
+    mostrarNotificacao("Informe a data da transferência.", "erro");
+
+    inputDataTransferencia.focus();
+
+    return;
+  }
+
+  if (
+    String(novoLocalId) === String(servidorSelecionado.localExercicioId || "")
+  ) {
+    mostrarNotificacao(
+      "Selecione um local diferente da lotação atual.",
+      "erro",
+    );
+
+    return;
+  }
+
+  const novoLocal = obterNomeLocal(novoLocalId);
+  const protocolo = gerarNumeroProtocolo();
 
   const servidorRef = ref(
     rtdb,
@@ -897,7 +1019,11 @@ async function transferirServidor() {
 
   // 🧾 Gera PDF
   gerarPDFTransferencia({
-    ...servidorSelecionado,
+    nome: servidorSelecionado.nome || "",
+    codigo: servidorSelecionado.codigo || "",
+    cpf: servidorSelecionado.cpf || "",
+    cargo: servidorSelecionado.cargo || "",
+    vinculo: servidorSelecionado.vinculo || "",
     novoLocal,
     dataTransferencia,
     protocolo,
@@ -907,8 +1033,7 @@ async function transferirServidor() {
   // Atualiza visualmente
   servidorSelecionado.localExercicioId = novoLocalId;
 
-  // Fecha modal
-  document.getElementById("modalTransferencia").style.display = "none";
+  fecharDrawerTransferencia();
 
   mostrarNotificacao("Transferência realizada com sucesso!");
 }

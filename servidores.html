@@ -246,84 +246,100 @@
             <div class="paginacao" id="paginacaoServidores"></div>
           </section>
         </div>
-
-        <!-- MODAL DE TRANSFERÊNCIA -->
-        <div id="modalTransferencia" class="modal" style="display: none">
-          <div class="modal-content box modal-transferencia-content">
-            <div class="modal-transferencia-cabecalho">
-              <div>
-                <span class="modal-transferencia-label">
-                  Movimentação funcional
-                </span>
-
-                <h2>Transferir servidor</h2>
-              </div>
-
-              <button
-                type="button"
-                class="btn-fechar-transferencia"
-                id="btnFecharTransferencia"
-                aria-label="Fechar"
-              >
-                <span class="material-symbols-outlined"> close </span>
-              </button>
-            </div>
-
-            <div class="servidor-transferencia-info">
-              <span class="material-symbols-outlined"> person </span>
-
-              <div>
-                <small>Servidor selecionado</small>
-
-                <strong id="nomeServidorTransferencia"></strong>
-              </div>
-            </div>
-
-            <div class="campos-transferencia">
-              <div>
-                <label for="selectNovoLocal"> Novo local de exercício </label>
-
-                <select id="selectNovoLocal"></select>
-              </div>
-
-              <div>
-                <label for="dataTransferencia"> Data da transferência </label>
-
-                <input type="date" id="dataTransferencia" />
-              </div>
-            </div>
-
-            <div>
-              <label for="obsTransferencia"> Observações </label>
-
-              <textarea
-                id="obsTransferencia"
-                rows="4"
-                placeholder="Digite observações, se necessário"
-              ></textarea>
-            </div>
-
-            <div class="acoes-transferencia">
-              <button class="btn" type="button" id="btnGerarTransferencia">
-                <span class="material-symbols-outlined"> swap_horiz </span>
-
-                Confirmar transferência
-              </button>
-
-              <button
-                class="btn btn-cancelar"
-                type="button"
-                id="btnCancelarTransferencia"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
       </main>
       <div class="right"></div>
     </div>
 
+    <!-- DRAWER DE TRANSFERÊNCIA -->
+    <div id="transferenciaOverlay" class="drawer-transferencia-overlay"></div>
+
+    <aside id="drawerTransferencia" class="drawer-transferencia">
+      <div class="drawer-transferencia-cabecalho">
+        <div class="drawer-transferencia-titulo">
+          <div class="drawer-transferencia-icone">
+            <span class="material-symbols-outlined">
+              transfer_within_a_station
+            </span>
+          </div>
+
+          <div>
+            <h2>Transferir servidor</h2>
+
+            <span> Informe o novo local de exercício do servidor. </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="drawer-transferencia-fechar"
+          id="btnFecharTransferencia"
+          title="Fechar"
+          aria-label="Fechar"
+        >
+          <span class="material-symbols-outlined"> close </span>
+        </button>
+      </div>
+
+      <div class="drawer-transferencia-conteudo">
+        <div class="servidor-transferencia-info">
+          <span class="material-symbols-outlined"> person </span>
+
+          <div>
+            <small>Servidor selecionado</small>
+
+            <strong id="nomeServidorTransferencia"></strong>
+          </div>
+        </div>
+
+        <div class="drawer-transferencia-divisor"></div>
+
+        <div class="autocomplete drawer-transferencia-campo">
+          <label for="inputNovoLocal"> Novo local de exercício </label>
+
+          <input
+            type="search"
+            id="inputNovoLocal"
+            placeholder="Digite para buscar o novo local"
+            autocomplete="off"
+          />
+
+          <ul id="autocompleteNovoLocal" class="autocomplete-list"></ul>
+        </div>
+
+        <div class="drawer-transferencia-campo">
+          <label for="dataTransferencia"> Data da transferência </label>
+
+          <input type="date" id="dataTransferencia" />
+        </div>
+
+        <div class="drawer-transferencia-campo">
+          <label for="obsTransferencia"> Observações </label>
+
+          <textarea
+            id="obsTransferencia"
+            rows="4"
+            maxlength="500"
+            placeholder="Informe alguma observação, se necessário."
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="drawer-transferencia-rodape">
+        <button
+          class="btn btn-cancelar"
+          type="button"
+          id="btnCancelarTransferencia"
+        >
+          Cancelar
+        </button>
+
+        <button class="btn" type="button" id="btnGerarTransferencia">
+          <span class="material-symbols-outlined"> swap_horiz </span>
+
+          Confirmar transferência
+        </button>
+      </div>
+    </aside>
     <!-- Scripts -->
     <!-- jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
