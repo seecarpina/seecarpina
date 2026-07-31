@@ -429,6 +429,7 @@ const selectUnidadeMaterial = document.getElementById("unidade");
 
 const inputDestinoEntrega = document.getElementById("destinoEntrega");
 const boxDestinoEntrega = document.getElementById("autocompleteDestinoEntrega");
+const inputObservacaoEntrega = document.getElementById("observacaoEntrega");
 
 const inputMaterialEntrega = document.getElementById("materialEntrega");
 const boxEntrega = document.getElementById("autocompleteEntrega");
@@ -1069,6 +1070,7 @@ btnGerarRomaneio.addEventListener("click", async () => {
   if (gerandoRomaneio) return;
 
   const destino = padronizarTexto(inputDestinoEntrega.value);
+  const observacao = inputObservacaoEntrega.value.trim();
 
   if (!destino) {
     mostrarNotificacao("Informe o destino.", "erro");
@@ -1177,6 +1179,8 @@ btnGerarRomaneio.addEventListener("click", async () => {
 
       data: new Date().toISOString(),
 
+      observacao,
+
       itens: itensEntrega.map((item) => ({
         ...item,
       })),
@@ -1193,6 +1197,7 @@ btnGerarRomaneio.addEventListener("click", async () => {
 
     inputDestinoEntrega.value = "";
     inputMaterialEntrega.value = "";
+    inputObservacaoEntrega.value = "";
     destinoIdSelecionado = null;
 
     document.getElementById("quantidadeEntrega").value = "";
@@ -1438,57 +1443,45 @@ function gerarPDF(dados) {
     );
 
     // ===============================
-    // OBSERVAÇÕES
+    // OBSERVAÇÕES DO ROMANEIO
     // ===============================
 
-    y += alturaCaixa + 8;
+    if (dados.observacao?.trim()) {
+      y += alturaCaixa + 8;
 
-    const alturaObservacoes = 45;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
 
-    // Verifica se há espaço
-    if (y + alturaObservacoes > alturaPagina - 20) {
-      adicionarNovaPagina();
-      y += 5;
+      const tituloObservacao = "OBSERVAÇÕES";
+
+      const textoObservacao = doc.splitTextToSize(
+        dados.observacao.trim(),
+        larguraCaixa - 10,
+      );
+
+      const alturaTexto = textoObservacao.length * 6;
+
+      const alturaCaixaObservacao = Math.max(28, alturaTexto + 18);
+
+      // Cria nova página caso a observação não caiba
+      if (y + alturaCaixaObservacao > alturaPagina - 20) {
+        adicionarNovaPagina();
+
+        y += 5;
+      }
+
+      doc.setDrawColor(0);
+      doc.setLineWidth(0.3);
+
+      doc.rect(margemEsquerda, y, larguraCaixa, alturaCaixaObservacao);
+
+      doc.text(tituloObservacao, margemEsquerda + 5, y + 8);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+
+      doc.text(textoObservacao, margemEsquerda + 5, y + 17);
     }
-
-    // Caixa externa
-    doc.rect(margemEsquerda, y, larguraCaixa, alturaObservacoes);
-
-    // Título
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    doc.text("OBSERVAÇÕES", margemEsquerda + 5, y + 8);
-
-    // Linhas
-    doc.setLineWidth(0.2);
-
-    doc.line(
-      margemEsquerda + 5,
-      y + 16,
-      larguraPagina - margemDireita - 5,
-      y + 16,
-    );
-
-    doc.line(
-      margemEsquerda + 5,
-      y + 23,
-      larguraPagina - margemDireita - 5,
-      y + 23,
-    );
-
-    doc.line(
-      margemEsquerda + 5,
-      y + 30,
-      larguraPagina - margemDireita - 5,
-      y + 30,
-    );
-
-    doc.line(
-      margemEsquerda + 5,
-      y + 37,
-      larguraPagina - margemDireita - 5,
-      y + 37,
-    );
 
     const blob = doc.output("blob");
     const url = URL.createObjectURL(blob);
