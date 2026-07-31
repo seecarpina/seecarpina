@@ -674,9 +674,14 @@ body.drawer-aberto {
 
 .drawer-entrega input,
 .drawer-entrega select {
+  height: 3.2rem;
+}
+
+.drawer-entrega input,
+.drawer-entrega select,
+.drawer-entrega textarea {
   width: 100%;
   min-width: 0;
-  height: 3.2rem;
   padding: 0 1rem;
   border: 1px solid var(--clr-primary);
   border-radius: var(--border-radius-1);
