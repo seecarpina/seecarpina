@@ -1437,6 +1437,59 @@ function gerarPDF(dados) {
       y + 58,
     );
 
+    // ===============================
+    // OBSERVAÇÕES
+    // ===============================
+
+    y += alturaCaixa + 8;
+
+    const alturaObservacoes = 45;
+
+    // Verifica se há espaço
+    if (y + alturaObservacoes > alturaPagina - 20) {
+      adicionarNovaPagina();
+      y += 5;
+    }
+
+    // Caixa externa
+    doc.rect(margemEsquerda, y, larguraCaixa, alturaObservacoes);
+
+    // Título
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text("OBSERVAÇÕES", margemEsquerda + 5, y + 8);
+
+    // Linhas
+    doc.setLineWidth(0.2);
+
+    doc.line(
+      margemEsquerda + 5,
+      y + 16,
+      larguraPagina - margemDireita - 5,
+      y + 16,
+    );
+
+    doc.line(
+      margemEsquerda + 5,
+      y + 23,
+      larguraPagina - margemDireita - 5,
+      y + 23,
+    );
+
+    doc.line(
+      margemEsquerda + 5,
+      y + 30,
+      larguraPagina - margemDireita - 5,
+      y + 30,
+    );
+
+    doc.line(
+      margemEsquerda + 5,
+      y + 37,
+      larguraPagina - margemDireita - 5,
+      y + 37,
+    );
+
     const blob = doc.output("blob");
     const url = URL.createObjectURL(blob);
 
