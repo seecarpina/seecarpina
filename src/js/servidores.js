@@ -1222,8 +1222,9 @@ function gerarPDFTransferencia(dados) {
     desenharVia(10);
     desenharVia(larguraPagina / 2 + 5);
 
-    const blob = doc.output("blob");
-    const url = URL.createObjectURL(blob);
-    window.open(url);
+    window.abrirOuBaixarPDF(
+      doc,
+      `Encaminhamento de Servidor - ${dados.nome}.pdf`,
+    );
   };
 }

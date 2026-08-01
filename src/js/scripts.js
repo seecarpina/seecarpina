@@ -1184,3 +1184,26 @@ carregarUsuarios();
     window.dispatchEvent(new Event("eventoHojeChecado"));
   });
 })();
+
+window.abrirOuBaixarPDF = function (doc, nomeArquivo = "documento.pdf") {
+  doc.save(nomeArquivo);
+  return;
+
+  // const isTouch = window.matchMedia("(pointer: coarse)").matches;
+
+  // const isIOS =
+  //   /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  //   (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+  // if (isTouch || isIOS) {
+  //   doc.save(nomeArquivo);
+  //   return;
+  // }
+
+  // const blob = doc.output("blob");
+  // const url = URL.createObjectURL(blob);
+
+  // window.open(url, "_blank", "noopener,noreferrer");
+
+  // setTimeout(() => URL.revokeObjectURL(url), 60000);
+};

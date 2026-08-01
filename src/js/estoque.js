@@ -1483,14 +1483,14 @@ function gerarPDF(dados) {
       doc.text(textoObservacao, margemEsquerda + 5, y + 17);
     }
 
-    const blob = doc.output("blob");
-    const url = URL.createObjectURL(blob);
+    const dataArquivo = new Date(dados.data)
+      .toLocaleDateString("pt-BR")
+      .replace(/\//g, ".");
 
-    window.open(url, "_blank");
-
-    setTimeout(() => {
-      URL.revokeObjectURL(url);
-    }, 60000);
+    window.abrirOuBaixarPDF(
+      doc,
+      `Romaneio - ${obterDestinoRomaneio(dados)} - ${dataArquivo}.pdf`,
+    );
   };
 
   img.onerror = () => {

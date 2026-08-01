@@ -2622,10 +2622,7 @@ function gerarPDF(local, lista) {
 
     adicionarRodapes();
 
-    const blob = doc.output("blob");
-    const url = URL.createObjectURL(blob);
-
-    window.open(url, "_blank");
+    window.abrirOuBaixarPDF(doc, `Quadro Distributivo - ${local}.pdf`);
   };
 
   img.onerror = () => {
