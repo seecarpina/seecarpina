@@ -213,7 +213,16 @@ listaTarefas.addEventListener("click", async (event) => {
 
   if (!tarefa) return;
 
-  const confirmou = confirm(`Excluir a tarefa "${tarefa.titulo}"?`);
+  const confirmou = await window.mostrarConfirmacao({
+    titulo: "Excluir tarefa",
+    mensagem:
+      `Deseja realmente excluir a tarefa ` +
+      `"${tarefa.titulo}"?\n\n` +
+      "Esta ação não poderá ser desfeita.",
+    tipo: "perigo",
+    textoConfirmar: "Excluir tarefa",
+    textoCancelar: "Cancelar",
+  });
 
   if (!confirmou) return;
 

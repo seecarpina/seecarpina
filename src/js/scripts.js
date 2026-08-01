@@ -33,6 +33,8 @@ window.addEventListener("load", () => {
 });
 
 import "./eventosStore.js";
+import "./dialogos.js";
+
 import {
   carregarSidebar,
   carregarRight,
@@ -798,9 +800,14 @@ onAuthStateChanged(auth, async (user) => {
 
       await signOut(auth);
 
-      alert(
-        "Seu acesso ao sistema está desativado. Entre em contato com o administrador.",
-      );
+      await window.mostrarAlerta({
+        titulo: "Acesso desativado",
+        mensagem:
+          "Seu acesso ao sistema está desativado.\n\n" +
+          "Entre em contato com o administrador para solicitar a reativação.",
+        tipo: "perigo",
+        textoConfirmar: "Entendi",
+      });
 
       window.location.href = "./login";
 
@@ -1186,9 +1193,6 @@ carregarUsuarios();
 })();
 
 window.abrirOuBaixarPDF = function (doc, nomeArquivo = "documento.pdf") {
-  doc.save(nomeArquivo);
-  return;
-
   const isTouch = window.matchMedia("(pointer: coarse)").matches;
 
   const isIOS =

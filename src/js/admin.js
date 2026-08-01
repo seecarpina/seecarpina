@@ -484,7 +484,16 @@ function resetarFormularioCategoriaEstoque() {
 }
 
 async function excluirCategoriaEstoque(categoria) {
-  const confirmou = confirm(`Deseja excluir a categoria "${categoria.nome}"?`);
+  const confirmou = await window.mostrarConfirmacao({
+    titulo: "Excluir categoria",
+    mensagem:
+      `Tem certeza que deseja excluir a categoria ` +
+      `"${categoria.nome}"?\n\n` +
+      "Esta ação não poderá ser desfeita.",
+    tipo: "perigo",
+    textoConfirmar: "Excluir categoria",
+    textoCancelar: "Cancelar",
+  });
 
   if (!confirmou) return;
 
@@ -1009,9 +1018,14 @@ function renderUsuarios() {
 ========================================= */
 
 async function alterarPerfilUsuario(usuario, novoPerfil) {
-  const confirmou = confirm(
-    `Deseja alterar o perfil de ` + `${usuario.nome} para ${novoPerfil}?`,
-  );
+  const confirmou = await window.mostrarConfirmacao({
+    titulo: "Alterar perfil",
+    mensagem:
+      `Deseja alterar o perfil de "${usuario.nome}" ` + `para "${novoPerfil}"?`,
+    tipo: "alerta",
+    textoConfirmar: "Alterar perfil",
+    textoCancelar: "Cancelar",
+  });
 
   if (!confirmou) {
     renderUsuarios();
@@ -1047,7 +1061,13 @@ async function alterarPerfilUsuario(usuario, novoPerfil) {
 async function alterarSituacaoUsuario(usuario, ativo) {
   const acao = ativo ? "ativar" : "desativar";
 
-  const confirmou = confirm(`Deseja ${acao} o usuário ${usuario.nome}?`);
+  const confirmou = await window.mostrarConfirmacao({
+    titulo: `${acao.charAt(0).toUpperCase() + acao.slice(1)} usuário`,
+    mensagem: `Deseja ${acao} o usuário "${usuario.nome}"?`,
+    tipo: "alerta",
+    textoConfirmar: `${acao.charAt(0).toUpperCase() + acao.slice(1)}`,
+    textoCancelar: "Cancelar",
+  });
 
   if (!confirmou) {
     renderUsuarios();
@@ -1544,7 +1564,13 @@ async function alternarMenu(item) {
 
   const acao = novoStatus ? "ativar" : "desativar";
 
-  const confirmou = confirm(`Deseja ${acao} o item "${item.titulo}"?`);
+  const confirmou = await window.mostrarConfirmacao({
+    titulo: `${acao.charAt(0).toUpperCase() + acao.slice(1)} item`,
+    mensagem: `Deseja ${acao} o menu "${item.titulo}"?`,
+    tipo: "alerta",
+    textoConfirmar: `${acao.charAt(0).toUpperCase() + acao.slice(1)}`,
+    textoCancelar: "Cancelar",
+  });
 
   if (!confirmou) return;
 
@@ -1568,9 +1594,16 @@ async function alternarMenu(item) {
 ========================================= */
 
 async function excluirMenu(item) {
-  const confirmou = confirm(
-    `Tem certeza que deseja excluir ` + `"${item.titulo}" do menu?`,
-  );
+  const confirmou = await window.mostrarConfirmacao({
+    titulo: "Excluir item do menu",
+    mensagem:
+      `Tem certeza que deseja excluir o item ` +
+      `"${item.titulo}" do menu?\n\n` +
+      "Esta ação não poderá ser desfeita.",
+    tipo: "perigo",
+    textoConfirmar: "Excluir item",
+    textoCancelar: "Cancelar",
+  });
 
   if (!confirmou) return;
 
@@ -1817,7 +1850,16 @@ async function excluirGrupoMenu(grupo, totalLinks) {
     return;
   }
 
-  const confirmou = confirm(`Deseja excluir o grupo "${grupo.titulo}"?`);
+  const confirmou = await window.mostrarConfirmacao({
+    titulo: "Excluir grupo",
+    mensagem:
+      `Tem certeza que deseja excluir o grupo ` +
+      `"${grupo.titulo}"?\n\n` +
+      "Esta ação não poderá ser desfeita.",
+    tipo: "perigo",
+    textoConfirmar: "Excluir grupo",
+    textoCancelar: "Cancelar",
+  });
 
   if (!confirmou) return;
 
@@ -2294,9 +2336,16 @@ async function excluirDestino(destino, totalOficios) {
     return;
   }
 
-  const confirmou = confirm(
-    `Tem certeza que deseja excluir o destino "${destino.nome}"?`,
-  );
+  const confirmou = await window.mostrarConfirmacao({
+    titulo: "Excluir destino",
+    mensagem:
+      `Tem certeza que deseja excluir o destino ` +
+      `"${destino.nome}"?\n\n` +
+      "Esta ação não poderá ser desfeita.",
+    tipo: "perigo",
+    textoConfirmar: "Excluir destino",
+    textoCancelar: "Cancelar",
+  });
 
   if (!confirmou) return;
 

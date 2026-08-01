@@ -2187,6 +2187,181 @@ body.sidebar-aberta {
   overflow: hidden;
 }
 
+/* =========================================
+   DIÁLOGOS GLOBAIS
+========================================= */
+
+.dialogo-global-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 1rem;
+
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+
+  opacity: 0;
+  visibility: hidden;
+
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease;
+}
+
+.dialogo-global-overlay.ativo {
+  opacity: 1;
+  visibility: visible;
+}
+
+.dialogo-global {
+  width: min(430px, 100%);
+
+  padding: 1.4rem;
+
+  border-radius: 1rem;
+
+  background: var(--clr-white);
+  color: var(--clr-dark);
+
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.22);
+
+  transform: translateY(16px) scale(0.98);
+
+  transition: transform 0.2s ease;
+}
+
+.dialogo-global-overlay.ativo .dialogo-global {
+  transform: translateY(0) scale(1);
+}
+
+.dialogo-global-icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 52px;
+  height: 52px;
+
+  margin-bottom: 1rem;
+
+  border-radius: 50%;
+}
+
+.dialogo-global-icone .material-symbols-outlined {
+  font-size: 1.8rem;
+}
+
+.dialogo-global-conteudo h2 {
+  margin: 0 0 0.5rem;
+
+  font-size: 1.15rem;
+}
+
+.dialogo-global-conteudo p {
+  margin: 0;
+
+  color: var(--clr-dark-variant);
+
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.dialogo-global-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.7rem;
+
+  margin-top: 1.4rem;
+}
+
+.btn-dialogo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 42px;
+
+  padding: 0.65rem 1rem;
+
+  border: 0;
+  border-radius: 0.7rem;
+
+  font: inherit;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease,
+    background 0.15s ease;
+}
+
+.btn-dialogo:hover {
+  transform: translateY(-1px);
+}
+
+.btn-dialogo-secundario {
+  background: var(--clr-light);
+  color: var(--clr-dark);
+}
+
+.btn-dialogo-principal {
+  background: var(--clr-primary);
+  color: #fff;
+}
+
+.dialogo-informacao .dialogo-global-icone {
+  background: rgba(59, 130, 246, 0.14);
+  color: #2563eb;
+}
+
+.dialogo-sucesso .dialogo-global-icone {
+  background: rgba(34, 197, 94, 0.14);
+  color: #16a34a;
+}
+
+.dialogo-alerta .dialogo-global-icone {
+  background: rgba(245, 158, 11, 0.16);
+  color: #d97706;
+}
+
+.dialogo-perigo .dialogo-global-icone {
+  background: rgba(239, 68, 68, 0.14);
+  color: #dc2626;
+}
+
+.dialogo-perigo .btn-dialogo-principal {
+  background: #dc2626;
+}
+
+.dialogo-sucesso .btn-dialogo-principal {
+  background: #16a34a;
+}
+
+body.dialogo-aberto {
+  overflow: hidden;
+}
+
+@media screen and (max-width: 600px) {
+  .dialogo-global {
+    padding: 1.15rem;
+  }
+
+  .dialogo-global-acoes {
+    flex-direction: column-reverse;
+  }
+
+  .btn-dialogo {
+    width: 100%;
+  }
+}
+
 /* MEDIA QUERY */
 
 @media screen and (min-width: 787px) {

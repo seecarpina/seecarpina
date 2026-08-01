@@ -1234,9 +1234,16 @@ function editarTurma(turma) {
 async function excluirTurma(turma) {
   if (!turma?.id) return;
 
-  const confirmou = confirm(
-    `Deseja excluir a turma "${turma.nome || "Turma"}"?`,
-  );
+  const confirmou = await window.mostrarConfirmacao({
+    titulo: "Excluir turma",
+    mensagem:
+      `Deseja realmente excluir a turma ` +
+      `"${turma.nome || "Turma"}"?\n\n` +
+      "Esta ação não poderá ser desfeita.",
+    tipo: "perigo",
+    textoConfirmar: "Excluir turma",
+    textoCancelar: "Cancelar",
+  });
 
   if (!confirmou) return;
 

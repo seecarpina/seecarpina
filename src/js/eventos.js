@@ -494,7 +494,16 @@ btnSalvarEdicao.addEventListener("click", async () => {
 ========================================= */
 
 async function excluirEvento(evento) {
-  const confirmou = confirm(`Deseja excluir o evento "${evento.titulo}"?`);
+  const confirmou = await window.mostrarConfirmacao({
+    titulo: "Excluir evento",
+    mensagem:
+      `Deseja realmente excluir o evento ` +
+      `"${evento.titulo}"?\n\n` +
+      "Esta ação não poderá ser desfeita.",
+    tipo: "perigo",
+    textoConfirmar: "Excluir evento",
+    textoCancelar: "Cancelar",
+  });
 
   if (!confirmou) return;
 

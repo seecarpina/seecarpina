@@ -631,12 +631,17 @@ async function desligarServidor(servidor, botao) {
     return;
   }
 
-  const confirmou = confirm(
-    `Confirma o desligamento do servidor ${servidor.nome}?\n\n` +
-      `Ao confirmar:\n` +
-      `• a situação do servidor será alterada para Inativo;\n` +
-      `• será cadastrado automaticamente um ofício de desligamento destinado ao RH.`,
-  );
+  const confirmou = await window.mostrarConfirmacao({
+    titulo: "Desligar servidor",
+    mensagem:
+      `Confirma o desligamento do servidor "${servidor.nome}"?\n\n` +
+      "Ao confirmar:\n" +
+      "• A situação do servidor será alterada para Inativo;\n" +
+      "• Será cadastrado automaticamente um ofício de desligamento destinado ao RH.",
+    tipo: "perigo",
+    textoConfirmar: "Desligar servidor",
+    textoCancelar: "Cancelar",
+  });
 
   if (!confirmou) return;
 

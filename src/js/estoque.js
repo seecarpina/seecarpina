@@ -1576,12 +1576,17 @@ async function cancelarRomaneio(romaneioId) {
 
   const destino = obterDestinoRomaneio(movimentacao);
 
-  const confirmar = window.confirm(
-    `Deseja realmente cancelar o romaneio para "${destino}"?\n\n` +
-      `Todos os itens serão devolvidos ao estoque.`,
-  );
+  const confirmou = await window.mostrarConfirmacao({
+    titulo: "Cancelar romaneio",
+    mensagem:
+      `Deseja realmente cancelar o romaneio para "${destino}"?\n\n` +
+      "Todos os itens serão devolvidos ao estoque.",
+    tipo: "perigo",
+    textoConfirmar: "Cancelar romaneio",
+    textoCancelar: "Voltar",
+  });
 
-  if (!confirmar) return;
+  if (!confirmou) return;
 
   cancelandoRomaneio = true;
 

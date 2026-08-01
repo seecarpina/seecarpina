@@ -1062,10 +1062,16 @@ function resetarFormularioEdicao() {
 ========================================= */
 
 async function cancelarOficio(oficio) {
-  const confirmou = confirm(
-    `Tem certeza que deseja cancelar o ofício nº ` +
-      `${formatarNumeroOficio(oficio.numero, anoSelecionado)}?`,
-  );
+  const confirmou = await window.mostrarConfirmacao({
+    titulo: "Cancelar ofício",
+    mensagem:
+      `Tem certeza que deseja cancelar o ofício nº ` +
+      `${formatarNumeroOficio(oficio.numero, anoSelecionado)}?\n\n` +
+      "O ofício será marcado como cancelado e poderá ser utilizado por outros usuários.",
+    tipo: "perigo",
+    textoConfirmar: "Cancelar ofício",
+    textoCancelar: "Voltar",
+  });
 
   if (!confirmou) return;
 
