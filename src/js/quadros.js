@@ -269,8 +269,6 @@ function obterCategoriaApoio(servidor) {
     "aux secretaria",
     "auxiliar de secretaria",
     "auxiliar secretaria",
-    "secretaria escolar",
-    "secretario escolar",
   ];
 
   if (
