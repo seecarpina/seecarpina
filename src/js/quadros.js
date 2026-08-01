@@ -926,6 +926,71 @@ function atualizarResumoQuadro() {
   resumoQuadro.style.display = "block";
 }
 
+function atualizarSelectEscolasCadastradas() {
+  selectLocal.innerHTML = "";
+
+  /*
+   * Espera o carregamento dos dois nós:
+   * - escolas
+   * - servidores/locaisExercicio
+   */
+  if (!escolas.length || !locais.length) {
+    selectLocal.innerHTML = `
+      <option value="">
+        Carregando escolas...
+      </option>
+    `;
+
+    selectLocal.disabled = true;
+    return;
+  }
+
+  const idsLocaisCadastrados = new Set(
+    escolas
+      .map((escola) => String(escola.localExercicioId || ""))
+      .filter(Boolean),
+  );
+
+  const escolasCadastradas = locais
+    .filter((local) => idsLocaisCadastrados.has(String(local.id)))
+    .sort((a, b) =>
+      String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR", {
+        sensitivity: "base",
+      }),
+    );
+
+  const optDefault = document.createElement("option");
+
+  optDefault.value = "";
+  optDefault.textContent = "Selecione uma escola";
+  optDefault.disabled = true;
+  optDefault.selected = true;
+
+  selectLocal.appendChild(optDefault);
+
+  escolasCadastradas.forEach((local) => {
+    const option = document.createElement("option");
+
+    option.value = local.id;
+    option.textContent = local.nome;
+
+    selectLocal.appendChild(option);
+  });
+
+  if (!escolasCadastradas.length) {
+    selectLocal.innerHTML = `
+      <option value="">
+        Nenhuma escola cadastrada
+      </option>
+    `;
+
+    selectLocal.disabled = true;
+    return;
+  }
+
+  selectLocal.disabled = false;
+}
+
 // ===============================
 // 🔄 ESTADO INICIAL (CARREGANDO)
 // ===============================
@@ -971,6 +1036,7 @@ onValue(ref(rtdb, "escolas"), (snap) => {
       }))
     : [];
 
+  atualizarSelectEscolasCadastradas();
   atualizarResumoQuadro();
 });
 
@@ -978,54 +1044,16 @@ onValue(ref(rtdb, "escolas"), (snap) => {
 // 🔥 CARREGAR LOCAIS
 // ===============================
 onValue(ref(rtdb, "servidores/locaisExercicio"), (snap) => {
-  selectLocal.innerHTML = "";
+  locais = snap.exists()
+    ? Object.entries(snap.val())
+        .map(([id, dados]) => ({
+          id,
+          nome: dados?.nome || "",
+        }))
+        .filter((local) => local.nome)
+    : [];
 
-  if (!snap.exists()) {
-    selectLocal.innerHTML = `
-      <option>
-        Nenhum local de exercício encontrado
-      </option>
-    `;
-
-    selectLocal.disabled = true;
-    return;
-  }
-
-  locais = Object.entries(snap.val())
-    .map(([id, dados]) => ({
-      id,
-      nome: dados?.nome || "",
-    }))
-    .filter((local) => local.nome)
-    .sort((a, b) =>
-      a.nome.localeCompare(b.nome, "pt-BR", {
-        sensitivity: "base",
-      }),
-    );
-
-  const optDefault = document.createElement("option");
-
-  optDefault.value = "";
-  optDefault.textContent = "Selecione um local de exercício";
-
-  optDefault.disabled = true;
-  optDefault.selected = true;
-
-  selectLocal.appendChild(optDefault);
-
-  locais.forEach((local) => {
-    const opt = document.createElement("option");
-
-    // O value agora é o ID
-    opt.value = local.id;
-
-    // O usuário continua vendo o nome
-    opt.textContent = local.nome;
-
-    selectLocal.appendChild(opt);
-  });
-
-  selectLocal.disabled = false;
+  atualizarSelectEscolasCadastradas();
 });
 
 selectLocal.addEventListener("change", atualizarResumoQuadro);
