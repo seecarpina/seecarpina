@@ -24,6 +24,7 @@ const btnSalvarEdicao = document.getElementById("btnSalvarServidor");
 const btnCancelar = document.getElementById("btnCancelarServidor");
 
 const inputCargo = document.getElementById("cargo");
+const inputHabilitacao = document.getElementById("habilitacao");
 const inputVinculo = document.getElementById("vinculo");
 const inputLocal = document.getElementById("localExercicio");
 
@@ -521,6 +522,7 @@ async function salvarServidor() {
     nome: padronizarTexto(nome.value),
     cpf: cpf.value.replace(/\D/g, ""),
     cargo: padronizarTexto(cargo.value),
+    habilitacao: padronizarTexto(inputHabilitacao.value),
     vinculo: padronizarTexto(vinculo.value),
     foraSala: inputForaSala.checked,
     localExercicioId: localId,
@@ -585,6 +587,7 @@ function editarServidor(s) {
   nome.value = s.nome;
   cpf.value = formatarCPF(s.cpf);
   cargo.value = s.cargo;
+  inputHabilitacao.value = s.habilitacao || "";
   vinculo.value = s.vinculo;
   inputForaSala.checked = !!s.foraSala;
   atualizarCampoProfessorForaSala();
