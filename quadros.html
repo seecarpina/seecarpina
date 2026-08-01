@@ -57,12 +57,23 @@
             </div>
 
             <div class="quadro-campo-acao">
-              <label class="label-invisivel">Ação</label>
+              <label class="label-invisivel">Ações</label>
 
-              <button id="btnGerarQuadro" class="btn" type="button">
-                <span class="material-symbols-outlined">picture_as_pdf</span>
-                Gerar Quadro Distributivo
-              </button>
+              <div class="quadro-botoes-acao">
+                <button
+                  id="btnValidarQuadro"
+                  class="btn btn-validar-quadro"
+                  type="button"
+                >
+                  <span class="material-symbols-outlined">fact_check</span>
+                  Validar Quadro
+                </button>
+
+                <button id="btnGerarQuadro" class="btn" type="button">
+                  <span class="material-symbols-outlined">picture_as_pdf</span>
+                  Gerar Quadro Distributivo
+                </button>
+              </div>
             </div>
           </div>
         </section>
@@ -144,6 +155,33 @@
               Bolsa
             </span>
           </div>
+        </section>
+        <section
+          id="resultadoValidacaoQuadro"
+          class="box glass resultado-validacao-quadro"
+          style="display: none"
+        >
+          <div class="validacao-cabecalho">
+            <div>
+              <h2>Validação do Quadro Distributivo</h2>
+
+              <span id="subtituloValidacaoQuadro"> Escola selecionada </span>
+            </div>
+
+            <button
+              type="button"
+              id="btnFecharValidacaoQuadro"
+              class="btn-fechar-validacao"
+              title="Fechar validação"
+            >
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+
+          <div
+            id="conteudoValidacaoQuadro"
+            class="conteudo-validacao-quadro"
+          ></div>
         </section>
       </main>
       <div class="right"></div>

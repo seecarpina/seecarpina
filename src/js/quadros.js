@@ -6,7 +6,23 @@ import {
 
 const selectLocal = document.getElementById("selectLocal");
 const btnGerar = document.getElementById("btnGerarQuadro");
+const btnValidarQuadro = document.getElementById("btnValidarQuadro");
 
+const resultadoValidacaoQuadro = document.getElementById(
+  "resultadoValidacaoQuadro",
+);
+
+const subtituloValidacaoQuadro = document.getElementById(
+  "subtituloValidacaoQuadro",
+);
+
+const conteudoValidacaoQuadro = document.getElementById(
+  "conteudoValidacaoQuadro",
+);
+
+const btnFecharValidacaoQuadro = document.getElementById(
+  "btnFecharValidacaoQuadro",
+);
 const resumoQuadro = document.getElementById("resumoQuadro");
 const nomeEscolaQuadro = document.getElementById("nomeEscolaQuadro");
 const situacaoQuadro = document.getElementById("situacaoQuadro");
@@ -437,6 +453,433 @@ function obterProfessoresEmSalaDoLocal(localId) {
   return Array.from(professoresPorId.values());
 }
 
+function obterIdServidor(servidor) {
+  return String(
+    servidor?.id || servidor?._key || servidor?.cpf || servidor?.nome || "",
+  );
+}
+
+function escaparHtmlValidacao(valor) {
+  return String(valor ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function criarItemValidacao(tipo, titulo, descricao, itens = []) {
+  const configuracoes = {
+    sucesso: {
+      classe: "validacao-sucesso",
+      icone: "check_circle",
+    },
+
+    alerta: {
+      classe: "validacao-alerta",
+      icone: "warning",
+    },
+
+    erro: {
+      classe: "validacao-erro",
+      icone: "error",
+    },
+  };
+
+  const configuracao = configuracoes[tipo] || configuracoes.alerta;
+
+  const lista = itens.length
+    ? `
+      <ul class="validacao-lista">
+        ${itens
+          .map(
+            (item) => `
+              <li>${escaparHtmlValidacao(item)}</li>
+            `,
+          )
+          .join("")}
+      </ul>
+    `
+    : "";
+
+  return `
+    <div class="validacao-item ${configuracao.classe}">
+      <span class="material-symbols-outlined">
+        ${configuracao.icone}
+      </span>
+
+      <div>
+        <strong>
+          ${escaparHtmlValidacao(titulo)}
+        </strong>
+
+        <span>
+          ${escaparHtmlValidacao(descricao)}
+        </span>
+
+        ${lista}
+      </div>
+    </div>
+  `;
+}
+
+function validarQuadroSelecionado() {
+  const localId = selectLocal.value;
+
+  if (!localId) {
+    mostrarNotificacao("Selecione uma escola para validar o quadro.", "erro");
+
+    return;
+  }
+
+  const localSelecionado = locais.find(
+    (local) => String(local.id) === String(localId),
+  );
+
+  if (!localSelecionado) {
+    mostrarNotificacao("Escola não encontrada.", "erro");
+
+    return;
+  }
+
+  const escola = obterEscolaPorLocalId(localId);
+
+  const servidoresAtivos = obterServidoresAtivosDoLocal(localId);
+
+  const turmasDoLocal = obterTurmasDoLocal(localId);
+
+  const itensValidacao = [];
+
+  /*
+   * Guarda todos os registros que aparecem
+   * em alguma seção do quadro.
+   */
+  const idsIncluidos = new Set();
+
+  /*
+   * Guarda as turmas vinculadas a cada cadastro
+   * de professor.
+   */
+  const turmasPorProfessor = new Map();
+
+  // =========================================
+  // EQUIPE GESTORA
+  // =========================================
+
+  const gestor = obterGestorDaEscola(escola);
+
+  const secretario = obterSecretarioDaEscola(escola);
+
+  const coordenadores = obterCoordenadoresDaEscola(escola);
+
+  if (gestor) {
+    idsIncluidos.add(obterIdServidor(gestor));
+
+    itensValidacao.push(
+      criarItemValidacao(
+        "sucesso",
+        "Diretor(a) cadastrado(a)",
+        gestor.nome || "Servidor identificado.",
+      ),
+    );
+  } else {
+    itensValidacao.push(
+      criarItemValidacao(
+        "alerta",
+        "Diretor(a) não cadastrado(a)",
+        "A escola não possui diretor vinculado na página Escolas.",
+      ),
+    );
+  }
+
+  if (secretario) {
+    idsIncluidos.add(obterIdServidor(secretario));
+
+    itensValidacao.push(
+      criarItemValidacao(
+        "sucesso",
+        "Secretário(a) escolar cadastrado(a)",
+        secretario.nome || "Servidor identificado.",
+      ),
+    );
+  } else {
+    itensValidacao.push(
+      criarItemValidacao(
+        "alerta",
+        "Secretário(a) escolar não cadastrado(a)",
+        "A escola não possui secretário vinculado.",
+      ),
+    );
+  }
+
+  coordenadores.forEach((servidor) => {
+    idsIncluidos.add(obterIdServidor(servidor));
+  });
+
+  if (coordenadores.length) {
+    itensValidacao.push(
+      criarItemValidacao(
+        "sucesso",
+        "Coordenação pedagógica cadastrada",
+        `${coordenadores.length} coordenador(es) vinculado(s).`,
+      ),
+    );
+  } else {
+    itensValidacao.push(
+      criarItemValidacao(
+        "alerta",
+        "Coordenação pedagógica não cadastrada",
+        "Nenhum coordenador foi vinculado à escola.",
+      ),
+    );
+  }
+
+  // =========================================
+  // TURMAS E PROFESSORES
+  // =========================================
+
+  const turmasSemProfessor = [];
+
+  const professoresLotacaoDiferente = [];
+
+  turmasDoLocal.forEach((turma) => {
+    const professoresDaTurma = obterProfessoresDaTurma(turma);
+
+    if (!professoresDaTurma.length) {
+      turmasSemProfessor.push(turma.nome || "Turma sem nome");
+
+      return;
+    }
+
+    professoresDaTurma.forEach((professor) => {
+      const professorId = obterIdServidor(professor);
+
+      idsIncluidos.add(professorId);
+
+      const turmasProfessor = turmasPorProfessor.get(professorId) || [];
+
+      turmasProfessor.push(turma.nome || "Turma sem nome");
+
+      turmasPorProfessor.set(professorId, turmasProfessor);
+
+      const mesmoLocal =
+        String(professor.localExercicioId || "") === String(localId || "");
+
+      if (!mesmoLocal) {
+        professoresLotacaoDiferente.push(
+          `${professor.nome || "Professor"} — ${
+            turma.nome || "Turma sem nome"
+          }`,
+        );
+      }
+    });
+  });
+
+  if (!turmasDoLocal.length) {
+    itensValidacao.push(
+      criarItemValidacao(
+        "alerta",
+        "Nenhuma turma cadastrada",
+        "A escola ainda não possui turmas cadastradas.",
+      ),
+    );
+  } else if (turmasSemProfessor.length) {
+    itensValidacao.push(
+      criarItemValidacao(
+        "erro",
+        "Turmas sem professor",
+        `${turmasSemProfessor.length} turma(s) não possuem professor vinculado.`,
+        turmasSemProfessor,
+      ),
+    );
+  } else {
+    itensValidacao.push(
+      criarItemValidacao(
+        "sucesso",
+        "Todas as turmas possuem professor",
+        `${turmasDoLocal.length} turma(s) verificadas.`,
+      ),
+    );
+  }
+
+  if (professoresLotacaoDiferente.length) {
+    itensValidacao.push(
+      criarItemValidacao(
+        "erro",
+        "Professores com lotação diferente",
+        "Estes professores estão vinculados a turmas desta escola, mas possuem outra lotação no cadastro.",
+        professoresLotacaoDiferente,
+      ),
+    );
+  } else {
+    itensValidacao.push(
+      criarItemValidacao(
+        "sucesso",
+        "Lotações dos professores conferidas",
+        "Todos os professores das turmas estão lotados nesta escola.",
+      ),
+    );
+  }
+
+  // =========================================
+  // PROFESSORES EM MAIS DE UMA TURMA
+  // =========================================
+
+  const professoresRepetidos = [];
+
+  turmasPorProfessor.forEach((nomesTurmas, professorId) => {
+    if (nomesTurmas.length <= 1) {
+      return;
+    }
+
+    const professor = obterServidorPorId(professorId);
+
+    professoresRepetidos.push(
+      `${professor?.nome || "Professor"} — ${nomesTurmas.join(", ")}`,
+    );
+  });
+
+  if (professoresRepetidos.length) {
+    itensValidacao.push(
+      criarItemValidacao(
+        "alerta",
+        "Professor vinculado a mais de uma turma",
+        "Confira se são realmente duas turmas do mesmo vínculo ou se deveria existir outro cadastro funcional.",
+        professoresRepetidos,
+      ),
+    );
+  } else {
+    itensValidacao.push(
+      criarItemValidacao(
+        "sucesso",
+        "Nenhum professor repetido entre turmas",
+        "Cada cadastro funcional está vinculado a somente uma turma.",
+      ),
+    );
+  }
+
+  // =========================================
+  // PROFESSORES FORA DE SALA
+  // =========================================
+
+  const professoresForaSala = servidoresAtivos.filter(
+    servidorEhProfessorForaSala,
+  );
+
+  professoresForaSala.forEach((servidor) => {
+    idsIncluidos.add(obterIdServidor(servidor));
+  });
+
+  // =========================================
+  // AUXILIARES DE SALA
+  // =========================================
+
+  const auxiliaresSala = servidoresAtivos.filter(servidorEhAuxiliarSala);
+
+  auxiliaresSala.forEach((servidor) => {
+    idsIncluidos.add(obterIdServidor(servidor));
+  });
+
+  // =========================================
+  // FUNCIONÁRIOS DE APOIO
+  // =========================================
+
+  const funcionariosApoio = servidoresAtivos.filter(servidorEhApoio);
+
+  funcionariosApoio.forEach((servidor) => {
+    idsIncluidos.add(obterIdServidor(servidor));
+  });
+
+  // =========================================
+  // CUIDADORES
+  // =========================================
+
+  const cuidadores = servidoresAtivos.filter(servidorEhCuidador);
+
+  cuidadores.forEach((servidor) => {
+    idsIncluidos.add(obterIdServidor(servidor));
+  });
+
+  // =========================================
+  // SERVIDORES NÃO INCLUÍDOS
+  // =========================================
+
+  const servidoresNaoIncluidos = servidoresAtivos.filter(
+    (servidor) => !idsIncluidos.has(obterIdServidor(servidor)),
+  );
+
+  if (servidoresNaoIncluidos.length) {
+    itensValidacao.push(
+      criarItemValidacao(
+        "erro",
+        "Servidores ativos não incluídos no quadro",
+        `${servidoresNaoIncluidos.length} servidor(es) não aparecem em nenhuma seção.`,
+        servidoresNaoIncluidos.map(
+          (servidor) =>
+            `${servidor.nome || "Sem nome"} — ${
+              servidor.cargo || "Cargo não informado"
+            }`,
+        ),
+      ),
+    );
+  } else {
+    itensValidacao.push(
+      criarItemValidacao(
+        "sucesso",
+        "Todos os servidores ativos foram identificados",
+        `${servidoresAtivos.length} servidor(es) ativos estão contemplados no quadro.`,
+      ),
+    );
+  }
+
+  // =========================================
+  // TOTAL IDENTIFICADO
+  // =========================================
+
+  const totalIdentificados = servidoresAtivos.filter((servidor) =>
+    idsIncluidos.has(obterIdServidor(servidor)),
+  ).length;
+
+  const possuiErro =
+    turmasSemProfessor.length > 0 ||
+    professoresLotacaoDiferente.length > 0 ||
+    servidoresNaoIncluidos.length > 0;
+
+  const possuiAlerta =
+    !gestor ||
+    !secretario ||
+    !coordenadores.length ||
+    professoresRepetidos.length > 0 ||
+    !turmasDoLocal.length;
+
+  const validacaoCompleta = !possuiErro && !possuiAlerta;
+
+  itensValidacao.unshift(
+    criarItemValidacao(
+      validacaoCompleta ? "sucesso" : possuiErro ? "erro" : "alerta",
+
+      validacaoCompleta
+        ? "Quadro validado com sucesso"
+        : possuiErro
+          ? "Quadro possui inconsistências"
+          : "Quadro possui pontos para conferência",
+
+      `${totalIdentificados} de ${servidoresAtivos.length} servidor(es) ativos foram identificados.`,
+    ),
+  );
+
+  subtituloValidacaoQuadro.textContent = localSelecionado.nome;
+
+  conteudoValidacaoQuadro.innerHTML = itensValidacao.join("");
+
+  resultadoValidacaoQuadro.style.display = "block";
+
+  resultadoValidacaoQuadro.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}
+
 function atualizarResumoQuadro() {
   const localId = selectLocal.value;
 
@@ -586,6 +1029,16 @@ onValue(ref(rtdb, "servidores/locaisExercicio"), (snap) => {
 });
 
 selectLocal.addEventListener("change", atualizarResumoQuadro);
+
+btnValidarQuadro?.addEventListener("click", validarQuadroSelecionado);
+
+btnFecharValidacaoQuadro?.addEventListener("click", () => {
+  resultadoValidacaoQuadro.style.display = "none";
+});
+
+selectLocal.addEventListener("change", () => {
+  resultadoValidacaoQuadro.style.display = "none";
+});
 
 // ===============================
 // 📄 GERAR PDF

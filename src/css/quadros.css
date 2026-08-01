@@ -37,6 +37,140 @@
 .quadro-campo-acao .btn {
   min-height: 44px;
   white-space: nowrap;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.quadro-botoes-acao {
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-end;
+}
+
+.btn-validar-quadro {
+  background: transparent;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  transition: 0.25s;
+}
+
+.btn-validar-quadro:hover {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+#btnGerarQuadro {
+  min-width: 250px;
+}
+
+.resultado-validacao-quadro {
+  margin-top: 1rem;
+}
+
+.validacao-cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+
+  margin-bottom: 1rem;
+}
+
+.validacao-cabecalho h2 {
+  margin: 0 0 0.2rem;
+}
+
+.validacao-cabecalho > div > span {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.btn-fechar-validacao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 36px;
+  height: 36px;
+
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+
+  background: transparent;
+  color: var(--clr-dark);
+
+  cursor: pointer;
+}
+
+.btn-fechar-validacao:hover {
+  background: var(--clr-light);
+}
+
+.conteudo-validacao-quadro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.validacao-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+
+  padding: 0.8rem 0.9rem;
+  border-radius: 0.8rem;
+}
+
+.validacao-item > .material-symbols-outlined {
+  flex-shrink: 0;
+  font-size: 1.3rem;
+}
+
+.validacao-item strong {
+  display: block;
+  margin-bottom: 0.15rem;
+}
+
+.validacao-item div > span {
+  font-size: 0.84rem;
+}
+
+.validacao-sucesso {
+  background: rgba(46, 204, 113, 0.12);
+}
+
+.validacao-sucesso > .material-symbols-outlined {
+  color: #219653;
+}
+
+.validacao-alerta {
+  background: rgba(242, 153, 74, 0.14);
+}
+
+.validacao-alerta > .material-symbols-outlined {
+  color: #d97706;
+}
+
+.validacao-erro {
+  background: rgba(235, 87, 87, 0.12);
+}
+
+.validacao-erro > .material-symbols-outlined {
+  color: var(--clr-danger);
+}
+
+.validacao-lista {
+  margin: 0.45rem 0 0;
+  padding-left: 1.1rem;
+
+  font-size: 0.82rem;
+}
+
+.validacao-lista li + li {
+  margin-top: 0.25rem;
 }
 
 /* =========================================
@@ -214,5 +348,14 @@
 
   .quadro-legenda {
     align-items: flex-start;
+  }
+
+  .quadro-botoes-acao {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .quadro-botoes-acao .btn {
+    width: 100%;
   }
 }
