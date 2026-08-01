@@ -2209,57 +2209,218 @@ function gerarPDF(local, lista) {
       return Math.max(9, maiorQuantidadeLinhas * 4 + 4);
     }
 
-    function desenharLinhaProfessor(turma, professor) {
+    function desenharTextoCelulaProfessor({
+      texto,
+      x,
+      yCelula,
+      largura,
+      altura,
+      cor,
+      negrito = false,
+      centralizarVertical = true,
+    }) {
+      doc.setFillColor(...cor);
+      doc.setDrawColor(110, 110, 110);
+      doc.setLineWidth(0.2);
+
+      doc.rect(x, yCelula, largura, altura, "FD");
+
+      doc.setTextColor(25, 25, 25);
+
+      doc.setFont("helvetica", negrito ? "bold" : "normal");
+
+      doc.setFontSize(7.5);
+
+      const linhasTexto = doc.splitTextToSize(
+        String(texto ?? "-"),
+        largura - 4,
+      );
+
+      const alturaTexto = linhasTexto.length * 3.2;
+
+      const posicaoY = centralizarVertical
+        ? yCelula + (altura - alturaTexto) / 2 + 2.8
+        : yCelula + 4.5;
+
+      doc.text(linhasTexto, x + 2, posicaoY);
+    }
+
+    function obterCorCelulasMescladas(professores) {
+      const professoresValidos = professores.filter(Boolean);
+
+      if (!professoresValidos.length) {
+        return [245, 245, 245];
+      }
+
+      const tiposVinculo = new Set(
+        professoresValidos.map((professor) => obterTipoVinculo(professor)),
+      );
+
+      /*
+       * Se todos possuírem o mesmo vínculo,
+       * usa a cor correspondente.
+       */
+      if (tiposVinculo.size === 1) {
+        return obterCorVinculoPDF(professoresValidos[0]);
+      }
+
+      /*
+       * Se houver vínculos diferentes,
+       * utiliza uma cor neutra nas colunas mescladas.
+       */
+      return [238, 233, 245];
+    }
+
+    function desenharGrupoProfessoresTurma(turma, professores) {
       const larguras = [35, 27, 27, 70, 40, 42, 32];
 
-      const textos = [
+      const professoresExibir = professores.length ? professores : [null];
+
+      /*
+       * Calcula a altura individual necessária
+       * para cada professor.
+       */
+      const alturasLinhas = professoresExibir.map((professor) => {
+        const textosProfessor = [
+          "",
+          "",
+          "",
+          professor?.nome || "-",
+          professor?.habilitacao || "-",
+          professor ? formatarCPF(professor.cpf) : "-",
+          professor ? obterNomeVinculo(professor) : "-",
+        ];
+
+        return calcularAlturaLinhaProfessor(textosProfessor);
+      });
+
+      let alturaTotal = alturasLinhas.reduce(
+        (total, altura) => total + altura,
+        0,
+      );
+
+      /*
+       * Garante espaço suficiente para os textos
+       * das células mescladas.
+       */
+      const textosMesclados = [
         turma.nome || turma.turma || "-",
         turma.turno || "-",
         turma.quantidadeAlunos ?? turma.qtdAlunos ?? turma.totalAlunos ?? "-",
-        professor?.nome || "-",
-        professor?.habilitacao || "-",
-        professor ? formatarCPF(professor.cpf) : "-",
-        professor ? obterNomeVinculo(professor) : "-",
       ];
 
-      const alturaAtual = calcularAlturaLinhaProfessor(textos);
+      let alturaMinimaMescladas = 9;
 
-      if (y + alturaAtual > limiteInferior) {
-        novaPaginaProfessores();
-      }
-
-      const cor = professor ? obterCorVinculoPDF(professor) : [245, 245, 245];
-
-      let x = margemEsquerda;
-
-      textos.forEach((texto, indice) => {
-        doc.setFillColor(...cor);
-
-        doc.setDrawColor(110, 110, 110);
-        doc.setLineWidth(0.2);
-
-        doc.rect(x, y, larguras[indice], alturaAtual, "FD");
-
-        doc.setTextColor(25, 25, 25);
-
-        doc.setFont(
-          "helvetica",
-          indice === 0 || indice === 3 ? "bold" : "normal",
-        );
-
-        doc.setFontSize(7.5);
-
-        const linhasTexto = doc.splitTextToSize(
+      textosMesclados.forEach((texto, indice) => {
+        const linhas = doc.splitTextToSize(
           String(texto ?? "-"),
           larguras[indice] - 4,
         );
 
-        doc.text(linhasTexto, x + 2, y + 4.5);
-
-        x += larguras[indice];
+        alturaMinimaMescladas = Math.max(
+          alturaMinimaMescladas,
+          linhas.length * 4 + 4,
+        );
       });
 
-      y += alturaAtual;
+      if (alturaTotal < alturaMinimaMescladas) {
+        const diferenca = alturaMinimaMescladas - alturaTotal;
+
+        alturasLinhas[alturasLinhas.length - 1] += diferenca;
+
+        alturaTotal = alturaMinimaMescladas;
+      }
+
+      /*
+       * Não divide uma mesma turma entre páginas
+       * quando o grupo inteiro ainda cabe em uma página.
+       */
+      if (y + alturaTotal > limiteInferior) {
+        novaPaginaProfessores();
+      }
+
+      const yInicialGrupo = y;
+
+      const corMesclada = obterCorCelulasMescladas(professoresExibir);
+
+      /*
+       * TURMA
+       */
+      desenharTextoCelulaProfessor({
+        texto: textosMesclados[0],
+        x: margemEsquerda,
+        yCelula: yInicialGrupo,
+        largura: larguras[0],
+        altura: alturaTotal,
+        cor: corMesclada,
+        negrito: true,
+      });
+
+      /*
+       * TURNO
+       */
+      desenharTextoCelulaProfessor({
+        texto: textosMesclados[1],
+        x: margemEsquerda + larguras[0],
+        yCelula: yInicialGrupo,
+        largura: larguras[1],
+        altura: alturaTotal,
+        cor: corMesclada,
+      });
+
+      /*
+       * QUANTIDADE DE ALUNOS
+       */
+      desenharTextoCelulaProfessor({
+        texto: textosMesclados[2],
+        x: margemEsquerda + larguras[0] + larguras[1],
+        yCelula: yInicialGrupo,
+        largura: larguras[2],
+        altura: alturaTotal,
+        cor: corMesclada,
+      });
+
+      /*
+       * PROFESSORES
+       */
+      let yProfessor = yInicialGrupo;
+
+      professoresExibir.forEach((professor, indiceProfessor) => {
+        const alturaAtual = alturasLinhas[indiceProfessor];
+
+        const corProfessor = professor
+          ? obterCorVinculoPDF(professor)
+          : [245, 245, 245];
+
+        const textosProfessor = [
+          professor?.nome || "-",
+          professor?.habilitacao || "-",
+          professor ? formatarCPF(professor.cpf) : "-",
+          professor ? obterNomeVinculo(professor) : "-",
+        ];
+
+        let x = margemEsquerda + larguras[0] + larguras[1] + larguras[2];
+
+        textosProfessor.forEach((texto, indice) => {
+          const indiceColuna = indice + 3;
+
+          desenharTextoCelulaProfessor({
+            texto,
+            x,
+            yCelula: yProfessor,
+            largura: larguras[indiceColuna],
+            altura: alturaAtual,
+            cor: corProfessor,
+            negrito: indice === 0,
+          });
+
+          x += larguras[indiceColuna];
+        });
+
+        yProfessor += alturaAtual;
+      });
+
+      y = yInicialGrupo + alturaTotal;
     }
 
     function desenharMensagemSemTurmas() {
@@ -2302,32 +2463,7 @@ function gerarPDF(local, lista) {
       turmasDoLocal.forEach((turma) => {
         const professoresDaTurma = obterProfessoresDaTurma(turma);
 
-        if (!professoresDaTurma.length) {
-          desenharLinhaProfessor(turma, null);
-          return;
-        }
-
-        professoresDaTurma.forEach((professor, indice) => {
-          /*
-           * Quando houver mais de um professor,
-           * repetiremos a turma inicialmente.
-           * Depois podemos mesclar essas células.
-           */
-          desenharLinhaProfessor(
-            indice === 0
-              ? turma
-              : {
-                  ...turma,
-                  nome: "",
-                  turma: "",
-                  turno: "",
-                  quantidadeAlunos: "",
-                  qtdAlunos: "",
-                  totalAlunos: "",
-                },
-            professor,
-          );
-        });
+        desenharGrupoProfessoresTurma(turma, professoresDaTurma);
       });
     }
 
