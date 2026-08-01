@@ -541,6 +541,227 @@
 }
 
 /* =========================================
+   TURMAS
+========================================= */
+
+.turmas-escola-controle {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) auto;
+  align-items: end;
+  gap: 1rem;
+}
+
+.turmas-escola-controle .btn {
+  min-height: 44px;
+}
+
+.resumo-turmas-escola {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+
+  border-radius: 0.8rem;
+
+  background: var(--clr-light);
+}
+
+.resumo-turmas-escola span {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+.lista-turmas-escola {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+
+  margin-top: 1rem;
+}
+
+.turmas-escola-vazio {
+  grid-column: 1 / -1;
+
+  padding: 2rem;
+
+  text-align: center;
+  opacity: 0.7;
+}
+
+.formulario-turma-container {
+  margin-top: 1rem;
+}
+
+.form-turma-escola {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.turma-form-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(180px, 1fr)
+    minmax(150px, 0.7fr)
+    minmax(150px, 0.7fr);
+
+  gap: 1rem;
+}
+
+.bloco-professores-turma {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.bloco-professores-turma-cabecalho {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.bloco-professores-turma-cabecalho div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.bloco-professores-turma-cabecalho span {
+  font-size: 0.82rem;
+  opacity: 0.7;
+}
+
+.professor-turma-adicionar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  align-items: end;
+  gap: 0.8rem;
+}
+
+.professor-turma-adicionar select {
+  width: 100%;
+}
+
+.lista-professores-turma {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.professor-turma-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  padding: 0.5rem 0.75rem;
+
+  border-radius: 999px;
+
+  background: var(--clr-light);
+}
+
+.professor-turma-item button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  padding: 0;
+
+  background: transparent;
+  color: var(--clr-danger);
+
+  cursor: pointer;
+}
+
+.professor-turma-item .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+.card-turma-escola {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+
+  padding: 1rem;
+
+  border: 1px solid var(--clr-light);
+  border-radius: 0.8rem;
+
+  background: var(--clr-white);
+}
+
+.card-turma-escola h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.card-turma-dados {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  font-size: 0.84rem;
+}
+
+.card-turma-professores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.card-turma-professor {
+  padding: 0.3rem 0.55rem;
+
+  border-radius: 999px;
+
+  background: var(--clr-light);
+
+  font-size: 0.75rem;
+}
+
+.card-turma-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+
+  margin-top: auto;
+}
+
+.btn-editar-turma,
+.btn-excluir-turma {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 36px;
+  height: 36px;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.btn-editar-turma {
+  color: var(--clr-primary);
+}
+
+.btn-excluir-turma {
+  color: var(--clr-danger);
+}
+
+.btn-editar-turma:hover,
+.btn-excluir-turma:hover {
+  background: var(--clr-light);
+}
+
+/* =========================================
    RESPONSIVO
 ========================================= */
 
@@ -585,6 +806,35 @@
   }
 
   .lista-escolas {
+    grid-template-columns: 1fr;
+  }
+
+  .turmas-escola-controle {
+    grid-template-columns: 1fr;
+  }
+
+  .turmas-escola-controle .btn {
+    width: 100%;
+  }
+
+  .resumo-turmas-escola {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .turma-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .professor-turma-adicionar {
+    grid-template-columns: 1fr;
+  }
+
+  .professor-turma-adicionar .btn {
+    width: 100%;
+  }
+
+  .lista-turmas-escola {
     grid-template-columns: 1fr;
   }
 }

@@ -5,6 +5,7 @@ import {
   push,
   onValue,
   update,
+  remove,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 /* =========================================
@@ -16,6 +17,8 @@ const escolasRef = ref(rtdb, "escolas");
 const locaisRef = ref(rtdb, "servidores/locaisExercicio");
 
 const servidoresRef = ref(rtdb, "servidores/registros");
+
+const turmasRef = ref(rtdb, "turmas");
 
 /* =========================================
    ELEMENTOS
@@ -88,6 +91,50 @@ const inputBusca = document.getElementById("buscaEscolas");
 const btnExportarExcel = document.getElementById("btnExportarExcel");
 
 /* =========================================
+   ELEMENTOS - TURMAS
+========================================= */
+
+const selectEscolaTurmas = document.getElementById("escolaTurmas");
+
+const btnNovaTurma = document.getElementById("btnNovaTurma");
+
+const resumoTurmasEscola = document.getElementById("resumoTurmasEscola");
+
+const nomeEscolaTurmas = document.getElementById("nomeEscolaTurmas");
+
+const contadorTurmasEscola = document.getElementById("contadorTurmasEscola");
+
+const listaTurmasEscola = document.getElementById("listaTurmasEscola");
+
+const formularioTurmaContainer = document.getElementById(
+  "formularioTurmaContainer",
+);
+
+const formTurma = document.getElementById("formTurma");
+
+const tituloFormularioTurma = document.getElementById("tituloFormularioTurma");
+
+const inputNomeTurma = document.getElementById("nomeTurma");
+
+const selectTurnoTurma = document.getElementById("turnoTurma");
+
+const inputQuantidadeAlunosTurma = document.getElementById(
+  "quantidadeAlunosTurma",
+);
+
+const selectProfessorTurma = document.getElementById("professorTurma");
+
+const btnAdicionarProfessorTurma = document.getElementById(
+  "btnAdicionarProfessorTurma",
+);
+
+const listaProfessoresTurma = document.getElementById("listaProfessoresTurma");
+
+const msgEdicaoTurma = document.getElementById("msgEdicaoTurma");
+
+const btnCancelarTurma = document.getElementById("btnCancelarTurma");
+
+/* =========================================
    ABAS
 ========================================= */
 
@@ -102,6 +149,7 @@ const conteudosAbas = document.querySelectorAll(".escolas-tab-content");
 let escolas = [];
 let locais = [];
 let servidores = [];
+let turmas = [];
 
 let localExercicioIdSelecionado = null;
 let gestorIdSelecionado = null;
@@ -112,6 +160,13 @@ let coordenadoresSelecionados = [];
 
 let editando = false;
 let chaveEdicao = null;
+
+let escolaTurmasIdSelecionada = null;
+
+let professoresTurmaSelecionados = [];
+
+let editandoTurma = false;
+let chaveTurmaEdicao = null;
 
 /* =========================================
    AUXILIARES
@@ -141,6 +196,51 @@ function normalizarTexto(texto) {
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .trim();
+}
+
+function obterGrupoTurma(nomeTurma) {
+  const nome = normalizarTexto(nomeTurma);
+
+  if (nome.includes("creche")) {
+    return 1;
+  }
+
+  if (
+    nome.includes("pre ") ||
+    nome.startsWith("pre") ||
+    nome.includes("pré ") ||
+    nome.startsWith("pré")
+  ) {
+    return 2;
+  }
+
+  if (/^\d/.test(nome)) {
+    return 3;
+  }
+
+  if (nome.includes("eja")) {
+    return 4;
+  }
+
+  if (nome.includes("aee")) {
+    return 5;
+  }
+
+  return 6;
+}
+
+function compararTurmas(a, b) {
+  const grupoA = obterGrupoTurma(a?.nome);
+  const grupoB = obterGrupoTurma(b?.nome);
+
+  if (grupoA !== grupoB) {
+    return grupoA - grupoB;
+  }
+
+  return String(a?.nome || "").localeCompare(String(b?.nome || ""), "pt-BR", {
+    sensitivity: "base",
+    numeric: true,
+  });
 }
 
 function mostrarSugestoesAutocomplete(
@@ -195,15 +295,75 @@ function obterNomeLocal(id) {
 }
 
 function obterNomeServidor(id) {
-  if (!id) return "";
+  if (id === null || id === undefined || id === "") {
+    return "";
+  }
 
-  const servidor = servidores.find((item) => item.id === id);
+  const servidor = servidores.find((item) => String(item.id) === String(id));
 
   return servidor?.nome || "";
 }
 
+function obterEscolaPorId(escolaId) {
+  if (!escolaId) return null;
+
+  return escolas.find((escola) => escola.id === escolaId) || null;
+}
+
+function obterServidorPorId(servidorId) {
+  if (servidorId === null || servidorId === undefined || servidorId === "") {
+    return null;
+  }
+
+  return (
+    servidores.find(
+      (servidor) => String(servidor.id || servidor._key) === String(servidorId),
+    ) || null
+  );
+}
+
 function servidorAtivo(servidor) {
   return normalizarTexto(servidor.situacao) === "ativo";
+}
+
+function servidorEhProfessor(servidor) {
+  const cargo = normalizarTexto(servidor?.cargo);
+
+  return (
+    cargo.includes("professor") ||
+    cargo.includes("tutor") ||
+    cargo.includes("instrutor de informatica") ||
+    cargo.includes("instrutor informatica") ||
+    cargo.includes("instrutor de libras") ||
+    cargo.includes("instrutor libras") ||
+    cargo.includes("estagio") ||
+    cargo.includes("estagiario") ||
+    cargo.includes("estagiaria")
+  );
+}
+
+function obterProfessoresDisponiveisDaEscola(escola) {
+  if (!escola?.localExercicioId) {
+    return [];
+  }
+
+  return servidores
+    .filter((servidor) => {
+      const mesmoLocal =
+        String(servidor.localExercicioId || "") ===
+        String(escola.localExercicioId || "");
+
+      const professor = servidorEhProfessor(servidor);
+
+      const emSala = servidor.foraSala !== true;
+
+      return mesmoLocal && professor && emSala;
+    })
+    .sort((a, b) =>
+      String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR", {
+        sensitivity: "base",
+      }),
+    );
 }
 
 /* =========================================
@@ -247,6 +407,7 @@ onValue(locaisRef, (snapshot) => {
     : [];
 
   renderEscolas();
+  atualizarSelectEscolasTurmas();
 });
 
 inputLocalExercicio?.addEventListener("input", () => {
@@ -451,7 +612,648 @@ onValue(escolasRef, (snapshot) => {
     : [];
 
   renderEscolas();
+  atualizarSelectEscolasTurmas();
+  renderTurmasEscola();
 });
+
+/* =========================================
+   CARREGAR TURMAS
+========================================= */
+
+onValue(turmasRef, (snapshot) => {
+  turmas = snapshot.exists()
+    ? Object.entries(snapshot.val()).map(([id, dados]) => ({
+        id,
+        ...dados,
+      }))
+    : [];
+
+  renderTurmasEscola();
+});
+
+function atualizarSelectEscolasTurmas() {
+  if (!selectEscolaTurmas) return;
+
+  const valorAtual = selectEscolaTurmas.value;
+
+  selectEscolaTurmas.innerHTML = `
+    <option value="">
+      Selecione uma escola
+    </option>
+  `;
+
+  const escolasOrdenadas = [...escolas].sort((a, b) =>
+    obterNomeLocal(a.localExercicioId).localeCompare(
+      obterNomeLocal(b.localExercicioId),
+      "pt-BR",
+      {
+        sensitivity: "base",
+      },
+    ),
+  );
+
+  escolasOrdenadas.forEach((escola) => {
+    const nomeEscola =
+      obterNomeLocal(escola.localExercicioId) || "Escola sem nome";
+
+    const option = document.createElement("option");
+
+    option.value = escola.id;
+    option.textContent = nomeEscola;
+
+    selectEscolaTurmas.appendChild(option);
+  });
+
+  if (valorAtual && escolas.some((escola) => escola.id === valorAtual)) {
+    selectEscolaTurmas.value = valorAtual;
+  }
+}
+
+function obterTurmasDaEscolaSelecionada() {
+  if (!escolaTurmasIdSelecionada) {
+    return [];
+  }
+
+  return turmas
+    .filter(
+      (turma) =>
+        String(turma.escolaId || "") ===
+        String(escolaTurmasIdSelecionada || ""),
+    )
+    .sort(compararTurmas);
+}
+
+function obterIdsProfessoresTurma(turma) {
+  const professores = turma?.professores;
+
+  if (!professores) {
+    return [];
+  }
+
+  if (Array.isArray(professores)) {
+    return professores
+      .map((valor, indice) => {
+        if (typeof valor === "string") {
+          return valor;
+        }
+
+        if (valor === true) {
+          return String(indice);
+        }
+
+        if (typeof valor === "object" && valor?.servidorId) {
+          return String(valor.servidorId);
+        }
+
+        return null;
+      })
+      .filter(Boolean);
+  }
+
+  return Object.entries(professores)
+    .map(([servidorId, dados]) => {
+      if (dados === false || dados === null) {
+        return null;
+      }
+
+      if (typeof dados === "object" && dados?.servidorId) {
+        return String(dados.servidorId);
+      }
+
+      return String(servidorId);
+    })
+    .filter(Boolean);
+}
+
+function montarProfessoresTurmaFirebase() {
+  return [...professoresTurmaSelecionados];
+}
+
+function renderTurmasEscola() {
+  if (!listaTurmasEscola) return;
+
+  if (!escolaTurmasIdSelecionada) {
+    resumoTurmasEscola.style.display = "none";
+
+    btnNovaTurma.disabled = true;
+
+    listaTurmasEscola.innerHTML = `
+      <div class="turmas-escola-vazio">
+        Selecione uma escola para visualizar as turmas.
+      </div>
+    `;
+
+    return;
+  }
+
+  const escola = obterEscolaPorId(escolaTurmasIdSelecionada);
+
+  if (!escola) {
+    resumoTurmasEscola.style.display = "none";
+    btnNovaTurma.disabled = true;
+
+    listaTurmasEscola.innerHTML = `
+      <div class="turmas-escola-vazio">
+        Escola não encontrada.
+      </div>
+    `;
+
+    return;
+  }
+
+  const nomeEscola = obterNomeLocal(escola.localExercicioId) || "Escola";
+
+  const turmasEscola = obterTurmasDaEscolaSelecionada();
+
+  nomeEscolaTurmas.textContent = nomeEscola;
+
+  contadorTurmasEscola.textContent = `${turmasEscola.length} turma${
+    turmasEscola.length === 1 ? "" : "s"
+  } cadastrada${turmasEscola.length === 1 ? "" : "s"}`;
+
+  resumoTurmasEscola.style.display = "flex";
+
+  btnNovaTurma.disabled = false;
+
+  if (!turmasEscola.length) {
+    listaTurmasEscola.innerHTML = `
+      <div class="turmas-escola-vazio">
+        Nenhuma turma cadastrada para esta escola.
+      </div>
+    `;
+
+    return;
+  }
+
+  listaTurmasEscola.innerHTML = turmasEscola
+    .map((turma) => {
+      const professores = obterIdsProfessoresTurma(turma)
+        .map(obterNomeServidor)
+        .filter(Boolean);
+
+      return `
+        <article class="card-turma-escola">
+          <div>
+            <h3>
+              ${escaparHtml(turma.nome || "Turma")}
+            </h3>
+          </div>
+
+          <div class="card-turma-dados">
+            <span>
+              <strong>Turno:</strong>
+              ${escaparHtml(turma.turno || "-")}
+            </span>
+
+            <span>
+              <strong>Quantidade de alunos:</strong>
+              ${escaparHtml(String(turma.quantidadeAlunos ?? "-"))}
+            </span>
+          </div>
+
+          <div class="card-turma-professores">
+            ${
+              professores.length
+                ? professores
+                    .map(
+                      (nomeProfessor) => `
+                        <span class="card-turma-professor">
+                          ${escaparHtml(nomeProfessor)}
+                        </span>
+                      `,
+                    )
+                    .join("")
+                : `
+                    <span class="card-turma-professor">
+                      Nenhum professor vinculado
+                    </span>
+                  `
+            }
+          </div>
+
+          <div class="card-turma-acoes">
+            <button
+              type="button"
+              class="btn-editar-turma"
+              data-id="${turma.id}"
+              title="Editar turma"
+            >
+              <span class="material-symbols-outlined">
+                edit_note
+              </span>
+            </button>
+
+            <button
+              type="button"
+              class="btn-excluir-turma"
+              data-id="${turma.id}"
+              title="Excluir turma"
+            >
+              <span class="material-symbols-outlined">
+                delete
+              </span>
+            </button>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+listaTurmasEscola?.addEventListener("click", async (event) => {
+  const btnEditar = event.target.closest(".btn-editar-turma");
+
+  const btnExcluir = event.target.closest(".btn-excluir-turma");
+
+  if (!btnEditar && !btnExcluir) {
+    return;
+  }
+
+  const turmaId = btnEditar?.dataset.id || btnExcluir?.dataset.id;
+
+  const turma = turmas.find((item) => item.id === turmaId);
+
+  if (!turma) {
+    notificar("Turma não encontrada.", "erro");
+    return;
+  }
+
+  if (btnEditar) {
+    editarTurma(turma);
+    return;
+  }
+
+  if (btnExcluir) {
+    await excluirTurma(turma);
+  }
+});
+
+selectEscolaTurmas?.addEventListener("change", () => {
+  escolaTurmasIdSelecionada = selectEscolaTurmas.value || null;
+
+  fecharFormularioTurma();
+
+  renderTurmasEscola();
+});
+
+function atualizarSelectProfessoresTurma() {
+  if (!selectProfessorTurma) return;
+
+  const escola = obterEscolaPorId(escolaTurmasIdSelecionada);
+
+  const professoresDisponiveis = obterProfessoresDisponiveisDaEscola(
+    escola,
+  ).filter((servidor) => !professoresTurmaSelecionados.includes(servidor.id));
+
+  selectProfessorTurma.innerHTML = `
+    <option value="">
+      ${
+        professoresDisponiveis.length
+          ? "Selecione um professor"
+          : "Nenhum professor disponível"
+      }
+    </option>
+  `;
+
+  professoresDisponiveis.forEach((servidor) => {
+    const option = document.createElement("option");
+
+    option.value = servidor.id;
+    option.textContent = servidor.nome || "Professor";
+
+    selectProfessorTurma.appendChild(option);
+  });
+
+  selectProfessorTurma.disabled = professoresDisponiveis.length === 0;
+}
+
+function abrirFormularioNovaTurma() {
+  if (!escolaTurmasIdSelecionada) {
+    notificar("Selecione uma escola.", "erro");
+    return;
+  }
+
+  editandoTurma = false;
+  chaveTurmaEdicao = null;
+
+  professoresTurmaSelecionados = [];
+
+  formTurma.reset();
+
+  tituloFormularioTurma.textContent = "Nova turma";
+
+  msgEdicaoTurma.style.display = "none";
+  msgEdicaoTurma.innerHTML = "";
+
+  atualizarSelectProfessoresTurma();
+
+  renderProfessoresTurmaSelecionados();
+
+  formularioTurmaContainer.style.display = "block";
+
+  inputNomeTurma.focus();
+}
+
+function fecharFormularioTurma() {
+  editandoTurma = false;
+  chaveTurmaEdicao = null;
+
+  professoresTurmaSelecionados = [];
+
+  formTurma?.reset();
+
+  if (formularioTurmaContainer) {
+    formularioTurmaContainer.style.display = "none";
+  }
+
+  if (msgEdicaoTurma) {
+    msgEdicaoTurma.style.display = "none";
+    msgEdicaoTurma.innerHTML = "";
+  }
+
+  renderProfessoresTurmaSelecionados();
+
+  const btnSalvarTurma = document.getElementById("btnSalvarTurma");
+
+  if (btnSalvarTurma) {
+    btnSalvarTurma.innerHTML = `
+    <span class="material-symbols-outlined">
+      save
+    </span>
+
+    Salvar turma
+  `;
+  }
+}
+
+btnNovaTurma?.addEventListener("click", abrirFormularioNovaTurma);
+
+btnCancelarTurma?.addEventListener("click", fecharFormularioTurma);
+
+function renderProfessoresTurmaSelecionados() {
+  if (!listaProfessoresTurma) return;
+
+  listaProfessoresTurma.innerHTML = "";
+
+  professoresTurmaSelecionados.forEach((servidorId) => {
+    const servidor = obterServidorPorId(servidorId);
+
+    if (!servidor) return;
+
+    const item = document.createElement("div");
+
+    item.className = "professor-turma-item";
+
+    item.innerHTML = `
+      <span>
+        ${escaparHtml(servidor.nome || "Professor")}
+      </span>
+
+      <button
+        type="button"
+        title="Remover professor"
+      >
+        <span class="material-symbols-outlined">
+          close
+        </span>
+      </button>
+    `;
+
+    item.querySelector("button").addEventListener("click", () => {
+      professoresTurmaSelecionados = professoresTurmaSelecionados.filter(
+        (id) => id !== servidorId,
+      );
+
+      renderProfessoresTurmaSelecionados();
+      atualizarSelectProfessoresTurma();
+    });
+
+    listaProfessoresTurma.appendChild(item);
+  });
+}
+
+btnAdicionarProfessorTurma?.addEventListener("click", () => {
+  const servidorId = String(selectProfessorTurma.value || "");
+
+  if (!servidorId) {
+    notificar("Selecione um professor.", "erro");
+    return;
+  }
+
+  if (professoresTurmaSelecionados.includes(servidorId)) {
+    notificar("Este professor já foi adicionado.", "erro");
+    return;
+  }
+
+  professoresTurmaSelecionados.push(servidorId);
+
+  renderProfessoresTurmaSelecionados();
+  atualizarSelectProfessoresTurma();
+});
+
+formTurma?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  if (!escolaTurmasIdSelecionada) {
+    notificar("Selecione uma escola.", "erro");
+    return;
+  }
+
+  const escola = obterEscolaPorId(escolaTurmasIdSelecionada);
+
+  if (!escola) {
+    notificar("Escola não encontrada.", "erro");
+    return;
+  }
+
+  const nome = inputNomeTurma.value.trim();
+
+  const turno = selectTurnoTurma.value;
+
+  const quantidadeAlunos = Number(inputQuantidadeAlunosTurma.value);
+
+  if (!nome) {
+    notificar("Informe o nome da turma.", "erro");
+
+    inputNomeTurma.focus();
+    return;
+  }
+
+  if (!turno) {
+    notificar("Selecione o turno.", "erro");
+
+    selectTurnoTurma.focus();
+    return;
+  }
+
+  if (!Number.isInteger(quantidadeAlunos) || quantidadeAlunos < 0) {
+    notificar("Informe uma quantidade de alunos válida.", "erro");
+
+    inputQuantidadeAlunosTurma.focus();
+    return;
+  }
+
+  /*
+   * Impede duas turmas com mesmo nome e turno
+   * dentro da mesma escola.
+   */
+  const turmaDuplicada = turmas.find((turma) => {
+    const mesmaEscola = turma.escolaId === escolaTurmasIdSelecionada;
+
+    const mesmoNome = normalizarTexto(turma.nome) === normalizarTexto(nome);
+
+    const mesmoTurno = normalizarTexto(turma.turno) === normalizarTexto(turno);
+
+    const outraTurma = turma.id !== chaveTurmaEdicao;
+
+    return mesmaEscola && mesmoNome && mesmoTurno && outraTurma;
+  });
+
+  if (turmaDuplicada) {
+    notificar(
+      "Já existe uma turma com este nome e turno nesta escola.",
+      "erro",
+    );
+
+    return;
+  }
+
+  const dadosTurma = {
+    escolaId: escola.id,
+
+    /*
+     * Mantemos também o localExercicioId porque
+     * o quadros.js já consegue localizar as turmas
+     * por este campo.
+     */
+    localExercicioId: escola.localExercicioId,
+
+    nome,
+
+    turno,
+
+    quantidadeAlunos,
+
+    professores: montarProfessoresTurmaFirebase(),
+
+    atualizadoEm: new Date().toISOString(),
+  };
+
+  const btnSalvarTurma = document.getElementById("btnSalvarTurma");
+
+  const conteudoOriginal = btnSalvarTurma.innerHTML;
+
+  btnSalvarTurma.disabled = true;
+
+  btnSalvarTurma.innerHTML = `
+    <span class="material-symbols-outlined">
+      hourglass_top
+    </span>
+
+    Salvando...
+  `;
+
+  try {
+    if (editandoTurma && chaveTurmaEdicao) {
+      await update(ref(rtdb, `turmas/${chaveTurmaEdicao}`), dadosTurma);
+
+      notificar("Turma atualizada com sucesso!");
+    } else {
+      await push(turmasRef, {
+        ...dadosTurma,
+        criadoEm: new Date().toISOString(),
+      });
+
+      notificar("Turma cadastrada com sucesso!");
+    }
+
+    fecharFormularioTurma();
+  } catch (erro) {
+    console.error("Erro ao salvar turma:", erro);
+
+    notificar("Não foi possível salvar a turma.", "erro");
+  } finally {
+    btnSalvarTurma.disabled = false;
+    btnSalvarTurma.innerHTML = conteudoOriginal;
+  }
+});
+
+function editarTurma(turma) {
+  if (!turma) return;
+
+  editandoTurma = true;
+  chaveTurmaEdicao = turma.id;
+
+  escolaTurmasIdSelecionada = turma.escolaId;
+
+  selectEscolaTurmas.value = turma.escolaId;
+
+  inputNomeTurma.value = turma.nome || "";
+
+  selectTurnoTurma.value = turma.turno || "";
+
+  inputQuantidadeAlunosTurma.value = turma.quantidadeAlunos ?? 0;
+
+  professoresTurmaSelecionados = obterIdsProfessoresTurma(turma).map(String);
+
+  tituloFormularioTurma.textContent = "Editar turma";
+
+  const btnSalvarTurma = document.getElementById("btnSalvarTurma");
+
+  btnSalvarTurma.innerHTML = `
+  <span class="material-symbols-outlined">
+    save
+  </span>
+
+  Salvar alterações
+`;
+
+  msgEdicaoTurma.style.display = "block";
+
+  msgEdicaoTurma.innerHTML = `
+    Editando:
+    <strong>
+      ${escaparHtml(turma.nome || "Turma")}
+    </strong>
+  `;
+
+  atualizarSelectProfessoresTurma();
+
+  renderProfessoresTurmaSelecionados();
+
+  formularioTurmaContainer.style.display = "block";
+
+  formularioTurmaContainer.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+
+  inputNomeTurma.focus();
+}
+
+async function excluirTurma(turma) {
+  if (!turma?.id) return;
+
+  const confirmou = confirm(
+    `Deseja excluir a turma "${turma.nome || "Turma"}"?`,
+  );
+
+  if (!confirmou) return;
+
+  try {
+    await remove(ref(rtdb, `turmas/${turma.id}`));
+
+    notificar("Turma excluída com sucesso!");
+
+    if (chaveTurmaEdicao === turma.id) {
+      fecharFormularioTurma();
+    }
+  } catch (erro) {
+    console.error("Erro ao excluir turma:", erro);
+
+    notificar("Não foi possível excluir a turma.", "erro");
+  }
+}
 
 /* =========================================
    CADASTRAR / EDITAR

@@ -33,6 +33,12 @@ const boxLocal = document.getElementById("autocompleteLocal");
 
 const contadorServidores = document.getElementById("contadorServidores");
 
+const inputForaSala = document.getElementById("foraSala");
+
+const blocoProfessorForaSala = document.getElementById(
+  "blocoProfessorForaSala",
+);
+
 /* ===============================
    FIREBASE
 ================================ */
@@ -167,9 +173,11 @@ function normalizarTextoLocal(texto) {
     .trim();
 }
 
-inputCargo.addEventListener("input", () =>
-  mostrarSugestoes(inputCargo, cargos, boxCargo),
-);
+inputCargo.addEventListener("input", () => {
+  mostrarSugestoes(inputCargo, cargos, boxCargo);
+
+  atualizarCampoProfessorForaSala();
+});
 
 inputVinculo.addEventListener("input", () =>
   mostrarSugestoes(inputVinculo, vinculos, boxVinculo),
@@ -196,6 +204,18 @@ function formatarDataBR(data) {
 
 function padronizarTexto(txt) {
   return txt ? txt.toString().trim() : "";
+}
+
+function atualizarCampoProfessorForaSala() {
+  const cargo = normalizarTextoLocal(inputCargo.value);
+
+  const ehProfessor = cargo.includes("professor");
+
+  blocoProfessorForaSala.style.display = ehProfessor ? "block" : "none";
+
+  if (!ehProfessor) {
+    inputForaSala.checked = false;
+  }
 }
 
 function obterNomeLocal(localId) {
@@ -502,6 +522,7 @@ async function salvarServidor() {
     cpf: cpf.value.replace(/\D/g, ""),
     cargo: padronizarTexto(cargo.value),
     vinculo: padronizarTexto(vinculo.value),
+    foraSala: inputForaSala.checked,
     localExercicioId: localId,
     dataAdmissao: dataAdmissao.value,
     situacao: situacao.value,
@@ -565,6 +586,8 @@ function editarServidor(s) {
   cpf.value = formatarCPF(s.cpf);
   cargo.value = s.cargo;
   vinculo.value = s.vinculo;
+  inputForaSala.checked = !!s.foraSala;
+  atualizarCampoProfessorForaSala();
   localExercicio.value = obterLocalServidor(s);
 
   localExercicioIdSelecionado = s.localExercicioId || null;
@@ -715,7 +738,9 @@ function resetarFormulario() {
   localExercicioIdSelecionado = null;
 
   form.reset();
+  inputForaSala.checked = false;
 
+  atualizarCampoProfessorForaSala();
   blocoCadastro.style.display = "block";
   blocoEdicao.style.display = "none";
   msgEdicao.innerHTML = "";

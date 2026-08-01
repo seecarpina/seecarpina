@@ -86,6 +86,16 @@
 
               Cadastrar escola
             </button>
+
+            <button
+              type="button"
+              class="escolas-tab"
+              data-tab="turmasEscolaTab"
+            >
+              <span class="material-symbols-outlined"> groups </span>
+
+              Turmas
+            </button>
           </div>
 
           <!-- =========================
@@ -288,8 +298,8 @@
                 </div>
 
                 <!-- =========================
-     MODALIDADES
-========================== -->
+                  MODALIDADES
+              ========================== -->
 
                 <div class="bloco-modalidades">
                   <label> Modalidades de ensino </label>
@@ -353,6 +363,173 @@
                     <span class="material-symbols-outlined"> close </span>
 
                     Cancelar edição
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+
+          <!-- =========================
+              TURMAS
+          ========================== -->
+
+          <section id="turmasEscolaTab" class="escolas-tab-content">
+            <div class="box glass">
+              <div class="cabecalho-escolas">
+                <div>
+                  <h2>Turmas das escolas</h2>
+
+                  <p>
+                    Cadastre as turmas e vincule os professores responsáveis.
+                  </p>
+                </div>
+              </div>
+
+              <div class="turmas-escola-controle">
+                <div class="campo-escola">
+                  <label for="escolaTurmas"> Escola </label>
+
+                  <select id="escolaTurmas">
+                    <option value="">Selecione uma escola</option>
+                  </select>
+                </div>
+
+                <button type="button" id="btnNovaTurma" class="btn" disabled>
+                  <span class="material-symbols-outlined"> add_circle </span>
+
+                  Nova turma
+                </button>
+              </div>
+
+              <div
+                id="resumoTurmasEscola"
+                class="resumo-turmas-escola"
+                style="display: none"
+              >
+                <strong id="nomeEscolaTurmas"> Escola selecionada </strong>
+
+                <span id="contadorTurmasEscola"> 0 turmas cadastradas </span>
+              </div>
+
+              <div id="listaTurmasEscola" class="lista-turmas-escola">
+                <div class="turmas-escola-vazio">
+                  Selecione uma escola para visualizar as turmas.
+                </div>
+              </div>
+            </div>
+
+            <div
+              id="formularioTurmaContainer"
+              class="box glass formulario-turma-container"
+              style="display: none"
+            >
+              <div class="cabecalho-escolas">
+                <div>
+                  <h2 id="tituloFormularioTurma">Nova turma</h2>
+
+                  <p>Informe os dados da turma e os professores vinculados.</p>
+                </div>
+              </div>
+
+              <form id="formTurma" class="form-turma-escola">
+                <div class="turma-form-grid">
+                  <div class="campo-escola">
+                    <label for="nomeTurma"> Turma </label>
+
+                    <input
+                      type="text"
+                      id="nomeTurma"
+                      placeholder="Ex.: 1º ANO A"
+                      autocomplete="off"
+                      required
+                    />
+                  </div>
+
+                  <div class="campo-escola">
+                    <label for="turnoTurma"> Turno </label>
+
+                    <select id="turnoTurma" required>
+                      <option value="">Selecione</option>
+
+                      <option value="MANHÃ">Manhã</option>
+
+                      <option value="TARDE">Tarde</option>
+
+                      <option value="NOITE">Noite</option>
+
+                      <option value="INTEGRAL">Integral</option>
+                    </select>
+                  </div>
+
+                  <div class="campo-escola">
+                    <label for="quantidadeAlunosTurma">
+                      Quantidade de alunos
+                    </label>
+
+                    <input
+                      type="number"
+                      id="quantidadeAlunosTurma"
+                      min="0"
+                      step="1"
+                      placeholder="0"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div class="bloco-professores-turma">
+                  <div class="bloco-professores-turma-cabecalho">
+                    <div>
+                      <strong> Professores da turma </strong>
+
+                      <span>
+                        Serão exibidos apenas professores ativos, lotados na
+                        escola e que não estejam marcados como fora de sala.
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="professor-turma-adicionar">
+                    <select id="professorTurma">
+                      <option value="">Nenhum professor disponível</option>
+                    </select>
+
+                    <button
+                      type="button"
+                      id="btnAdicionarProfessorTurma"
+                      class="btn"
+                    >
+                      <span class="material-symbols-outlined">
+                        person_add
+                      </span>
+
+                      Adicionar
+                    </button>
+                  </div>
+
+                  <div
+                    id="listaProfessoresTurma"
+                    class="lista-professores-turma"
+                  ></div>
+                </div>
+
+                <div id="msgEdicaoTurma" class="msg-edicao-escola"></div>
+
+                <div class="acoes-escola">
+                  <button type="submit" id="btnSalvarTurma" class="btn">
+                    <span class="material-symbols-outlined"> save </span>
+
+                    Salvar turma
+                  </button>
+
+                  <button
+                    type="button"
+                    id="btnCancelarTurma"
+                    class="btn btn-cancelar"
+                  >
+                    <span class="material-symbols-outlined"> close </span>
+
+                    Cancelar
                   </button>
                 </div>
               </form>

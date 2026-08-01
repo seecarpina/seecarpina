@@ -1,0 +1,218 @@
+/* =========================================
+   CONTROLE DO QUADRO
+========================================= */
+
+.quadro-controle {
+  margin-top: 1rem;
+}
+
+.quadro-selecao {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto;
+  align-items: end;
+  gap: 1rem;
+}
+
+.quadro-campo-escola,
+.quadro-campo-acao {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.quadro-campo-escola label,
+.quadro-campo-acao label {
+  font-weight: 600;
+}
+
+.quadro-campo-escola select {
+  width: 100%;
+  min-height: 44px;
+}
+
+.label-invisivel {
+  visibility: hidden;
+}
+
+.quadro-campo-acao .btn {
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+/* =========================================
+   RESUMO
+========================================= */
+
+.quadro-resumo {
+  margin-top: 1rem;
+}
+
+.quadro-resumo-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.quadro-resumo-cabecalho h2 {
+  margin: 0 0 0.25rem;
+}
+
+.quadro-resumo-cabecalho span {
+  opacity: 0.75;
+}
+
+/* =========================================
+   INDICADORES
+========================================= */
+
+.quadro-indicadores {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.quadro-indicador {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-height: 90px;
+  padding: 1rem;
+  border: 1px solid var(--color-light);
+  border-radius: var(--border-radius-2);
+  background: var(--color-white);
+}
+
+.quadro-indicador > .material-symbols-outlined {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--color-light);
+  font-size: 1.65rem;
+}
+
+.quadro-indicador div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.quadro-indicador strong {
+  font-size: 1.45rem;
+}
+
+.quadro-indicador span:last-child {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+/* =========================================
+   LEGENDA DOS VÍNCULOS
+========================================= */
+
+.quadro-legenda {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-light);
+}
+
+.legenda-vinculo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.legenda-vinculo > span {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.legenda-efetivo {
+  background: #e8f5d8;
+}
+
+.legenda-efetivo > span {
+  background: #c8e6a0;
+}
+
+.legenda-contrato {
+  background: #fff8cf;
+}
+
+.legenda-contrato > span {
+  background: #ffe99a;
+}
+
+.legenda-bolsa {
+  background: #f0e8fa;
+}
+
+.legenda-bolsa > span {
+  background: #d9c2f0;
+}
+
+/* =========================================
+   TEMA ESCURO
+========================================= */
+
+.dark-theme-variables .quadro-indicador {
+  background: var(--color-white);
+  border-color: var(--color-light);
+}
+
+.dark-theme-variables .legenda-efetivo {
+  color: #24331b;
+}
+
+.dark-theme-variables .legenda-contrato {
+  color: #3a3214;
+}
+
+.dark-theme-variables .legenda-bolsa {
+  color: #33243e;
+}
+
+/* =========================================
+   RESPONSIVO
+========================================= */
+
+@media screen and (max-width: 1100px) {
+  .quadro-indicadores {
+    grid-template-columns: repeat(2, minmax(160px, 1fr));
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .quadro-selecao {
+    grid-template-columns: 1fr;
+  }
+
+  .label-invisivel {
+    display: none;
+  }
+
+  .quadro-campo-acao .btn {
+    width: 100%;
+  }
+
+  .quadro-indicadores {
+    grid-template-columns: 1fr;
+  }
+
+  .quadro-legenda {
+    align-items: flex-start;
+  }
+}
