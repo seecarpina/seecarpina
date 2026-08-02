@@ -44,6 +44,10 @@ const boxSecretario = document.getElementById("autocompleteSecretario");
 
 const inputCoordenador = document.getElementById("coordenadorSelect");
 
+const selectModalidadeCoordenador = document.getElementById(
+  "modalidadeCoordenador",
+);
+
 const boxCoordenador = document.getElementById("autocompleteCoordenador");
 
 const btnAdicionarCoordenador = document.getElementById(
@@ -497,6 +501,8 @@ inputCoordenador?.addEventListener("input", () => {
 btnAdicionarCoordenador?.addEventListener("click", () => {
   const servidorId = coordenadorIdSelecionado;
 
+  const modalidade = selectModalidadeCoordenador.value;
+
   if (!servidorId) {
     notificar("Selecione um coordenador entre as sugestões.", "erro");
 
@@ -505,8 +511,10 @@ btnAdicionarCoordenador?.addEventListener("click", () => {
     return;
   }
 
-  if (coordenadoresSelecionados.includes(servidorId)) {
-    notificar("Este coordenador já foi adicionado.", "erro");
+  if (!modalidade) {
+    notificar("Selecione a modalidade do coordenador.", "erro");
+
+    selectModalidadeCoordenador.focus();
 
     return;
   }
@@ -523,9 +531,28 @@ btnAdicionarCoordenador?.addEventListener("click", () => {
     return;
   }
 
-  coordenadoresSelecionados.push(servidorId);
+  const coordenadorExistente = coordenadoresSelecionados.find(
+    (coordenador) => String(coordenador.servidorId) === String(servidorId),
+  );
+
+  if (coordenadorExistente) {
+    if (coordenadorExistente.modalidades.includes(modalidade)) {
+      notificar("Esta modalidade já foi adicionada ao coordenador.", "erro");
+
+      return;
+    }
+
+    coordenadorExistente.modalidades.push(modalidade);
+  } else {
+    coordenadoresSelecionados.push({
+      servidorId,
+      modalidades: [modalidade],
+    });
+  }
 
   inputCoordenador.value = "";
+
+  selectModalidadeCoordenador.value = "";
 
   coordenadorIdSelecionado = null;
 
@@ -563,7 +590,13 @@ function renderCoordenadoresSelecionados() {
 
   listaCoordenadoresSelecionados.innerHTML = "";
 
-  coordenadoresSelecionados.forEach((servidorId) => {
+  coordenadoresSelecionados.forEach((coordenador) => {
+    const servidorId = coordenador.servidorId;
+
+    const modalidades = Array.isArray(coordenador.modalidades)
+      ? coordenador.modalidades
+      : [];
+
     const nome = obterNomeServidor(servidorId);
 
     const item = document.createElement("div");
@@ -571,25 +604,46 @@ function renderCoordenadoresSelecionados() {
     item.className = "coordenador-selecionado";
 
     item.innerHTML = `
-        <span>
+      <div class="coordenador-selecionado-dados">
+        <strong>
           ${escaparHtml(nome || "Servidor")}
-        </span>
+        </strong>
 
-        <button
-          type="button"
-          title="Remover coordenador"
-        >
-          <span
-            class="material-symbols-outlined"
-          >
-            close
-          </span>
-        </button>
-      `;
+        <div class="coordenador-modalidades">
+          ${
+            modalidades.length
+              ? modalidades
+                  .map(
+                    (modalidade) => `
+                      <span class="coordenador-modalidade">
+                        ${escaparHtml(modalidade)}
+                      </span>
+                    `,
+                  )
+                  .join("")
+              : `
+                  <span class="coordenador-modalidade">
+                    Sem modalidade
+                  </span>
+                `
+          }
+        </div>
+      </div>
+
+      <button
+        type="button"
+        title="Remover coordenador"
+      >
+        <span class="material-symbols-outlined">
+          close
+        </span>
+      </button>
+    `;
 
     item.querySelector("button")?.addEventListener("click", () => {
       coordenadoresSelecionados = coordenadoresSelecionados.filter(
-        (id) => id !== servidorId,
+        (itemCoordenador) =>
+          String(itemCoordenador.servidorId) !== String(servidorId),
       );
 
       renderCoordenadoresSelecionados();
@@ -1358,13 +1412,23 @@ formEscola?.addEventListener("submit", async (event) => {
     return;
   }
 
-  if (gestorId && coordenadoresSelecionados.includes(gestorId)) {
+  if (
+    gestorId &&
+    coordenadoresSelecionados.some(
+      (coordenador) => String(coordenador.servidorId) === String(gestorId),
+    )
+  ) {
     notificar("O gestor não pode também ser coordenador.", "erro");
 
     return;
   }
 
-  if (secretarioId && coordenadoresSelecionados.includes(secretarioId)) {
+  if (
+    secretarioId &&
+    coordenadoresSelecionados.some(
+      (coordenador) => String(coordenador.servidorId) === String(secretarioId),
+    )
+  ) {
     notificar("O secretário não pode também ser coordenador.", "erro");
 
     return;
@@ -1385,7 +1449,13 @@ formEscola?.addEventListener("submit", async (event) => {
 
     secretarioId,
 
-    coordenadoresIds: [...coordenadoresSelecionados],
+    coordenadores: coordenadoresSelecionados.map((coordenador) => ({
+      servidorId: coordenador.servidorId,
+
+      modalidades: Array.isArray(coordenador.modalidades)
+        ? [...coordenador.modalidades]
+        : [],
+    })),
 
     modalidades: {
       creche: modalidadeCreche.checked,
@@ -1476,8 +1546,9 @@ function obterEscolasFiltradas() {
 
       const nomeSecretario = obterNomeServidor(escola.secretarioId);
 
-      const coordenadores = (escola.coordenadoresIds || [])
-        .map(obterNomeServidor)
+      const coordenadores = (escola.coordenadores || [])
+        .map((coordenador) => obterNomeServidor(coordenador.servidorId))
+        .filter(Boolean)
         .join(" ");
 
       const texto = normalizarTexto(`
@@ -1531,8 +1602,8 @@ function renderEscolas() {
 
       const secretario = obterNomeServidor(escola.secretarioId) || "-";
 
-      const coordenadores = (escola.coordenadoresIds || [])
-        .map(obterNomeServidor)
+      const coordenadores = (escola.coordenadores || [])
+        .map((coordenador) => obterNomeServidor(coordenador.servidorId))
         .filter(Boolean);
 
       const modalidades = obterModalidades(escola.modalidades);
@@ -1665,8 +1736,16 @@ function editarEscola(escola) {
 
   inputCoordenador.value = "";
 
-  coordenadoresSelecionados = Array.isArray(escola.coordenadoresIds)
-    ? [...escola.coordenadoresIds]
+  coordenadoresSelecionados = Array.isArray(escola.coordenadores)
+    ? escola.coordenadores
+        .map((coordenador) => ({
+          servidorId: String(coordenador?.servidorId || ""),
+
+          modalidades: Array.isArray(coordenador?.modalidades)
+            ? [...coordenador.modalidades]
+            : [],
+        }))
+        .filter((coordenador) => coordenador.servidorId)
     : [];
 
   modalidadeCreche.checked = escola.modalidades?.creche === true;
@@ -1783,10 +1862,18 @@ btnExportarExcel?.addEventListener("click", () => {
   }
 
   const dadosExcel = escolasExportar.map((escola) => {
-    const coordenadores = (escola.coordenadoresIds || [])
-      .map(obterNomeServidor)
+    const coordenadores = (escola.coordenadores || [])
+      .map((coordenador) => {
+        const nome = obterNomeServidor(coordenador.servidorId);
+
+        const modalidades = Array.isArray(coordenador.modalidades)
+          ? coordenador.modalidades.join(", ")
+          : "";
+
+        return modalidades ? `${nome} (${modalidades})` : nome;
+      })
       .filter(Boolean)
-      .join(", ");
+      .join("; ");
 
     const modalidades = obterModalidades(escola.modalidades).join(", ");
 

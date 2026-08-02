@@ -378,12 +378,24 @@ function obterSecretarioDaEscola(escola) {
 }
 
 function obterCoordenadoresDaEscola(escola) {
-  const coordenadoresIds = Array.isArray(escola?.coordenadoresIds)
-    ? escola.coordenadoresIds
-    : [];
+  return (escola?.coordenadores || [])
+    .map((coordenador) => {
+      const servidor = obterServidorPorId(coordenador.servidorId);
 
-  return coordenadoresIds
-    .map((servidorId) => obterServidorPorId(servidorId))
+      if (!servidor) {
+        return null;
+      }
+
+      const modalidades = Array.isArray(coordenador.modalidades)
+        ? coordenador.modalidades
+        : [];
+
+      return {
+        ...servidor,
+
+        modalidade: modalidades.length ? modalidades.join(", ") : "-",
+      };
+    })
     .filter(Boolean)
     .sort((a, b) =>
       String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR", {

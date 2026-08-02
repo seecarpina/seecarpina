@@ -121,11 +121,8 @@
 
 .coordenador-adicionar {
   display: grid;
-  grid-template-columns:
-    minmax(0, 1fr)
-    auto;
-
-  gap: 0.8rem;
+  grid-template-columns: minmax(320px, 1fr) 220px auto;
+  gap: 1rem;
   align-items: end;
 }
 
@@ -759,6 +756,46 @@
 .btn-editar-turma:hover,
 .btn-excluir-turma:hover {
   background: var(--clr-light);
+}
+
+.coordenador-selecionado-dados {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.coordenador-selecionado-dados strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.coordenador-selecionado-dados span {
+  font-size: 0.78rem;
+  color: var(--clr-dark-variant);
+}
+
+.coordenador-modalidades {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.3rem;
+}
+
+.coordenador-modalidade {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 0.25rem 0.55rem;
+
+  border-radius: 999px;
+
+  background: var(--clr-light);
+  color: var(--clr-dark-variant);
+
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 /* =========================================
