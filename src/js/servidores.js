@@ -34,6 +34,18 @@ const boxLocal = document.getElementById("autocompleteLocal");
 
 const contadorServidores = document.getElementById("contadorServidores");
 
+const listaHistoricoTransferencias = document.getElementById(
+  "listaHistoricoTransferencias",
+);
+
+const buscaHistoricoTransferencias = document.getElementById(
+  "buscaHistoricoTransferencias",
+);
+
+const contadorHistoricoTransferencias = document.getElementById(
+  "contadorHistoricoTransferencias",
+);
+
 const inputForaSala = document.getElementById("foraSala");
 
 const blocoProfessorForaSala = document.getElementById(
@@ -47,6 +59,7 @@ const registrosRef = ref(rtdb, "servidores/registros");
 const cargosRef = ref(rtdb, "servidores/cargos");
 const vinculosRef = ref(rtdb, "servidores/vinculos");
 const locaisRef = ref(rtdb, "servidores/locaisExercicio");
+const transferenciasRef = ref(rtdb, "servidores/transferencias");
 
 /* ===============================
    VARIÁVEIS
@@ -60,6 +73,7 @@ let chaveEdicao = null;
 let cargos = [];
 let vinculos = [];
 let locais = [];
+let historicoTransferencias = [];
 
 onValue(cargosRef, (s) => {
   cargos = s.exists() ? Object.values(s.val()).map(padronizarTexto) : [];
@@ -93,6 +107,24 @@ onValue(locaisRef, (snapshot) => {
 /* ===============================
    UTILITÁRIOS
 ================================ */
+document.querySelectorAll(".servidores-tabs .tab-btn").forEach((botao) => {
+  botao.addEventListener("click", () => {
+    document
+      .querySelectorAll(".servidores-tabs .tab-btn")
+      .forEach((item) => item.classList.remove("active"));
+
+    document
+      .querySelectorAll("#servidoresTab, #historicoServidoresTab")
+      .forEach((aba) => aba.classList.remove("active"));
+
+    botao.classList.add("active");
+
+    const aba = document.getElementById(botao.dataset.tab);
+
+    aba?.classList.add("active");
+  });
+});
+
 function formatarCPF(cpf) {
   return cpf
     .replace(/\D/g, "")
@@ -207,6 +239,14 @@ function padronizarTexto(txt) {
   return txt ? txt.toString().trim() : "";
 }
 
+function escaparHtmlServidor(texto) {
+  const elemento = document.createElement("div");
+
+  elemento.textContent = texto ?? "";
+
+  return elemento.innerHTML;
+}
+
 function atualizarCampoProfessorForaSala() {
   const cargo = normalizarTextoLocal(inputCargo.value);
 
@@ -285,6 +325,247 @@ onValue(registrosRef, (snap) => {
     }));
 
     renderTabela();
+  });
+});
+
+/* ===============================
+   HISTÓRICO DE TRANSFERÊNCIAS
+================================ */
+
+onValue(transferenciasRef, (snapshot) => {
+  historicoTransferencias = [];
+
+  if (snapshot.exists()) {
+    Object.entries(snapshot.val()).forEach(([servidorId, transferencias]) => {
+      Object.entries(transferencias || {}).forEach(
+        ([transferenciaId, dados]) => {
+          historicoTransferencias.push({
+            ...dados,
+
+            _key: transferenciaId,
+
+            servidorId: dados.servidorId || servidorId,
+          });
+        },
+      );
+    });
+  }
+
+  historicoTransferencias.sort((a, b) => {
+    const dataA = new Date(a.criadoEm || a.data || 0).getTime();
+    const dataB = new Date(b.criadoEm || b.data || 0).getTime();
+
+    return dataB - dataA;
+  });
+
+  renderHistoricoTransferencias();
+});
+
+function renderHistoricoTransferencias() {
+  if (!listaHistoricoTransferencias) return;
+
+  const busca = normalizarTextoLocal(buscaHistoricoTransferencias?.value || "");
+
+  const filtrados = historicoTransferencias.filter((movimentacao) => {
+    const servidorAtual = servidores.find(
+      (servidor) => servidor._key === movimentacao.servidorId,
+    );
+
+    const nomeServidor = movimentacao.servidorNome || servidorAtual?.nome || "";
+
+    const cpfServidor = movimentacao.servidorCPF || servidorAtual?.cpf || "";
+
+    const codigoServidor =
+      movimentacao.servidorCodigo || servidorAtual?.codigo || "";
+
+    const textoBusca = normalizarTextoLocal(`
+      ${movimentacao.protocolo || ""}
+      ${nomeServidor}
+      ${cpfServidor}
+      ${codigoServidor}
+      ${movimentacao.de || ""}
+      ${movimentacao.para || ""}
+      ${movimentacao.usuario || ""}
+      ${movimentacao.observacao || ""}
+      ${movimentacao.data || ""}
+    `);
+
+    return textoBusca.includes(busca);
+  });
+
+  if (contadorHistoricoTransferencias) {
+    const total = filtrados.length;
+
+    contadorHistoricoTransferencias.textContent = `${total} movimentação${total === 1 ? "" : "ões"}`;
+  }
+
+  if (!filtrados.length) {
+    listaHistoricoTransferencias.innerHTML = `
+      <div class="historico-transferencias-vazio">
+        Nenhuma movimentação encontrada.
+      </div>
+    `;
+
+    return;
+  }
+
+  listaHistoricoTransferencias.innerHTML = filtrados
+    .map((movimentacao) => {
+      const servidorAtual = servidores.find(
+        (servidor) => servidor._key === movimentacao.servidorId,
+      );
+
+      const nomeServidor =
+        movimentacao.servidorNome || servidorAtual?.nome || "Servidor";
+
+      const cpfServidor = movimentacao.servidorCPF || servidorAtual?.cpf || "";
+
+      const codigoServidor =
+        movimentacao.servidorCodigo || servidorAtual?.codigo || "";
+
+      const cpfFormatado = cpfServidor ? formatarCPF(String(cpfServidor)) : "-";
+
+      const dataTransferencia = movimentacao.data
+        ? formatarDataBR(movimentacao.data)
+        : "-";
+
+      return `
+        <article class="card-historico-transferencia">
+          <div class="historico-transferencia-icone">
+            <span class="material-symbols-outlined">
+              swap_horiz
+            </span>
+          </div>
+
+          <div class="historico-transferencia-conteudo">
+            <div class="historico-transferencia-topo">
+              <div class="historico-transferencia-servidor">
+                <span class="historico-transferencia-badge">
+                  Transferência
+                </span>
+
+                <strong>
+                  ${escaparHtmlServidor(nomeServidor)}
+                </strong>
+
+                <span>
+                  Código: ${escaparHtmlServidor(codigoServidor || "-")}
+                  ·
+                  CPF: ${escaparHtmlServidor(cpfFormatado)}
+                </span>
+              </div>
+
+              <span class="historico-transferencia-data">
+                ${escaparHtmlServidor(dataTransferencia)}
+              </span>
+            </div>
+
+            <p class="historico-transferencia-rota">
+              <strong>
+                ${escaparHtmlServidor(movimentacao.de || "-")}
+              </strong>
+
+              <span class="material-symbols-outlined">
+                arrow_forward
+              </span>
+
+              <strong>
+                ${escaparHtmlServidor(movimentacao.para || "-")}
+              </strong>
+            </p>
+
+            <div class="historico-transferencia-detalhes">
+              <span>
+                <strong>Protocolo:</strong>
+                ${escaparHtmlServidor(movimentacao.protocolo || "-")}
+              </span>
+            </div>
+
+            ${
+              movimentacao.observacao
+                ? `
+                  <p class="historico-transferencia-observacao">
+                    <strong>Observação:</strong>
+                    ${escaparHtmlServidor(movimentacao.observacao)}
+                  </p>
+                `
+                : ""
+            }
+
+            <div class="historico-transferencia-responsavel">
+              Realizado por
+              <strong>
+                ${escaparHtmlServidor(movimentacao.usuario || "Não informado")}
+              </strong>
+            </div>
+          </div>
+
+          <div class="historico-transferencia-acoes">
+            <button
+              type="button"
+              class="btn-pdf-transferencia"
+              data-transferencia-id="${escaparHtmlServidor(movimentacao._key)}"
+              data-servidor-id="${escaparHtmlServidor(movimentacao.servidorId)}"
+              title="Abrir PDF da transferência"
+            >
+              <span class="material-symbols-outlined">
+                picture_as_pdf
+              </span>
+            </button>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+buscaHistoricoTransferencias?.addEventListener(
+  "input",
+  renderHistoricoTransferencias,
+);
+
+listaHistoricoTransferencias?.addEventListener("click", (event) => {
+  const botao = event.target.closest(".btn-pdf-transferencia");
+
+  if (!botao) return;
+
+  const transferenciaId = botao.dataset.transferenciaId;
+  const servidorId = botao.dataset.servidorId;
+
+  const movimentacao = historicoTransferencias.find(
+    (item) => item._key === transferenciaId && item.servidorId === servidorId,
+  );
+
+  if (!movimentacao) {
+    mostrarNotificacao("Transferência não localizada.", "erro");
+    return;
+  }
+
+  const servidorAtual = servidores.find(
+    (servidor) => servidor._key === movimentacao.servidorId,
+  );
+
+  const usuarioTransferencia = window.dadosUsuario?.nome || "USUÁRIO";
+  const criadoEmTransferencia = new Date().toISOString();
+
+  gerarPDFTransferencia({
+    nome: movimentacao.servidorNome || servidorAtual?.nome || "",
+
+    codigo: movimentacao.servidorCodigo || servidorAtual?.codigo || "",
+
+    cpf: movimentacao.servidorCPF || servidorAtual?.cpf || "",
+
+    cargo: movimentacao.servidorCargo || servidorAtual?.cargo || "",
+
+    vinculo: movimentacao.servidorVinculo || servidorAtual?.vinculo || "",
+
+    novoLocal: movimentacao.para || "",
+    dataTransferencia: movimentacao.data || "",
+    protocolo: movimentacao.protocolo || "",
+    observacao: movimentacao.observacao || "",
+
+    usuario: movimentacao.usuario || "",
+    criadoEm: movimentacao.criadoEm || "",
   });
 });
 
@@ -1042,13 +1323,25 @@ async function transferirServidor() {
   );
 
   await push(historicoRef, {
+    tipo: "transferencia",
+
     protocolo,
+
+    servidorId: servidorSelecionado._key,
+    servidorCodigo: servidorSelecionado.codigo || "",
+    servidorNome: servidorSelecionado.nome || "",
+    servidorCPF: servidorSelecionado.cpf || "",
+    servidorCargo: servidorSelecionado.cargo || "",
+    servidorVinculo: servidorSelecionado.vinculo || "",
+
     de: obterLocalServidor(servidorSelecionado),
     para: novoLocal,
+
     data: dataTransferencia,
     observacao,
-    usuario: window.dadosUsuario?.nome || "USUÁRIO",
-    criadoEm: new Date().toISOString(),
+
+    usuario: usuarioTransferencia,
+    criadoEm: criadoEmTransferencia,
   });
 
   // 🧾 Gera PDF
@@ -1062,6 +1355,8 @@ async function transferirServidor() {
     dataTransferencia,
     protocolo,
     observacao,
+    usuario: usuarioTransferencia,
+    criadoEm: criadoEmTransferencia,
   });
 
   // Atualiza visualmente
@@ -1188,8 +1483,12 @@ function gerarPDFTransferencia(dados) {
       // Assinatura (subida)
       y = alturaPagina - 60;
 
+      const dataGeracao = dados.criadoEm
+        ? new Date(dados.criadoEm)
+        : new Date();
+
       doc.text(
-        `Carpina, ${new Date().toLocaleDateString("pt-BR")}.`,
+        `Carpina, ${dataGeracao.toLocaleDateString("pt-BR")}.`,
         xInicial + colunaLargura / 2,
         y,
         { align: "center" },
@@ -1202,7 +1501,8 @@ function gerarPDFTransferencia(dados) {
       doc.setFontSize(9);
       doc.setFont("Helvetica", "bold");
 
-      const nomeUsuario = window.dadosUsuario?.nome || "USUÁRIO";
+      const nomeUsuario =
+        dados.usuario || window.dadosUsuario?.nome || "USUÁRIO";
 
       doc.text(nomeUsuario.toUpperCase(), xInicial + colunaLargura / 2, y, {
         align: "center",
@@ -1226,7 +1526,7 @@ function gerarPDFTransferencia(dados) {
 
       doc.setFontSize(7);
       doc.text(
-        `Protocolo nº ${protocolo} gerado por ${nomeUsuario} em ${new Date().toLocaleString(
+        `Protocolo nº ${protocolo} gerado por ${nomeUsuario} em ${dataGeracao.toLocaleString(
           "pt-BR",
         )}`,
         xInicial + colunaLargura / 2,
