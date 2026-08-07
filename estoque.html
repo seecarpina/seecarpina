@@ -125,7 +125,13 @@
                   <div>
                     <label for="quantidade">Quantidade</label>
 
-                    <input type="number" id="quantidade" min="1" required />
+                    <input
+                      type="search"
+                      id="quantidade"
+                      inputmode="numeric"
+                      autocomplete="off"
+                      required
+                    />
                   </div>
 
                   <div class="campo-botao">
@@ -338,7 +344,12 @@
           <div class="drawer-quantidade">
             <label for="quantidadeEntrega"> Quantidade </label>
 
-            <input type="number" id="quantidadeEntrega" min="1" />
+            <input
+              type="search"
+              id="quantidadeEntrega"
+              inputmode="numeric"
+              autocomplete="off"
+            />
           </div>
 
           <button class="btn" type="button" id="btnAdicionarItem">

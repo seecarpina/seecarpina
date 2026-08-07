@@ -53,6 +53,23 @@ function normalizarBusca(texto) {
     .trim();
 }
 
+function formatarQuantidadeInput(input) {
+  let valor = input.value.replace(/\D/g, "");
+
+  if (!valor) {
+    input.value = "";
+    return;
+  }
+
+  valor = String(Number(valor));
+
+  input.value = Number(valor).toLocaleString("pt-BR");
+}
+
+function obterQuantidadeNumerica(valor) {
+  return Number(String(valor || "").replace(/\./g, ""));
+}
+
 function getNomeResponsavel() {
   return window.dadosUsuario?.nome?.split(" ")[0] || "Usuário";
 }
@@ -427,6 +444,16 @@ const boxMaterial = document.getElementById("autocompleteMaterial");
 const selectCategoriaMaterial = document.getElementById("categoriaMaterial");
 const selectUnidadeMaterial = document.getElementById("unidade");
 
+const inputQuantidade = document.getElementById("quantidade");
+const inputQuantidadeEntrega = document.getElementById("quantidadeEntrega");
+inputQuantidade?.addEventListener("input", () => {
+  formatarQuantidadeInput(inputQuantidade);
+});
+
+inputQuantidadeEntrega?.addEventListener("input", () => {
+  formatarQuantidadeInput(inputQuantidadeEntrega);
+});
+
 const inputDestinoEntrega = document.getElementById("destinoEntrega");
 const boxDestinoEntrega = document.getElementById("autocompleteDestinoEntrega");
 const inputObservacaoEntrega = document.getElementById("observacaoEntrega");
@@ -619,7 +646,7 @@ formMaterial.addEventListener("submit", async (event) => {
 
   const unidade = document.getElementById("unidade").value;
 
-  const quantidade = Number(document.getElementById("quantidade").value);
+  const quantidade = obterQuantidadeNumerica(inputQuantidade.value);
 
   if (!nome || !categoriaId || quantidade <= 0) {
     mostrarNotificacao("Preencha os campos corretamente.", "erro");
@@ -939,7 +966,7 @@ document.addEventListener("keydown", (event) => {
 btnAdicionarItem.addEventListener("click", () => {
   const nomeMaterial = inputMaterialEntrega.value.trim();
 
-  const quantidade = Number(document.getElementById("quantidadeEntrega").value);
+  const quantidade = obterQuantidadeNumerica(inputQuantidadeEntrega.value);
 
   const material = obterMateriaisPermitidos().find(
     (item) => normalizarBusca(item.nome) === normalizarBusca(nomeMaterial),
@@ -983,7 +1010,7 @@ btnAdicionarItem.addEventListener("click", () => {
   renderItensEntrega();
 
   inputMaterialEntrega.value = "";
-  document.getElementById("quantidadeEntrega").value = "";
+  inputQuantidadeEntrega.value = "";
 
   inputMaterialEntrega.focus();
 });
@@ -1200,7 +1227,7 @@ btnGerarRomaneio.addEventListener("click", async () => {
     inputObservacaoEntrega.value = "";
     destinoIdSelecionado = null;
 
-    document.getElementById("quantidadeEntrega").value = "";
+    inputQuantidadeEntrega.value = "";
 
     fecharDrawerEntrega();
 
