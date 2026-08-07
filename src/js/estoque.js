@@ -2022,6 +2022,7 @@ function renderMovimentacoes() {
         ${obterDestinoRomaneio(movimentacao)}
         ${movimentacao.usuario || ""}
         ${movimentacao.responsavel || ""}
+        ${movimentacao.material || ""}
         ${nomesItens}
         ${formatarData(movimentacao.data)}
       `);
