@@ -677,12 +677,10 @@ body.drawer-aberto {
   height: 3.2rem;
 }
 
-.drawer-entrega input,
-.drawer-entrega select,
-.drawer-entrega textarea {
+textarea {
   width: 100%;
   min-width: 0;
-  padding: 0 1rem;
+  padding: 1rem;
   border: 1px solid var(--clr-primary);
   border-radius: var(--border-radius-1);
   background: var(--clr-white);
@@ -856,6 +854,31 @@ body.drawer-aberto {
 .romaneio-status-cancelado {
   color: var(--clr-danger);
   font-weight: 600;
+}
+
+.romaneio-cancelamento-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.romaneio-responsavel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.romaneio-cancelamento-detalhes {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.romaneio-motivo-cancelamento {
+  font-size: 0.85rem;
+  opacity: 0.8;
 }
 
 @media (max-width: 900px) {

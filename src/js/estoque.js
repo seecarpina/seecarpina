@@ -1245,6 +1245,21 @@ function gerarPDF(dados) {
     function adicionarCabecalhoPagina(primeiraPagina = false) {
       doc.addImage(img, "PNG", 0, 0, larguraPagina, alturaPagina);
 
+      if (dados.cancelado === true) {
+        doc.saveGraphicsState();
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(42);
+        doc.setTextColor(210, 210, 210);
+
+        doc.text("CANCELADO", larguraPagina / 2, alturaPagina / 2, {
+          align: "center",
+          angle: 45,
+        });
+
+        doc.restoreGraphicsState();
+      }
+
       if (primeiraPagina) {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(14);
@@ -1253,25 +1268,70 @@ function gerarPDF(dados) {
           align: "center",
         });
 
+        let yCabecalho = 68;
+
+        // ===============================
+        // AVISO DE ROMANEIO CANCELADO
+        // ===============================
+
+        if (dados.cancelado === true) {
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(12);
+
+          doc.text("ROMANEIO CANCELADO", larguraPagina / 2, yCabecalho, {
+            align: "center",
+          });
+
+          yCabecalho += 8;
+
+          if (dados.motivoCancelamento) {
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+
+            const linhasMotivo = doc.splitTextToSize(
+              `Motivo: ${dados.motivoCancelamento}`,
+              larguraTexto,
+            );
+
+            doc.text(linhasMotivo, margemEsquerda, yCabecalho);
+
+            yCabecalho += linhasMotivo.length * 5 + 5;
+          }
+        }
+
         doc.setFont("helvetica", "normal");
         doc.setFontSize(12);
 
-        doc.text(`Destino: ${obterDestinoRomaneio(dados)}`, margemEsquerda, 68);
+        doc.text(
+          `Destino: ${obterDestinoRomaneio(dados)}`,
+          margemEsquerda,
+          yCabecalho,
+        );
 
-        doc.text(`Data: ${formatarData(dados.data)}`, margemEsquerda, 76);
+        yCabecalho += 8;
+
+        doc.text(
+          `Data: ${formatarData(dados.data)}`,
+          margemEsquerda,
+          yCabecalho,
+        );
+
+        yCabecalho += 8;
 
         doc.text(
           `Responsável: ${dados.responsavel || "-"}`,
           margemEsquerda,
-          84,
+          yCabecalho,
         );
+
+        yCabecalho += 18;
 
         doc.setFont("helvetica", "bold");
         doc.setFontSize(12);
 
-        doc.text("ITENS:", margemEsquerda, 102);
+        doc.text("ITENS:", margemEsquerda, yCabecalho);
 
-        y = 112;
+        y = yCabecalho + 10;
       } else {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(12);
@@ -1588,6 +1648,25 @@ async function cancelarRomaneio(romaneioId) {
 
   if (!confirmou) return;
 
+  const motivoCancelamento = await window.mostrarPrompt({
+    titulo: "Motivo do cancelamento",
+    mensagem: "Informe o motivo do cancelamento deste romaneio.",
+    tipo: "informacao",
+    placeholder: "Digite o motivo do cancelamento...",
+    textoConfirmar: "Confirmar cancelamento",
+    textoCancelar: "Voltar",
+    obrigatorio: true,
+  });
+
+  if (motivoCancelamento === null) return;
+
+  const motivo = motivoCancelamento.trim();
+
+  if (!motivo) {
+    mostrarNotificacao("Informe o motivo do cancelamento.", "erro");
+    return;
+  }
+
   cancelandoRomaneio = true;
 
   try {
@@ -1637,6 +1716,8 @@ async function cancelarRomaneio(romaneioId) {
       destinoId: movimentacao.destinoId || null,
       destino: movimentacao.destino || destino,
 
+      motivo,
+
       itens: movimentacao.itens.map((item) => ({
         materialId: item.materialId,
         material: item.nome || "",
@@ -1655,6 +1736,7 @@ async function cancelarRomaneio(romaneioId) {
     atualizacoes[`movimentacoes/${romaneioId}/canceladoEm`] = agora;
     atualizacoes[`movimentacoes/${romaneioId}/canceladoPor`] =
       getNomeResponsavel();
+    atualizacoes[`movimentacoes/${romaneioId}/motivoCancelamento`] = motivo;
 
     await update(ref(rtdb), atualizacoes);
 
@@ -1749,26 +1831,42 @@ function renderHistorico() {
                 item${quantidadeItens === 1 ? "" : "s"}
               </span>
 
-              <span>
-                <span class="material-symbols-outlined">
-                  person
+              <div class="romaneio-cancelamento-info">
+                <span class="romaneio-responsavel">
+                  <span class="material-symbols-outlined">
+                    person
+                  </span>
+
+                  ${escaparHtmlEstoque(movimentacao.responsavel || "-")}
                 </span>
 
-                ${escaparHtmlEstoque(movimentacao.responsavel || "-")}
                 ${
                   movimentacao.cancelado === true
                     ? `
-                      <span class="romaneio-status-cancelado">
-                        <span class="material-symbols-outlined">
-                          cancel
+                      <div class="romaneio-cancelamento-detalhes">
+                        <span class="romaneio-status-cancelado">
+                          <span class="material-symbols-outlined">
+                            cancel
+                          </span>
+
+                          Cancelado
                         </span>
 
-                        Cancelado
-                      </span>
+                        ${
+                          movimentacao.motivoCancelamento
+                            ? `
+                              <span class="romaneio-motivo-cancelamento">
+                                <strong>Motivo:</strong>
+                                ${escaparHtmlEstoque(movimentacao.motivoCancelamento)}
+                              </span>
+                            `
+                            : ""
+                        }
+                      </div>
                     `
                     : ""
                 }
-              </span>
+              </div>
             </div>
           </div>
 
@@ -2017,6 +2115,17 @@ function renderMovimentacoes() {
         <ul class="movimentacao-itens-devolvidos">
           ${listaItens}
         </ul>
+
+        ${
+          movimentacao.motivo
+            ? `
+      <p>
+        <strong>Motivo:</strong>
+        ${escaparHtmlEstoque(movimentacao.motivo)}
+      </p>
+    `
+            : ""
+        }
       </div>
     </article>
   `;

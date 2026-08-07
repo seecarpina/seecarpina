@@ -223,3 +223,124 @@ window.mostrarAlerta = function ({
     mostrarCancelar: false,
   });
 };
+
+window.mostrarPrompt = function ({
+  titulo = "Informe os dados",
+  mensagem = "",
+  tipo = "informacao",
+  placeholder = "",
+  textoConfirmar = "Confirmar",
+  textoCancelar = "Cancelar",
+  obrigatorio = false,
+} = {}) {
+  criarEstruturaDialogo();
+
+  const overlay = document.getElementById("dialogoGlobalOverlay");
+  const dialogo = document.getElementById("dialogoGlobal");
+  const tituloElemento = document.getElementById("dialogoGlobalTitulo");
+  const mensagemElemento = document.getElementById("dialogoGlobalMensagem");
+  const iconeElemento = document.getElementById("dialogoGlobalIcone");
+  const btnConfirmar = document.getElementById("dialogoGlobalConfirmar");
+  const btnCancelar = document.getElementById("dialogoGlobalCancelar");
+
+  const configuracao = obterConfiguracaoDialogo(tipo);
+
+  dialogo.className = `
+    dialogo-global
+    ${configuracao.classe}
+  `;
+
+  tituloElemento.textContent = titulo;
+  mensagemElemento.textContent = mensagem;
+
+  iconeElemento.textContent = configuracao.icone;
+
+  btnConfirmar.textContent = textoConfirmar;
+  btnCancelar.textContent = textoCancelar;
+
+  btnCancelar.style.display = "inline-flex";
+
+  // Remove um campo anterior, caso exista
+  document.getElementById("dialogoGlobalPrompt")?.remove();
+
+  const input = document.createElement("textarea");
+
+  input.id = "dialogoGlobalPrompt";
+  input.className = "dialogo-global-prompt";
+  input.placeholder = placeholder;
+  input.rows = 3;
+  input.maxLength = 500;
+
+  mensagemElemento.insertAdjacentElement("afterend", input);
+
+  overlay.classList.add("ativo");
+  document.body.classList.add("dialogo-aberto");
+
+  return new Promise((resolve) => {
+    let resolvido = false;
+
+    function finalizar(valor) {
+      if (resolvido) return;
+
+      resolvido = true;
+
+      overlay.classList.remove("ativo");
+      document.body.classList.remove("dialogo-aberto");
+
+      input.remove();
+
+      btnConfirmar.removeEventListener("click", confirmar);
+      btnCancelar.removeEventListener("click", cancelar);
+      overlay.removeEventListener("click", clicarFora);
+      document.removeEventListener("keydown", pressionarTecla);
+
+      resolve(valor);
+    }
+
+    function confirmar() {
+      const valor = input.value.trim();
+
+      if (obrigatorio && !valor) {
+        input.classList.add("erro");
+        input.focus();
+        return;
+      }
+
+      finalizar(valor);
+    }
+
+    function cancelar() {
+      finalizar(null);
+    }
+
+    function clicarFora(event) {
+      if (event.target === overlay) {
+        finalizar(null);
+      }
+    }
+
+    function pressionarTecla(event) {
+      if (event.key === "Escape") {
+        finalizar(null);
+      }
+
+      // Ctrl + Enter confirma
+      if (event.key === "Enter" && event.ctrlKey) {
+        confirmar();
+      }
+    }
+
+    btnConfirmar.addEventListener("click", confirmar);
+    btnCancelar.addEventListener("click", cancelar);
+    overlay.addEventListener("click", clicarFora);
+    document.addEventListener("keydown", pressionarTecla);
+
+    input.addEventListener("input", () => {
+      input.classList.remove("erro");
+    });
+
+    setTimeout(() => {
+      input.focus();
+    }, 50);
+  });
+};
