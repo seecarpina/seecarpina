@@ -677,7 +677,8 @@ body.drawer-aberto {
   height: 3.2rem;
 }
 
-textarea {
+.drawer-campo textarea,
+#dialogoGlobal textarea {
   width: 100%;
   min-width: 0;
   padding: 1rem;
