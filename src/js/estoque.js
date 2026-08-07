@@ -1773,6 +1773,7 @@ function renderHistorico() {
       const texto = normalizarBusca(`
         ${obterDestinoRomaneio(movimentacao)}
         ${movimentacao.responsavel || ""}
+        ${movimentacao.motivoCancelamento || ""}
         ${formatarData(movimentacao.data)}
       `);
 
