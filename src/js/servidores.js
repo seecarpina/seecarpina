@@ -1047,6 +1047,7 @@ async function transferirServidor() {
     para: novoLocal,
     data: dataTransferencia,
     observacao,
+    usuario: window.dadosUsuario?.nome || "USUÁRIO",
     criadoEm: new Date().toISOString(),
   });
 
@@ -1126,7 +1127,7 @@ function gerarPDFTransferencia(dados) {
       doc.setFontSize(10);
       doc.setFont("Helvetica", "normal");
 
-      doc.text("Da: SECRETARIA DE EDUCAÇÃO", xInicial, y);
+      doc.text("Da: SECRETARIA MUNICIPAL DE EDUCAÇÃO E ESPORTES", xInicial, y);
       y += 6;
 
       doc.text(`À Direção da: ${dados.novoLocal}`, xInicial, y);
@@ -1199,25 +1200,33 @@ function gerarPDFTransferencia(dados) {
 
       y += 6;
       doc.setFontSize(9);
-      doc.text("ROSEJARA RAMOS DE OLIVEIRA", xInicial + colunaLargura / 2, y, {
+      doc.setFont("Helvetica", "bold");
+
+      const nomeUsuario = window.dadosUsuario?.nome || "USUÁRIO";
+
+      doc.text(nomeUsuario.toUpperCase(), xInicial + colunaLargura / 2, y, {
         align: "center",
       });
 
       y += 4;
+
+      doc.setFont("Helvetica", "normal");
+
       doc.text(
-        "Secretária Municipal de Educação e Esportes",
+        "Secretaria Municipal de Educação e Esportes",
         xInicial + colunaLargura / 2,
         y,
-        { align: "center" },
+        {
+          align: "center",
+        },
       );
 
       // Rodapé
-      const usuario = window.dadosUsuario?.nome || "USUÁRIO";
       const protocolo = dados.protocolo;
 
       doc.setFontSize(7);
       doc.text(
-        `Protocolo nº ${protocolo} gerado por ${usuario} em ${new Date().toLocaleString(
+        `Protocolo nº ${protocolo} gerado por ${nomeUsuario} em ${new Date().toLocaleString(
           "pt-BR",
         )}`,
         xInicial + colunaLargura / 2,
