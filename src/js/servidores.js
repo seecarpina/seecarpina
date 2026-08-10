@@ -1306,6 +1306,10 @@ async function transferirServidor() {
   const novoLocal = obterNomeLocal(novoLocalId);
   const protocolo = gerarNumeroProtocolo();
 
+  const usuarioTransferencia = window.dadosUsuario?.nome || "USUÁRIO";
+
+  const criadoEmTransferencia = new Date().toISOString();
+
   const servidorRef = ref(
     rtdb,
     `servidores/registros/${servidorSelecionado._key}`,
