@@ -321,6 +321,23 @@ button {
   text-align: center;
 }
 
+.mensagem-login.sucesso {
+  border-color: rgba(52, 199, 89, 0.3);
+  color: #248a3d;
+  background: rgba(52, 199, 89, 0.1);
+}
+
+.login-ajuda a {
+  color: var(--cor-primaria);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.login-ajuda a:hover {
+  color: var(--cor-primaria-escura);
+  text-decoration: underline;
+}
+
 @media (max-width: 900px) {
   .pagina-login {
     grid-template-columns: 1fr;

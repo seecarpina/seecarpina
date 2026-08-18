@@ -1,112 +1,309 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cadastro - SEE Carpina</title>
-    <link rel="stylesheet" href="./src/css/style.css" />
+    <link rel="stylesheet" href="./gestao-escolar/src/css/login.css" />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
     />
   </head>
   <body>
-    <main class="login">
-      <form id="formCadastro" class="glass">
-        <div>
-          <h1>Cadastro</h1>
+    <main class="pagina-login">
+      <section class="login-apresentacao">
+        <div class="login-apresentacao-conteudo">
+          <span class="login-identificacao">
+            Secretaria Municipal de Educação e Esportes
+          </span>
+
+          <h1>Sistema SEE Carpina</h1>
+
+          <p>
+            Crie sua conta para acessar as ferramentas administrativas da
+            Secretaria de Educação.
+          </p>
         </div>
-        <div>
-          <input
-            type="text"
-            id="nome"
-            name="nome"
-            placeholder="Nome completo"
-            required
-          />
+      </section>
+
+      <section class="login-area">
+        <div class="login-card">
+          <div class="login-cabecalho">
+            <div class="login-icone">
+              <span class="material-symbols-outlined"> person_add </span>
+            </div>
+
+            <div>
+              <h2>Criar conta</h2>
+              <p>Preencha seus dados de acesso.</p>
+            </div>
+          </div>
+
+          <form id="formCadastro">
+            <div class="campo-login">
+              <label for="nome">Nome completo</label>
+
+              <div class="campo-input">
+                <span class="material-symbols-outlined">person</span>
+
+                <input
+                  type="text"
+                  id="nome"
+                  name="nome"
+                  placeholder="Digite seu nome completo"
+                  autocomplete="name"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="campo-login">
+              <label for="email">E-mail</label>
+
+              <div class="campo-input">
+                <span class="material-symbols-outlined">mail</span>
+
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="seuemail@carpina.pe.gov.br"
+                  autocomplete="email"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="campo-login">
+              <label for="senha">Senha</label>
+
+              <div class="campo-input">
+                <span class="material-symbols-outlined">lock</span>
+
+                <input
+                  type="password"
+                  id="senha"
+                  name="senha"
+                  placeholder="Crie uma senha"
+                  autocomplete="new-password"
+                  minlength="6"
+                  required
+                />
+
+                <button
+                  type="button"
+                  id="btnMostrarSenha"
+                  class="btn-mostrar-senha"
+                  title="Mostrar senha"
+                  aria-label="Mostrar senha"
+                >
+                  <span class="material-symbols-outlined"> visibility </span>
+                </button>
+              </div>
+            </div>
+
+            <div
+              id="mensagemCadastro"
+              class="mensagem-login"
+              role="alert"
+            ></div>
+
+            <button type="submit" id="btnCadastrar" class="btn-entrar">
+              <span class="material-symbols-outlined"> person_add </span>
+
+              <span>Cadastrar</span>
+            </button>
+          </form>
+
+          <p class="login-ajuda">
+            Já possui uma conta?
+            <a href="./login.html">Entrar no sistema</a>
+          </p>
         </div>
-        <div>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="E-mail"
-            required
-          />
-        </div>
-        <div>
-          <input
-            type="password"
-            id="senha"
-            name="senha"
-            placeholder="Senha"
-            required
-          />
-        </div>
-        <button class="btn">Cadastrar</button>
-        <p>Já tem conta? <a href="login.html">Entrar</a></p>
-      </form>
+      </section>
     </main>
 
     <!-- Firebase Auth + Firestore -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+
       import {
         getAuth,
         createUserWithEmailAndPassword,
         updateProfile,
       } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
       import {
         getFirestore,
         doc,
         setDoc,
       } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-      // 🔥 Configuração do seu Firebase
       const firebaseConfig = {
         apiKey: "AIzaSyCl69j1qpqKObNlZFSDOaJY5Ob8arFCr3k",
         authDomain: "see-carpina-2a774.firebaseapp.com",
         projectId: "see-carpina-2a774",
       };
 
-      // Inicializa Firebase
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const db = getFirestore(app);
 
-      // 📋 Formulário de cadastro
-      const form = document.getElementById("formCadastro");
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
+      const formCadastro = document.getElementById("formCadastro");
+      const inputNome = document.getElementById("nome");
+      const inputEmail = document.getElementById("email");
+      const inputSenha = document.getElementById("senha");
+      const btnCadastrar = document.getElementById("btnCadastrar");
+      const btnMostrarSenha = document.getElementById("btnMostrarSenha");
+      const mensagemCadastro = document.getElementById("mensagemCadastro");
 
-        const nome = document.getElementById("nome").value.trim();
-        const email = document.getElementById("email").value.trim();
-        const senha = document.getElementById("senha").value.trim();
+      let cadastroEmAndamento = false;
+
+      function mostrarMensagem(mensagem, tipo = "erro") {
+        mensagemCadastro.textContent = mensagem;
+
+        mensagemCadastro.className =
+          tipo === "sucesso"
+            ? "mensagem-login ativa sucesso"
+            : "mensagem-login ativa";
+      }
+
+      function limparMensagem() {
+        mensagemCadastro.textContent = "";
+        mensagemCadastro.className = "mensagem-login";
+      }
+
+      function alterarCarregamento(carregando) {
+        btnCadastrar.disabled = carregando;
+
+        if (carregando) {
+          btnCadastrar.innerHTML = `
+        <span class="material-symbols-outlined">
+          progress_activity
+        </span>
+
+        <span>Cadastrando...</span>
+      `;
+
+          return;
+        }
+
+        btnCadastrar.innerHTML = `
+      <span class="material-symbols-outlined">
+        person_add
+      </span>
+
+      <span>Cadastrar</span>
+    `;
+      }
+
+      function obterMensagemErro(error) {
+        const mensagens = {
+          "auth/email-already-in-use": "Este e-mail já está cadastrado.",
+
+          "auth/invalid-email": "Informe um endereço de e-mail válido.",
+
+          "auth/weak-password": "A senha deve possuir pelo menos 6 caracteres.",
+
+          "auth/missing-password": "Informe uma senha.",
+
+          "auth/network-request-failed":
+            "Não foi possível conectar ao servidor. Verifique sua internet.",
+
+          "auth/too-many-requests":
+            "Muitas tentativas foram realizadas. Aguarde alguns minutos.",
+        };
+
+        return (
+          mensagens[error.code] ||
+          "Não foi possível concluir o cadastro. Tente novamente."
+        );
+      }
+
+      formCadastro.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        if (cadastroEmAndamento) {
+          return;
+        }
+
+        limparMensagem();
+
+        const nome = inputNome.value.trim();
+        const email = inputEmail.value.trim();
+        const senha = inputSenha.value;
+
+        if (!nome || !email || !senha) {
+          mostrarMensagem("Preencha todos os campos.");
+          return;
+        }
+
+        if (senha.length < 6) {
+          mostrarMensagem("A senha deve possuir pelo menos 6 caracteres.");
+
+          return;
+        }
+
+        cadastroEmAndamento = true;
+        alterarCarregamento(true);
 
         try {
-          // 1️⃣ Cria usuário no Firebase Auth
-          const userCredential = await createUserWithEmailAndPassword(
+          const credencial = await createUserWithEmailAndPassword(
             auth,
             email,
-            senha
+            senha,
           );
-          const user = userCredential.user;
 
-          // 2️⃣ Atualiza o perfil com o nome
-          await updateProfile(user, { displayName: nome });
+          const usuario = credencial.user;
 
-          // 3️⃣ Cria documento no Firestore com os dados do usuário
-          await setDoc(doc(db, "usuarios", user.uid), {
-            nome: nome,
-            email: email,
+          await updateProfile(usuario, {
+            displayName: nome,
+          });
+
+          await setDoc(doc(db, "usuarios", usuario.uid), {
+            nome,
+            email,
             criadoEm: new Date().toISOString(),
           });
 
-          alert("Usuário cadastrado com sucesso!");
-          window.location.href = "index.html";
+          mostrarMensagem(
+            "Cadastro realizado com sucesso. Redirecionando...",
+            "sucesso",
+          );
+
+          setTimeout(() => {
+            window.location.replace("./");
+          }, 1200);
         } catch (error) {
-          alert("Erro ao cadastrar: " + error.message);
+          console.error("Erro ao cadastrar usuário:", error);
+
+          mostrarMensagem(obterMensagemErro(error));
+
+          cadastroEmAndamento = false;
+          alterarCarregamento(false);
         }
+      });
+
+      btnMostrarSenha.addEventListener("click", () => {
+        const senhaVisivel = inputSenha.type === "text";
+
+        inputSenha.type = senhaVisivel ? "password" : "text";
+
+        btnMostrarSenha.innerHTML = `
+      <span class="material-symbols-outlined">
+        ${senhaVisivel ? "visibility" : "visibility_off"}
+      </span>
+    `;
+
+        btnMostrarSenha.title = senhaVisivel
+          ? "Mostrar senha"
+          : "Ocultar senha";
+
+        btnMostrarSenha.setAttribute(
+          "aria-label",
+          senhaVisivel ? "Mostrar senha" : "Ocultar senha",
+        );
       });
     </script>
   </body>

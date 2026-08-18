@@ -1,84 +1,111 @@
 <!doctype html>
-<html lang="pt-br">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SEE Carpina</title>
-    <link rel="stylesheet" href="./src/css/style.css" />
+
+    <title>Acesso ao sistema | SEE Carpina</title>
+
+    <link rel="stylesheet" href="./gestao-escolar/src/css/login.css" />
+
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
     />
   </head>
+
   <body>
-    <main class="login">
-      <form action="" class="glass">
-        <div>
-          <h1>Login</h1>
+    <main class="pagina-login">
+      <section class="login-apresentacao">
+        <div class="login-apresentacao-conteudo">
+          <span class="login-identificacao">
+            Secretaria Municipal de Educação e Esportes
+          </span>
+
+          <h1>Sistema SEE Carpina</h1>
+
+          <p>
+            Acesse as ferramentas administrativas e acompanhe as atividades da
+            Secretaria de Educação.
+          </p>
         </div>
-        <div>
-          <input
-            type="email"
-            id="login"
-            name="login"
-            placeholder="Email"
-            required
-          />
+      </section>
+
+      <section class="login-area">
+        <div class="login-card">
+          <div class="login-cabecalho">
+            <div class="login-icone">
+              <span class="material-symbols-outlined">
+                admin_panel_settings
+              </span>
+            </div>
+
+            <div>
+              <h2>Entrar no sistema</h2>
+              <p>Informe seu e-mail e sua senha.</p>
+            </div>
+          </div>
+
+          <form id="formLogin">
+            <div class="campo-login">
+              <label for="email">E-mail</label>
+
+              <div class="campo-input">
+                <span class="material-symbols-outlined">mail</span>
+
+                <input
+                  type="email"
+                  id="email"
+                  placeholder="seuemail@carpina.pe.gov.br"
+                  autocomplete="email"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="campo-login">
+              <label for="senha">Senha</label>
+
+              <div class="campo-input">
+                <span class="material-symbols-outlined">lock</span>
+
+                <input
+                  type="password"
+                  id="senha"
+                  placeholder="Digite sua senha"
+                  autocomplete="current-password"
+                  required
+                />
+
+                <button
+                  type="button"
+                  id="btnMostrarSenha"
+                  class="btn-mostrar-senha"
+                  title="Mostrar senha"
+                  aria-label="Mostrar senha"
+                >
+                  <span class="material-symbols-outlined"> visibility </span>
+                </button>
+              </div>
+            </div>
+
+            <div id="mensagemLogin" class="mensagem-login" role="alert"></div>
+
+            <button type="submit" id="btnEntrar" class="btn-entrar">
+              <span class="material-symbols-outlined">login</span>
+              <span>Entrar</span>
+            </button>
+          </form>
+
+          <p class="login-ajuda">
+            Em caso de dificuldade de acesso, entre em contato com o
+            administrador do sistema.
+          </p>
         </div>
-        <div>
-          <input
-            type="password"
-            id="senha"
-            name="senha"
-            placeholder="Senha"
-            required
-          />
-        </div>
-        <button class="btn">Entrar</button>
-        <!-- <input type="button" class="btn" value="Entrar" /> -->
-      </form>
+      </section>
     </main>
 
-    <script type="module">
-      // Importa o Firebase
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-      import {
-        getAuth,
-        signInWithEmailAndPassword,
-        onAuthStateChanged,
-      } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-
-      // Configuração do Firebase
-      const firebaseConfig = {
-        apiKey: "AIzaSyCl69j1qpqKObNlZFSDOaJY5Ob8arFCr3k",
-        authDomain: "see-carpina-2a774.firebaseapp.com",
-        projectId: "see-carpina-2a774",
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-
-      // Login
-      const form = document.querySelector("form");
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const email = document.getElementById("login").value;
-        const password = document.getElementById("senha").value;
-
-        try {
-          await signInWithEmailAndPassword(auth, email, password);
-          window.location.href = "./";
-        } catch (error) {
-          alert("Erro ao logar: " + error.message);
-        }
-      });
-
-      // Se já estiver logado, redireciona direto
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          window.location.href = "./";
-        }
-      });
-    </script>
+    <script type="module" src="./src/js/login.js"></script>
   </body>
 </html>
