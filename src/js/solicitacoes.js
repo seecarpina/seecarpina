@@ -59,7 +59,9 @@ const listaCentralSolicitacoes = document.getElementById(
 );
 
 const totalRecebidas = document.getElementById("totalRecebidas");
-const totalEmAnalise = document.getElementById("totalEmAnalise");
+const totalAtendidasParcialmente = document.getElementById(
+  "totalAtendidasParcialmente",
+);
 const totalEmAtendimento = document.getElementById("totalEmAtendimento");
 const totalConcluidas = document.getElementById("totalConcluidas");
 
@@ -356,8 +358,8 @@ function atualizarIndicadores() {
     (solicitacao) => solicitacao.status === "RECEBIDA",
   ).length;
 
-  totalEmAnalise.textContent = permitidas.filter(
-    (solicitacao) => solicitacao.status === "EM_ANALISE",
+  totalAtendidasParcialmente.textContent = permitidas.filter(
+    (solicitacao) => solicitacao.status === "ATENDIDA_PARCIALMENTE",
   ).length;
 
   totalEmAtendimento.textContent = permitidas.filter(
@@ -684,19 +686,18 @@ function renderizarDadosEspecificos(solicitacao) {
 }
 
 const transicoesStatus = {
-  RECEBIDA: ["EM_ANALISE", "APROVADA", "INDEFERIDA"],
-
-  EM_ANALISE: ["APROVADA", "INDEFERIDA"],
-
-  APROVADA: ["EM_ATENDIMENTO"],
+  RECEBIDA: ["EM_ATENDIMENTO"],
 
   EM_ATENDIMENTO: ["CONCLUIDA", "ATENDIDA_PARCIALMENTE"],
 
-  ATENDIDA_PARCIALMENTE: ["EM_ATENDIMENTO", "CONCLUIDA"],
-
   CONCLUIDA: [],
-  INDEFERIDA: [],
+  ATENDIDA_PARCIALMENTE: [],
   CANCELADA: [],
+
+  // Compatibilidade com solicitações antigas
+  EM_ANALISE: ["EM_ATENDIMENTO"],
+  APROVADA: ["EM_ATENDIMENTO"],
+  INDEFERIDA: [],
 };
 
 function obterTransicoesPermitidas(statusAtual) {
