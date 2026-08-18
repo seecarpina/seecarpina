@@ -233,7 +233,7 @@ function carregarSolicitacoesRecentes(escolaId) {
     </div>
   `;
 
-  const registrosRef = ref(rtdb, "portalGestor/solicitacoesInsumos/registros");
+  const registrosRef = ref(rtdb, "portalGestor/solicitacoes/registros");
 
   const consultaEscola = query(
     registrosRef,
