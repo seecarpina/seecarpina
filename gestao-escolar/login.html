@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Portal do Gestor Escolar | SEE Carpina</title>
+
+    <link rel="stylesheet" href="./src/css/login.css" />
+
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+  </head>
+
+  <body>
+    <main class="pagina-login">
+      <section class="login-apresentacao">
+        <div class="login-apresentacao-conteudo">
+          <span class="login-identificacao">
+            Secretaria Municipal de Educação e Esportes
+          </span>
+
+          <h1>Portal do Gestor Escolar</h1>
+
+          <p>
+            Acesse as ferramentas de solicitação e acompanhe os atendimentos da
+            sua unidade escolar.
+          </p>
+        </div>
+      </section>
+
+      <section class="login-area">
+        <div class="login-card">
+          <div class="login-cabecalho">
+            <div class="login-icone">
+              <span class="material-symbols-outlined">school</span>
+            </div>
+
+            <div>
+              <h2>Entrar no portal</h2>
+              <p>Informe seu e-mail e sua senha.</p>
+            </div>
+          </div>
+
+          <form id="formLogin">
+            <div class="campo-login">
+              <label for="email">E-mail</label>
+
+              <div class="campo-input">
+                <span class="material-symbols-outlined">mail</span>
+
+                <input
+                  type="email"
+                  id="email"
+                  placeholder="gestor@escola.com"
+                  autocomplete="email"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="campo-login">
+              <label for="senha">Senha</label>
+
+              <div class="campo-input">
+                <span class="material-symbols-outlined">lock</span>
+
+                <input
+                  type="password"
+                  id="senha"
+                  placeholder="Digite sua senha"
+                  autocomplete="current-password"
+                  required
+                />
+
+                <button
+                  type="button"
+                  id="btnMostrarSenha"
+                  class="btn-mostrar-senha"
+                  title="Mostrar senha"
+                  aria-label="Mostrar senha"
+                >
+                  <span class="material-symbols-outlined">visibility</span>
+                </button>
+              </div>
+            </div>
+
+            <div id="mensagemLogin" class="mensagem-login" role="alert"></div>
+
+            <button type="submit" id="btnEntrar" class="btn-entrar">
+              <span class="material-symbols-outlined">login</span>
+              <span>Entrar</span>
+            </button>
+          </form>
+
+          <p class="login-ajuda">
+            Em caso de dificuldade de acesso, entre em contato com a Secretaria
+            de Educação.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./src/js/login.js"></script>
+  </body>
+</html>

@@ -696,11 +696,40 @@ function salvarUsuarioCache(usuario) {
   const dadosCache = {
     nome: usuario.nome || "",
     cargo: usuario.cargo || "",
+    perfil: usuario.perfil || "",
     foto: usuario.foto || "",
     ativo: usuario.ativo,
+    escolaId: usuario.escolaId || "",
+    escolaNome: usuario.escolaNome || "",
   };
 
   localStorage.setItem("usuarioCache", JSON.stringify(dadosCache));
+}
+
+function obterUrlPortalGestor() {
+  const ambienteLocal = ["localhost", "127.0.0.1"].includes(
+    window.location.hostname,
+  );
+
+  if (ambienteLocal) {
+    return `${window.location.origin}/gestao-escolar/`;
+  }
+
+  return "https://gestao-escolar.seecarpina.online";
+}
+
+function redirecionarGestorEscolar(dadosUsuario) {
+  const perfil = String(dadosUsuario?.perfil || "")
+    .trim()
+    .toUpperCase();
+
+  if (perfil !== "GESTOR_ESCOLAR") {
+    return false;
+  }
+
+  window.location.replace(obterUrlPortalGestor());
+
+  return true;
 }
 
 onAuthStateChanged(auth, async (user) => {
@@ -720,6 +749,10 @@ onAuthStateChanged(auth, async (user) => {
 
   if (usuarioCache) {
     window.dadosUsuario = usuarioCache;
+
+    if (redirecionarGestorEscolar(usuarioCache)) {
+      return;
+    }
 
     if (usuarioCache.nome) {
       nomeResponsavel = usuarioCache.nome.split(" ")[0];
@@ -817,6 +850,10 @@ onAuthStateChanged(auth, async (user) => {
     // ==================================
     // ATUALIZA CACHE
     // ==================================
+
+    if (redirecionarGestorEscolar(dadosUsuario)) {
+      return;
+    }
 
     salvarUsuarioCache(dadosUsuario);
 

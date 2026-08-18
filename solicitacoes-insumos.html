@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Solicitações de Insumos - SEE Carpina</title>
+
+    <link rel="stylesheet" href="./src/css/style.css" />
+    <link rel="stylesheet" href="./src/css/solicitacoes-insumos.css" />
+
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+  </head>
+
+  <body>
+    <div id="notificacao"></div>
+
+    <button id="btnTopo">↑</button>
+
+    <div class="loading">
+      <svg
+        class="svg-spinner"
+        viewBox="0 0 50 50"
+        role="img"
+        aria-label="Carregando"
+      >
+        <circle
+          class="path"
+          cx="25"
+          cy="25"
+          r="20"
+          fill="none"
+          stroke-width="4"
+        />
+      </svg>
+    </div>
+
+    <div class="container">
+      <aside id="sidebar"></aside>
+
+      <main>
+        <h1>Solicitações de Insumos</h1>
+
+        <div class="solicitacoes-insumos-grid">
+          <section class="box glass">
+            <div class="info-card">
+              <span class="material-symbols-outlined"> water_drop </span>
+
+              <div>
+                <strong>Solicitações das unidades escolares</strong><br />
+
+                Analise e acompanhe os pedidos de água mineral, gás de cozinha e
+                abastecimento por caminhão-pipa.
+              </div>
+            </div>
+          </section>
+
+          <section class="resumo-solicitacoes">
+            <article class="card-resumo-solicitacao">
+              <div class="card-resumo-icone recebidas">
+                <span class="material-symbols-outlined">
+                  mark_email_unread
+                </span>
+              </div>
+
+              <div>
+                <span>Recebidas</span>
+                <strong id="totalRecebidas">0</strong>
+              </div>
+            </article>
+
+            <article class="card-resumo-solicitacao">
+              <div class="card-resumo-icone analise">
+                <span class="material-symbols-outlined"> manage_search </span>
+              </div>
+
+              <div>
+                <span>Em análise</span>
+                <strong id="totalEmAnalise">0</strong>
+              </div>
+            </article>
+
+            <article class="card-resumo-solicitacao">
+              <div class="card-resumo-icone atendimento">
+                <span class="material-symbols-outlined"> local_shipping </span>
+              </div>
+
+              <div>
+                <span>Em atendimento</span>
+                <strong id="totalEmAtendimento">0</strong>
+              </div>
+            </article>
+
+            <article class="card-resumo-solicitacao">
+              <div class="card-resumo-icone concluidas">
+                <span class="material-symbols-outlined"> check_circle </span>
+              </div>
+
+              <div>
+                <span>Concluídas</span>
+                <strong id="totalConcluidas">0</strong>
+              </div>
+            </article>
+          </section>
+
+          <section class="box glass painel-solicitacoes">
+            <div class="cabecalho-listagem-solicitacoes">
+              <div>
+                <h2>Solicitações recebidas</h2>
+
+                <span id="contadorSolicitacoes">
+                  Carregando solicitações...
+                </span>
+              </div>
+            </div>
+
+            <div class="filtros-solicitacoes">
+              <div class="busca-solicitacoes">
+                <span class="material-symbols-outlined"> search </span>
+
+                <input
+                  type="search"
+                  id="buscaSolicitacoes"
+                  placeholder="Buscar por protocolo, escola, gestor ou item"
+                  autocomplete="off"
+                />
+              </div>
+
+              <select id="filtroTipoSolicitacao">
+                <option value="">Todos os itens</option>
+                <option value="AGUA_MINERAL">Água mineral</option>
+                <option value="GAS_P13">Gás — Botijão P13</option>
+                <option value="GAS_P45">Gás — Cilindro P45</option>
+                <option value="CAMINHAO_PIPA">Caminhão-pipa</option>
+              </select>
+
+              <select id="filtroStatusSolicitacao">
+                <option value="">Todas as situações</option>
+                <option value="RECEBIDA">Recebida</option>
+                <option value="EM_ANALISE">Em análise</option>
+                <option value="APROVADA">Aprovada</option>
+                <option value="EM_ATENDIMENTO">Em atendimento</option>
+                <option value="CONCLUIDA">Concluída</option>
+                <option value="ATENDIDA_PARCIALMENTE">
+                  Atendida parcialmente
+                </option>
+                <option value="INDEFERIDA">Indeferida</option>
+                <option value="CANCELADA">Cancelada</option>
+              </select>
+
+              <select id="filtroPrioridadeSolicitacao">
+                <option value="">Todas as prioridades</option>
+                <option value="NORMAL">Normal</option>
+                <option value="URGENTE">Urgente</option>
+              </select>
+            </div>
+
+            <div
+              id="listaSolicitacoesAdministrativo"
+              class="lista-solicitacoes-administrativo"
+            >
+              <div class="estado-solicitacoes">
+                <span class="material-symbols-outlined">
+                  progress_activity
+                </span>
+
+                <strong>Carregando solicitações...</strong>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <div class="right"></div>
+    </div>
+
+    <div id="overlaySolicitacao" class="overlay-solicitacao"></div>
+
+    <aside id="drawerSolicitacao" class="drawer-solicitacao">
+      <header class="drawer-solicitacao-cabecalho">
+        <div class="drawer-solicitacao-titulo">
+          <div class="drawer-solicitacao-icone">
+            <span id="iconeSolicitacaoDrawer" class="material-symbols-outlined">
+              inventory_2
+            </span>
+          </div>
+
+          <div>
+            <span id="protocoloSolicitacaoDrawer"> Protocolo </span>
+
+            <h2 id="tituloSolicitacaoDrawer">Detalhes da solicitação</h2>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          id="btnFecharSolicitacao"
+          class="btn-fechar-solicitacao"
+          title="Fechar"
+        >
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </header>
+
+      <div class="drawer-solicitacao-conteudo">
+        <div id="conteudoSolicitacaoDrawer"></div>
+      </div>
+
+      <footer class="drawer-solicitacao-rodape">
+        <button
+          type="button"
+          id="btnFecharSolicitacaoRodape"
+          class="btn-secundario-solicitacao"
+        >
+          Fechar
+        </button>
+
+        <button
+          type="button"
+          id="btnAtualizarSolicitacao"
+          class="btn-atualizar-solicitacao"
+        >
+          <span class="material-symbols-outlined"> edit </span>
+
+          Atualizar situação
+        </button>
+      </footer>
+    </aside>
+
+    <script type="module" src="./src/js/scripts.js"></script>
+
+    <script type="module" src="./src/js/solicitacoes-insumos.js"></script>
+  </body>
+</html>

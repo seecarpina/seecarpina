@@ -30,6 +30,7 @@ let PERFIS = ["ADM"];
 
 let categoriasEstoque = [];
 let permissoesEstoque = {};
+let permissoesSolicitacoes = {};
 
 let editandoCategoriaEstoque = false;
 let chaveCategoriaEstoqueEdicao = null;
@@ -195,6 +196,11 @@ const categoriasEstoqueRef = ref(rtdb, "configuracoes/estoque/categorias");
 
 const permissoesEstoqueRef = ref(rtdb, "configuracoes/estoque/permissoes");
 
+const permissoesSolicitacoesRef = ref(
+  rtdb,
+  "configuracoes/solicitacoes/permissoes",
+);
+
 const oficiosAdminRef = ref(rtdb, "oficios");
 
 /* =========================================
@@ -258,6 +264,34 @@ const btnSalvarPermissoesEstoque = document.getElementById(
 );
 
 /* =========================================
+   ELEMENTOS - PERMISSÕES DAS SOLICITAÇÕES
+========================================= */
+
+const perfilPermissaoSolicitacoes = document.getElementById(
+  "perfilPermissaoSolicitacoes",
+);
+
+const configuracaoPermissaoSolicitacoes = document.getElementById(
+  "configuracaoPermissaoSolicitacoes",
+);
+
+const todosModulosSolicitacoes = document.getElementById(
+  "todosModulosSolicitacoes",
+);
+
+const blocoModulosPermitidosSolicitacoes = document.getElementById(
+  "blocoModulosPermitidosSolicitacoes",
+);
+
+const modulosPermitidosSolicitacoes = document.getElementById(
+  "modulosPermitidosSolicitacoes",
+);
+
+const btnSalvarPermissoesSolicitacoes = document.getElementById(
+  "btnSalvarPermissoesSolicitacoes",
+);
+
+/* =========================================
    CATEGORIAS DO ESTOQUE
 ========================================= */
 
@@ -283,6 +317,12 @@ onValue(permissoesEstoqueRef, (snapshot) => {
   permissoesEstoque = snapshot.exists() ? snapshot.val() : {};
 
   renderPermissoesEstoque();
+});
+
+onValue(permissoesSolicitacoesRef, (snapshot) => {
+  permissoesSolicitacoes = snapshot.exists() ? snapshot.val() : {};
+
+  renderPermissoesSolicitacoes();
 });
 
 function renderCategoriasEstoque() {
@@ -627,6 +667,101 @@ btnSalvarPermissoesEstoque?.addEventListener("click", async () => {
 });
 
 /* =========================================
+   PERMISSÕES DAS SOLICITAÇÕES
+========================================= */
+
+function renderPermissoesSolicitacoes() {
+  if (
+    !perfilPermissaoSolicitacoes ||
+    !configuracaoPermissaoSolicitacoes ||
+    !modulosPermitidosSolicitacoes
+  ) {
+    return;
+  }
+
+  const perfil = perfilPermissaoSolicitacoes.value;
+
+  if (!perfil) {
+    configuracaoPermissaoSolicitacoes.style.display = "none";
+    return;
+  }
+
+  configuracaoPermissaoSolicitacoes.style.display = "block";
+
+  const permissao = permissoesSolicitacoes[perfil] || {};
+  const acessoTodos = permissao.todas === true;
+
+  todosModulosSolicitacoes.checked = acessoTodos;
+
+  document
+    .querySelectorAll(".modulo-permissao-solicitacoes")
+    .forEach((checkbox) => {
+      checkbox.checked = permissao.modulos?.[checkbox.value] === true;
+
+      checkbox.disabled = acessoTodos;
+    });
+
+  blocoModulosPermitidosSolicitacoes.style.opacity = acessoTodos ? "0.5" : "1";
+}
+
+perfilPermissaoSolicitacoes?.addEventListener(
+  "change",
+  renderPermissoesSolicitacoes,
+);
+
+todosModulosSolicitacoes?.addEventListener("change", () => {
+  const acessoTodos = todosModulosSolicitacoes.checked;
+
+  document
+    .querySelectorAll(".modulo-permissao-solicitacoes")
+    .forEach((checkbox) => {
+      checkbox.disabled = acessoTodos;
+    });
+
+  blocoModulosPermitidosSolicitacoes.style.opacity = acessoTodos ? "0.5" : "1";
+});
+
+btnSalvarPermissoesSolicitacoes?.addEventListener("click", async () => {
+  const perfil = perfilPermissaoSolicitacoes.value;
+
+  if (!perfil) {
+    notificar("Selecione um perfil.", "erro");
+    return;
+  }
+
+  const todas = todosModulosSolicitacoes.checked;
+  const modulos = {};
+
+  if (!todas) {
+    document
+      .querySelectorAll(".modulo-permissao-solicitacoes:checked")
+      .forEach((checkbox) => {
+        modulos[checkbox.value] = true;
+      });
+
+    if (!Object.keys(modulos).length) {
+      notificar("Selecione pelo menos um módulo de solicitações.", "erro");
+
+      return;
+    }
+  }
+
+  try {
+    await update(ref(rtdb, `configuracoes/solicitacoes/permissoes/${perfil}`), {
+      todas,
+      modulos: todas ? null : modulos,
+      atualizadoEm: new Date().toISOString(),
+    });
+
+    notificar("Permissões das solicitações salvas com sucesso!");
+  } catch (erro) {
+    console.error("Erro ao salvar permissões das solicitações:", erro);
+
+    notificar("Não foi possível salvar as permissões.", "erro");
+  }
+});
+
+/* =========================================
    UTILITÁRIOS
 ========================================= */
 
@@ -733,6 +868,7 @@ function atualizarPerfisDisponiveis() {
   renderPerfisMenu();
 
   atualizarSelectPerfisEstoque();
+  atualizarSelectPerfisSolicitacoes();
 }
 
 function atualizarFiltroPerfis() {
@@ -786,6 +922,35 @@ function atualizarSelectPerfisEstoque() {
   }
 }
 
+function atualizarSelectPerfisSolicitacoes() {
+  if (!perfilPermissaoSolicitacoes) {
+    return;
+  }
+
+  const valorAtual = perfilPermissaoSolicitacoes.value;
+
+  perfilPermissaoSolicitacoes.innerHTML = `
+    <option value="">
+      Selecione um perfil
+    </option>
+  `;
+
+  PERFIS.forEach((perfil) => {
+    const option = document.createElement("option");
+
+    option.value = perfil;
+    option.textContent = perfil;
+
+    perfilPermissaoSolicitacoes.appendChild(option);
+  });
+
+  if (valorAtual && PERFIS.includes(valorAtual)) {
+    perfilPermissaoSolicitacoes.value = valorAtual;
+  }
+
+  renderPermissoesSolicitacoes();
+}
+
 function obterPerfisMenuMarcados() {
   return Array.from(document.querySelectorAll(".perfil-menu:checked")).map(
     (checkbox) => checkbox.value,
@@ -828,6 +993,68 @@ function renderPerfisMenu(perfisSelecionados = null) {
 /* =========================================
    CARREGAR USUÁRIOS
 ========================================= */
+async function sincronizarControleAcessoUsuarios() {
+  if (!usuarios.length) {
+    return;
+  }
+
+  const atualizacoes = {};
+  const agora = new Date().toISOString();
+
+  usuarios.forEach((usuario) => {
+    if (!usuario._uid) {
+      return;
+    }
+
+    const perfilPortal = String(usuario.perfil || "")
+      .trim()
+      .toUpperCase();
+
+    const cargo = String(usuario.cargo || "")
+      .trim()
+      .toUpperCase();
+
+    const perfilAcesso =
+      perfilPortal === "GESTOR_ESCOLAR" ? "GESTOR_ESCOLAR" : cargo;
+
+    atualizacoes[`controleAcesso/usuarios/${usuario._uid}`] = {
+      nome: usuario.nome || "",
+      perfil: perfilAcesso,
+      cargo,
+      ativo: usuario.ativo !== false,
+      escolaId: usuario.escolaId || null,
+      atualizadoEm: agora,
+    };
+  });
+
+  await update(ref(rtdb), atualizacoes);
+}
+
+async function sincronizarUsuarioControleAcesso(usuario) {
+  if (!usuario?._uid) {
+    return;
+  }
+
+  const perfilPortal = String(usuario.perfil || "")
+    .trim()
+    .toUpperCase();
+
+  const cargo = String(usuario.cargo || "")
+    .trim()
+    .toUpperCase();
+
+  const perfilAcesso =
+    perfilPortal === "GESTOR_ESCOLAR" ? "GESTOR_ESCOLAR" : cargo;
+
+  await update(ref(rtdb, `controleAcesso/usuarios/${usuario._uid}`), {
+    nome: usuario.nome || "",
+    perfil: perfilAcesso,
+    cargo,
+    ativo: usuario.ativo !== false,
+    escolaId: usuario.escolaId || null,
+    atualizadoEm: new Date().toISOString(),
+  });
+}
 
 async function carregarUsuarios() {
   try {
@@ -837,6 +1064,17 @@ async function carregarUsuarios() {
       ...documento.data(),
       _uid: documento.id,
     }));
+
+    try {
+      await sincronizarControleAcessoUsuarios();
+    } catch (erro) {
+      console.error("Erro ao sincronizar o controle de acesso:", erro);
+
+      notificar(
+        "Os usuários foram carregados, mas o controle de acesso não pôde ser sincronizado.",
+        "erro",
+      );
+    }
 
     atualizarPerfisDisponiveis();
 
@@ -1040,6 +1278,8 @@ async function alterarPerfilUsuario(usuario, novoPerfil) {
 
     usuario.cargo = novoPerfil;
 
+    await sincronizarUsuarioControleAcesso(usuario);
+
     atualizarPerfisDisponiveis();
 
     notificar("Perfil atualizado com sucesso!");
@@ -1081,6 +1321,8 @@ async function alterarSituacaoUsuario(usuario, ativo) {
     });
 
     usuario.ativo = ativo;
+
+    await sincronizarUsuarioControleAcesso(usuario);
 
     notificar(
       ativo

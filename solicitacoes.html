@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Central de Solicitações - SEE Carpina</title>
+
+    <link rel="stylesheet" href="./src/css/style.css" />
+    <link rel="stylesheet" href="./src/css/solicitacoes.css" />
+
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+  </head>
+
+  <body>
+    <div id="notificacao"></div>
+
+    <button id="btnTopo">↑</button>
+
+    <div class="loading">
+      <svg
+        class="svg-spinner"
+        viewBox="0 0 50 50"
+        role="img"
+        aria-label="Carregando"
+      >
+        <circle
+          class="path"
+          cx="25"
+          cy="25"
+          r="20"
+          fill="none"
+          stroke-width="4"
+        />
+      </svg>
+    </div>
+
+    <div class="container">
+      <aside id="sidebar"></aside>
+
+      <main>
+        <h1>Central de Solicitações</h1>
+
+        <div class="central-solicitacoes-grid">
+          <section class="box glass">
+            <div class="info-card">
+              <span class="material-symbols-outlined"> support_agent </span>
+
+              <div>
+                <strong>Solicitações das unidades escolares</strong><br />
+
+                Consulte, analise e acompanhe as solicitações enviadas pelos
+                gestores escolares.
+              </div>
+            </div>
+          </section>
+
+          <section class="resumo-central-solicitacoes">
+            <article class="card-resumo-central">
+              <div class="resumo-central-icone recebidas">
+                <span class="material-symbols-outlined">
+                  mark_email_unread
+                </span>
+              </div>
+
+              <div>
+                <span>Recebidas</span>
+                <strong id="totalRecebidas">0</strong>
+              </div>
+            </article>
+
+            <article class="card-resumo-central">
+              <div class="resumo-central-icone analise">
+                <span class="material-symbols-outlined"> manage_search </span>
+              </div>
+
+              <div>
+                <span>Em análise</span>
+                <strong id="totalEmAnalise">0</strong>
+              </div>
+            </article>
+
+            <article class="card-resumo-central">
+              <div class="resumo-central-icone atendimento">
+                <span class="material-symbols-outlined"> local_shipping </span>
+              </div>
+
+              <div>
+                <span>Em atendimento</span>
+                <strong id="totalEmAtendimento">0</strong>
+              </div>
+            </article>
+
+            <article class="card-resumo-central">
+              <div class="resumo-central-icone concluidas">
+                <span class="material-symbols-outlined"> check_circle </span>
+              </div>
+
+              <div>
+                <span>Concluídas</span>
+                <strong id="totalConcluidas">0</strong>
+              </div>
+            </article>
+          </section>
+
+          <div class="tabs solicitacoes-tabs">
+            <button type="button" class="tab-btn active" data-modulo="TODOS">
+              Visão geral
+            </button>
+
+            <button
+              type="button"
+              class="tab-btn"
+              data-modulo="INSUMOS"
+              id="abaSolicitacoesInsumos"
+            >
+              Água, gás e caminhão-pipa
+            </button>
+
+            <button
+              type="button"
+              class="tab-btn"
+              data-modulo="MATERIAIS_EXPEDIENTE"
+              id="abaSolicitacoesMateriais"
+            >
+              Material de expediente
+            </button>
+
+            <button
+              type="button"
+              class="tab-btn"
+              data-modulo="MANUTENCAO"
+              id="abaSolicitacoesManutencao"
+            >
+              Manutenção
+            </button>
+          </div>
+
+          <section class="box glass painel-central-solicitacoes">
+            <div class="cabecalho-central">
+              <div>
+                <h2 id="tituloListagemSolicitacoes">Todas as solicitações</h2>
+
+                <span id="contadorSolicitacoes">
+                  Carregando solicitações...
+                </span>
+              </div>
+            </div>
+
+            <div class="filtros-central-solicitacoes">
+              <div class="busca-central-solicitacoes">
+                <span class="material-symbols-outlined"> search </span>
+
+                <input
+                  type="search"
+                  id="buscaSolicitacoes"
+                  placeholder="Buscar por protocolo, escola, gestor ou item"
+                  autocomplete="off"
+                />
+              </div>
+
+              <select id="filtroStatusSolicitacao">
+                <option value="">Todas as situações</option>
+                <option value="RECEBIDA">Recebida</option>
+                <option value="EM_ANALISE">Em análise</option>
+                <option value="APROVADA">Aprovada</option>
+                <option value="EM_ATENDIMENTO">Em atendimento</option>
+                <option value="CONCLUIDA">Concluída</option>
+                <option value="ATENDIDA_PARCIALMENTE">
+                  Atendida parcialmente
+                </option>
+                <option value="INDEFERIDA">Indeferida</option>
+                <option value="CANCELADA">Cancelada</option>
+              </select>
+
+              <select id="filtroPrioridadeSolicitacao">
+                <option value="">Todas as prioridades</option>
+                <option value="NORMAL">Normal</option>
+                <option value="URGENTE">Urgente</option>
+              </select>
+            </div>
+
+            <div
+              id="listaCentralSolicitacoes"
+              class="lista-central-solicitacoes"
+            >
+              <div class="estado-central-solicitacoes">
+                <span class="material-symbols-outlined">
+                  progress_activity
+                </span>
+
+                <strong>Carregando solicitações...</strong>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <div class="right"></div>
+    </div>
+
+    <div id="overlayAtualizacao" class="overlay-atualizacao"></div>
+
+    <section
+      id="dialogoAtualizacao"
+      class="dialogo-atualizacao"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tituloDialogoAtualizacao"
+    >
+      <div class="dialogo-atualizacao-cabecalho">
+        <div class="dialogo-atualizacao-icone">
+          <span class="material-symbols-outlined"> edit_note </span>
+        </div>
+
+        <div>
+          <span id="protocoloAtualizacao"> Protocolo </span>
+
+          <h2 id="tituloDialogoAtualizacao">Atualizar situação</h2>
+        </div>
+      </div>
+
+      <div class="dialogo-atualizacao-conteudo">
+        <div class="campo-atualizacao">
+          <label for="novoStatusSolicitacao"> Nova situação </label>
+
+          <select id="novoStatusSolicitacao">
+            <option value="">Selecione</option>
+            <option value="EM_ANALISE">Em análise</option>
+            <option value="APROVADA">Aprovada</option>
+            <option value="EM_ATENDIMENTO">Em atendimento</option>
+            <option value="CONCLUIDA">Concluída</option>
+            <option value="ATENDIDA_PARCIALMENTE">Atendida parcialmente</option>
+            <option value="INDEFERIDA">Indeferida</option>
+          </select>
+        </div>
+
+        <div class="campo-atualizacao">
+          <label for="observacaoAtualizacao">
+            Observação da atualização
+            <span>Opcional</span>
+          </label>
+
+          <textarea
+            id="observacaoAtualizacao"
+            rows="5"
+            maxlength="1000"
+            placeholder="Informe orientações ou detalhes sobre a atualização."
+          ></textarea>
+
+          <small>
+            <span id="contadorObservacaoAtualizacao">0</span>/1000 caracteres
+          </small>
+        </div>
+
+        <div
+          id="avisoObservacaoObrigatoria"
+          class="aviso-observacao-obrigatoria"
+        >
+          <span class="material-symbols-outlined"> info </span>
+
+          <p>
+            Para solicitações indeferidas ou atendidas parcialmente, a
+            observação é obrigatória.
+          </p>
+        </div>
+      </div>
+
+      <div class="dialogo-atualizacao-acoes">
+        <button
+          type="button"
+          id="btnCancelarAtualizacao"
+          class="btn-cancelar-atualizacao"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          id="btnConfirmarAtualizacao"
+          class="btn-confirmar-atualizacao"
+        >
+          <span class="material-symbols-outlined"> save </span>
+
+          Salvar atualização
+        </button>
+      </div>
+    </section>
+
+    <div id="overlaySolicitacao" class="overlay-solicitacao"></div>
+
+    <aside id="drawerSolicitacao" class="drawer-solicitacao">
+      <header class="drawer-solicitacao-cabecalho">
+        <div class="drawer-solicitacao-titulo">
+          <div class="drawer-solicitacao-icone">
+            <span id="iconeSolicitacaoDrawer" class="material-symbols-outlined">
+              inventory_2
+            </span>
+          </div>
+
+          <div>
+            <span id="protocoloSolicitacaoDrawer"> Protocolo </span>
+
+            <h2 id="tituloSolicitacaoDrawer">Detalhes da solicitação</h2>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          id="btnFecharSolicitacao"
+          class="btn-fechar-solicitacao"
+          title="Fechar"
+          aria-label="Fechar"
+        >
+          <span class="material-symbols-outlined"> close </span>
+        </button>
+      </header>
+
+      <div class="drawer-solicitacao-conteudo">
+        <div id="conteudoSolicitacaoDrawer"></div>
+      </div>
+
+      <footer class="drawer-solicitacao-rodape">
+        <button
+          type="button"
+          id="btnFecharSolicitacaoRodape"
+          class="btn-secundario-solicitacao"
+        >
+          Fechar
+        </button>
+
+        <button
+          type="button"
+          id="btnAtualizarSolicitacao"
+          class="btn-atualizar-solicitacao"
+        >
+          <span class="material-symbols-outlined"> edit </span>
+
+          Atualizar situação
+        </button>
+      </footer>
+    </aside>
+
+    <script type="module" src="./src/js/scripts.js"></script>
+
+    <script type="module" src="./src/js/solicitacoes.js"></script>
+  </body>
+</html>

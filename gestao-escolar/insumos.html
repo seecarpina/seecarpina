@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Solicitação de Insumos | Portal do Gestor</title>
+
+    <link rel="stylesheet" href="./src/css/portal.css" />
+    <link rel="stylesheet" href="./src/css/insumos.css" />
+
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+  </head>
+
+  <body class="verificando-acesso">
+    <div id="notificacao" class="notificacao"></div>
+
+    <header class="topo-portal">
+      <div class="topo-conteudo">
+        <a href="./" class="marca-portal">
+          <div class="marca-icone">
+            <span class="material-symbols-outlined">school</span>
+          </div>
+
+          <div>
+            <strong>Portal do Gestor</strong>
+            <span>SEE Carpina</span>
+          </div>
+        </a>
+
+        <div class="usuario-topo">
+          <div class="usuario-informacoes">
+            <strong id="nomeGestor">Gestor</strong>
+            <span id="escolaGestor">Unidade escolar</span>
+          </div>
+
+          <button
+            type="button"
+            id="btnSair"
+            class="btn-sair"
+            title="Sair do portal"
+          >
+            <span class="material-symbols-outlined">logout</span>
+            <span class="btn-sair-texto">Sair</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="conteudo-portal pagina-insumos">
+      <nav class="navegacao-voltar">
+        <a href="./">
+          <span class="material-symbols-outlined">arrow_back</span>
+          Voltar ao início
+        </a>
+      </nav>
+
+      <section class="cabecalho-insumos">
+        <div class="cabecalho-insumos-icone">
+          <span class="material-symbols-outlined">water_drop</span>
+        </div>
+
+        <div>
+          <span class="secao-legenda">Insumos essenciais</span>
+
+          <h1>Água, gás e caminhão-pipa</h1>
+
+          <p>
+            Faça uma nova solicitação ou acompanhe os pedidos enviados pela sua
+            unidade escolar.
+          </p>
+        </div>
+      </section>
+
+      <div class="abas-insumos">
+        <button
+          type="button"
+          class="aba-insumos ativa"
+          data-aba="novaSolicitacao"
+        >
+          <span class="material-symbols-outlined">add_circle</span>
+          Nova solicitação
+        </button>
+
+        <button
+          type="button"
+          class="aba-insumos"
+          data-aba="historicoSolicitacoes"
+        >
+          <span class="material-symbols-outlined">history</span>
+          Minhas solicitações
+        </button>
+      </div>
+
+      <section id="novaSolicitacao" class="conteudo-aba-insumos ativo">
+        <form id="formSolicitacaoInsumo" class="formulario-insumos">
+          <div class="bloco-formulario">
+            <div class="bloco-formulario-cabecalho">
+              <div>
+                <span>1</span>
+
+                <div>
+                  <h2>Identificação</h2>
+                  <p>Dados do gestor e da unidade solicitante.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="grade-campos grade-identificacao">
+              <div class="campo-formulario">
+                <label for="unidadeEscolar">Unidade escolar</label>
+
+                <input type="text" id="unidadeEscolar" readonly tabindex="-1" />
+              </div>
+
+              <div class="campo-formulario">
+                <label for="gestorSolicitante">Gestor solicitante</label>
+
+                <input
+                  type="text"
+                  id="gestorSolicitante"
+                  readonly
+                  tabindex="-1"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="bloco-formulario">
+            <div class="bloco-formulario-cabecalho">
+              <div>
+                <span>2</span>
+
+                <div>
+                  <h2>Item solicitado</h2>
+                  <p>Selecione o insumo e informe a quantidade.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="grade-campos grade-item">
+              <div class="campo-formulario campo-tipo-insumo">
+                <label for="tipoInsumo">Tipo de solicitação</label>
+
+                <select id="tipoInsumo" required>
+                  <option value="">Selecione</option>
+                  <option value="AGUA_MINERAL">Água mineral</option>
+                  <option value="GAS_P13">
+                    Gás de cozinha — Botijão de 13 kg (P13)
+                  </option>
+
+                  <option value="GAS_P45">
+                    Gás de cozinha — Cilindro de 45 kg (P45)
+                  </option>
+                  <option value="CAMINHAO_PIPA">
+                    Abastecimento por caminhão-pipa
+                  </option>
+                </select>
+              </div>
+
+              <div class="campo-formulario">
+                <label for="quantidadeInsumo">Quantidade</label>
+
+                <input
+                  type="number"
+                  id="quantidadeInsumo"
+                  min="1"
+                  step="1"
+                  inputmode="numeric"
+                  placeholder="0"
+                  required
+                />
+              </div>
+
+              <div class="campo-formulario">
+                <label for="unidadeMedida">Unidade de medida</label>
+
+                <input
+                  type="text"
+                  id="unidadeMedida"
+                  placeholder="Selecione o tipo"
+                  readonly
+                  tabindex="-1"
+                />
+              </div>
+            </div>
+
+            <div id="orientacaoInsumo" class="orientacao-insumo">
+              <span class="material-symbols-outlined">info</span>
+
+              <p>
+                Selecione o tipo de solicitação para visualizar a unidade de
+                medida correspondente.
+              </p>
+            </div>
+          </div>
+
+          <div class="bloco-formulario">
+            <div class="bloco-formulario-cabecalho">
+              <div>
+                <span>3</span>
+
+                <div>
+                  <h2>Necessidade</h2>
+                  <p>Informe a prioridade e o motivo da solicitação.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="grade-campos grade-necessidade">
+              <div class="campo-formulario">
+                <label for="prioridadeSolicitacao">Prioridade</label>
+
+                <select id="prioridadeSolicitacao" required>
+                  <option value="NORMAL">Normal</option>
+                  <option value="URGENTE">Urgente</option>
+                </select>
+              </div>
+
+              <div class="campo-formulario campo-data">
+                <label for="dataNecessidade">
+                  Data em que o insumo será necessário
+                </label>
+
+                <input type="date" id="dataNecessidade" required />
+              </div>
+            </div>
+
+            <div class="campo-formulario">
+              <label for="justificativaSolicitacao">Justificativa</label>
+
+              <textarea
+                id="justificativaSolicitacao"
+                rows="5"
+                maxlength="1000"
+                placeholder="Explique a necessidade desta solicitação."
+                required
+              ></textarea>
+
+              <small>
+                <span id="contadorJustificativa">0</span>/1000 caracteres
+              </small>
+            </div>
+
+            <div class="campo-formulario">
+              <label for="observacoesSolicitacao">
+                Observações
+                <span>Opcional</span>
+              </label>
+
+              <textarea
+                id="observacoesSolicitacao"
+                rows="4"
+                maxlength="500"
+                placeholder="Acrescente alguma informação complementar, se necessário."
+              ></textarea>
+
+              <small>
+                <span id="contadorObservacoes">0</span>/500 caracteres
+              </small>
+            </div>
+          </div>
+
+          <div class="acoes-formulario-insumos">
+            <button type="reset" class="btn-secundario" id="btnLimpar">
+              Limpar formulário
+            </button>
+
+            <button type="submit" class="btn-enviar" id="btnEnviarSolicitacao">
+              <span class="material-symbols-outlined">send</span>
+              Enviar solicitação
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section id="historicoSolicitacoes" class="conteudo-aba-insumos">
+        <div class="painel-historico-insumos">
+          <div class="filtros-historico">
+            <div class="campo-busca-historico">
+              <span class="material-symbols-outlined">search</span>
+
+              <input
+                type="search"
+                id="buscaSolicitacoes"
+                placeholder="Buscar por protocolo, item ou situação"
+              />
+            </div>
+
+            <select id="filtroStatus">
+              <option value="">Todas as situações</option>
+              <option value="RECEBIDA">Recebida</option>
+              <option value="EM_ANALISE">Em análise</option>
+              <option value="APROVADA">Aprovada</option>
+              <option value="EM_ATENDIMENTO">Em atendimento</option>
+              <option value="CONCLUIDA">Concluída</option>
+              <option value="ATENDIDA_PARCIALMENTE">
+                Atendida parcialmente
+              </option>
+              <option value="INDEFERIDA">Indeferida</option>
+              <option value="CANCELADA">Cancelada</option>
+            </select>
+          </div>
+
+          <div id="listaSolicitacoes" class="lista-solicitacoes">
+            <div class="estado-vazio">
+              <span class="material-symbols-outlined">inbox</span>
+              <strong>Nenhuma solicitação encontrada</strong>
+              <p>Os pedidos enviados pela escola aparecerão aqui.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div
+      id="overlayCancelamento"
+      class="overlay-cancelamento"
+      aria-hidden="true"
+    ></div>
+
+    <section
+      id="dialogoCancelamento"
+      class="dialogo-cancelamento"
+      role="dialog"
+      aria-modal="true"
+      aria-hidden="true"
+      aria-labelledby="tituloCancelamento"
+    >
+      <div class="dialogo-cancelamento-icone">
+        <span class="material-symbols-outlined">cancel</span>
+      </div>
+
+      <div class="dialogo-cancelamento-conteudo">
+        <h2 id="tituloCancelamento">Cancelar solicitação</h2>
+
+        <p>
+          Informe o motivo do cancelamento. Essa informação ficará registrada no
+          histórico da solicitação.
+        </p>
+
+        <div class="campo-motivo-cancelamento">
+          <label for="motivoCancelamento"> Motivo do cancelamento </label>
+
+          <textarea
+            id="motivoCancelamento"
+            rows="4"
+            maxlength="500"
+            placeholder="Descreva o motivo do cancelamento."
+          ></textarea>
+
+          <small>
+            <span id="contadorMotivoCancelamento">0</span>/500 caracteres
+          </small>
+        </div>
+      </div>
+
+      <div class="dialogo-cancelamento-acoes">
+        <button
+          type="button"
+          id="btnVoltarCancelamento"
+          class="btn-voltar-cancelamento"
+        >
+          Voltar
+        </button>
+
+        <button
+          type="button"
+          id="btnConfirmarCancelamento"
+          class="btn-confirmar-cancelamento"
+        >
+          <span class="material-symbols-outlined">cancel</span>
+          Confirmar cancelamento
+        </button>
+      </div>
+    </section>
+
+    <div id="overlayDetalhes" class="overlay-detalhes" aria-hidden="true"></div>
+
+    <aside
+      id="drawerDetalhes"
+      class="drawer-detalhes"
+      aria-hidden="true"
+      aria-labelledby="tituloDrawerDetalhes"
+    >
+      <header class="drawer-detalhes-cabecalho">
+        <div class="drawer-detalhes-titulo">
+          <div class="drawer-detalhes-icone">
+            <span
+              id="iconeDetalhesSolicitacao"
+              class="material-symbols-outlined"
+            >
+              inventory_2
+            </span>
+          </div>
+
+          <div>
+            <span id="protocoloDetalhes">Protocolo</span>
+            <h2 id="tituloDrawerDetalhes">Detalhes da solicitação</h2>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          id="btnFecharDetalhes"
+          class="btn-fechar-detalhes"
+          title="Fechar"
+          aria-label="Fechar"
+        >
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </header>
+
+      <div class="drawer-detalhes-conteudo">
+        <div class="detalhes-status-linha">
+          <span id="statusDetalhes" class="status-solicitacao recebida">
+            Recebida
+          </span>
+
+          <span id="prioridadeDetalhes" class="prioridade-detalhes">
+            Prioridade normal
+          </span>
+        </div>
+
+        <section class="secao-detalhes">
+          <h3>Dados do pedido</h3>
+
+          <div class="grade-detalhes">
+            <div>
+              <small>Item solicitado</small>
+              <strong id="tipoDetalhes">-</strong>
+            </div>
+
+            <div>
+              <small>Quantidade</small>
+              <strong id="quantidadeDetalhes">-</strong>
+            </div>
+
+            <div>
+              <small>Data da solicitação</small>
+              <strong id="dataEnvioDetalhes">-</strong>
+            </div>
+
+            <div>
+              <small>Necessário em</small>
+              <strong id="dataNecessidadeDetalhes">-</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="secao-detalhes">
+          <h3>Justificativa</h3>
+
+          <p id="justificativaDetalhes" class="texto-detalhes">-</p>
+        </section>
+
+        <section id="blocoObservacoesDetalhes" class="secao-detalhes">
+          <h3>Observações</h3>
+
+          <p id="observacoesDetalhes" class="texto-detalhes">-</p>
+        </section>
+
+        <section class="secao-detalhes">
+          <h3>Unidade solicitante</h3>
+
+          <div class="grade-detalhes">
+            <div>
+              <small>Escola</small>
+              <strong id="escolaDetalhes">-</strong>
+            </div>
+
+            <div>
+              <small>Gestor solicitante</small>
+              <strong id="gestorDetalhes">-</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="secao-detalhes">
+          <h3>Histórico</h3>
+
+          <div id="historicoDetalhes" class="historico-detalhes"></div>
+        </section>
+      </div>
+
+      <footer class="drawer-detalhes-rodape">
+        <button
+          type="button"
+          id="btnCancelarSolicitacao"
+          class="btn-cancelar-solicitacao"
+        >
+          <span class="material-symbols-outlined">cancel</span>
+          Cancelar solicitação
+        </button>
+
+        <button
+          type="button"
+          id="btnFecharDetalhesRodape"
+          class="btn-fechar-rodape"
+        >
+          Fechar
+        </button>
+      </footer>
+    </aside>
+
+    <footer class="rodape-portal">
+      <p>Secretaria Municipal de Educação e Esportes de Carpina</p>
+    </footer>
+
+    <script type="module" src="./src/js/insumos.js"></script>
+  </body>
+</html>

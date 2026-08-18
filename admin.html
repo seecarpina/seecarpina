@@ -107,6 +107,16 @@
 
             Categorias do estoque
           </button>
+
+          <button
+            type="button"
+            class="admin-tab"
+            data-tab="permissoesSolicitacoesTab"
+          >
+            <span class="material-symbols-outlined"> support_agent </span>
+
+            Solicitações
+          </button>
         </div>
 
         <section id="gruposMenuTab" class="admin-tab-content">
@@ -750,6 +760,102 @@
                 <button
                   type="button"
                   id="btnSalvarPermissoesEstoque"
+                  class="btn"
+                >
+                  <span class="material-symbols-outlined"> save </span>
+
+                  Salvar permissões
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="permissoesSolicitacoesTab" class="admin-tab-content">
+          <div class="box">
+            <div class="cabecalho-admin">
+              <div>
+                <h2>Permissões das solicitações</h2>
+
+                <p>
+                  Defina quais tipos de solicitação cada perfil poderá
+                  visualizar e administrar.
+                </p>
+              </div>
+            </div>
+
+            <div class="grid-local-form">
+              <div class="form-group">
+                <label for="perfilPermissaoSolicitacoes">
+                  Perfil de acesso
+                </label>
+
+                <select id="perfilPermissaoSolicitacoes">
+                  <option value="">Selecione um perfil</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="configuracaoPermissaoSolicitacoes" style="display: none">
+              <div class="admin-config-bloco">
+                <div class="admin-switch-linha">
+                  <div>
+                    <strong> Acesso a todos os tipos de solicitação </strong>
+
+                    <span>
+                      O perfil poderá visualizar, analisar e atualizar
+                      solicitações de todos os módulos do Portal do Gestor.
+                    </span>
+                  </div>
+
+                  <label class="switch">
+                    <input type="checkbox" id="todosModulosSolicitacoes" />
+
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div id="blocoModulosPermitidosSolicitacoes" class="admin-perfis">
+                <label>Módulos permitidos</label>
+
+                <div id="modulosPermitidosSolicitacoes" class="perfis-grid">
+                  <label class="perfil-check">
+                    <input
+                      type="checkbox"
+                      class="modulo-permissao-solicitacoes"
+                      value="insumos"
+                    />
+
+                    <span> Água, gás e caminhão-pipa </span>
+                  </label>
+
+                  <label class="perfil-check">
+                    <input
+                      type="checkbox"
+                      class="modulo-permissao-solicitacoes"
+                      value="materiaisExpediente"
+                    />
+
+                    <span> Material de expediente </span>
+                  </label>
+
+                  <label class="perfil-check">
+                    <input
+                      type="checkbox"
+                      class="modulo-permissao-solicitacoes"
+                      value="manutencao"
+                    />
+
+                    <span> Chamados de manutenção </span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="acoes-form-admin">
+                <button
+                  type="button"
+                  id="btnSalvarPermissoesSolicitacoes"
                   class="btn"
                 >
                   <span class="material-symbols-outlined"> save </span>
