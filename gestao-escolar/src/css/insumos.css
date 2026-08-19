@@ -558,6 +558,79 @@
   -webkit-box-orient: vertical;
 }
 
+.btn-confirmar-recebimento {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 43px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 10px;
+  color: var(--clr-white);
+  background: var(--clr-success);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-confirmar-recebimento:hover {
+  filter: brightness(0.94);
+}
+
+.btn-confirmar-recebimento:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.btn-confirmar-recebimento .material-symbols-outlined {
+  font-size: 19px;
+}
+
+.dialogo-cancelamento-icone.confirmacao {
+  color: var(--clr-success);
+  background: rgba(52, 199, 89, 0.12);
+}
+
+.btn-confirmar-entrega-recebida {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 43px;
+  padding: 0 15px;
+  border: none;
+  border-radius: 10px;
+  color: var(--clr-white);
+  background: var(--clr-success);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-confirmar-entrega-recebida:hover {
+  filter: brightness(0.94);
+}
+
+.btn-confirmar-entrega-recebida:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.btn-confirmar-entrega-recebida .material-symbols-outlined {
+  font-size: 19px;
+}
+
+@media (max-width: 520px) {
+  .btn-confirmar-entrega-recebida {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .btn-confirmar-recebimento {
+    width: 100%;
+  }
+}
+
 @media (max-width: 800px) {
   .dados-solicitacao {
     grid-template-columns: repeat(2, minmax(0, 1fr));

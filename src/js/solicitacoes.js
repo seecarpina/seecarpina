@@ -103,6 +103,12 @@ const protocoloAtualizacao = document.getElementById("protocoloAtualizacao");
 
 const novoStatusSolicitacao = document.getElementById("novoStatusSolicitacao");
 
+const blocoTipoAtendimento = document.getElementById("blocoTipoAtendimento");
+
+const tipoAtendimentoEntrega = document.getElementById(
+  "tipoAtendimentoEntrega",
+);
+
 const observacaoAtualizacao = document.getElementById("observacaoAtualizacao");
 
 const contadorObservacaoAtualizacao = document.getElementById(
@@ -207,6 +213,11 @@ function obterDadosStatus(status) {
     EM_ATENDIMENTO: {
       nome: "Em atendimento",
       classe: "em-atendimento",
+    },
+
+    AGUARDANDO_CONFIRMACAO: {
+      nome: "Aguardando confirmação",
+      classe: "aguardando-confirmacao",
     },
 
     CONCLUIDA: {
@@ -688,8 +699,9 @@ function renderizarDadosEspecificos(solicitacao) {
 const transicoesStatus = {
   RECEBIDA: ["EM_ATENDIMENTO"],
 
-  EM_ATENDIMENTO: ["CONCLUIDA", "ATENDIDA_PARCIALMENTE"],
+  EM_ATENDIMENTO: ["AGUARDANDO_CONFIRMACAO"],
 
+  AGUARDANDO_CONFIRMACAO: [],
   CONCLUIDA: [],
   ATENDIDA_PARCIALMENTE: [],
   CANCELADA: [],
@@ -905,6 +917,9 @@ function abrirDialogoAtualizacao() {
       .join("")}
   `;
 
+  tipoAtendimentoEntrega.value = "";
+  blocoTipoAtendimento.hidden = true;
+  tipoAtendimentoEntrega.required = false;
   observacaoAtualizacao.value = "";
   contadorObservacaoAtualizacao.textContent = "0";
   avisoObservacaoObrigatoria.classList.remove("ativo");
@@ -918,18 +933,37 @@ function fecharDialogoAtualizacao() {
   dialogoAtualizacao.classList.remove("ativo");
 
   novoStatusSolicitacao.value = "";
+  tipoAtendimentoEntrega.value = "";
+  blocoTipoAtendimento.hidden = true;
+  tipoAtendimentoEntrega.required = false;
   observacaoAtualizacao.value = "";
   contadorObservacaoAtualizacao.textContent = "0";
 
   avisoObservacaoObrigatoria.classList.remove("ativo");
 }
 
-function observacaoEhObrigatoria(status) {
-  return ["INDEFERIDA", "ATENDIDA_PARCIALMENTE"].includes(status);
+function atualizarCampoTipoAtendimento() {
+  const deveExibir = novoStatusSolicitacao.value === "AGUARDANDO_CONFIRMACAO";
+
+  blocoTipoAtendimento.hidden = !deveExibir;
+  tipoAtendimentoEntrega.required = deveExibir;
+
+  if (!deveExibir) {
+    tipoAtendimentoEntrega.value = "";
+  }
+
+  atualizarAvisoObservacao();
+}
+
+function observacaoEhObrigatoria(status, tipoAtendimento) {
+  return status === "AGUARDANDO_CONFIRMACAO" && tipoAtendimento === "PARCIAL";
 }
 
 function atualizarAvisoObservacao() {
-  const obrigatoria = observacaoEhObrigatoria(novoStatusSolicitacao.value);
+  const obrigatoria = observacaoEhObrigatoria(
+    novoStatusSolicitacao.value,
+    tipoAtendimentoEntrega.value,
+  );
 
   avisoObservacaoObrigatoria.classList.toggle("ativo", obrigatoria);
 }
@@ -940,10 +974,14 @@ async function salvarAtualizacaoSolicitacao() {
   }
 
   const novoStatus = novoStatusSolicitacao.value;
+  const tipoAtendimento = tipoAtendimentoEntrega.value;
   const observacao = observacaoAtualizacao.value.trim();
 
   if (!novoStatus) {
     throw new Error("Selecione a nova situação.");
+  }
+  if (novoStatus === "AGUARDANDO_CONFIRMACAO" && !tipoAtendimento) {
+    throw new Error("Informe o resultado da entrega.");
   }
 
   const transicoesPermitidas = obterTransicoesPermitidas(
@@ -954,8 +992,8 @@ async function salvarAtualizacaoSolicitacao() {
     throw new Error("Esta alteração de situação não é permitida.");
   }
 
-  if (observacaoEhObrigatoria(novoStatus) && !observacao) {
-    throw new Error("Informe uma observação para esta situação.");
+  if (observacaoEhObrigatoria(novoStatus, tipoAtendimento) && !observacao) {
+    throw new Error("Informe na observação o que foi entregue parcialmente.");
   }
 
   const solicitacaoId = solicitacaoSelecionada.id;
@@ -1004,6 +1042,17 @@ async function salvarAtualizacaoSolicitacao() {
 
       solicitacaoAtual.atualizadoPorNome = dadosUsuarioAtual.nome || "Usuário";
 
+      if (novoStatus === "AGUARDANDO_CONFIRMACAO") {
+        solicitacaoAtual.confirmacaoEntrega = {
+          pendente: true,
+          tipoAtendimento,
+          informadoEm: agora,
+          informadoPorUid: dadosUsuarioAtual.uid,
+          informadoPorNome: dadosUsuarioAtual.nome || "Usuário",
+          observacao,
+        };
+      }
+
       if (!solicitacaoAtual.historico) {
         solicitacaoAtual.historico = {};
       }
@@ -1012,15 +1061,27 @@ async function salvarAtualizacaoSolicitacao() {
 
       const novoStatusNome = obterDadosStatus(novoStatus).nome;
 
+      const descricaoAtualizacao =
+        novoStatus === "AGUARDANDO_CONFIRMACAO"
+          ? tipoAtendimento === "TOTAL"
+            ? "Entrega completa informada. Aguardando confirmação da unidade escolar."
+            : "Entrega parcial informada. Aguardando confirmação da unidade escolar." +
+              (observacao ? ` Observação: ${observacao}` : "")
+          : `Situação alterada de ${statusAnteriorNome} para ${novoStatusNome}.` +
+            (observacao ? ` Observação: ${observacao}` : "");
+
       solicitacaoAtual.historico[historicoId] = {
         status: novoStatus,
         statusAnterior,
-        acao: "STATUS_ATUALIZADO",
 
-        descricao:
-          `Situação alterada de ${statusAnteriorNome} ` +
-          `para ${novoStatusNome}.` +
-          (observacao ? ` Observação: ${observacao}` : ""),
+        acao:
+          novoStatus === "AGUARDANDO_CONFIRMACAO"
+            ? "ENTREGA_INFORMADA"
+            : "STATUS_ATUALIZADO",
+
+        descricao: descricaoAtualizacao,
+        tipoAtendimento:
+          novoStatus === "AGUARDANDO_CONFIRMACAO" ? tipoAtendimento : null,
 
         observacao,
         responsavelUid: dadosUsuarioAtual.uid,
@@ -1060,7 +1121,9 @@ btnCancelarAtualizacao.addEventListener("click", fecharDialogoAtualizacao);
 
 overlayAtualizacao.addEventListener("click", fecharDialogoAtualizacao);
 
-novoStatusSolicitacao.addEventListener("change", atualizarAvisoObservacao);
+novoStatusSolicitacao.addEventListener("change", atualizarCampoTipoAtendimento);
+
+tipoAtendimentoEntrega.addEventListener("change", atualizarAvisoObservacao);
 
 observacaoAtualizacao.addEventListener("input", () => {
   contadorObservacaoAtualizacao.textContent =

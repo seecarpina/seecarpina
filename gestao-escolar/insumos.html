@@ -378,6 +378,53 @@
       </div>
     </section>
 
+    <div
+      id="overlayConfirmacaoRecebimento"
+      class="overlay-cancelamento"
+      aria-hidden="true"
+    ></div>
+
+    <section
+      id="dialogoConfirmacaoRecebimento"
+      class="dialogo-cancelamento"
+      role="dialog"
+      aria-modal="true"
+      aria-hidden="true"
+      aria-labelledby="tituloConfirmacaoRecebimento"
+    >
+      <div class="dialogo-cancelamento-icone confirmacao">
+        <span class="material-symbols-outlined"> inventory </span>
+      </div>
+
+      <div class="dialogo-cancelamento-conteudo">
+        <h2 id="tituloConfirmacaoRecebimento">Confirmar recebimento</h2>
+
+        <p id="textoConfirmacaoRecebimento">
+          Confirme que os itens informados foram entregues à unidade escolar.
+        </p>
+      </div>
+
+      <div class="dialogo-cancelamento-acoes">
+        <button
+          type="button"
+          id="btnVoltarConfirmacaoRecebimento"
+          class="btn-voltar-cancelamento"
+        >
+          Voltar
+        </button>
+
+        <button
+          type="button"
+          id="btnConfirmarEntregaRecebida"
+          class="btn-confirmar-entrega-recebida"
+        >
+          <span class="material-symbols-outlined"> check_circle </span>
+
+          Confirmar recebimento
+        </button>
+      </div>
+    </section>
+
     <div id="overlayDetalhes" class="overlay-detalhes" aria-hidden="true"></div>
 
     <aside
@@ -502,6 +549,17 @@
           class="btn-fechar-rodape"
         >
           Fechar
+        </button>
+
+        <button
+          type="button"
+          id="btnConfirmarRecebimento"
+          class="btn-confirmar-recebimento"
+          style="display: none"
+        >
+          <span class="material-symbols-outlined"> inventory </span>
+
+          Confirmar recebimento
         </button>
       </footer>
     </aside>

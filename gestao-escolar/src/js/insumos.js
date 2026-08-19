@@ -68,6 +68,10 @@ const btnCancelarSolicitacao = document.getElementById(
   "btnCancelarSolicitacao",
 );
 
+const btnConfirmarRecebimento = document.getElementById(
+  "btnConfirmarRecebimento",
+);
+
 const iconeDetalhesSolicitacao = document.getElementById(
   "iconeDetalhesSolicitacao",
 );
@@ -99,6 +103,26 @@ const contadorMotivoCancelamento = document.getElementById(
 const btnVoltarCancelamento = document.getElementById("btnVoltarCancelamento");
 const btnConfirmarCancelamento = document.getElementById(
   "btnConfirmarCancelamento",
+);
+
+const overlayConfirmacaoRecebimento = document.getElementById(
+  "overlayConfirmacaoRecebimento",
+);
+
+const dialogoConfirmacaoRecebimento = document.getElementById(
+  "dialogoConfirmacaoRecebimento",
+);
+
+const textoConfirmacaoRecebimento = document.getElementById(
+  "textoConfirmacaoRecebimento",
+);
+
+const btnVoltarConfirmacaoRecebimento = document.getElementById(
+  "btnVoltarConfirmacaoRecebimento",
+);
+
+const btnConfirmarEntregaRecebida = document.getElementById(
+  "btnConfirmarEntregaRecebida",
 );
 
 let solicitacaoSelecionada = null;
@@ -411,6 +435,11 @@ function obterDadosStatus(status) {
       classe: "em-atendimento",
     },
 
+    AGUARDANDO_CONFIRMACAO: {
+      nome: "Aguardando confirmação",
+      classe: "aguardando-confirmacao",
+    },
+
     CONCLUIDA: {
       nome: "Concluída",
       classe: "concluida",
@@ -571,10 +600,21 @@ function abrirDetalhesSolicitacao(solicitacaoId) {
 
   const podeCancelar = solicitacao.status === "RECEBIDA";
 
+  const podeConfirmarRecebimento =
+    solicitacao.status === "AGUARDANDO_CONFIRMACAO" &&
+    solicitacao.confirmacaoEntrega?.pendente === true;
+
   btnCancelarSolicitacao.style.display = podeCancelar ? "flex" : "none";
+
+  btnConfirmarRecebimento.style.display = podeConfirmarRecebimento
+    ? "flex"
+    : "none";
 
   btnCancelarSolicitacao.disabled = false;
   btnCancelarSolicitacao.dataset.id = solicitacao.id;
+
+  btnConfirmarRecebimento.disabled = false;
+  btnConfirmarRecebimento.dataset.id = solicitacao.id;
 
   overlayDetalhes.classList.add("ativo");
   drawerDetalhes.classList.add("ativo");
@@ -774,6 +814,46 @@ btnConfirmarCancelamento.addEventListener("click", async () => {
   }
 });
 
+function abrirDialogoConfirmacaoRecebimento() {
+  if (!solicitacaoSelecionada) {
+    mostrarNotificacao("Solicitação não localizada.");
+    return;
+  }
+
+  const confirmacao = solicitacaoSelecionada.confirmacaoEntrega;
+
+  if (
+    solicitacaoSelecionada.status !== "AGUARDANDO_CONFIRMACAO" ||
+    confirmacao?.pendente !== true
+  ) {
+    mostrarNotificacao("Esta solicitação não possui confirmação pendente.");
+
+    return;
+  }
+
+  const entregaParcial = confirmacao.tipoAtendimento === "PARCIAL";
+
+  textoConfirmacaoRecebimento.textContent = entregaParcial
+    ? "Foi informada uma entrega parcial. Confirme que os itens descritos no histórico foram recebidos pela unidade escolar."
+    : "Foi informada uma entrega completa. Confirme que o pedido foi recebido pela unidade escolar.";
+
+  overlayConfirmacaoRecebimento.classList.add("ativo");
+  dialogoConfirmacaoRecebimento.classList.add("ativo");
+
+  overlayConfirmacaoRecebimento.setAttribute("aria-hidden", "false");
+
+  dialogoConfirmacaoRecebimento.setAttribute("aria-hidden", "false");
+}
+
+function fecharDialogoConfirmacaoRecebimento() {
+  overlayConfirmacaoRecebimento.classList.remove("ativo");
+  dialogoConfirmacaoRecebimento.classList.remove("ativo");
+
+  overlayConfirmacaoRecebimento.setAttribute("aria-hidden", "true");
+
+  dialogoConfirmacaoRecebimento.setAttribute("aria-hidden", "true");
+}
+
 function fecharDetalhesSolicitacao() {
   overlayDetalhes.classList.remove("ativo");
   drawerDetalhes.classList.remove("ativo");
@@ -784,6 +864,7 @@ function fecharDetalhesSolicitacao() {
 
   solicitacaoSelecionada = null;
   btnCancelarSolicitacao.dataset.id = "";
+  btnConfirmarRecebimento.dataset.id = "";
 }
 
 listaSolicitacoes.addEventListener("click", (event) => {
@@ -796,14 +877,196 @@ listaSolicitacoes.addEventListener("click", (event) => {
   abrirDetalhesSolicitacao(botao.dataset.id);
 });
 
+async function confirmarRecebimentoSolicitacao() {
+  if (!solicitacaoSelecionada?.id) {
+    throw new Error("Solicitação não localizada.");
+  }
+
+  if (!dadosGestorAtual?.uid || !dadosGestorAtual?.escolaId) {
+    throw new Error("Gestor não identificado.");
+  }
+
+  const solicitacaoId = solicitacaoSelecionada.id;
+
+  const solicitacaoRef = ref(
+    rtdb,
+    `portalGestor/solicitacoes/registros/${solicitacaoId}`,
+  );
+
+  const novoHistoricoRef = push(
+    ref(rtdb, `portalGestor/solicitacoes/registros/${solicitacaoId}/historico`),
+  );
+
+  const historicoId = novoHistoricoRef.key;
+
+  if (!historicoId) {
+    throw new Error("Não foi possível registrar a confirmação.");
+  }
+
+  const agora = Date.now();
+  let motivoFalha = "";
+
+  const resultado = await runTransaction(
+    solicitacaoRef,
+
+    (solicitacaoAtual) => {
+      if (!solicitacaoAtual) {
+        motivoFalha = "SOLICITACAO_NAO_ENCONTRADA";
+        return;
+      }
+
+      if (
+        String(solicitacaoAtual.escolaId) !== String(dadosGestorAtual.escolaId)
+      ) {
+        motivoFalha = "ESCOLA_NAO_AUTORIZADA";
+        return;
+      }
+
+      if (solicitacaoAtual.status !== "AGUARDANDO_CONFIRMACAO") {
+        motivoFalha = "STATUS_NAO_PERMITIDO";
+        return;
+      }
+
+      const confirmacaoAtual = solicitacaoAtual.confirmacaoEntrega;
+
+      if (confirmacaoAtual?.pendente !== true) {
+        motivoFalha = "CONFIRMACAO_NAO_PENDENTE";
+        return;
+      }
+
+      const tipoAtendimento = confirmacaoAtual.tipoAtendimento;
+
+      if (!["TOTAL", "PARCIAL"].includes(tipoAtendimento)) {
+        motivoFalha = "TIPO_ATENDIMENTO_INVALIDO";
+        return;
+      }
+
+      const novoStatus =
+        tipoAtendimento === "PARCIAL" ? "ATENDIDA_PARCIALMENTE" : "CONCLUIDA";
+
+      solicitacaoAtual.status = novoStatus;
+      solicitacaoAtual.atualizadoEm = agora;
+
+      solicitacaoAtual.confirmacaoEntrega.pendente = false;
+      solicitacaoAtual.confirmacaoEntrega.confirmadoEm = agora;
+
+      solicitacaoAtual.confirmacaoEntrega.confirmadoPorUid =
+        dadosGestorAtual.uid;
+
+      solicitacaoAtual.confirmacaoEntrega.confirmadoPorNome =
+        dadosGestorAtual.nome;
+
+      if (!solicitacaoAtual.historico) {
+        solicitacaoAtual.historico = {};
+      }
+
+      solicitacaoAtual.historico[historicoId] = {
+        status: novoStatus,
+        statusAnterior: "AGUARDANDO_CONFIRMACAO",
+        acao: "RECEBIMENTO_CONFIRMADO",
+
+        descricao:
+          tipoAtendimento === "PARCIAL"
+            ? "Recebimento da entrega parcial confirmado pela unidade escolar."
+            : "Recebimento da entrega completa confirmado pela unidade escolar.",
+
+        tipoAtendimento,
+        responsavelUid: dadosGestorAtual.uid,
+        responsavelNome: dadosGestorAtual.nome,
+        criadoEm: agora,
+      };
+
+      return solicitacaoAtual;
+    },
+  );
+
+  if (!resultado.committed) {
+    const mensagens = {
+      SOLICITACAO_NAO_ENCONTRADA: "A solicitação não foi encontrada.",
+
+      ESCOLA_NAO_AUTORIZADA:
+        "Você não possui autorização para confirmar esta solicitação.",
+
+      STATUS_NAO_PERMITIDO:
+        "A situação da solicitação foi alterada e não permite mais confirmação.",
+
+      CONFIRMACAO_NAO_PENDENTE:
+        "O recebimento desta solicitação já foi confirmado.",
+
+      TIPO_ATENDIMENTO_INVALIDO: "O resultado da entrega não foi identificado.",
+    };
+
+    throw new Error(
+      mensagens[motivoFalha] || "Não foi possível confirmar o recebimento.",
+    );
+  }
+}
+
+btnConfirmarEntregaRecebida.addEventListener("click", async () => {
+  btnConfirmarEntregaRecebida.disabled = true;
+
+  btnConfirmarEntregaRecebida.innerHTML = `
+      <span class="material-symbols-outlined">
+        progress_activity
+      </span>
+
+      Confirmando...
+    `;
+
+  try {
+    await confirmarRecebimentoSolicitacao();
+
+    fecharDialogoConfirmacaoRecebimento();
+    fecharDetalhesSolicitacao();
+
+    mostrarNotificacao("Recebimento confirmado com sucesso.", "sucesso");
+  } catch (error) {
+    console.error("Erro ao confirmar recebimento:", error);
+
+    mostrarNotificacao(
+      error.message || "Não foi possível confirmar o recebimento.",
+    );
+  } finally {
+    btnConfirmarEntregaRecebida.disabled = false;
+
+    btnConfirmarEntregaRecebida.innerHTML = `
+        <span class="material-symbols-outlined">
+          check_circle
+        </span>
+
+        Confirmar recebimento
+      `;
+  }
+});
+
 btnFecharDetalhes.addEventListener("click", fecharDetalhesSolicitacao);
 
 btnFecharDetalhesRodape.addEventListener("click", fecharDetalhesSolicitacao);
+
+btnConfirmarRecebimento.addEventListener(
+  "click",
+  abrirDialogoConfirmacaoRecebimento,
+);
+
+btnVoltarConfirmacaoRecebimento.addEventListener(
+  "click",
+  fecharDialogoConfirmacaoRecebimento,
+);
+
+overlayConfirmacaoRecebimento.addEventListener(
+  "click",
+  fecharDialogoConfirmacaoRecebimento,
+);
 
 overlayDetalhes.addEventListener("click", fecharDetalhesSolicitacao);
 
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") {
+    return;
+  }
+
+  if (dialogoConfirmacaoRecebimento.classList.contains("ativo")) {
+    fecharDialogoConfirmacaoRecebimento();
     return;
   }
 
