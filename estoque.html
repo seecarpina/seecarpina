@@ -140,12 +140,23 @@
                       Ação
                     </label>
 
-                    <input
-                      type="submit"
-                      id="btnAdicionarEstoque"
-                      class="btn"
-                      value="Adicionar ao estoque"
-                    />
+                    <div class="acoes-material">
+                      <input
+                        type="submit"
+                        id="btnAdicionarEstoque"
+                        class="btn"
+                        value="Adicionar ao estoque"
+                      />
+
+                      <button
+                        type="button"
+                        id="btnCancelarEdicaoMaterial"
+                        class="btn btn-cancelar-edicao"
+                        hidden
+                      >
+                        Cancelar
+                      </button>
+                    </div>
                   </div>
                 </div>
               </form>
@@ -162,6 +173,10 @@
                     placeholder="Buscar material"
                     autocomplete="off"
                   />
+
+                  <select id="filtroCategoriaEstoque">
+                    <option value="">Todas as categorias</option>
+                  </select>
                 </div>
 
                 <div class="estoque-toolbar-acoes">

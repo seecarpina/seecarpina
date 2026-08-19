@@ -882,6 +882,74 @@ body.drawer-aberto {
   opacity: 0.8;
 }
 
+.acoes-material {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.acoes-material .btn {
+  width: auto;
+  min-width: 150px;
+  white-space: nowrap;
+}
+
+.acoes-material #btnAdicionarEstoque {
+  flex: 1;
+}
+
+.acoes-material .btn-cancelar-edicao {
+  flex: 0 0 auto;
+}
+
+.btn-editar-material {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  color: var(--text-color);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.btn-editar-material:hover {
+  color: var(--primary-color);
+  background: rgba(64, 81, 181, 0.1);
+  transform: scale(1.08);
+}
+
+.btn-editar-material:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.btn-editar-material .material-symbols-outlined {
+  font-size: 21px;
+}
+
+@media (max-width: 600px) {
+  .acoes-material {
+    flex-wrap: nowrap;
+  }
+
+  .acoes-material .btn {
+    min-width: 0;
+  }
+
+  .acoes-material #btnAdicionarEstoque {
+    flex: 1;
+  }
+}
+
 @media (max-width: 900px) {
   .drawer-entrega {
     width: 100%;

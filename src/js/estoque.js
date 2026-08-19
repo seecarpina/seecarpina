@@ -34,6 +34,7 @@ let itensEntrega = [];
 
 let destinoIdSelecionado = null;
 let materialCadastroSelecionadoId = null;
+let materialEmEdicaoId = null;
 
 let categoriasEstoque = [];
 let permissoesEstoque = {};
@@ -328,39 +329,62 @@ function preencherCategoriasMaterial() {
   }
 }
 
+function preencherFiltroCategoriasEstoque() {
+  if (!filtroCategoriaEstoque) return;
+
+  const valorAtual = filtroCategoriaEstoque.value;
+  const categoriasPermitidas = obterCategoriasPermitidas();
+
+  filtroCategoriaEstoque.innerHTML = `
+    <option value="">Todas as categorias</option>
+  `;
+
+  categoriasPermitidas.forEach((categoria) => {
+    const option = document.createElement("option");
+
+    option.value = categoria.id;
+    option.textContent = categoria.nome;
+
+    filtroCategoriaEstoque.appendChild(option);
+  });
+
+  if (
+    valorAtual &&
+    categoriasPermitidas.some((categoria) => categoria.id === valorAtual)
+  ) {
+    filtroCategoriaEstoque.value = valorAtual;
+  }
+}
+
 function selecionarMaterialCadastro(nomeSelecionado) {
+  if (materialEmEdicaoId) return;
+
   const material = obterMateriaisPermitidos().find(
     (item) => item.nome === nomeSelecionado,
   );
 
   if (!material) {
     materialCadastroSelecionadoId = null;
-
     return;
   }
 
   materialCadastroSelecionadoId = material._key;
 
-  // Categoria já cadastrada
   selectCategoriaMaterial.value = material.categoriaId || "";
-
-  // Unidade já cadastrada
   selectUnidadeMaterial.value = material.unidade || "Unidade";
 
-  // Impede alteração acidental
   selectCategoriaMaterial.disabled = true;
-
   selectUnidadeMaterial.disabled = true;
 }
 
 function liberarDadosMaterialCadastro() {
+  if (materialEmEdicaoId) return;
+
   materialCadastroSelecionadoId = null;
 
   selectCategoriaMaterial.disabled = false;
   selectUnidadeMaterial.disabled = false;
 
-  // Se o campo Material estiver vazio,
-  // volta Categoria e Unidade ao padrão
   if (!inputMaterial.value.trim()) {
     selectCategoriaMaterial.value = "";
     selectUnidadeMaterial.value = "Unidade";
@@ -464,6 +488,10 @@ const boxEntrega = document.getElementById("autocompleteEntrega");
 const formMaterial = document.getElementById("formMaterial");
 const btnAdicionarEstoque = document.getElementById("btnAdicionarEstoque");
 
+const btnCancelarEdicaoMaterial = document.getElementById(
+  "btnCancelarEdicaoMaterial",
+);
+
 const btnNovaEntrega = document.getElementById("btnNovaEntrega");
 
 const btnExportarExcel = document.getElementById("btnExportarExcel");
@@ -478,6 +506,9 @@ const btnAdicionarItem = document.getElementById("btnAdicionarItem");
 const btnGerarRomaneio = document.getElementById("btnGerarRomaneio");
 
 const inputBusca = document.getElementById("busca");
+const filtroCategoriaEstoque = document.getElementById(
+  "filtroCategoriaEstoque",
+);
 const inputBuscaHistorico = document.getElementById("buscaHistorico");
 const inputBuscaMovimentacoes = document.getElementById("buscaMovimentacoes");
 
@@ -509,6 +540,8 @@ onValue(categoriasEstoqueRef, (snapshot) => {
 
   preencherCategoriasMaterial();
 
+  preencherFiltroCategoriasEstoque();
+
   renderTabela();
 });
 
@@ -518,6 +551,8 @@ onValue(permissoesEstoqueRef, (snapshot) => {
   atualizarPerfilUsuario();
 
   preencherCategoriasMaterial();
+
+  preencherFiltroCategoriasEstoque();
 
   renderTabela();
 
@@ -635,6 +670,66 @@ onValue(
 
 let salvandoMaterial = false;
 
+function encerrarEdicaoMaterial() {
+  materialEmEdicaoId = null;
+
+  formMaterial.reset();
+  liberarDadosMaterialCadastro();
+
+  inputQuantidade.disabled = false;
+  inputQuantidade.required = true;
+  selectUnidadeMaterial.disabled = false;
+
+  btnAdicionarEstoque.value = "Adicionar ao estoque";
+
+  if (btnCancelarEdicaoMaterial) {
+    btnCancelarEdicaoMaterial.hidden = true;
+  }
+}
+
+function editarMaterial(materialId) {
+  const material = obterMateriaisPermitidos().find(
+    (item) => item._key === materialId,
+  );
+
+  if (!material) {
+    mostrarNotificacao("Material não encontrado.", "erro");
+    return;
+  }
+
+  materialEmEdicaoId = material._key;
+  materialCadastroSelecionadoId = null;
+
+  inputMaterial.value = material.nome || "";
+  selectCategoriaMaterial.value = material.categoriaId || "";
+  selectUnidadeMaterial.value = material.unidade || "Unidade";
+  inputQuantidade.value = "";
+
+  selectCategoriaMaterial.disabled = false;
+  selectUnidadeMaterial.disabled = true;
+
+  inputQuantidade.disabled = true;
+  inputQuantidade.required = false;
+
+  btnAdicionarEstoque.value = "Salvar alterações";
+
+  if (btnCancelarEdicaoMaterial) {
+    btnCancelarEdicaoMaterial.hidden = false;
+  }
+
+  formMaterial.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+
+  inputMaterial.focus();
+}
+
+btnCancelarEdicaoMaterial?.addEventListener("click", () => {
+  encerrarEdicaoMaterial();
+  inputMaterial.focus();
+});
+
 formMaterial.addEventListener("submit", async (event) => {
   event.preventDefault();
 
@@ -648,7 +743,7 @@ formMaterial.addEventListener("submit", async (event) => {
 
   const quantidade = obterQuantidadeNumerica(inputQuantidade.value);
 
-  if (!nome || !categoriaId || quantidade <= 0) {
+  if (!nome || !categoriaId || (!materialEmEdicaoId && quantidade <= 0)) {
     mostrarNotificacao("Preencha os campos corretamente.", "erro");
 
     return;
@@ -669,6 +764,45 @@ formMaterial.addEventListener("submit", async (event) => {
   btnAdicionarEstoque.value = "Salvando...";
 
   try {
+    if (materialEmEdicaoId) {
+      const materialEmEdicao = materiais.find(
+        (material) => material._key === materialEmEdicaoId,
+      );
+
+      if (!materialEmEdicao) {
+        mostrarNotificacao("Material não encontrado.", "erro");
+        return;
+      }
+
+      const nomeDuplicado = materiais.some(
+        (material) =>
+          material._key !== materialEmEdicaoId &&
+          normalizarBusca(material.nome) === normalizarBusca(nome),
+      );
+
+      if (nomeDuplicado) {
+        mostrarNotificacao(
+          "Já existe outro material cadastrado com esse nome.",
+          "erro",
+        );
+
+        return;
+      }
+
+      await update(ref(rtdb, `materiais/${materialEmEdicaoId}`), {
+        nome,
+        categoriaId,
+        atualizadoEm: new Date().toISOString(),
+      });
+
+      mostrarNotificacao("Material atualizado com sucesso!");
+
+      encerrarEdicaoMaterial();
+      inputMaterial.focus();
+
+      return;
+    }
+
     const existente = materialCadastroSelecionadoId
       ? materiais.find(
           (material) => material._key === materialCadastroSelecionadoId,
@@ -748,7 +882,9 @@ formMaterial.addEventListener("submit", async (event) => {
     salvandoMaterial = false;
 
     btnAdicionarEstoque.disabled = false;
-    btnAdicionarEstoque.value = "Adicionar ao estoque";
+    btnAdicionarEstoque.value = materialEmEdicaoId
+      ? "Salvar alterações"
+      : "Adicionar ao estoque";
   }
 });
 
@@ -760,9 +896,14 @@ function renderTabela() {
   if (!listaMateriais) return;
 
   const busca = normalizarBusca(inputBusca.value);
+  const categoriaSelecionada = filtroCategoriaEstoque?.value || "";
 
   const filtrados = obterMateriaisPermitidos()
     .filter((material) => normalizarBusca(material.nome).includes(busca))
+    .filter(
+      (material) =>
+        !categoriaSelecionada || material.categoriaId === categoriaSelecionada,
+    )
     .sort((a, b) => {
       const estoqueA = Number(a.estoque) || 0;
       const estoqueB = Number(b.estoque) || 0;
@@ -867,6 +1008,16 @@ function renderTabela() {
               ${material.atualizadoEm ? formatarData(material.atualizadoEm) : "-"}
             </span>
           </div>
+
+          <button
+            type="button"
+            class="btn-editar-material"
+            data-material-id="${escaparHtmlEstoque(material._key)}"
+            title="Editar material"
+            aria-label="Editar material"
+          >
+            <span class="material-symbols-outlined">edit</span>
+          </button>
         </article>
       `;
     })
@@ -874,6 +1025,16 @@ function renderTabela() {
 }
 
 inputBusca.addEventListener("input", renderTabela);
+
+filtroCategoriaEstoque?.addEventListener("change", renderTabela);
+
+listaMateriais?.addEventListener("click", (event) => {
+  const botaoEditar = event.target.closest(".btn-editar-material");
+
+  if (!botaoEditar) return;
+
+  editarMaterial(botaoEditar.dataset.materialId);
+});
 
 /* =========================
    EXPORTAR ESTOQUE PARA EXCEL
