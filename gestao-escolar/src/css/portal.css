@@ -670,6 +670,12 @@ a.card-ferramenta:hover {
   background: #f9f5ff;
 }
 
+.status-recente.aguardando-confirmacao {
+  border-color: rgba(191, 90, 242, 0.35);
+  color: #7a2ea8;
+  background: rgba(191, 90, 242, 0.1);
+}
+
 .status-recente.parcial {
   border-color: #fec84b;
   color: #93370d;

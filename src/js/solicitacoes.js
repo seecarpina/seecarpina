@@ -696,6 +696,78 @@ function renderizarDadosEspecificos(solicitacao) {
   return "";
 }
 
+function renderizarInformacoesEntrega(solicitacao) {
+  const entrega = solicitacao.confirmacaoEntrega;
+
+  if (!entrega?.tipoAtendimento) {
+    return "";
+  }
+
+  const entregaParcial = entrega.tipoAtendimento === "PARCIAL";
+
+  let situacaoConfirmacao = "Aguardando confirmação da escola";
+
+  if (entrega.pendente === false && entrega.confirmadoEm) {
+    situacaoConfirmacao = `Confirmado por ${
+      entrega.confirmadoPorNome || "gestor da unidade"
+    } em ${formatarDataHora(entrega.confirmadoEm)}`;
+  }
+
+  return `
+    <section class="secao-detalhe-central">
+      <h3>Informações da entrega</h3>
+
+      <div class="grade-detalhe-central">
+        <div>
+          <small>Resultado informado</small>
+
+          <strong>
+            ${entregaParcial ? "Entrega parcial" : "Entrega completa"}
+          </strong>
+        </div>
+
+        <div>
+          <small>Informado em</small>
+
+          <strong>
+            ${formatarDataHora(entrega.informadoEm)}
+          </strong>
+        </div>
+
+        <div>
+          <small>Responsável pelo atendimento</small>
+
+          <strong>
+            ${escaparHtml(entrega.informadoPorNome || "Não informado")}
+          </strong>
+        </div>
+
+        <div>
+          <small>Confirmação da escola</small>
+
+          <strong>
+            ${escaparHtml(situacaoConfirmacao)}
+          </strong>
+        </div>
+      </div>
+
+      ${
+        entregaParcial && String(entrega.observacao || "").trim()
+          ? `
+            <div class="observacao-entrega-central">
+              <small>Observação da entrega parcial</small>
+
+              <p>
+                ${escaparHtml(entrega.observacao)}
+              </p>
+            </div>
+          `
+          : ""
+      }
+    </section>
+  `;
+}
+
 const transicoesStatus = {
   RECEBIDA: ["EM_ATENDIMENTO"],
 
@@ -750,6 +822,8 @@ function preencherDrawerSolicitacao(solicitacao) {
     </div>
 
     ${renderizarDadosEspecificos(solicitacao)}
+
+    ${renderizarInformacoesEntrega(solicitacao)}
 
     <section class="secao-detalhe-central">
       <h3>Unidade solicitante</h3>

@@ -97,6 +97,29 @@
 
       <section id="novaSolicitacao" class="conteudo-aba-insumos ativo">
         <form id="formSolicitacaoInsumo" class="formulario-insumos">
+          <div
+            id="avisoConfirmacaoPendente"
+            class="aviso-confirmacao-pendente"
+            style="display: none"
+          >
+            <span class="material-symbols-outlined">
+              notification_important
+            </span>
+
+            <div>
+              <strong>Confirmação de recebimento pendente</strong>
+
+              <p id="textoConfirmacaoPendente">
+                Confirme o recebimento do pedido anterior para realizar uma nova
+                solicitação.
+              </p>
+
+              <button type="button" id="btnVerConfirmacaoPendente">
+                Ver solicitação pendente
+              </button>
+            </div>
+          </div>
+
           <div class="bloco-formulario">
             <div class="bloco-formulario-cabecalho">
               <div>
@@ -296,6 +319,9 @@
               <option value="EM_ANALISE">Em análise</option>
               <option value="APROVADA">Aprovada</option>
               <option value="EM_ATENDIMENTO">Em atendimento</option>
+              <option value="AGUARDANDO_CONFIRMACAO">
+                Aguardando confirmação
+              </option>
               <option value="CONCLUIDA">Concluída</option>
               <option value="ATENDIDA_PARCIALMENTE">
                 Atendida parcialmente
@@ -508,6 +534,45 @@
           <h3>Observações</h3>
 
           <p id="observacoesDetalhes" class="texto-detalhes">-</p>
+        </section>
+
+        <section
+          id="blocoEntregaDetalhes"
+          class="secao-detalhes"
+          style="display: none"
+        >
+          <h3>Informações da entrega</h3>
+
+          <div class="grade-detalhes">
+            <div>
+              <small>Resultado informado</small>
+              <strong id="resultadoEntregaDetalhes">-</strong>
+            </div>
+
+            <div>
+              <small>Informado em</small>
+              <strong id="dataEntregaDetalhes">-</strong>
+            </div>
+
+            <div>
+              <small>Responsável pelo atendimento</small>
+              <strong id="responsavelEntregaDetalhes">-</strong>
+            </div>
+
+            <div>
+              <small>Confirmação da escola</small>
+              <strong id="confirmacaoEntregaDetalhes">-</strong>
+            </div>
+          </div>
+
+          <div
+            id="blocoObservacaoEntregaDetalhes"
+            class="observacao-entrega-detalhes"
+            style="display: none"
+          >
+            <small>Observação da entrega parcial</small>
+            <p id="observacaoEntregaDetalhes">-</p>
+          </div>
         </section>
 
         <section class="secao-detalhes">

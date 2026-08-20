@@ -52,7 +52,20 @@ const buscaSolicitacoes = document.getElementById("buscaSolicitacoes");
 
 const filtroStatus = document.getElementById("filtroStatus");
 
+const avisoConfirmacaoPendente = document.getElementById(
+  "avisoConfirmacaoPendente",
+);
+
+const textoConfirmacaoPendente = document.getElementById(
+  "textoConfirmacaoPendente",
+);
+
+const btnVerConfirmacaoPendente = document.getElementById(
+  "btnVerConfirmacaoPendente",
+);
+
 let solicitacoesEscola = [];
+let confirmacaoPendenteAtual = null;
 let cancelarEscutaSolicitacoes = null;
 
 let dadosGestorAtual = null;
@@ -92,6 +105,29 @@ const blocoObservacoesDetalhes = document.getElementById(
 const observacoesDetalhes = document.getElementById("observacoesDetalhes");
 const escolaDetalhes = document.getElementById("escolaDetalhes");
 const gestorDetalhes = document.getElementById("gestorDetalhes");
+const blocoEntregaDetalhes = document.getElementById("blocoEntregaDetalhes");
+
+const resultadoEntregaDetalhes = document.getElementById(
+  "resultadoEntregaDetalhes",
+);
+
+const dataEntregaDetalhes = document.getElementById("dataEntregaDetalhes");
+
+const responsavelEntregaDetalhes = document.getElementById(
+  "responsavelEntregaDetalhes",
+);
+
+const confirmacaoEntregaDetalhes = document.getElementById(
+  "confirmacaoEntregaDetalhes",
+);
+
+const blocoObservacaoEntregaDetalhes = document.getElementById(
+  "blocoObservacaoEntregaDetalhes",
+);
+
+const observacaoEntregaDetalhes = document.getElementById(
+  "observacaoEntregaDetalhes",
+);
 const historicoDetalhes = document.getElementById("historicoDetalhes");
 
 const overlayCancelamento = document.getElementById("overlayCancelamento");
@@ -596,6 +632,54 @@ function abrirDetalhesSolicitacao(solicitacaoId) {
 
   gestorDetalhes.textContent = solicitacao.solicitanteNome || "-";
 
+  const dadosEntrega = solicitacao.confirmacaoEntrega;
+
+  if (dadosEntrega?.tipoAtendimento) {
+    blocoEntregaDetalhes.style.display = "";
+
+    resultadoEntregaDetalhes.textContent =
+      dadosEntrega.tipoAtendimento === "PARCIAL"
+        ? "Entrega parcial"
+        : "Entrega completa";
+
+    dataEntregaDetalhes.textContent = formatarDataHora(
+      dadosEntrega.informadoEm,
+    );
+
+    responsavelEntregaDetalhes.textContent =
+      dadosEntrega.informadoPorNome || "Não informado";
+
+    if (dadosEntrega.pendente === true) {
+      confirmacaoEntregaDetalhes.textContent = "Aguardando confirmação";
+    } else if (dadosEntrega.confirmadoEm) {
+      confirmacaoEntregaDetalhes.textContent = `Confirmado por ${
+        dadosEntrega.confirmadoPorNome || "gestor da unidade"
+      } em ${formatarDataHora(dadosEntrega.confirmadoEm)}`;
+    } else {
+      confirmacaoEntregaDetalhes.textContent = "Não informada";
+    }
+
+    const possuiObservacao =
+      dadosEntrega.tipoAtendimento === "PARCIAL" &&
+      Boolean(String(dadosEntrega.observacao || "").trim());
+
+    blocoObservacaoEntregaDetalhes.style.display = possuiObservacao
+      ? ""
+      : "none";
+
+    observacaoEntregaDetalhes.textContent = dadosEntrega.observacao || "";
+  } else {
+    blocoEntregaDetalhes.style.display = "none";
+    resultadoEntregaDetalhes.textContent = "-";
+    dataEntregaDetalhes.textContent = "-";
+    responsavelEntregaDetalhes.textContent = "-";
+    confirmacaoEntregaDetalhes.textContent = "-";
+    blocoObservacaoEntregaDetalhes.style.display = "none";
+    observacaoEntregaDetalhes.textContent = "";
+  }
+
+  renderizarHistoricoDetalhes(solicitacao);
+
   renderizarHistoricoDetalhes(solicitacao);
 
   const podeCancelar = solicitacao.status === "RECEBIDA";
@@ -1080,6 +1164,33 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+function atualizarBloqueioNovaSolicitacao() {
+  confirmacaoPendenteAtual = solicitacoesEscola.find(
+    (solicitacao) =>
+      solicitacao.modulo === "INSUMOS" &&
+      solicitacao.status === "AGUARDANDO_CONFIRMACAO" &&
+      solicitacao.confirmacaoEntrega?.pendente === true,
+  );
+
+  const possuiPendencia = Boolean(confirmacaoPendenteAtual);
+
+  avisoConfirmacaoPendente.style.display = possuiPendencia ? "flex" : "none";
+
+  btnEnviarSolicitacao.disabled = possuiPendencia;
+
+  if (!possuiPendencia) {
+    textoConfirmacaoPendente.textContent = "";
+    return;
+  }
+
+  const protocolo =
+    confirmacaoPendenteAtual.protocolo || "sem protocolo identificado";
+
+  textoConfirmacaoPendente.textContent =
+    `Confirme o recebimento da solicitação ${protocolo} ` +
+    "antes de realizar um novo pedido.";
+}
+
 function renderizarSolicitacoes() {
   const termo = normalizarTexto(buscaSolicitacoes.value);
   const statusSelecionado = filtroStatus.value;
@@ -1263,6 +1374,7 @@ function carregarSolicitacoesEscola() {
         (a, b) => Number(b.criadoEm || 0) - Number(a.criadoEm || 0),
       );
 
+      atualizarBloqueioNovaSolicitacao();
       renderizarSolicitacoes();
     },
 
@@ -1323,7 +1435,7 @@ async function gerarProtocoloInsumo() {
 }
 
 function alterarEstadoEnvio(enviando) {
-  btnEnviarSolicitacao.disabled = enviando;
+  btnEnviarSolicitacao.disabled = enviando || Boolean(confirmacaoPendenteAtual);
 
   if (enviando) {
     btnEnviarSolicitacao.innerHTML = `
@@ -1475,6 +1587,20 @@ form.addEventListener("submit", async (event) => {
   } finally {
     alterarEstadoEnvio(false);
   }
+});
+
+btnVerConfirmacaoPendente.addEventListener("click", () => {
+  if (!confirmacaoPendenteAtual?.id) {
+    mostrarNotificacao("Não foi possível localizar a solicitação pendente.");
+
+    return;
+  }
+
+  ativarAba("historicoSolicitacoes");
+
+  setTimeout(() => {
+    abrirDetalhesSolicitacao(confirmacaoPendenteAtual.id);
+  }, 150);
 });
 
 btnSair.addEventListener("click", async () => {

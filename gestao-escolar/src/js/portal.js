@@ -117,6 +117,11 @@ function obterStatusSolicitacao(status) {
       classe: "em-atendimento",
     },
 
+    AGUARDANDO_CONFIRMACAO: {
+      nome: "Aguardando confirmação",
+      classe: "aguardando-confirmacao",
+    },
+
     CONCLUIDA: {
       nome: "Concluída",
       classe: "concluida",
