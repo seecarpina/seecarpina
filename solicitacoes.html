@@ -166,6 +166,9 @@
                 <option value="">Todas as situações</option>
                 <option value="RECEBIDA">Recebida</option>
                 <option value="EM_ATENDIMENTO">Em atendimento</option>
+                <option value="AGUARDANDO_CONFIRMACAO">
+                  Aguardando confirmação
+                </option>
                 <option value="CONCLUIDA">Concluída</option>
                 <option value="ATENDIDA_PARCIALMENTE">
                   Atendida parcialmente
@@ -243,6 +246,27 @@
             <option value="TOTAL">Entrega completa</option>
             <option value="PARCIAL">Entrega parcial</option>
           </select>
+        </div>
+
+        <div
+          id="blocoQuantidadesMateriais"
+          class="bloco-quantidades-materiais"
+          hidden
+        >
+          <div class="cabecalho-quantidades-materiais">
+            <div>
+              <strong>Quantidades entregues</strong>
+
+              <p>Informe quanto foi entregue de cada material.</p>
+            </div>
+
+            <span id="resumoQuantidadesMateriais"></span>
+          </div>
+
+          <div
+            id="listaQuantidadesMateriais"
+            class="lista-quantidades-materiais"
+          ></div>
         </div>
 
         <div class="campo-atualizacao">

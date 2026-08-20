@@ -32,6 +32,11 @@ let categoriasEstoque = [];
 let permissoesEstoque = {};
 let permissoesSolicitacoes = {};
 
+let configuracaoCategoriasMateriais = {
+  todas: false,
+  categorias: {},
+};
+
 let editandoCategoriaEstoque = false;
 let chaveCategoriaEstoqueEdicao = null;
 
@@ -201,6 +206,11 @@ const permissoesSolicitacoesRef = ref(
   "configuracoes/solicitacoes/permissoes",
 );
 
+const categoriasMateriaisGestoresRef = ref(
+  rtdb,
+  "configuracoes/solicitacoes/catalogos/materiaisExpediente",
+);
+
 const oficiosAdminRef = ref(rtdb, "oficios");
 
 /* =========================================
@@ -291,6 +301,22 @@ const btnSalvarPermissoesSolicitacoes = document.getElementById(
   "btnSalvarPermissoesSolicitacoes",
 );
 
+const todasCategoriasMateriaisGestores = document.getElementById(
+  "todasCategoriasMateriaisGestores",
+);
+
+const blocoCategoriasMateriaisGestores = document.getElementById(
+  "blocoCategoriasMateriaisGestores",
+);
+
+const listaCategoriasMateriaisGestores = document.getElementById(
+  "listaCategoriasMateriaisGestores",
+);
+
+const btnSalvarCategoriasMateriaisGestores = document.getElementById(
+  "btnSalvarCategoriasMateriaisGestores",
+);
+
 /* =========================================
    CATEGORIAS DO ESTOQUE
 ========================================= */
@@ -311,6 +337,7 @@ onValue(categoriasEstoqueRef, (snapshot) => {
 
   renderCategoriasEstoque();
   renderPermissoesEstoque();
+  renderCategoriasMateriaisGestores();
 });
 
 onValue(permissoesEstoqueRef, (snapshot) => {
@@ -323,6 +350,17 @@ onValue(permissoesSolicitacoesRef, (snapshot) => {
   permissoesSolicitacoes = snapshot.exists() ? snapshot.val() : {};
 
   renderPermissoesSolicitacoes();
+});
+
+onValue(categoriasMateriaisGestoresRef, (snapshot) => {
+  configuracaoCategoriasMateriais = snapshot.exists()
+    ? snapshot.val()
+    : {
+        todas: false,
+        categorias: {},
+      };
+
+  renderCategoriasMateriaisGestores();
 });
 
 function renderCategoriasEstoque() {
@@ -758,6 +796,103 @@ btnSalvarPermissoesSolicitacoes?.addEventListener("click", async () => {
     console.error("Erro ao salvar permissões das solicitações:", erro);
 
     notificar("Não foi possível salvar as permissões.", "erro");
+  }
+});
+
+function renderCategoriasMateriaisGestores() {
+  if (!listaCategoriasMateriaisGestores) {
+    return;
+  }
+
+  const acessoTodas = configuracaoCategoriasMateriais.todas === true;
+
+  todasCategoriasMateriaisGestores.checked = acessoTodas;
+
+  blocoCategoriasMateriaisGestores.style.opacity = acessoTodas ? "0.5" : "1";
+
+  if (!categoriasEstoque.length) {
+    listaCategoriasMateriaisGestores.innerHTML = `
+      <div class="estado-vazio">
+        Nenhuma categoria cadastrada.
+      </div>
+    `;
+
+    return;
+  }
+
+  listaCategoriasMateriaisGestores.innerHTML = categoriasEstoque
+    .map(
+      (categoria) => `
+          <label class="perfil-check">
+            <input
+              type="checkbox"
+              class="categoria-material-gestor"
+              value="${escaparHtml(categoria.id)}"
+              ${
+                configuracaoCategoriasMateriais.categorias?.[categoria.id] ===
+                true
+                  ? "checked"
+                  : ""
+              }
+              ${acessoTodas ? "disabled" : ""}
+            />
+
+            <span>
+              ${escaparHtml(categoria.nome)}
+            </span>
+          </label>
+        `,
+    )
+    .join("");
+}
+
+todasCategoriasMateriaisGestores?.addEventListener("change", () => {
+  const acessoTodas = todasCategoriasMateriaisGestores.checked;
+
+  blocoCategoriasMateriaisGestores.style.opacity = acessoTodas ? "0.5" : "1";
+
+  document
+    .querySelectorAll(".categoria-material-gestor")
+    .forEach((checkbox) => {
+      checkbox.disabled = acessoTodas;
+    });
+});
+
+btnSalvarCategoriasMateriaisGestores?.addEventListener("click", async () => {
+  const todas = todasCategoriasMateriaisGestores.checked;
+
+  const categorias = {};
+
+  if (!todas) {
+    document
+      .querySelectorAll(".categoria-material-gestor:checked")
+      .forEach((checkbox) => {
+        categorias[checkbox.value] = true;
+      });
+
+    if (!Object.keys(categorias).length) {
+      notificar("Selecione pelo menos uma categoria.", "erro");
+
+      return;
+    }
+  }
+
+  btnSalvarCategoriasMateriaisGestores.disabled = true;
+
+  try {
+    await update(categoriasMateriaisGestoresRef, {
+      todas,
+      categorias: todas ? null : categorias,
+      atualizadoEm: new Date().toISOString(),
+    });
+
+    notificar("Categorias disponíveis para solicitação salvas com sucesso!");
+  } catch (error) {
+    console.error("Erro ao salvar categorias do Portal do Gestor:", error);
+
+    notificar("Não foi possível salvar as categorias.", "erro");
+  } finally {
+    btnSalvarCategoriasMateriaisGestores.disabled = false;
   }
 });
 

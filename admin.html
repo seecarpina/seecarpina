@@ -865,6 +865,61 @@
               </div>
             </div>
           </div>
+
+          <div class="box">
+            <div class="cabecalho-admin">
+              <div>
+                <h2>Categorias vinculadas a Material de expediente</h2>
+
+                <p>
+                  Selecione quais categorias e seus respectivos materiais serão
+                  exibidos na página Material de expediente do Portal do Gestor.
+                </p>
+              </div>
+            </div>
+
+            <div class="admin-config-bloco">
+              <div class="admin-switch-linha">
+                <div>
+                  <strong>Permitir todas as categorias</strong>
+
+                  <span>
+                    Os gestores poderão selecionar materiais de qualquer
+                    categoria que possua saldo no estoque.
+                  </span>
+                </div>
+
+                <label class="switch">
+                  <input
+                    type="checkbox"
+                    id="todasCategoriasMateriaisGestores"
+                  />
+
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div id="blocoCategoriasMateriaisGestores" class="admin-perfis">
+              <label>Categorias vinculadas à página</label>
+
+              <div id="listaCategoriasMateriaisGestores" class="perfis-grid">
+                <div class="estado-vazio">Carregando categorias...</div>
+              </div>
+            </div>
+
+            <div class="acoes-form-admin">
+              <button
+                type="button"
+                id="btnSalvarCategoriasMateriaisGestores"
+                class="btn"
+              >
+                <span class="material-symbols-outlined"> save </span>
+
+                Salvar categorias
+              </button>
+            </div>
+          </div>
         </section>
       </main>
 

@@ -109,6 +109,18 @@ const tipoAtendimentoEntrega = document.getElementById(
   "tipoAtendimentoEntrega",
 );
 
+const blocoQuantidadesMateriais = document.getElementById(
+  "blocoQuantidadesMateriais",
+);
+
+const listaQuantidadesMateriais = document.getElementById(
+  "listaQuantidadesMateriais",
+);
+
+const resumoQuantidadesMateriais = document.getElementById(
+  "resumoQuantidadesMateriais",
+);
+
 const observacaoAtualizacao = document.getElementById("observacaoAtualizacao");
 
 const contadorObservacaoAtualizacao = document.getElementById(
@@ -670,15 +682,69 @@ function renderizarDadosEspecificos(solicitacao) {
   }
 
   if (solicitacao.modulo === "MATERIAIS_EXPEDIENTE") {
-    return `
-      <section class="secao-detalhe-central">
-        <h3>Materiais solicitados</h3>
+    const itens = Array.isArray(solicitacao.itens)
+      ? solicitacao.itens.filter(Boolean)
+      : Object.values(solicitacao.itens || {});
 
+    const listaItens = itens.length
+      ? itens
+          .map(
+            (item, indice) => `
+            <div>
+              <small>Material ${indice + 1}</small>
+
+              <strong>
+                ${escaparHtml(item.nome || "Material não informado")}
+              </strong>
+
+              <span>
+                ${escaparHtml(item.quantidadeSolicitada || 0)}
+                ${escaparHtml(item.unidade || "unidade")}
+              </span>
+            </div>
+          `,
+          )
+          .join("")
+      : `
         <p class="texto-detalhe-central">
-          Os itens do pedido serão exibidos aqui.
+          Nenhum material foi encontrado nesta solicitação.
         </p>
-      </section>
-    `;
+      `;
+
+    return `
+    <section class="secao-detalhe-central">
+      <h3>Materiais solicitados</h3>
+
+      <div class="grade-detalhe-central">
+        ${listaItens}
+      </div>
+
+      <div class="grade-detalhe-central">
+        <div>
+          <small>Total de materiais diferentes</small>
+
+          <strong>
+            ${itens.length}
+          </strong>
+        </div>
+
+        <div>
+          <small>Quantidade total solicitada</small>
+
+          <strong>
+            ${escaparHtml(
+              solicitacao.quantidadeTotal ??
+                itens.reduce(
+                  (total, item) =>
+                    total + Number(item.quantidadeSolicitada || 0),
+                  0,
+                ),
+            )}
+          </strong>
+        </div>
+      </div>
+    </section>
+  `;
   }
 
   if (solicitacao.modulo === "MANUTENCAO") {
@@ -704,6 +770,80 @@ function renderizarInformacoesEntrega(solicitacao) {
   }
 
   const entregaParcial = entrega.tipoAtendimento === "PARCIAL";
+
+  const itensEntregues = Array.isArray(entrega.itensEntregues)
+    ? entrega.itensEntregues.filter(Boolean)
+    : Object.values(entrega.itensEntregues || {});
+
+  const comparativoMateriais = itensEntregues.length
+    ? `
+      <div class="comparativo-entrega-materiais">
+        <div class="titulo-comparativo-materiais">
+          <strong>Materiais entregues</strong>
+
+          <span>
+            ${itensEntregues.length}
+            ${itensEntregues.length === 1 ? "material" : "materiais"}
+          </span>
+        </div>
+
+        <div class="lista-comparativo-materiais">
+          ${itensEntregues
+            .map((item) => {
+              const solicitada = Number(item.quantidadeSolicitada || 0);
+
+              const entregue = Number(item.quantidadeEntregue || 0);
+
+              let classeResultado = "nao-entregue";
+              let textoResultado = "Não entregue";
+
+              if (entregue >= solicitada && solicitada > 0) {
+                classeResultado = "completo";
+                textoResultado = "Completo";
+              } else if (entregue > 0) {
+                classeResultado = "parcial";
+                textoResultado = "Parcial";
+              }
+
+              return `
+                <div class="item-comparativo-material">
+                  <div class="nome-comparativo-material">
+                    <strong>
+                      ${escaparHtml(item.nome || "Material")}
+                    </strong>
+
+                    <span>
+                      ${escaparHtml(item.unidade || "Unidade")}
+                    </span>
+                  </div>
+
+                  <div class="quantidades-comparativo-material">
+                    <div>
+                      <small>Solicitado</small>
+                      <strong>${escaparHtml(solicitada)}</strong>
+                    </div>
+
+                    <span class="seta-comparativo material-symbols-outlined">
+                      arrow_forward
+                    </span>
+
+                    <div>
+                      <small>Entregue</small>
+                      <strong>${escaparHtml(entregue)}</strong>
+                    </div>
+                  </div>
+
+                  <span class="resultado-comparativo ${classeResultado}">
+                    ${textoResultado}
+                  </span>
+                </div>
+              `;
+            })
+            .join("")}
+        </div>
+      </div>
+    `
+    : "";
 
   let situacaoConfirmacao = "Aguardando confirmação da escola";
 
@@ -750,6 +890,8 @@ function renderizarInformacoesEntrega(solicitacao) {
           </strong>
         </div>
       </div>
+
+      ${comparativoMateriais}
 
       ${
         entregaParcial && String(entrega.observacao || "").trim()
@@ -994,6 +1136,7 @@ function abrirDialogoAtualizacao() {
   tipoAtendimentoEntrega.value = "";
   blocoTipoAtendimento.hidden = true;
   tipoAtendimentoEntrega.required = false;
+  ocultarQuantidadesMateriais();
   observacaoAtualizacao.value = "";
   contadorObservacaoAtualizacao.textContent = "0";
   avisoObservacaoObrigatoria.classList.remove("ativo");
@@ -1010,10 +1153,168 @@ function fecharDialogoAtualizacao() {
   tipoAtendimentoEntrega.value = "";
   blocoTipoAtendimento.hidden = true;
   tipoAtendimentoEntrega.required = false;
+  ocultarQuantidadesMateriais();
   observacaoAtualizacao.value = "";
   contadorObservacaoAtualizacao.textContent = "0";
 
   avisoObservacaoObrigatoria.classList.remove("ativo");
+}
+
+function obterItensMateriaisSolicitacao() {
+  if (!solicitacaoSelecionada) {
+    return [];
+  }
+
+  const itens = solicitacaoSelecionada.itens;
+
+  return Array.isArray(itens)
+    ? itens.filter(Boolean)
+    : Object.values(itens || {});
+}
+
+function ocultarQuantidadesMateriais() {
+  blocoQuantidadesMateriais.hidden = true;
+  listaQuantidadesMateriais.innerHTML = "";
+  resumoQuantidadesMateriais.textContent = "";
+}
+
+function renderizarQuantidadesMateriais() {
+  const ehPedidoMateriais =
+    solicitacaoSelecionada?.modulo === "MATERIAIS_EXPEDIENTE";
+
+  const informandoEntrega =
+    novoStatusSolicitacao.value === "AGUARDANDO_CONFIRMACAO";
+
+  const tipoAtendimento = tipoAtendimentoEntrega.value;
+
+  if (!ehPedidoMateriais || !informandoEntrega || !tipoAtendimento) {
+    ocultarQuantidadesMateriais();
+    return;
+  }
+
+  const itens = obterItensMateriaisSolicitacao();
+  const entregaCompleta = tipoAtendimento === "TOTAL";
+
+  blocoQuantidadesMateriais.hidden = false;
+
+  resumoQuantidadesMateriais.textContent = `${itens.length} material${itens.length === 1 ? "" : "is"}`;
+
+  listaQuantidadesMateriais.innerHTML = itens
+    .map((item, indice) => {
+      const quantidadeSolicitada = Number(item.quantidadeSolicitada || 0);
+
+      const quantidadeEntregue = entregaCompleta ? quantidadeSolicitada : 0;
+
+      return `
+        <div class="item-quantidade-material">
+          <div class="dados-item-quantidade-material">
+            <strong>
+              ${escaparHtml(item.nome || "Material não informado")}
+            </strong>
+
+            <span>
+              Solicitado:
+              ${escaparHtml(quantidadeSolicitada)}
+              ${escaparHtml(item.unidade || "unidade")}
+            </span>
+          </div>
+
+          <div class="campo-quantidade-entregue">
+            <label for="quantidadeEntregueMaterial${indice}">
+              Quantidade entregue
+            </label>
+
+            <div>
+              <input
+                type="number"
+                id="quantidadeEntregueMaterial${indice}"
+                class="quantidade-entregue-material"
+                data-indice="${indice}"
+                min="0"
+                max="${quantidadeSolicitada}"
+                step="1"
+                value="${quantidadeEntregue}"
+                ${entregaCompleta ? "readonly" : ""}
+              />
+
+              <span>
+                ${escaparHtml(item.unidade || "unidade")}
+              </span>
+            </div>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function obterQuantidadesEntreguesMateriais(tipoAtendimento) {
+  const itensSolicitados = obterItensMateriaisSolicitacao();
+
+  if (!itensSolicitados.length) {
+    throw new Error("A solicitação não possui materiais.");
+  }
+
+  const camposQuantidade = Array.from(
+    listaQuantidadesMateriais.querySelectorAll(".quantidade-entregue-material"),
+  );
+
+  const itensEntregues = itensSolicitados.map((item, indice) => {
+    const quantidadeSolicitada = Number(item.quantidadeSolicitada || 0);
+
+    const campo = camposQuantidade.find(
+      (elemento) => Number(elemento.dataset.indice) === indice,
+    );
+
+    const quantidadeEntregue =
+      tipoAtendimento === "TOTAL"
+        ? quantidadeSolicitada
+        : Number(campo?.value || 0);
+
+    if (!Number.isFinite(quantidadeEntregue) || quantidadeEntregue < 0) {
+      throw new Error(
+        `Informe uma quantidade válida para ${item.nome || "o material"}.`,
+      );
+    }
+
+    if (quantidadeEntregue > quantidadeSolicitada) {
+      throw new Error(
+        `A quantidade entregue de ${item.nome || "o material"} não pode ser maior que a solicitada.`,
+      );
+    }
+
+    return {
+      materialId: item.materialId || "",
+      nome: item.nome || "Material",
+      unidade: item.unidade || "Unidade",
+      quantidadeSolicitada,
+      quantidadeEntregue,
+    };
+  });
+
+  const quantidadeTotalEntregue = itensEntregues.reduce(
+    (total, item) => total + item.quantidadeEntregue,
+    0,
+  );
+
+  if (quantidadeTotalEntregue <= 0) {
+    throw new Error("Informe a quantidade entregue de pelo menos um material.");
+  }
+
+  const todosEntreguesIntegralmente = itensEntregues.every(
+    (item) => item.quantidadeEntregue === item.quantidadeSolicitada,
+  );
+
+  if (tipoAtendimento === "PARCIAL" && todosEntreguesIntegralmente) {
+    throw new Error(
+      "Todas as quantidades foram entregues. Selecione Entrega completa.",
+    );
+  }
+
+  return {
+    itensEntregues,
+    quantidadeTotalEntregue,
+  };
 }
 
 function atualizarCampoTipoAtendimento() {
@@ -1026,6 +1327,7 @@ function atualizarCampoTipoAtendimento() {
     tipoAtendimentoEntrega.value = "";
   }
 
+  renderizarQuantidadesMateriais();
   atualizarAvisoObservacao();
 }
 
@@ -1051,11 +1353,20 @@ async function salvarAtualizacaoSolicitacao() {
   const tipoAtendimento = tipoAtendimentoEntrega.value;
   const observacao = observacaoAtualizacao.value.trim();
 
+  const ehPedidoMateriais =
+    solicitacaoSelecionada.modulo === "MATERIAIS_EXPEDIENTE";
+
+  let dadosEntregaMateriais = null;
+
   if (!novoStatus) {
     throw new Error("Selecione a nova situação.");
   }
   if (novoStatus === "AGUARDANDO_CONFIRMACAO" && !tipoAtendimento) {
     throw new Error("Informe o resultado da entrega.");
+  }
+
+  if (ehPedidoMateriais && novoStatus === "AGUARDANDO_CONFIRMACAO") {
+    dadosEntregaMateriais = obterQuantidadesEntreguesMateriais(tipoAtendimento);
   }
 
   const transicoesPermitidas = obterTransicoesPermitidas(
@@ -1124,6 +1435,15 @@ async function salvarAtualizacaoSolicitacao() {
           informadoPorUid: dadosUsuarioAtual.uid,
           informadoPorNome: dadosUsuarioAtual.nome || "Usuário",
           observacao,
+
+          ...(dadosEntregaMateriais
+            ? {
+                itensEntregues: dadosEntregaMateriais.itensEntregues,
+
+                quantidadeTotalEntregue:
+                  dadosEntregaMateriais.quantidadeTotalEntregue,
+              }
+            : {}),
         };
       }
 
@@ -1156,6 +1476,16 @@ async function salvarAtualizacaoSolicitacao() {
         descricao: descricaoAtualizacao,
         tipoAtendimento:
           novoStatus === "AGUARDANDO_CONFIRMACAO" ? tipoAtendimento : null,
+
+        itensEntregues:
+          novoStatus === "AGUARDANDO_CONFIRMACAO" && dadosEntregaMateriais
+            ? dadosEntregaMateriais.itensEntregues
+            : null,
+
+        quantidadeTotalEntregue:
+          novoStatus === "AGUARDANDO_CONFIRMACAO" && dadosEntregaMateriais
+            ? dadosEntregaMateriais.quantidadeTotalEntregue
+            : null,
 
         observacao,
         responsavelUid: dadosUsuarioAtual.uid,
@@ -1197,7 +1527,10 @@ overlayAtualizacao.addEventListener("click", fecharDialogoAtualizacao);
 
 novoStatusSolicitacao.addEventListener("change", atualizarCampoTipoAtendimento);
 
-tipoAtendimentoEntrega.addEventListener("change", atualizarAvisoObservacao);
+tipoAtendimentoEntrega.addEventListener("change", () => {
+  atualizarAvisoObservacao();
+  renderizarQuantidadesMateriais();
+});
 
 observacaoAtualizacao.addEventListener("input", () => {
   contadorObservacaoAtualizacao.textContent =
