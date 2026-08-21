@@ -158,6 +158,12 @@ function obterDadosModulo(modulo) {
       link: "./materiais-expediente.html#historico",
     },
 
+    MATERIAIS_LIMPEZA: {
+      nome: "Materiais de limpeza e higiene",
+      icone: "cleaning_services",
+      link: "./materiais-limpeza.html#historico",
+    },
+
     MANUTENCAO: {
       nome: "Chamado de manutenção",
       icone: "construction",
@@ -181,11 +187,16 @@ function normalizarItensSolicitacao(itens) {
 }
 
 function obterTituloSolicitacao(solicitacao) {
-  if (solicitacao.modulo === "MATERIAIS_EXPEDIENTE") {
+  if (
+    solicitacao.modulo === "MATERIAIS_EXPEDIENTE" ||
+    solicitacao.modulo === "MATERIAIS_LIMPEZA"
+  ) {
     const itens = normalizarItensSolicitacao(solicitacao.itens);
 
     if (!itens.length) {
-      return "Material de expediente";
+      return solicitacao.modulo === "MATERIAIS_LIMPEZA"
+        ? "Materiais de limpeza e higiene"
+        : "Material de expediente";
     }
 
     const primeiroMaterial = itens[0]?.nome || "Material de expediente";

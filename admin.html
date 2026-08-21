@@ -844,6 +844,16 @@
                     <input
                       type="checkbox"
                       class="modulo-permissao-solicitacoes"
+                      value="materiaisLimpeza"
+                    />
+
+                    <span>Materiais de limpeza e higiene</span>
+                  </label>
+
+                  <label class="perfil-check">
+                    <input
+                      type="checkbox"
+                      class="modulo-permissao-solicitacoes"
                       value="manutencao"
                     />
 
@@ -917,6 +927,61 @@
                 <span class="material-symbols-outlined"> save </span>
 
                 Salvar categorias
+              </button>
+            </div>
+          </div>
+
+          <div class="box">
+            <div class="cabecalho-admin">
+              <div>
+                <h2>Categorias — Materiais de limpeza e higiene</h2>
+
+                <p>
+                  Selecione quais categorias do estoque ficarão disponíveis
+                  exclusivamente na solicitação de materiais de limpeza e
+                  higiene.
+                </p>
+              </div>
+            </div>
+
+            <div class="admin-config-bloco">
+              <div class="admin-switch-linha">
+                <div>
+                  <strong>Permitir todas as categorias</strong>
+
+                  <span>
+                    Os gestores poderão selecionar materiais de qualquer
+                    categoria que possua saldo no estoque.
+                  </span>
+                </div>
+
+                <label class="switch">
+                  <input type="checkbox" id="todasCategoriasMateriaisLimpeza" />
+
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div id="blocoCategoriasMateriaisLimpeza" class="admin-perfis">
+              <label
+                >Categorias vinculadas a materiais de limpeza e higiene</label
+              >
+
+              <div id="listaCategoriasMateriaisLimpeza" class="perfis-grid">
+                <div class="estado-vazio">Carregando categorias...</div>
+              </div>
+            </div>
+
+            <div class="acoes-form-admin">
+              <button
+                type="button"
+                id="btnSalvarCategoriasMateriaisLimpeza"
+                class="btn"
+              >
+                <span class="material-symbols-outlined">save</span>
+
+                Salvar categorias de limpeza
               </button>
             </div>
           </div>

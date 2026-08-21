@@ -34,6 +34,10 @@ const abaSolicitacoesMateriais = document.getElementById(
   "abaSolicitacoesMateriais",
 );
 
+const abaSolicitacoesLimpeza = document.getElementById(
+  "abaSolicitacoesLimpeza",
+);
+
 const abaSolicitacoesManutencao = document.getElementById(
   "abaSolicitacoesManutencao",
 );
@@ -277,6 +281,7 @@ function obterIconeSolicitacao(solicitacao) {
   const iconesPorModulo = {
     INSUMOS: "water_drop",
     MATERIAIS_EXPEDIENTE: "inventory_2",
+    MATERIAIS_LIMPEZA: "cleaning_services",
     MANUTENCAO: "construction",
   };
 
@@ -287,6 +292,7 @@ function obterNomeModulo(modulo) {
   const nomes = {
     INSUMOS: "Água, gás e caminhão-pipa",
     MATERIAIS_EXPEDIENTE: "Material de expediente",
+    MATERIAIS_LIMPEZA: "Materiais de limpeza e higiene",
     MANUTENCAO: "Chamados de manutenção",
   };
 
@@ -309,6 +315,7 @@ function obterChavePermissaoModulo(modulo) {
   const chaves = {
     INSUMOS: "insumos",
     MATERIAIS_EXPEDIENTE: "materiaisExpediente",
+    MATERIAIS_LIMPEZA: "materiaisLimpeza",
     MANUTENCAO: "manutencao",
   };
 
@@ -337,6 +344,10 @@ function configurarAbasPermitidas() {
   abaSolicitacoesMateriais.style.display = moduloPermitido(
     "MATERIAIS_EXPEDIENTE",
   )
+    ? ""
+    : "none";
+
+  abaSolicitacoesLimpeza.style.display = moduloPermitido("MATERIAIS_LIMPEZA")
     ? ""
     : "none";
 
@@ -445,6 +456,7 @@ function atualizarTituloListagem() {
     TODOS: "Todas as solicitações",
     INSUMOS: "Água, gás e caminhão-pipa",
     MATERIAIS_EXPEDIENTE: "Material de expediente",
+    MATERIAIS_LIMPEZA: "Materiais de limpeza e higiene",
     MANUTENCAO: "Chamados de manutenção",
   };
 
@@ -681,7 +693,10 @@ function renderizarDadosEspecificos(solicitacao) {
     `;
   }
 
-  if (solicitacao.modulo === "MATERIAIS_EXPEDIENTE") {
+  if (
+    solicitacao.modulo === "MATERIAIS_EXPEDIENTE" ||
+    solicitacao.modulo === "MATERIAIS_LIMPEZA"
+  ) {
     const itens = Array.isArray(solicitacao.itens)
       ? solicitacao.itens.filter(Boolean)
       : Object.values(solicitacao.itens || {});
@@ -713,7 +728,13 @@ function renderizarDadosEspecificos(solicitacao) {
 
     return `
     <section class="secao-detalhe-central">
-      <h3>Materiais solicitados</h3>
+      <h3>
+        ${
+          solicitacao.modulo === "MATERIAIS_LIMPEZA"
+            ? "Materiais de limpeza e higiene solicitados"
+            : "Materiais de expediente solicitados"
+        }
+      </h3>
 
       <div class="grade-detalhe-central">
         ${listaItens}
@@ -1179,8 +1200,10 @@ function ocultarQuantidadesMateriais() {
 }
 
 function renderizarQuantidadesMateriais() {
-  const ehPedidoMateriais =
-    solicitacaoSelecionada?.modulo === "MATERIAIS_EXPEDIENTE";
+  const ehPedidoMateriais = [
+    "MATERIAIS_EXPEDIENTE",
+    "MATERIAIS_LIMPEZA",
+  ].includes(solicitacaoSelecionada?.modulo);
 
   const informandoEntrega =
     novoStatusSolicitacao.value === "AGUARDANDO_CONFIRMACAO";
@@ -1353,8 +1376,10 @@ async function salvarAtualizacaoSolicitacao() {
   const tipoAtendimento = tipoAtendimentoEntrega.value;
   const observacao = observacaoAtualizacao.value.trim();
 
-  const ehPedidoMateriais =
-    solicitacaoSelecionada.modulo === "MATERIAIS_EXPEDIENTE";
+  const ehPedidoMateriais = [
+    "MATERIAIS_EXPEDIENTE",
+    "MATERIAIS_LIMPEZA",
+  ].includes(solicitacaoSelecionada.modulo);
 
   let dadosEntregaMateriais = null;
 
@@ -1664,7 +1689,12 @@ function consolidarSolicitacoes() {
 function carregarSolicitacoes() {
   const registrosRef = ref(rtdb, "portalGestor/solicitacoes/registros");
 
-  const modulosDisponiveis = ["INSUMOS", "MATERIAIS_EXPEDIENTE", "MANUTENCAO"];
+  const modulosDisponiveis = [
+    "INSUMOS",
+    "MATERIAIS_EXPEDIENTE",
+    "MATERIAIS_LIMPEZA",
+    "MANUTENCAO",
+  ];
 
   const modulosAutorizados = modulosDisponiveis.filter((modulo) =>
     moduloPermitido(modulo),

@@ -37,6 +37,11 @@ let configuracaoCategoriasMateriais = {
   categorias: {},
 };
 
+let configuracaoCategoriasMateriaisLimpeza = {
+  todas: false,
+  categorias: {},
+};
+
 let editandoCategoriaEstoque = false;
 let chaveCategoriaEstoqueEdicao = null;
 
@@ -211,6 +216,11 @@ const categoriasMateriaisGestoresRef = ref(
   "configuracoes/solicitacoes/catalogos/materiaisExpediente",
 );
 
+const categoriasMateriaisLimpezaRef = ref(
+  rtdb,
+  "configuracoes/solicitacoes/catalogos/materiaisLimpeza",
+);
+
 const oficiosAdminRef = ref(rtdb, "oficios");
 
 /* =========================================
@@ -317,6 +327,22 @@ const btnSalvarCategoriasMateriaisGestores = document.getElementById(
   "btnSalvarCategoriasMateriaisGestores",
 );
 
+const todasCategoriasMateriaisLimpeza = document.getElementById(
+  "todasCategoriasMateriaisLimpeza",
+);
+
+const blocoCategoriasMateriaisLimpeza = document.getElementById(
+  "blocoCategoriasMateriaisLimpeza",
+);
+
+const listaCategoriasMateriaisLimpeza = document.getElementById(
+  "listaCategoriasMateriaisLimpeza",
+);
+
+const btnSalvarCategoriasMateriaisLimpeza = document.getElementById(
+  "btnSalvarCategoriasMateriaisLimpeza",
+);
+
 /* =========================================
    CATEGORIAS DO ESTOQUE
 ========================================= */
@@ -338,6 +364,7 @@ onValue(categoriasEstoqueRef, (snapshot) => {
   renderCategoriasEstoque();
   renderPermissoesEstoque();
   renderCategoriasMateriaisGestores();
+  renderCategoriasMateriaisLimpeza();
 });
 
 onValue(permissoesEstoqueRef, (snapshot) => {
@@ -361,6 +388,17 @@ onValue(categoriasMateriaisGestoresRef, (snapshot) => {
       };
 
   renderCategoriasMateriaisGestores();
+});
+
+onValue(categoriasMateriaisLimpezaRef, (snapshot) => {
+  configuracaoCategoriasMateriaisLimpeza = snapshot.exists()
+    ? snapshot.val()
+    : {
+        todas: false,
+        categorias: {},
+      };
+
+  renderCategoriasMateriaisLimpeza();
 });
 
 function renderCategoriasEstoque() {
@@ -846,6 +884,58 @@ function renderCategoriasMateriaisGestores() {
     .join("");
 }
 
+function renderCategoriasMateriaisLimpeza() {
+  if (
+    !listaCategoriasMateriaisLimpeza ||
+    !todasCategoriasMateriaisLimpeza ||
+    !blocoCategoriasMateriaisLimpeza
+  ) {
+    return;
+  }
+
+  const acessoTodas = configuracaoCategoriasMateriaisLimpeza.todas === true;
+
+  todasCategoriasMateriaisLimpeza.checked = acessoTodas;
+
+  blocoCategoriasMateriaisLimpeza.style.opacity = acessoTodas ? "0.5" : "1";
+
+  if (!categoriasEstoque.length) {
+    listaCategoriasMateriaisLimpeza.innerHTML = `
+      <div class="estado-vazio">
+        Nenhuma categoria cadastrada.
+      </div>
+    `;
+
+    return;
+  }
+
+  listaCategoriasMateriaisLimpeza.innerHTML = categoriasEstoque
+    .map(
+      (categoria) => `
+        <label class="perfil-check">
+          <input
+            type="checkbox"
+            class="categoria-material-limpeza"
+            value="${escaparHtml(categoria.id)}"
+            ${
+              configuracaoCategoriasMateriaisLimpeza.categorias?.[
+                categoria.id
+              ] === true
+                ? "checked"
+                : ""
+            }
+            ${acessoTodas ? "disabled" : ""}
+          />
+
+          <span>
+            ${escaparHtml(categoria.nome)}
+          </span>
+        </label>
+      `,
+    )
+    .join("");
+}
+
 todasCategoriasMateriaisGestores?.addEventListener("change", () => {
   const acessoTodas = todasCategoriasMateriaisGestores.checked;
 
@@ -853,6 +943,18 @@ todasCategoriasMateriaisGestores?.addEventListener("change", () => {
 
   document
     .querySelectorAll(".categoria-material-gestor")
+    .forEach((checkbox) => {
+      checkbox.disabled = acessoTodas;
+    });
+});
+
+todasCategoriasMateriaisLimpeza?.addEventListener("change", () => {
+  const acessoTodas = todasCategoriasMateriaisLimpeza.checked;
+
+  blocoCategoriasMateriaisLimpeza.style.opacity = acessoTodas ? "0.5" : "1";
+
+  document
+    .querySelectorAll(".categoria-material-limpeza")
     .forEach((checkbox) => {
       checkbox.disabled = acessoTodas;
     });
@@ -893,6 +995,43 @@ btnSalvarCategoriasMateriaisGestores?.addEventListener("click", async () => {
     notificar("Não foi possível salvar as categorias.", "erro");
   } finally {
     btnSalvarCategoriasMateriaisGestores.disabled = false;
+  }
+});
+
+btnSalvarCategoriasMateriaisLimpeza?.addEventListener("click", async () => {
+  const todas = todasCategoriasMateriaisLimpeza.checked;
+  const categorias = {};
+
+  if (!todas) {
+    document
+      .querySelectorAll(".categoria-material-limpeza:checked")
+      .forEach((checkbox) => {
+        categorias[checkbox.value] = true;
+      });
+
+    if (!Object.keys(categorias).length) {
+      notificar("Selecione pelo menos uma categoria de limpeza.", "erro");
+
+      return;
+    }
+  }
+
+  btnSalvarCategoriasMateriaisLimpeza.disabled = true;
+
+  try {
+    await update(categoriasMateriaisLimpezaRef, {
+      todas,
+      categorias: todas ? null : categorias,
+      atualizadoEm: new Date().toISOString(),
+    });
+
+    notificar("Categorias de limpeza salvas com sucesso!");
+  } catch (error) {
+    console.error("Erro ao salvar categorias de limpeza:", error);
+
+    notificar("Não foi possível salvar as categorias de limpeza.", "erro");
+  } finally {
+    btnSalvarCategoriasMateriaisLimpeza.disabled = false;
   }
 });
 

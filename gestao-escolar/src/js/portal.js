@@ -151,8 +151,8 @@ function obterStatusSolicitacao(status) {
   );
 }
 
-function obterIconeSolicitacao(tipo) {
-  const icones = {
+function obterIconeSolicitacao(solicitacao) {
+  const iconesPorTipo = {
     AGUA_MINERAL: "water_drop",
     GAS_P13: "propane_tank",
     GAS_P45: "propane_tank",
@@ -160,7 +160,29 @@ function obterIconeSolicitacao(tipo) {
     CAMINHAO_PIPA: "local_shipping",
   };
 
-  return icones[tipo] || "inventory_2";
+  if (iconesPorTipo[solicitacao.tipo]) {
+    return iconesPorTipo[solicitacao.tipo];
+  }
+
+  const iconesPorModulo = {
+    INSUMOS: "water_drop",
+    MATERIAIS_EXPEDIENTE: "inventory_2",
+    MATERIAIS_LIMPEZA: "cleaning_services",
+    MANUTENCAO: "construction",
+  };
+
+  return iconesPorModulo[solicitacao.modulo] || "description";
+}
+
+function obterLinkSolicitacao(solicitacao) {
+  const links = {
+    INSUMOS: "./insumos.html#historico",
+    MATERIAIS_EXPEDIENTE: "./materiais-expediente.html#historico",
+    MATERIAIS_LIMPEZA: "./materiais-limpeza.html#historico",
+    MANUTENCAO: "./manutencao.html#historico",
+  };
+
+  return links[solicitacao.modulo] || "./minhas-solicitacoes.html";
 }
 
 function renderizarSolicitacoesRecentes(solicitacoes) {
@@ -187,12 +209,12 @@ function renderizarSolicitacoesRecentes(solicitacoes) {
 
       return `
         <a
-          href="./insumos.html#historico"
+          href="${obterLinkSolicitacao(solicitacao)}"
           class="item-solicitacao-recente"
         >
           <div class="solicitacao-recente-icone">
             <span class="material-symbols-outlined">
-              ${obterIconeSolicitacao(solicitacao.tipo)}
+              ${obterIconeSolicitacao(solicitacao)}
             </span>
           </div>
 
