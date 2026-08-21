@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Minhas Solicitações | Portal do Gestor</title>
+
+    <link rel="stylesheet" href="./src/css/portal.css" />
+    <link rel="stylesheet" href="./src/css/minhas-solicitacoes.css" />
+
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+  </head>
+
+  <body class="verificando-acesso">
+    <div id="notificacao" class="notificacao"></div>
+
+    <header class="topo-portal">
+      <div class="topo-conteudo">
+        <a href="./" class="marca-portal">
+          <div class="marca-icone">
+            <span class="material-symbols-outlined">school</span>
+          </div>
+
+          <div>
+            <strong>Portal do Gestor</strong>
+            <span>SEE Carpina</span>
+          </div>
+        </a>
+
+        <div class="usuario-topo">
+          <div class="usuario-informacoes">
+            <strong id="nomeGestor">Gestor</strong>
+            <span id="escolaGestor">Unidade escolar</span>
+          </div>
+
+          <button
+            type="button"
+            id="btnSair"
+            class="btn-sair"
+            title="Sair do portal"
+            aria-label="Sair do portal"
+          >
+            <span class="material-symbols-outlined">logout</span>
+            <span class="btn-sair-texto">Sair</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="conteudo-portal pagina-minhas-solicitacoes">
+      <section class="cabecalho-minhas-solicitacoes">
+        <div class="cabecalho-minhas-solicitacoes-icone">
+          <span class="material-symbols-outlined">receipt_long</span>
+        </div>
+
+        <div class="cabecalho-minhas-solicitacoes-texto">
+          <a href="./" class="link-voltar-portal">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Voltar ao início
+          </a>
+
+          <span class="secao-legenda">Acompanhamento</span>
+
+          <h1>Minhas solicitações</h1>
+
+          <p>
+            Consulte e acompanhe todas as solicitações enviadas pela sua unidade
+            escolar.
+          </p>
+        </div>
+      </section>
+
+      <section class="resumo-minhas-solicitacoes">
+        <article class="card-resumo-solicitacoes">
+          <div class="icone-resumo-solicitacoes total">
+            <span class="material-symbols-outlined">inbox</span>
+          </div>
+
+          <div>
+            <span>Total</span>
+            <strong id="totalSolicitacoes">0</strong>
+          </div>
+        </article>
+
+        <article class="card-resumo-solicitacoes">
+          <div class="icone-resumo-solicitacoes andamento">
+            <span class="material-symbols-outlined">pending_actions</span>
+          </div>
+
+          <div>
+            <span>Em andamento</span>
+            <strong id="totalEmAndamento">0</strong>
+          </div>
+        </article>
+
+        <article class="card-resumo-solicitacoes">
+          <div class="icone-resumo-solicitacoes confirmacao">
+            <span class="material-symbols-outlined">fact_check</span>
+          </div>
+
+          <div>
+            <span>Aguardando confirmação</span>
+            <strong id="totalAguardandoConfirmacao">0</strong>
+          </div>
+        </article>
+
+        <article class="card-resumo-solicitacoes">
+          <div class="icone-resumo-solicitacoes finalizadas">
+            <span class="material-symbols-outlined">check_circle</span>
+          </div>
+
+          <div>
+            <span>Finalizadas</span>
+            <strong id="totalFinalizadas">0</strong>
+          </div>
+        </article>
+      </section>
+
+      <section class="painel-minhas-solicitacoes">
+        <div class="cabecalho-painel-solicitacoes">
+          <div>
+            <span class="secao-legenda">Histórico da unidade</span>
+            <h2>Todas as solicitações</h2>
+
+            <p id="contadorSolicitacoes">Carregando solicitações...</p>
+          </div>
+        </div>
+
+        <div class="filtros-minhas-solicitacoes">
+          <div class="busca-minhas-solicitacoes">
+            <span class="material-symbols-outlined">search</span>
+
+            <input
+              type="search"
+              id="buscaSolicitacoes"
+              placeholder="Buscar por protocolo, item ou descrição"
+              autocomplete="off"
+            />
+          </div>
+
+          <select id="filtroModuloSolicitacoes">
+            <option value="">Todos os tipos</option>
+            <option value="INSUMOS">Água, gás e caminhão-pipa</option>
+            <option value="MATERIAIS_EXPEDIENTE">Material de expediente</option>
+            <option value="MANUTENCAO">Manutenção</option>
+          </select>
+
+          <select id="filtroStatusSolicitacoes">
+            <option value="">Todas as situações</option>
+            <option value="RECEBIDA">Recebida</option>
+            <option value="EM_ATENDIMENTO">Em atendimento</option>
+            <option value="AGUARDANDO_CONFIRMACAO">
+              Aguardando confirmação
+            </option>
+            <option value="CONCLUIDA">Concluída</option>
+            <option value="ATENDIDA_PARCIALMENTE">Atendida parcialmente</option>
+            <option value="CANCELADA">Cancelada</option>
+          </select>
+        </div>
+
+        <div id="listaMinhasSolicitacoes" class="lista-minhas-solicitacoes">
+          <div class="estado-minhas-solicitacoes">
+            <span class="material-symbols-outlined carregando">
+              progress_activity
+            </span>
+
+            <strong>Carregando solicitações...</strong>
+
+            <p>Aguarde enquanto buscamos os registros da sua escola.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="rodape-portal">
+      <p>Secretaria Municipal de Educação e Esportes de Carpina</p>
+    </footer>
+
+    <script type="module" src="./src/js/minhas-solicitacoes.js"></script>
+  </body>
+</html>
