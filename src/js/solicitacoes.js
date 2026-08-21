@@ -496,6 +496,19 @@ function renderizarSolicitacoes() {
     .map((solicitacao) => {
       const status = obterDadosStatus(solicitacao.status);
       const prioridadeUrgente = solicitacao.prioridade === "URGENTE";
+      const ehManutencao = solicitacao.modulo === "MANUTENCAO";
+
+      const rotuloDataCard = ehManutencao
+        ? "Problema identificado em"
+        : "Necessário em";
+
+      const dataCard = ehManutencao
+        ? solicitacao.dataIdentificacao
+        : solicitacao.dataNecessidade;
+
+      const descricaoCard = ehManutencao
+        ? solicitacao.descricaoProblema
+        : solicitacao.justificativa;
 
       return `
         <article class="card-central-solicitacao">
@@ -566,17 +579,16 @@ function renderizarSolicitacoes() {
               </div>
 
               <div>
-                <small>Necessário em</small>
-
+                <small>${rotuloDataCard}</small>
                 <strong>
-                  ${formatarData(solicitacao.dataNecessidade)}
+                  ${formatarData(dataCard)}
                 </strong>
               </div>
             </div>
 
             <div class="rodape-card-central">
               <p>
-                ${escaparHtml(solicitacao.justificativa || "")}
+                ${escaparHtml(descricaoCard || "")}
               </p>
 
               <button
@@ -770,14 +782,88 @@ function renderizarDadosEspecificos(solicitacao) {
 
   if (solicitacao.modulo === "MANUTENCAO") {
     return `
-      <section class="secao-detalhe-central">
-        <h3>Dados do chamado</h3>
+    <section class="secao-detalhe-central">
+      <h3>Dados do chamado de manutenção</h3>
 
-        <p class="texto-detalhe-central">
-          Os dados do chamado de manutenção serão exibidos aqui.
+      <div class="grade-detalhe-central">
+        <div>
+          <small>Categoria</small>
+
+          <strong>
+            ${escaparHtml(
+              solicitacao.categoriaNome ||
+                solicitacao.tipoNome ||
+                "Não informada",
+            )}
+          </strong>
+        </div>
+
+        <div>
+          <small>Ambiente</small>
+
+          <strong>
+            ${escaparHtml(solicitacao.ambienteNome || "Não informado")}
+          </strong>
+        </div>
+
+        <div>
+          <small>Local específico</small>
+
+          <strong>
+            ${escaparHtml(solicitacao.localEspecifico || "Não informado")}
+          </strong>
+        </div>
+
+        <div>
+          <small>Data de identificação</small>
+
+          <strong>
+            ${formatarData(solicitacao.dataIdentificacao)}
+          </strong>
+        </div>
+
+        <div>
+          <small>Impacto nas atividades</small>
+
+          <strong>
+            ${escaparHtml(solicitacao.impactoNome || "Não informado")}
+          </strong>
+        </div>
+
+        <div>
+          <small>Prioridade</small>
+
+          <strong>
+            ${solicitacao.prioridade === "URGENTE" ? "Urgente" : "Normal"}
+          </strong>
+        </div>
+      </div>
+
+      <div class="bloco-texto-detalhe-central">
+        <small>Descrição do problema</small>
+
+        <p>
+          ${escaparHtml(
+            solicitacao.descricaoProblema || "Descrição não informada.",
+          )}
         </p>
-      </section>
-    `;
+      </div>
+
+      ${
+        solicitacao.observacoes
+          ? `
+            <div class="bloco-texto-detalhe-central">
+              <small>Observações</small>
+
+              <p>
+                ${escaparHtml(solicitacao.observacoes)}
+              </p>
+            </div>
+          `
+          : ""
+      }
+    </section>
+  `;
   }
 
   return "";
@@ -791,6 +877,20 @@ function renderizarInformacoesEntrega(solicitacao) {
   }
 
   const entregaParcial = entrega.tipoAtendimento === "PARCIAL";
+
+  const ehManutencao = solicitacao.modulo === "MANUTENCAO";
+
+  const tituloAtendimento = ehManutencao
+    ? "Informações do atendimento"
+    : "Informações da entrega";
+
+  const resultadoAtendimento = ehManutencao
+    ? entregaParcial
+      ? "Atendimento parcial"
+      : "Serviço concluído"
+    : entregaParcial
+      ? "Entrega parcial"
+      : "Entrega completa";
 
   const itensEntregues = Array.isArray(entrega.itensEntregues)
     ? entrega.itensEntregues.filter(Boolean)
@@ -876,14 +976,14 @@ function renderizarInformacoesEntrega(solicitacao) {
 
   return `
     <section class="secao-detalhe-central">
-      <h3>Informações da entrega</h3>
+      <h3>${tituloAtendimento}</h3>
 
       <div class="grade-detalhe-central">
         <div>
           <small>Resultado informado</small>
 
           <strong>
-            ${entregaParcial ? "Entrega parcial" : "Entrega completa"}
+            ${resultadoAtendimento}
           </strong>
         </div>
 
@@ -1136,6 +1236,26 @@ function abrirDialogoAtualizacao() {
   protocoloAtualizacao.textContent =
     solicitacaoSelecionada.protocolo || "Sem protocolo";
 
+  const ehManutencao = solicitacaoSelecionada.modulo === "MANUTENCAO";
+
+  const labelTipoAtendimento = blocoTipoAtendimento.querySelector("label");
+
+  labelTipoAtendimento.textContent = ehManutencao
+    ? "Resultado do serviço"
+    : "Resultado da entrega";
+
+  tipoAtendimentoEntrega.innerHTML = ehManutencao
+    ? `
+      <option value="">Selecione</option>
+      <option value="TOTAL">Serviço concluído</option>
+      <option value="PARCIAL">Atendimento parcial</option>
+    `
+    : `
+      <option value="">Selecione</option>
+      <option value="TOTAL">Entrega completa</option>
+      <option value="PARCIAL">Entrega parcial</option>
+    `;
+
   novoStatusSolicitacao.innerHTML = `
     <option value="">
       Selecione
@@ -1381,13 +1501,19 @@ async function salvarAtualizacaoSolicitacao() {
     "MATERIAIS_LIMPEZA",
   ].includes(solicitacaoSelecionada.modulo);
 
+  const ehManutencao = solicitacaoSelecionada.modulo === "MANUTENCAO";
+
   let dadosEntregaMateriais = null;
 
   if (!novoStatus) {
     throw new Error("Selecione a nova situação.");
   }
   if (novoStatus === "AGUARDANDO_CONFIRMACAO" && !tipoAtendimento) {
-    throw new Error("Informe o resultado da entrega.");
+    throw new Error(
+      ehManutencao
+        ? "Informe o resultado do serviço."
+        : "Informe o resultado da entrega.",
+    );
   }
 
   if (ehPedidoMateriais && novoStatus === "AGUARDANDO_CONFIRMACAO") {
@@ -1480,14 +1606,27 @@ async function salvarAtualizacaoSolicitacao() {
 
       const novoStatusNome = obterDadosStatus(novoStatus).nome;
 
-      const descricaoAtualizacao =
-        novoStatus === "AGUARDANDO_CONFIRMACAO"
-          ? tipoAtendimento === "TOTAL"
-            ? "Entrega completa informada. Aguardando confirmação da unidade escolar."
-            : "Entrega parcial informada. Aguardando confirmação da unidade escolar." +
-              (observacao ? ` Observação: ${observacao}` : "")
-          : `Situação alterada de ${statusAnteriorNome} para ${novoStatusNome}.` +
-            (observacao ? ` Observação: ${observacao}` : "");
+      let descricaoAtualizacao;
+
+      if (novoStatus === "AGUARDANDO_CONFIRMACAO") {
+        if (ehManutencao) {
+          descricaoAtualizacao =
+            tipoAtendimento === "TOTAL"
+              ? "Serviço concluído. Aguardando confirmação da unidade escolar."
+              : "Chamado atendido parcialmente. Aguardando confirmação da unidade escolar." +
+                (observacao ? ` Observação: ${observacao}` : "");
+        } else {
+          descricaoAtualizacao =
+            tipoAtendimento === "TOTAL"
+              ? "Entrega completa informada. Aguardando confirmação da unidade escolar."
+              : "Entrega parcial informada. Aguardando confirmação da unidade escolar." +
+                (observacao ? ` Observação: ${observacao}` : "");
+        }
+      } else {
+        descricaoAtualizacao =
+          `Situação alterada de ${statusAnteriorNome} para ${novoStatusNome}.` +
+          (observacao ? ` Observação: ${observacao}` : "");
+      }
 
       solicitacaoAtual.historico[historicoId] = {
         status: novoStatus,
@@ -1495,7 +1634,9 @@ async function salvarAtualizacaoSolicitacao() {
 
         acao:
           novoStatus === "AGUARDANDO_CONFIRMACAO"
-            ? "ENTREGA_INFORMADA"
+            ? ehManutencao
+              ? "SERVICO_INFORMADO"
+              : "ENTREGA_INFORMADA"
             : "STATUS_ATUALIZADO",
 
         descricao: descricaoAtualizacao,
