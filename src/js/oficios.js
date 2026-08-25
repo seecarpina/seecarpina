@@ -1315,8 +1315,11 @@ btnExportar?.addEventListener("click", () => {
     Assunto: oficio.assunto || "",
     Data: formatarDataBR(oficio.data),
     Destino: obterDestinoOficio(oficio),
-
     Cópia: obterCopiaOficio(oficio),
+    "Encaminhado ao Carpina Digital":
+      oficio.sistemaCarpinaDigital === true ? "Sim" : "Não",
+    "Número do Processo":
+      oficio.sistemaCarpinaDigital === true ? oficio.numeroProcesso || "" : "",
     Responsável: oficio.responsavel || "",
   }));
 
