@@ -271,14 +271,14 @@
                 <table id="tabelaServidores">
                   <thead>
                     <tr>
-                      <th>Código</th>
+                      <th>Cod</th>
                       <th>Nome</th>
                       <th>CPF</th>
                       <th>Cargo</th>
                       <th>Vínculo</th>
                       <th>Admissão</th>
                       <th>Situação</th>
-                      <th>Local de exercício</th>
+                      <th>Lotação</th>
                       <th>Ações</th>
                     </tr>
                   </thead>
@@ -420,6 +420,27 @@
         </button>
       </div>
     </aside>
+    <!-- MENU DE AÇÕES DO SERVIDOR -->
+    <div id="menuAcoesServidor" class="menu-acoes-servidor" hidden>
+      <button type="button" id="menuEditarServidor">
+        <span class="material-symbols-outlined">edit_note</span>
+        <span>Editar servidor</span>
+      </button>
+
+      <button type="button" id="menuTransferirServidor">
+        <span class="material-symbols-outlined">
+          transfer_within_a_station
+        </span>
+        <span>Transferir servidor</span>
+      </button>
+
+      <div id="divisorMenuServidor" class="menu-acoes-servidor-divisor"></div>
+
+      <button type="button" id="menuDesligarServidor" class="acao-perigosa">
+        <span class="material-symbols-outlined">cancel</span>
+        <span>Desligar servidor</span>
+      </button>
+    </div>
     <!-- Scripts -->
     <!-- jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>

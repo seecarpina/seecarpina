@@ -292,10 +292,6 @@
   min-width: 220px;
 }
 
-#tabelaServidores td:last-child {
-  min-width: 100px;
-}
-
 /* =========================================
    SITUAÇÃO
 ========================================= */
@@ -324,43 +320,113 @@
    AÇÕES
 ========================================= */
 
+#tabelaServidores td:last-child {
+  min-width: 65px;
+  text-align: center;
+}
+
 .acoes-servidor {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  justify-content: center;
 }
 
-.acoes-servidor button {
+.btn-menu-acoes {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  width: 1.4rem;
-  height: 1.4rem;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
   border: 0;
   border-radius: 50%;
+  color: var(--clr-primary);
   background: transparent;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.btn-menu-acoes:hover,
+.btn-menu-acoes.menu-aberto {
+  background: rgba(115, 128, 236, 0.14);
+}
+
+.btn-menu-acoes:active {
+  transform: scale(0.92);
+}
+
+.btn-menu-acoes .material-symbols-outlined {
+  font-size: 1.3rem;
+}
+
+/* Menu suspenso sobre a página */
+.menu-acoes-servidor {
+  position: fixed;
+  z-index: 10000;
+  width: 210px;
+  padding: 0.4rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 0.8rem;
+  background: var(--clr-white);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.18);
+}
+
+.menu-acoes-servidor[hidden] {
+  display: none;
+}
+
+.menu-acoes-servidor button[hidden],
+.menu-acoes-servidor div[hidden] {
+  display: none;
+}
+
+.menu-acoes-servidor button {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.7rem 0.75rem;
+  border: 0;
+  border-radius: 0.55rem;
+  color: var(--clr-dark);
+  background: transparent;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: left;
   cursor: pointer;
 }
 
-.acoes-servidor button:hover {
+.menu-acoes-servidor button:hover {
+  color: var(--clr-primary);
   background: var(--clr-light);
 }
 
-.acoes-servidor .edit-btn {
-  color: var(--clr-primary);
+.menu-acoes-servidor button:disabled {
+  opacity: 0.55;
+  cursor: wait;
 }
 
-.acoes-servidor .transfer-btn {
-  color: var(--clr-warnig);
+.menu-acoes-servidor button .material-symbols-outlined {
+  flex-shrink: 0;
+  font-size: 1.2rem;
 }
 
-.acoes-servidor .desligar-btn {
+.menu-acoes-servidor .acao-perigosa {
   color: crimson;
 }
 
-.acoes-servidor .desligar-btn:hover {
-  background: rgba(255, 69, 58, 0.12);
+.menu-acoes-servidor .acao-perigosa:hover {
+  color: crimson;
+  background: rgba(220, 20, 60, 0.1);
+}
+
+.menu-acoes-servidor-divisor {
+  height: 1px;
+  margin: 0.3rem 0.45rem;
+  background: rgba(0, 0, 0, 0.08);
 }
 
 /* =========================================

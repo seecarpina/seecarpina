@@ -13,6 +13,17 @@ import {
 const tabela = document.querySelector("#tabelaServidores tbody");
 const busca = document.getElementById("buscaServidor");
 const paginacao = document.getElementById("paginacaoServidores");
+const menuAcoesServidor = document.getElementById("menuAcoesServidor");
+
+const menuEditarServidor = document.getElementById("menuEditarServidor");
+
+const menuTransferirServidor = document.getElementById(
+  "menuTransferirServidor",
+);
+
+const menuDesligarServidor = document.getElementById("menuDesligarServidor");
+
+const divisorMenuServidor = document.getElementById("divisorMenuServidor");
 
 const form = document.getElementById("formServidor");
 
@@ -69,6 +80,8 @@ let paginaAtual = 1;
 const itensPorPagina = 100;
 let editando = false;
 let chaveEdicao = null;
+let servidorMenuSelecionado = null;
+let botaoMenuSelecionado = null;
 
 let cargos = [];
 let vinculos = [];
@@ -650,54 +663,25 @@ function renderTabela() {
     <td>
       <div class="acoes-servidor">
         <button
-          class="edit-btn"
+          class="btn-menu-acoes"
           type="button"
-          title="Editar servidor"
+          title="Ações do servidor"
+          aria-label="Abrir ações de ${s.nome || "servidor"}"
+          aria-haspopup="menu"
+          aria-expanded="false"
         >
           <span class="material-symbols-outlined">
-            edit_note
+            more_vert
           </span>
         </button>
-
-        ${
-          String(s.situacao || "").toLowerCase() === "ativo"
-            ? `
-              <button
-                class="transfer-btn"
-                type="button"
-                title="Transferir servidor"
-              >
-                <span class="material-symbols-outlined">
-                  transfer_within_a_station
-                </span>
-              </button>
-
-              <button
-                class="desligar-btn"
-                type="button"
-                title="Desligar servidor"
-              >
-                <span class="material-symbols-outlined">
-                  cancel
-                </span>
-              </button>
-            `
-            : ""
-        }
       </div>
     </td>
   `;
 
-      tr.querySelector(".edit-btn").addEventListener("click", () => {
-        editarServidor(s);
-      });
+      tr.querySelector(".btn-menu-acoes").addEventListener("click", (event) => {
+        event.stopPropagation();
 
-      tr.querySelector(".transfer-btn")?.addEventListener("click", () => {
-        abrirTransferencia(s);
-      });
-
-      tr.querySelector(".desligar-btn")?.addEventListener("click", (event) => {
-        desligarServidor(s, event.currentTarget);
+        abrirMenuAcoesServidor(s, event.currentTarget);
       });
 
       tabela.appendChild(tr);
@@ -706,6 +690,122 @@ function renderTabela() {
 
   renderPaginacao(totalPaginas);
 }
+
+/* ===============================
+   MENU DE AÇÕES DO SERVIDOR
+================================ */
+
+function fecharMenuAcoesServidor() {
+  if (!menuAcoesServidor) return;
+
+  menuAcoesServidor.hidden = true;
+
+  botaoMenuSelecionado?.classList.remove("menu-aberto");
+  botaoMenuSelecionado?.setAttribute("aria-expanded", "false");
+
+  servidorMenuSelecionado = null;
+  botaoMenuSelecionado = null;
+}
+
+function abrirMenuAcoesServidor(servidor, botao) {
+  if (!menuAcoesServidor) return;
+
+  const mesmoBotao =
+    botaoMenuSelecionado === botao && !menuAcoesServidor.hidden;
+
+  if (mesmoBotao) {
+    fecharMenuAcoesServidor();
+    return;
+  }
+
+  fecharMenuAcoesServidor();
+
+  servidorMenuSelecionado = servidor;
+  botaoMenuSelecionado = botao;
+
+  const servidorAtivo =
+    String(servidor.situacao || "").toLowerCase() === "ativo";
+
+  menuTransferirServidor.hidden = !servidorAtivo;
+  menuDesligarServidor.hidden = !servidorAtivo;
+  divisorMenuServidor.hidden = !servidorAtivo;
+
+  menuAcoesServidor.hidden = false;
+
+  botao.classList.add("menu-aberto");
+  botao.setAttribute("aria-expanded", "true");
+
+  const posicaoBotao = botao.getBoundingClientRect();
+  const larguraMenu = menuAcoesServidor.offsetWidth;
+  const alturaMenu = menuAcoesServidor.offsetHeight;
+  const margem = 8;
+
+  let esquerda = posicaoBotao.right - larguraMenu;
+
+  esquerda = Math.max(
+    margem,
+    Math.min(esquerda, window.innerWidth - larguraMenu - margem),
+  );
+
+  let topo = posicaoBotao.bottom + margem;
+
+  if (topo + alturaMenu > window.innerHeight - margem) {
+    topo = posicaoBotao.top - alturaMenu - margem;
+  }
+
+  menuAcoesServidor.style.left = `${esquerda}px`;
+  menuAcoesServidor.style.top = `${Math.max(margem, topo)}px`;
+}
+
+menuEditarServidor?.addEventListener("click", () => {
+  const servidor = servidorMenuSelecionado;
+
+  fecharMenuAcoesServidor();
+
+  if (servidor) {
+    editarServidor(servidor);
+  }
+});
+
+menuTransferirServidor?.addEventListener("click", () => {
+  const servidor = servidorMenuSelecionado;
+
+  fecharMenuAcoesServidor();
+
+  if (servidor) {
+    abrirTransferencia(servidor);
+  }
+});
+
+menuDesligarServidor?.addEventListener("click", async () => {
+  const servidor = servidorMenuSelecionado;
+
+  if (!servidor) return;
+
+  await desligarServidor(servidor, menuDesligarServidor);
+
+  fecharMenuAcoesServidor();
+});
+
+document.addEventListener("click", (event) => {
+  if (
+    !menuAcoesServidor?.hidden &&
+    !menuAcoesServidor.contains(event.target) &&
+    !event.target.closest(".btn-menu-acoes")
+  ) {
+    fecharMenuAcoesServidor();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    fecharMenuAcoesServidor();
+  }
+});
+
+window.addEventListener("resize", fecharMenuAcoesServidor);
+
+window.addEventListener("scroll", fecharMenuAcoesServidor, true);
 
 /* ===============================
    PAGINAÇÃO
