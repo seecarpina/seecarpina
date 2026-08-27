@@ -17,6 +17,8 @@ const menuAcoesServidor = document.getElementById("menuAcoesServidor");
 
 const menuEditarServidor = document.getElementById("menuEditarServidor");
 
+const menuFichaFuncional = document.getElementById("menuFichaFuncional");
+
 const menuTransferirServidor = document.getElementById(
   "menuTransferirServidor",
 );
@@ -62,6 +64,234 @@ const inputForaSala = document.getElementById("foraSala");
 const blocoProfessorForaSala = document.getElementById(
   "blocoProfessorForaSala",
 );
+
+const idsCamposComplementares = [
+  "endereco",
+  "numero",
+  "complemento",
+  "bairro",
+  "cep",
+  "cidade",
+  "uf",
+  "telefone",
+  "dataNascimento",
+  "sexo",
+  "cor",
+  "estadoCivil",
+  "conjuge",
+  "email",
+  "pcd",
+  "rg",
+  "orgaoEmissorRg",
+  "ufRg",
+  "dataEmissaoRg",
+  "nacionalidade",
+  "naturalidade",
+  "ufNaturalidade",
+  "ctps",
+  "serieCtps",
+  "orgaoEmissorCtps",
+  "ufCtps",
+  "pis",
+  "tituloEleitor",
+  "secaoEleitoral",
+  "zonaEleitoral",
+  "pai",
+  "mae",
+  "banco",
+  "agencia",
+  "conta",
+];
+
+const camposComplementares = Object.fromEntries(
+  idsCamposComplementares.map((id) => [id, document.getElementById(id)]),
+);
+
+const acordeaoDadosComplementares = document.getElementById(
+  "acordeaoDadosComplementares",
+);
+
+/* ===============================
+   PREENCHIMENTO AUTOMÁTICO DO CEP
+================================ */
+
+const inputCep = camposComplementares.cep;
+
+function formatarCepInput(valor) {
+  const numeros = String(valor || "")
+    .replace(/\D/g, "")
+    .slice(0, 8);
+
+  if (numeros.length > 5) {
+    return numeros.replace(/^(\d{5})(\d{1,3})$/, "$1-$2");
+  }
+
+  return numeros;
+}
+
+async function consultarCep() {
+  const cep = String(inputCep?.value || "").replace(/\D/g, "");
+
+  if (!cep) return;
+
+  if (cep.length !== 8) {
+    mostrarNotificacao("Informe um CEP com 8 números.", "erro");
+
+    return;
+  }
+
+  const campoEndereco = camposComplementares.endereco;
+
+  const campoBairro = camposComplementares.bairro;
+
+  const campoCidade = camposComplementares.cidade;
+
+  const campoUf = camposComplementares.uf;
+
+  const campoComplemento = camposComplementares.complemento;
+
+  inputCep.disabled = true;
+
+  try {
+    const resposta = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+
+    if (!resposta.ok) {
+      throw new Error("Erro ao consultar CEP");
+    }
+
+    const dados = await resposta.json();
+
+    if (dados.erro) {
+      mostrarNotificacao("CEP não encontrado.", "erro");
+
+      return;
+    }
+
+    inputCep.value = formatarCepInput(dados.cep || cep);
+
+    if (campoEndereco) {
+      campoEndereco.value = String(dados.logradouro || "").toUpperCase();
+    }
+
+    if (campoBairro) {
+      campoBairro.value = String(dados.bairro || "").toUpperCase();
+    }
+
+    if (campoCidade) {
+      campoCidade.value = String(dados.localidade || "").toUpperCase();
+    }
+
+    if (campoUf) {
+      campoUf.value = String(dados.uf || "").toUpperCase();
+    }
+
+    if (
+      campoComplemento &&
+      !campoComplemento.value.trim() &&
+      dados.complemento
+    ) {
+      campoComplemento.value = String(dados.complemento).toUpperCase();
+    }
+
+    camposComplementares.numero?.focus();
+  } catch (erro) {
+    console.error("Erro ao consultar o CEP:", erro);
+
+    mostrarNotificacao("Não foi possível consultar o CEP.", "erro");
+  } finally {
+    inputCep.disabled = false;
+  }
+}
+
+inputCep?.addEventListener("input", (event) => {
+  const campo = event.target;
+
+  campo.value = formatarCepInput(campo.value);
+
+  const cepNumerico = campo.value.replace(/\D/g, "");
+
+  if (cepNumerico.length === 8) {
+    consultarCep();
+  }
+});
+
+/* ===============================
+   FORMATAÇÃO DO TELEFONE
+================================ */
+
+const inputTelefone = camposComplementares.telefone;
+
+function formatarTelefone(valor) {
+  const numeros = String(valor || "")
+    .replace(/\D/g, "")
+    .slice(0, 11);
+
+  if (numeros.length === 0) {
+    return "";
+  }
+
+  if (numeros.length <= 2) {
+    return `(${numeros}`;
+  }
+
+  if (numeros.length <= 7) {
+    return `(${numeros.slice(0, 2)}) ${numeros.slice(2)}`;
+  }
+
+  return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 7)}-${numeros.slice(7)}`;
+}
+
+inputTelefone?.addEventListener("input", (event) => {
+  event.target.value = formatarTelefone(event.target.value);
+});
+
+/* ===============================
+   FORMATAÇÃO DO RG
+================================ */
+
+const inputRg = camposComplementares.rg;
+
+function formatarRg(valor) {
+  const numeros = String(valor || "")
+    .replace(/\D/g, "")
+    .slice(0, 11);
+
+  if (!numeros) {
+    return "";
+  }
+
+  // RG antigo: até 7 números
+  if (numeros.length <= 7) {
+    return numeros
+      .replace(/^(\d{1})(\d)/, "$1.$2")
+      .replace(/^(\d{1})\.(\d{3})(\d)/, "$1.$2.$3");
+  }
+
+  // Nova identificação com
+  // a mesma numeração do CPF
+  return numeros
+    .replace(/^(\d{3})(\d)/, "$1.$2")
+    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4");
+}
+
+inputRg?.addEventListener("input", (event) => {
+  event.target.value = formatarRg(event.target.value);
+});
+
+/* ===============================
+   FORMATAÇÃO DO E-MAIL
+================================ */
+
+const inputEmail = camposComplementares.email;
+
+inputEmail?.addEventListener("blur", (event) => {
+  setTimeout(() => {
+    event.target.value = String(event.target.value || "")
+      .trim()
+      .toLowerCase();
+  }, 0);
+});
 
 /* ===============================
    FIREBASE
@@ -767,6 +997,16 @@ menuEditarServidor?.addEventListener("click", () => {
   }
 });
 
+menuFichaFuncional?.addEventListener("click", () => {
+  const servidor = servidorMenuSelecionado;
+
+  fecharMenuAcoesServidor();
+
+  if (servidor) {
+    gerarPDFFichaFuncional(servidor);
+  }
+});
+
 menuTransferirServidor?.addEventListener("click", () => {
   const servidor = servidorMenuSelecionado;
 
@@ -910,6 +1150,30 @@ async function salvarServidor() {
     dataAdmissao: dataAdmissao.value,
     situacao: situacao.value,
   };
+  idsCamposComplementares.forEach((id) => {
+    const campo = camposComplementares[id];
+
+    const valor = campo?.value?.trim() || "";
+
+    const camposMaiusculos = [
+      "endereco",
+      "complemento",
+      "bairro",
+      "cidade",
+      "uf",
+      "ufRg",
+      "ufNaturalidade",
+      "ufCtps",
+    ];
+
+    if (camposMaiusculos.includes(id)) {
+      servidor[id] = valor.toUpperCase();
+    } else if (id === "email") {
+      servidor[id] = valor.toLowerCase();
+    } else {
+      servidor[id] = valor;
+    }
+  });
 
   if (!servidor.codigo || !servidor.nome) return;
 
@@ -977,6 +1241,22 @@ function editarServidor(s) {
   localExercicioIdSelecionado = s.localExercicioId || null;
   dataAdmissao.value = s.dataAdmissao;
   situacao.value = s.situacao;
+
+  idsCamposComplementares.forEach((id) => {
+    const campo = camposComplementares[id];
+
+    if (!campo) return;
+
+    const valor = String(s[id] || "");
+
+    campo.value = id === "email" ? valor.toLowerCase() : valor;
+  });
+
+  if (acordeaoDadosComplementares) {
+    acordeaoDadosComplementares.open = idsCamposComplementares.some((id) => {
+      return String(s[id] || "").trim() !== "";
+    });
+  }
 
   blocoCadastro.style.display = "none";
   blocoEdicao.style.display = "flex";
@@ -1128,6 +1408,10 @@ function resetarFormulario() {
 
   form.reset();
   inputForaSala.checked = false;
+
+  if (acordeaoDadosComplementares) {
+    acordeaoDadosComplementares.open = false;
+  }
 
   atualizarCampoProfessorForaSala();
   blocoCadastro.style.display = "block";
@@ -1481,6 +1765,516 @@ function gerarNumeroProtocolo() {
   const aleatorio = Math.floor(1000 + Math.random() * 9000);
 
   return `${data}-${hora}-${aleatorio}`;
+}
+
+/* ===============================
+   FICHA FUNCIONAL
+================================ */
+
+function gerarPDFFichaFuncional(servidor) {
+  if (!window.jspdf?.jsPDF) {
+    mostrarNotificacao("Não foi possível carregar o gerador de PDF.", "erro");
+
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+
+  const doc = new jsPDF("portrait", "mm", "a4");
+
+  const larguraPagina = 210;
+  const alturaPagina = 297;
+  const margem = 14;
+  const larguraUtil = larguraPagina - margem * 2;
+
+  function primeiroValor(...valores) {
+    const valor = valores.find((item) => {
+      return item !== undefined && item !== null && String(item).trim() !== "";
+    });
+
+    if (valor === undefined) {
+      return "";
+    }
+
+    return String(valor).trim();
+  }
+
+  function dataFicha(...valores) {
+    const valor = primeiroValor(...valores);
+
+    if (!valor) {
+      return "";
+    }
+
+    return formatarDataBR(valor);
+  }
+
+  function valorSimNao(valor) {
+    const texto = String(valor ?? "")
+      .trim()
+      .toLowerCase();
+
+    if (valor === true || texto === "sim" || texto === "true") {
+      return "Sim";
+    }
+
+    if (
+      valor === false ||
+      texto === "não" ||
+      texto === "nao" ||
+      texto === "false"
+    ) {
+      return "Não";
+    }
+
+    return primeiroValor(valor);
+  }
+
+  function desenharConteudo() {
+    let y = 34;
+
+    doc.setTextColor(34, 39, 52);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(15);
+
+    doc.text("FICHA FUNCIONAL", larguraPagina / 2, y, {
+      align: "center",
+    });
+
+    y += 6;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(95, 101, 116);
+
+    doc.text(
+      `Documento emitido em ${new Date().toLocaleDateString("pt-BR")}`,
+      larguraPagina / 2,
+      y,
+      {
+        align: "center",
+      },
+    );
+
+    function desenharSecao(titulo) {
+      y += 6;
+
+      doc.setFillColor(70, 64, 145);
+
+      doc.roundedRect(margem, y, larguraUtil, 8, 1.5, 1.5, "F");
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+
+      doc.text(titulo, margem + 4, y + 5.3);
+
+      y += 8;
+    }
+
+    function desenharLinha(campos, altura = 11) {
+      let x = margem;
+
+      campos.forEach((campo) => {
+        const largura = larguraUtil * campo.fracao;
+
+        doc.setDrawColor(211, 214, 222);
+        doc.setLineWidth(0.25);
+
+        doc.rect(x, y, largura, altura);
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(6.5);
+        doc.setTextColor(90, 96, 110);
+
+        doc.text(campo.rotulo.toUpperCase(), x + 2.5, y + 3.4);
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8.3);
+        doc.setTextColor(28, 32, 42);
+
+        const texto = doc.splitTextToSize(
+          primeiroValor(campo.valor),
+          largura - 5,
+        );
+
+        doc.text(texto.slice(0, 2), x + 2.5, y + 7.7);
+
+        x += largura;
+      });
+
+      y += altura;
+    }
+
+    desenharSecao("DADOS DO SERVIDOR");
+
+    desenharLinha([
+      {
+        rotulo: "Código/Matrícula",
+        valor: servidor.codigo,
+        fracao: 0.25,
+      },
+      {
+        rotulo: "CPF",
+        valor: formatarCPF(servidor.cpf || ""),
+        fracao: 0.3,
+      },
+      {
+        rotulo: "Nome",
+        valor: servidor.nome,
+        fracao: 0.45,
+      },
+    ]);
+
+    desenharLinha([
+      {
+        rotulo: "Endereço",
+        valor: servidor.endereco,
+        fracao: 0.55,
+      },
+      {
+        rotulo: "Número",
+        valor: servidor.numero,
+        fracao: 0.15,
+      },
+      {
+        rotulo: "Complemento",
+        valor: servidor.complemento,
+        fracao: 0.3,
+      },
+    ]);
+
+    desenharLinha([
+      {
+        rotulo: "Bairro",
+        valor: servidor.bairro,
+        fracao: 0.3,
+      },
+      {
+        rotulo: "CEP",
+        valor: servidor.cep,
+        fracao: 0.2,
+      },
+      {
+        rotulo: "Cidade",
+        valor: servidor.cidade,
+        fracao: 0.3,
+      },
+      {
+        rotulo: "UF",
+        valor: servidor.uf,
+        fracao: 0.2,
+      },
+    ]);
+
+    desenharLinha([
+      {
+        rotulo: "Telefone",
+        valor: primeiroValor(servidor.telefone, servidor.fone),
+        fracao: 0.25,
+      },
+      {
+        rotulo: "Data de nascimento",
+        valor: dataFicha(servidor.dataNascimento),
+        fracao: 0.25,
+      },
+      {
+        rotulo: "Sexo",
+        valor: servidor.sexo,
+        fracao: 0.25,
+      },
+      {
+        rotulo: "Cor/Raça",
+        valor: primeiroValor(servidor.cor, servidor.raca),
+        fracao: 0.25,
+      },
+    ]);
+
+    desenharLinha([
+      {
+        rotulo: "Estado civil",
+        valor: servidor.estadoCivil,
+        fracao: 0.3,
+      },
+      {
+        rotulo: "Cônjuge",
+        valor: servidor.conjuge,
+        fracao: 0.35,
+      },
+      {
+        rotulo: "E-mail",
+        valor: servidor.email,
+        fracao: 0.35,
+      },
+    ]);
+
+    desenharLinha([
+      {
+        rotulo: "Escolaridade",
+        valor: primeiroValor(servidor.habilitacao, servidor.escolaridade),
+        fracao: 0.5,
+      },
+      {
+        rotulo: "Pessoa com deficiência",
+        valor: valorSimNao(
+          primeiroValor(servidor.pcd, servidor.possuiDeficiencia),
+        ),
+        fracao: 0.5,
+      },
+    ]);
+
+    desenharLinha([
+      {
+        rotulo: "RG",
+        valor: servidor.rg,
+        fracao: 0.25,
+      },
+      {
+        rotulo: "Órgão emissor",
+        valor: primeiroValor(servidor.orgaoEmissorRg, servidor.orgaoEmissor),
+        fracao: 0.25,
+      },
+      {
+        rotulo: "UF",
+        valor: servidor.ufRg,
+        fracao: 0.15,
+      },
+      {
+        rotulo: "Data de emissão",
+        valor: dataFicha(servidor.dataEmissaoRg),
+        fracao: 0.35,
+      },
+    ]);
+
+    desenharLinha([
+      {
+        rotulo: "Nacionalidade",
+        valor: servidor.nacionalidade,
+        fracao: 0.35,
+      },
+      {
+        rotulo: "Naturalidade",
+        valor: servidor.naturalidade,
+        fracao: 0.45,
+      },
+      {
+        rotulo: "UF",
+        valor: servidor.ufNaturalidade,
+        fracao: 0.2,
+      },
+    ]);
+
+    desenharLinha([
+      {
+        rotulo: "CTPS",
+        valor: servidor.ctps,
+        fracao: 0.25,
+      },
+      {
+        rotulo: "Série",
+        valor: servidor.serieCtps,
+        fracao: 0.2,
+      },
+      {
+        rotulo: "Órgão emissor",
+        valor: servidor.orgaoEmissorCtps,
+        fracao: 0.35,
+      },
+      {
+        rotulo: "UF",
+        valor: servidor.ufCtps,
+        fracao: 0.2,
+      },
+    ]);
+
+    desenharLinha([
+      {
+        rotulo: "PIS/PASEP/NIS",
+        valor: primeiroValor(servidor.pis, servidor.pasep, servidor.nis),
+        fracao: 0.3,
+      },
+      {
+        rotulo: "Título de eleitor",
+        valor: servidor.tituloEleitor,
+        fracao: 0.3,
+      },
+      {
+        rotulo: "Seção",
+        valor: servidor.secaoEleitoral,
+        fracao: 0.2,
+      },
+      {
+        rotulo: "Zona",
+        valor: servidor.zonaEleitoral,
+        fracao: 0.2,
+      },
+    ]);
+
+    desenharLinha([
+      {
+        rotulo: "Pai",
+        valor: servidor.pai,
+        fracao: 0.5,
+      },
+      {
+        rotulo: "Mãe",
+        valor: servidor.mae,
+        fracao: 0.5,
+      },
+    ]);
+
+    desenharLinha([
+      {
+        rotulo: "Banco",
+        valor: servidor.banco,
+        fracao: 0.3,
+      },
+      {
+        rotulo: "Agência",
+        valor: servidor.agencia,
+        fracao: 0.25,
+      },
+      {
+        rotulo: "Conta",
+        valor: servidor.conta,
+        fracao: 0.25,
+      },
+      {
+        rotulo: "Tipo de vínculo",
+        valor: servidor.vinculo,
+        fracao: 0.2,
+      },
+    ]);
+
+    desenharSecao("RELATÓRIO FUNCIONAL");
+
+    desenharLinha([
+      {
+        rotulo: "Data de admissão",
+        valor: dataFicha(servidor.dataAdmissao),
+        fracao: 0.35,
+      },
+      {
+        rotulo: "Situação funcional",
+        valor: servidor.situacao,
+        fracao: 0.35,
+      },
+      {
+        rotulo: "Tipo de vínculo",
+        valor: servidor.vinculo,
+        fracao: 0.3,
+      },
+    ]);
+
+    desenharLinha([
+      {
+        rotulo: "Secretaria",
+        valor: primeiroValor(
+          servidor.secretaria,
+          "SECRETARIA MUNICIPAL DE EDUCAÇÃO E ESPORTES",
+        ).toUpperCase(),
+        fracao: 0.5,
+      },
+      {
+        rotulo: "Unidade/Local de exercício",
+        valor: obterLocalServidor(servidor),
+        fracao: 0.5,
+      },
+    ]);
+
+    desenharLinha([
+      {
+        rotulo: "Cargo/Função",
+        valor: servidor.cargo,
+        fracao: 0.5,
+      },
+      {
+        rotulo: "Habilitação",
+        valor: servidor.habilitacao,
+        fracao: 0.5,
+      },
+    ]);
+
+    y += 16;
+
+    doc.setDrawColor(90, 96, 110);
+
+    doc.line(margem + 8, y, margem + 78, y);
+
+    doc.line(larguraPagina - margem - 78, y, larguraPagina - margem - 8, y);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.5);
+    doc.setTextColor(70, 75, 88);
+
+    doc.text("SERVIDOR(A)", margem + 43, y + 4, {
+      align: "center",
+    });
+
+    doc.text("RESPONSÁVEL PELA EMISSÃO", larguraPagina - margem - 43, y + 4, {
+      align: "center",
+    });
+
+    const anoAtual = new Date().getFullYear();
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(40, 44, 54);
+
+    doc.text(
+      `Carpina, ______ de ____________________ de ${anoAtual}.`,
+      larguraPagina / 2,
+      y + 15,
+      {
+        align: "center",
+      },
+    );
+
+    doc.setFontSize(6.5);
+    doc.setTextColor(110, 115, 125);
+
+    doc.text(
+      "Secretaria de Educação e Esportes - Prefeitura Municipal de Carpina",
+      larguraPagina / 2,
+      alturaPagina - 10,
+      {
+        align: "center",
+      },
+    );
+
+    const nomeArquivo = primeiroValor(servidor.nome, "Servidor")
+      .replace(/[\\/:*?"<>|]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    window.abrirOuBaixarPDF(doc, `Ficha Funcional - ${nomeArquivo}.pdf`);
+  }
+
+  const imgTimbrado = new Image();
+
+  let finalizado = false;
+
+  function finalizar(comTimbrado) {
+    if (finalizado) return;
+
+    finalizado = true;
+
+    if (comTimbrado) {
+      doc.addImage(imgTimbrado, "PNG", 0, 0, larguraPagina, alturaPagina);
+    }
+
+    desenharConteudo();
+  }
+
+  imgTimbrado.onload = () => {
+    finalizar(true);
+  };
+
+  imgTimbrado.onerror = () => {
+    finalizar(false);
+  };
+
+  imgTimbrado.src = "./src/images/papel-timbrado.png";
 }
 
 function gerarPDFTransferencia(dados) {

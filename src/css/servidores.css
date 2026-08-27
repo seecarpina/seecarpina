@@ -84,6 +84,95 @@
   width: 100%;
 }
 
+/* Dados complementares */
+
+.acordeao-dados-complementares {
+  overflow: hidden;
+  border: 1px solid var(--clr-light);
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.acordeao-dados-complementares > summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem;
+  color: var(--clr-dark);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.acordeao-dados-complementares > summary::-webkit-details-marker {
+  display: none;
+}
+
+.acordeao-dados-complementares > summary:hover {
+  background: rgba(115, 128, 236, 0.08);
+}
+
+.acordeao-dados-complementares > summary > span:nth-child(2) {
+  min-width: 0;
+}
+
+.acordeao-dados-complementares > summary strong,
+.acordeao-dados-complementares > summary small {
+  display: block;
+}
+
+.acordeao-dados-complementares > summary small {
+  margin-top: 0.2rem;
+  color: var(--clr-dark-variant);
+  font-size: 0.76rem;
+  font-weight: 400;
+}
+
+.acordeao-dados-complementares .seta-acordeao {
+  transition: transform 0.2s ease;
+}
+
+.acordeao-dados-complementares[open] .seta-acordeao {
+  transform: rotate(180deg);
+}
+
+.conteudo-dados-complementares {
+  display: grid;
+  gap: 1rem;
+  padding: 0 1rem 1rem;
+  border-top: 1px solid var(--clr-light);
+}
+
+.conteudo-dados-complementares fieldset {
+  min-width: 0;
+  margin: 1rem 0 0;
+  padding: 1rem;
+  border: 1px solid var(--clr-light);
+  border-radius: 0.75rem;
+}
+
+.conteudo-dados-complementares legend {
+  padding: 0 0.45rem;
+  color: var(--clr-primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.grade-complementar {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.grade-complementar > div {
+  min-width: 0;
+}
+
+.grade-complementar .campo-largo {
+  grid-column: span 2;
+}
+
 .acoes-form-servidor {
   display: flex;
   align-items: center;
@@ -1017,6 +1106,20 @@ body.drawer-transferencia-aberto {
   #botoesCadastroServidor .btn,
   #botoesEdicaoServidor .btn {
     width: 100%;
+  }
+
+  .grade-complementar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .grade-complementar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .grade-complementar .campo-largo {
+    grid-column: auto;
   }
 }
 

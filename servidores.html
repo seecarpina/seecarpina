@@ -199,6 +199,379 @@
                   </label>
                 </div>
 
+                <details
+                  id="acordeaoDadosComplementares"
+                  class="acordeao-dados-complementares"
+                >
+                  <summary>
+                    <span class="material-symbols-outlined">person_book</span>
+
+                    <span>
+                      <strong>Dados complementares da ficha funcional</strong>
+                      <small>
+                        Informações pessoais, documentos, filiação e dados
+                        bancários
+                      </small>
+                    </span>
+
+                    <span class="material-symbols-outlined seta-acordeao">
+                      expand_more
+                    </span>
+                  </summary>
+
+                  <div class="conteudo-dados-complementares">
+                    <fieldset>
+                      <legend>Dados pessoais</legend>
+
+                      <div class="grade-complementar">
+                        <div>
+                          <label for="cep">CEP</label>
+                          <input type="text" id="cep" placeholder="00000-000" />
+                        </div>
+
+                        <div class="campo-largo">
+                          <label for="endereco">Endereço</label>
+                          <input type="text" id="endereco" />
+                        </div>
+
+                        <div>
+                          <label for="numero">Número</label>
+                          <input type="text" id="numero" />
+                        </div>
+
+                        <div>
+                          <label for="complemento">Complemento</label>
+                          <input type="text" id="complemento" />
+                        </div>
+
+                        <div>
+                          <label for="bairro">Bairro</label>
+                          <input type="text" id="bairro" />
+                        </div>
+
+                        <div>
+                          <label for="cidade">Cidade</label>
+                          <input type="text" id="cidade" />
+                        </div>
+
+                        <div>
+                          <label for="uf">UF</label>
+
+                          <select id="uf" autocomplete="address-level1">
+                            <option value="">Selecione</option>
+                            <option value="AC">AC - Acre</option>
+                            <option value="AL">AL - Alagoas</option>
+                            <option value="AP">AP - Amapá</option>
+                            <option value="AM">AM - Amazonas</option>
+                            <option value="BA">BA - Bahia</option>
+                            <option value="CE">CE - Ceará</option>
+                            <option value="DF">DF - Distrito Federal</option>
+                            <option value="ES">ES - Espírito Santo</option>
+                            <option value="GO">GO - Goiás</option>
+                            <option value="MA">MA - Maranhão</option>
+                            <option value="MT">MT - Mato Grosso</option>
+                            <option value="MS">MS - Mato Grosso do Sul</option>
+                            <option value="MG">MG - Minas Gerais</option>
+                            <option value="PA">PA - Pará</option>
+                            <option value="PB">PB - Paraíba</option>
+                            <option value="PR">PR - Paraná</option>
+                            <option value="PE">PE - Pernambuco</option>
+                            <option value="PI">PI - Piauí</option>
+                            <option value="RJ">RJ - Rio de Janeiro</option>
+                            <option value="RN">RN - Rio Grande do Norte</option>
+                            <option value="RS">RS - Rio Grande do Sul</option>
+                            <option value="RO">RO - Rondônia</option>
+                            <option value="RR">RR - Roraima</option>
+                            <option value="SC">SC - Santa Catarina</option>
+                            <option value="SP">SP - São Paulo</option>
+                            <option value="SE">SE - Sergipe</option>
+                            <option value="TO">TO - Tocantins</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label for="telefone">Telefone</label>
+                          <input
+                            type="tel"
+                            id="telefone"
+                            placeholder="(00) 00000-0000"
+                            inputmode="numeric"
+                            maxlength="15"
+                          />
+                        </div>
+
+                        <div>
+                          <label for="dataNascimento">Data de nascimento</label>
+                          <input type="date" id="dataNascimento" />
+                        </div>
+
+                        <div>
+                          <label for="sexo">Sexo</label>
+                          <select id="sexo">
+                            <option value="">Selecione</option>
+                            <option value="Masculino">Masculino</option>
+                            <option value="Feminino">Feminino</option>
+                            <option value="Outro">Outro</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label for="cor">Cor/Raça</label>
+                          <select id="cor">
+                            <option value="">Selecione</option>
+                            <option value="Branca">Branca</option>
+                            <option value="Preta">Preta</option>
+                            <option value="Parda">Parda</option>
+                            <option value="Amarela">Amarela</option>
+                            <option value="Indígena">Indígena</option>
+                            <option value="Não declarada">Não declarada</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label for="estadoCivil">Estado civil</label>
+                          <select id="estadoCivil">
+                            <option value="">Selecione</option>
+                            <option value="Solteiro(a)">Solteiro(a)</option>
+                            <option value="Casado(a)">Casado(a)</option>
+                            <option value="Divorciado(a)">Divorciado(a)</option>
+                            <option value="Viúvo(a)">Viúvo(a)</option>
+                            <option value="União estável">União estável</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label for="conjuge">Cônjuge</label>
+                          <input type="text" id="conjuge" />
+                        </div>
+
+                        <div>
+                          <label for="email">E-mail</label>
+                          <input type="email" id="email" />
+                        </div>
+
+                        <div>
+                          <label for="pcd">Deficiência?</label>
+                          <select id="pcd">
+                            <option value="">Selecione</option>
+                            <option value="Sim">Sim</option>
+                            <option value="Não">Não</option>
+                          </select>
+                        </div>
+                      </div>
+                    </fieldset>
+
+                    <fieldset>
+                      <legend>Documentação</legend>
+
+                      <div class="grade-complementar">
+                        <div>
+                          <label for="rg">RG</label>
+                          <input
+                            type="text"
+                            id="rg"
+                            placeholder="0.000.000"
+                            inputmode="numeric"
+                            maxlength="14"
+                          />
+                        </div>
+
+                        <div>
+                          <label for="orgaoEmissorRg">Órgão emissor</label>
+                          <input type="text" id="orgaoEmissorRg" />
+                        </div>
+
+                        <div>
+                          <label for="ufRg">UF do RG</label>
+                          <select id="ufRg">
+                            <option value="">Selecione</option>
+                            <option value="AC">AC - Acre</option>
+                            <option value="AL">AL - Alagoas</option>
+                            <option value="AP">AP - Amapá</option>
+                            <option value="AM">AM - Amazonas</option>
+                            <option value="BA">BA - Bahia</option>
+                            <option value="CE">CE - Ceará</option>
+                            <option value="DF">DF - Distrito Federal</option>
+                            <option value="ES">ES - Espírito Santo</option>
+                            <option value="GO">GO - Goiás</option>
+                            <option value="MA">MA - Maranhão</option>
+                            <option value="MT">MT - Mato Grosso</option>
+                            <option value="MS">MS - Mato Grosso do Sul</option>
+                            <option value="MG">MG - Minas Gerais</option>
+                            <option value="PA">PA - Pará</option>
+                            <option value="PB">PB - Paraíba</option>
+                            <option value="PR">PR - Paraná</option>
+                            <option value="PE">PE - Pernambuco</option>
+                            <option value="PI">PI - Piauí</option>
+                            <option value="RJ">RJ - Rio de Janeiro</option>
+                            <option value="RN">RN - Rio Grande do Norte</option>
+                            <option value="RS">RS - Rio Grande do Sul</option>
+                            <option value="RO">RO - Rondônia</option>
+                            <option value="RR">RR - Roraima</option>
+                            <option value="SC">SC - Santa Catarina</option>
+                            <option value="SP">SP - São Paulo</option>
+                            <option value="SE">SE - Sergipe</option>
+                            <option value="TO">TO - Tocantins</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label for="dataEmissaoRg">Data de emissão</label>
+                          <input type="date" id="dataEmissaoRg" />
+                        </div>
+
+                        <div>
+                          <label for="nacionalidade">Nacionalidade</label>
+                          <input type="text" id="nacionalidade" />
+                        </div>
+
+                        <div>
+                          <label for="naturalidade">Naturalidade</label>
+                          <input type="text" id="naturalidade" />
+                        </div>
+
+                        <div>
+                          <label for="ufNaturalidade"> UF de nascimento </label>
+
+                          <select id="ufNaturalidade">
+                            <option value="">Selecione</option>
+                            <option value="AC">AC - Acre</option>
+                            <option value="AL">AL - Alagoas</option>
+                            <option value="AP">AP - Amapá</option>
+                            <option value="AM">AM - Amazonas</option>
+                            <option value="BA">BA - Bahia</option>
+                            <option value="CE">CE - Ceará</option>
+                            <option value="DF">DF - Distrito Federal</option>
+                            <option value="ES">ES - Espírito Santo</option>
+                            <option value="GO">GO - Goiás</option>
+                            <option value="MA">MA - Maranhão</option>
+                            <option value="MT">MT - Mato Grosso</option>
+                            <option value="MS">MS - Mato Grosso do Sul</option>
+                            <option value="MG">MG - Minas Gerais</option>
+                            <option value="PA">PA - Pará</option>
+                            <option value="PB">PB - Paraíba</option>
+                            <option value="PR">PR - Paraná</option>
+                            <option value="PE">PE - Pernambuco</option>
+                            <option value="PI">PI - Piauí</option>
+                            <option value="RJ">RJ - Rio de Janeiro</option>
+                            <option value="RN">RN - Rio Grande do Norte</option>
+                            <option value="RS">RS - Rio Grande do Sul</option>
+                            <option value="RO">RO - Rondônia</option>
+                            <option value="RR">RR - Roraima</option>
+                            <option value="SC">SC - Santa Catarina</option>
+                            <option value="SP">SP - São Paulo</option>
+                            <option value="SE">SE - Sergipe</option>
+                            <option value="TO">TO - Tocantins</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label for="ctps">CTPS</label>
+                          <input type="text" id="ctps" />
+                        </div>
+
+                        <div>
+                          <label for="serieCtps">Série da CTPS</label>
+                          <input type="text" id="serieCtps" />
+                        </div>
+
+                        <div>
+                          <label for="orgaoEmissorCtps"
+                            >Órgão emissor da CTPS</label
+                          >
+                          <input type="text" id="orgaoEmissorCtps" />
+                        </div>
+
+                        <div>
+                          <label for="ufCtps">UF da CTPS</label>
+
+                          <select id="ufCtps">
+                            <option value="">Selecione</option>
+                            <option value="AC">AC - Acre</option>
+                            <option value="AL">AL - Alagoas</option>
+                            <option value="AP">AP - Amapá</option>
+                            <option value="AM">AM - Amazonas</option>
+                            <option value="BA">BA - Bahia</option>
+                            <option value="CE">CE - Ceará</option>
+                            <option value="DF">DF - Distrito Federal</option>
+                            <option value="ES">ES - Espírito Santo</option>
+                            <option value="GO">GO - Goiás</option>
+                            <option value="MA">MA - Maranhão</option>
+                            <option value="MT">MT - Mato Grosso</option>
+                            <option value="MS">MS - Mato Grosso do Sul</option>
+                            <option value="MG">MG - Minas Gerais</option>
+                            <option value="PA">PA - Pará</option>
+                            <option value="PB">PB - Paraíba</option>
+                            <option value="PR">PR - Paraná</option>
+                            <option value="PE">PE - Pernambuco</option>
+                            <option value="PI">PI - Piauí</option>
+                            <option value="RJ">RJ - Rio de Janeiro</option>
+                            <option value="RN">RN - Rio Grande do Norte</option>
+                            <option value="RS">RS - Rio Grande do Sul</option>
+                            <option value="RO">RO - Rondônia</option>
+                            <option value="RR">RR - Roraima</option>
+                            <option value="SC">SC - Santa Catarina</option>
+                            <option value="SP">SP - São Paulo</option>
+                            <option value="SE">SE - Sergipe</option>
+                            <option value="TO">TO - Tocantins</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label for="pis">PIS/PASEP/NIS</label>
+                          <input type="text" id="pis" />
+                        </div>
+
+                        <div>
+                          <label for="tituloEleitor">Título de eleitor</label>
+                          <input type="text" id="tituloEleitor" />
+                        </div>
+
+                        <div>
+                          <label for="secaoEleitoral">Seção</label>
+                          <input type="text" id="secaoEleitoral" />
+                        </div>
+
+                        <div>
+                          <label for="zonaEleitoral">Zona</label>
+                          <input type="text" id="zonaEleitoral" />
+                        </div>
+                      </div>
+                    </fieldset>
+
+                    <fieldset>
+                      <legend>Filiação e dados bancários</legend>
+
+                      <div class="grade-complementar">
+                        <div class="campo-largo">
+                          <label for="pai">Nome do pai</label>
+                          <input type="text" id="pai" />
+                        </div>
+
+                        <div class="campo-largo">
+                          <label for="mae">Nome da mãe</label>
+                          <input type="text" id="mae" />
+                        </div>
+
+                        <div>
+                          <label for="banco">Banco</label>
+                          <input type="text" id="banco" />
+                        </div>
+
+                        <div>
+                          <label for="agencia">Agência</label>
+                          <input type="text" id="agencia" />
+                        </div>
+
+                        <div>
+                          <label for="conta">Conta</label>
+                          <input type="text" id="conta" />
+                        </div>
+                      </div>
+                    </fieldset>
+                  </div>
+                </details>
+
                 <div class="acoes-form-servidor">
                   <div id="botoesCadastroServidor">
                     <button type="submit" class="btn" id="btnCadastrarServidor">
@@ -425,6 +798,11 @@
       <button type="button" id="menuEditarServidor">
         <span class="material-symbols-outlined">edit_note</span>
         <span>Editar servidor</span>
+      </button>
+
+      <button type="button" id="menuFichaFuncional">
+        <span class="material-symbols-outlined">badge</span>
+        <span>Gerar ficha funcional</span>
       </button>
 
       <button type="button" id="menuTransferirServidor">
