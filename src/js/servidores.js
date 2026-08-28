@@ -19,6 +19,10 @@ const menuEditarServidor = document.getElementById("menuEditarServidor");
 
 const menuFichaFuncional = document.getElementById("menuFichaFuncional");
 
+const menuCartaEncaminhamento = document.getElementById(
+  "menuCartaEncaminhamento",
+);
+
 const menuTransferirServidor = document.getElementById(
   "menuTransferirServidor",
 );
@@ -1005,6 +1009,57 @@ menuFichaFuncional?.addEventListener("click", () => {
   if (servidor) {
     gerarPDFFichaFuncional(servidor);
   }
+});
+
+menuCartaEncaminhamento?.addEventListener("click", () => {
+  const servidor = servidorMenuSelecionado;
+
+  fecharMenuAcoesServidor();
+
+  if (!servidor?._key) {
+    mostrarNotificacao("Servidor não localizado.", "erro");
+
+    return;
+  }
+
+  // O histórico já está ordenado
+  // do mais recente para o mais antigo.
+  const transferencia = historicoTransferencias.find((item) => {
+    return String(item.servidorId) === String(servidor._key);
+  });
+
+  if (!transferencia) {
+    mostrarNotificacao(
+      "Este servidor não possui carta de encaminhamento registrada.",
+      "erro",
+    );
+
+    return;
+  }
+
+  gerarPDFTransferencia({
+    nome: transferencia.servidorNome || servidor.nome || "",
+
+    codigo: transferencia.servidorCodigo || servidor.codigo || "",
+
+    cpf: transferencia.servidorCPF || servidor.cpf || "",
+
+    cargo: transferencia.servidorCargo || servidor.cargo || "",
+
+    vinculo: transferencia.servidorVinculo || servidor.vinculo || "",
+
+    novoLocal: transferencia.para || "",
+
+    dataTransferencia: transferencia.data || "",
+
+    protocolo: transferencia.protocolo || "",
+
+    observacao: transferencia.observacao || "",
+
+    usuario: transferencia.usuario || "",
+
+    criadoEm: transferencia.criadoEm || "",
+  });
 });
 
 menuTransferirServidor?.addEventListener("click", () => {
