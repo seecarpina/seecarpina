@@ -902,7 +902,7 @@ function renderTabela() {
           : "inativo";
 
       tr.innerHTML = `
-    <td>${s.codigo || "-"}</td>
+    <td>${s.codigo || "NI"}</td>
 
     <td>${s.nome || "-"}</td>
 
@@ -1109,7 +1109,7 @@ function abrirDetalhesServidor(servidor) {
   }
 
   const dadosFuncionais = criarSecaoDetalhes("Dados funcionais", "work", [
-    criarItemDetalhe("Código/Matrícula", servidor.codigo),
+    criarItemDetalhe("Código/Matrícula", servidor.codigo || "NI"),
 
     criarItemDetalhe("CPF", servidor.cpf, "cpf"),
 
@@ -1601,8 +1601,12 @@ async function salvarServidor() {
 
   const localId = await obterOuCriarLocalId(nomeLocal);
 
+  const codigoDigitado = codigo.value.trim();
+
+  const codigoServidor = /^0+$/.test(codigoDigitado) ? "" : codigoDigitado;
+
   const servidor = {
-    codigo: codigo.value.trim(),
+    codigo: codigoServidor,
     nome: padronizarTexto(nome.value),
     cpf: cpf.value.replace(/\D/g, ""),
     cargo: padronizarTexto(cargo.value),
@@ -1638,7 +1642,13 @@ async function salvarServidor() {
     }
   });
 
-  if (!servidor.codigo || !servidor.nome) return;
+  if (!servidor.nome) {
+    mostrarNotificacao("Informe o nome do servidor.", "erro");
+
+    nome.focus();
+
+    return;
+  }
 
   await salvarSeNaoExistir(cargosRef, servidor.cargo);
   await salvarSeNaoExistir(vinculosRef, servidor.vinculo);
@@ -1691,7 +1701,7 @@ function editarServidor(s) {
   editando = true;
   chaveEdicao = s._key;
 
-  codigo.value = s.codigo;
+  codigo.value = s.codigo || "";
   nome.value = s.nome;
   cpf.value = formatarCPF(s.cpf);
   cargo.value = s.cargo;
