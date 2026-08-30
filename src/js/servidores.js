@@ -14,6 +14,9 @@ const tabela = document.querySelector("#tabelaServidores tbody");
 const busca = document.getElementById("buscaServidor");
 const paginacao = document.getElementById("paginacaoServidores");
 const menuAcoesServidor = document.getElementById("menuAcoesServidor");
+const menuVerDetalhesServidor = document.getElementById(
+  "menuVerDetalhesServidor",
+);
 
 const menuEditarServidor = document.getElementById("menuEditarServidor");
 
@@ -113,6 +116,30 @@ const camposComplementares = Object.fromEntries(
 
 const acordeaoDadosComplementares = document.getElementById(
   "acordeaoDadosComplementares",
+);
+
+const detalhesServidorOverlay = document.getElementById(
+  "detalhesServidorOverlay",
+);
+
+const drawerDetalhesServidor = document.getElementById(
+  "drawerDetalhesServidor",
+);
+
+const conteudoDetalhesServidor = document.getElementById(
+  "conteudoDetalhesServidor",
+);
+
+const btnFecharDetalhesServidor = document.getElementById(
+  "btnFecharDetalhesServidor",
+);
+
+const btnDetalhesFichaFuncional = document.getElementById(
+  "btnDetalhesFichaFuncional",
+);
+
+const btnDetalhesCartaEncaminhamento = document.getElementById(
+  "btnDetalhesCartaEncaminhamento",
 );
 
 /* ===============================
@@ -316,6 +343,7 @@ let editando = false;
 let chaveEdicao = null;
 let servidorMenuSelecionado = null;
 let botaoMenuSelecionado = null;
+let servidorDetalhesSelecionado = null;
 
 let cargos = [];
 let vinculos = [];
@@ -926,6 +954,417 @@ function renderTabela() {
 }
 
 /* ===============================
+   DETALHES DO SERVIDOR
+================================ */
+
+function obterTransferenciaMaisRecente(servidorId) {
+  return historicoTransferencias.find((item) => {
+    return String(item.servidorId) === String(servidorId);
+  });
+}
+
+function gerarCartaRegistradaDoServidor(servidor) {
+  if (!servidor?._key) {
+    mostrarNotificacao("Servidor não localizado.", "erro");
+
+    return;
+  }
+
+  const transferencia = obterTransferenciaMaisRecente(servidor._key);
+
+  if (!transferencia) {
+    mostrarNotificacao(
+      "Este servidor não possui carta de encaminhamento registrada.",
+      "erro",
+    );
+
+    return;
+  }
+
+  gerarPDFTransferencia({
+    nome: transferencia.servidorNome || servidor.nome || "",
+
+    codigo: transferencia.servidorCodigo || servidor.codigo || "",
+
+    cpf: transferencia.servidorCPF || servidor.cpf || "",
+
+    cargo: transferencia.servidorCargo || servidor.cargo || "",
+
+    vinculo: transferencia.servidorVinculo || servidor.vinculo || "",
+
+    novoLocal: transferencia.para || "",
+
+    dataTransferencia: transferencia.data || "",
+
+    protocolo: transferencia.protocolo || "",
+
+    observacao: transferencia.observacao || "",
+
+    usuario: transferencia.usuario || "",
+
+    criadoEm: transferencia.criadoEm || "",
+  });
+}
+
+function calcularPreenchimentoFicha(servidor) {
+  const valoresEssenciais = [
+    servidor.codigo,
+    servidor.cpf,
+    servidor.nome,
+    servidor.cargo,
+    servidor.vinculo,
+    servidor.habilitacao,
+    servidor.dataAdmissao,
+    servidor.situacao,
+    obterLocalServidor(servidor),
+    servidor.cep,
+    servidor.endereco,
+    servidor.bairro,
+    servidor.cidade,
+    servidor.uf,
+    servidor.telefone,
+    servidor.dataNascimento,
+    servidor.sexo,
+    servidor.email,
+    servidor.rg,
+    servidor.pis,
+    servidor.mae,
+  ];
+
+  const preenchidos = valoresEssenciais.filter((valor) => {
+    return String(valor || "").trim() !== "";
+  }).length;
+
+  return Math.round((preenchidos / valoresEssenciais.length) * 100);
+}
+
+function valorDetalhe(valor, tipo = "texto") {
+  if (valor === undefined || valor === null || String(valor).trim() === "") {
+    return "—";
+  }
+
+  if (tipo === "data") {
+    return escaparHtmlServidor(formatarDataBR(String(valor)));
+  }
+
+  if (tipo === "cpf") {
+    return escaparHtmlServidor(formatarCPF(String(valor)));
+  }
+
+  return escaparHtmlServidor(String(valor));
+}
+
+function criarItemDetalhe(rotulo, valor, tipo = "texto") {
+  return `
+    <div class="detalhes-item">
+      <small>
+        ${escaparHtmlServidor(rotulo)}
+      </small>
+
+      <strong>
+        ${valorDetalhe(valor, tipo)}
+      </strong>
+    </div>
+  `;
+}
+
+function criarSecaoDetalhes(titulo, icone, itens) {
+  return `
+    <section class="detalhes-secao">
+      <h3>
+        <span class="material-symbols-outlined">
+          ${escaparHtmlServidor(icone)}
+        </span>
+
+        ${escaparHtmlServidor(titulo)}
+      </h3>
+
+      <div class="detalhes-grade">
+        ${itens.join("")}
+      </div>
+    </section>
+  `;
+}
+
+function abrirDetalhesServidor(servidor) {
+  if (!servidor || !conteudoDetalhesServidor) {
+    return;
+  }
+
+  servidorDetalhesSelecionado = servidor;
+
+  const transferencia = obterTransferenciaMaisRecente(servidor._key);
+
+  const percentual = calcularPreenchimentoFicha(servidor);
+
+  const situacaoAtiva =
+    String(servidor.situacao || "").toLowerCase() === "ativo";
+
+  if (btnDetalhesCartaEncaminhamento) {
+    btnDetalhesCartaEncaminhamento.disabled = !transferencia;
+
+    btnDetalhesCartaEncaminhamento.title = transferencia
+      ? "Abrir a carta de encaminhamento mais recente"
+      : "Nenhuma carta de encaminhamento registrada";
+  }
+
+  const dadosFuncionais = criarSecaoDetalhes("Dados funcionais", "work", [
+    criarItemDetalhe("Código/Matrícula", servidor.codigo),
+
+    criarItemDetalhe("CPF", servidor.cpf, "cpf"),
+
+    criarItemDetalhe("Cargo/Função", servidor.cargo),
+
+    criarItemDetalhe("Vínculo", servidor.vinculo),
+
+    criarItemDetalhe("Habilitação", servidor.habilitacao),
+
+    criarItemDetalhe("Data de admissão", servidor.dataAdmissao, "data"),
+
+    criarItemDetalhe("Situação", servidor.situacao),
+
+    criarItemDetalhe("Local de exercício", obterLocalServidor(servidor)),
+  ]);
+
+  const endereco = criarSecaoDetalhes("Endereço e contato", "home", [
+    criarItemDetalhe("CEP", servidor.cep),
+
+    criarItemDetalhe("Endereço", servidor.endereco),
+
+    criarItemDetalhe("Número", servidor.numero),
+
+    criarItemDetalhe("Complemento", servidor.complemento),
+
+    criarItemDetalhe("Bairro", servidor.bairro),
+
+    criarItemDetalhe(
+      "Cidade/UF",
+      [servidor.cidade, servidor.uf].filter(Boolean).join(" - "),
+    ),
+
+    criarItemDetalhe("Telefone", servidor.telefone),
+
+    criarItemDetalhe("E-mail", servidor.email),
+  ]);
+
+  const dadosPessoais = criarSecaoDetalhes("Dados pessoais", "person", [
+    criarItemDetalhe("Data de nascimento", servidor.dataNascimento, "data"),
+
+    criarItemDetalhe("Sexo", servidor.sexo),
+
+    criarItemDetalhe("Cor/Raça", servidor.cor),
+
+    criarItemDetalhe("Estado civil", servidor.estadoCivil),
+
+    criarItemDetalhe("Cônjuge", servidor.conjuge),
+
+    criarItemDetalhe("Pessoa com deficiência", servidor.pcd),
+
+    criarItemDetalhe("Nacionalidade", servidor.nacionalidade),
+
+    criarItemDetalhe(
+      "Naturalidade",
+      [servidor.naturalidade, servidor.ufNaturalidade]
+        .filter(Boolean)
+        .join(" - "),
+    ),
+  ]);
+
+  const documentos = criarSecaoDetalhes("Documentação", "id_card", [
+    criarItemDetalhe("RG", servidor.rg),
+
+    criarItemDetalhe(
+      "Órgão emissor/UF",
+      [servidor.orgaoEmissorRg, servidor.ufRg].filter(Boolean).join(" - "),
+    ),
+
+    criarItemDetalhe("Data de emissão do RG", servidor.dataEmissaoRg, "data"),
+
+    criarItemDetalhe("CTPS", servidor.ctps),
+
+    criarItemDetalhe("Série da CTPS", servidor.serieCtps),
+
+    criarItemDetalhe(
+      "Órgão emissor/UF da CTPS",
+      [servidor.orgaoEmissorCtps, servidor.ufCtps].filter(Boolean).join(" - "),
+    ),
+
+    criarItemDetalhe("PIS/PASEP/NIS", servidor.pis),
+
+    criarItemDetalhe("Título de eleitor", servidor.tituloEleitor),
+
+    criarItemDetalhe("Seção eleitoral", servidor.secaoEleitoral),
+
+    criarItemDetalhe("Zona eleitoral", servidor.zonaEleitoral),
+  ]);
+
+  const filiacao = criarSecaoDetalhes("Filiação", "family_restroom", [
+    criarItemDetalhe("Nome do pai", servidor.pai),
+
+    criarItemDetalhe("Nome da mãe", servidor.mae),
+  ]);
+
+  const dadosBancarios = criarSecaoDetalhes(
+    "Dados bancários",
+    "account_balance",
+    [
+      criarItemDetalhe("Banco", servidor.banco),
+
+      criarItemDetalhe("Agência", servidor.agencia),
+
+      criarItemDetalhe("Conta", servidor.conta),
+    ],
+  );
+
+  const ultimaMovimentacao = transferencia
+    ? `
+        <section class="detalhes-secao">
+          <h3>
+            <span class="material-symbols-outlined">
+              history
+            </span>
+
+            Última transferência
+          </h3>
+
+          <div class="detalhes-transferencia">
+            <strong>
+              ${valorDetalhe(transferencia.de)}
+            </strong>
+
+            →
+
+            <strong>
+              ${valorDetalhe(transferencia.para)}
+            </strong>
+
+            <br>
+
+            Data:
+            ${valorDetalhe(transferencia.data, "data")}
+
+            · Protocolo:
+            ${valorDetalhe(transferencia.protocolo)}
+          </div>
+        </section>
+      `
+    : `
+        <section class="detalhes-secao">
+          <h3>
+            <span class="material-symbols-outlined">
+              history
+            </span>
+
+            Última transferência
+          </h3>
+
+          <div class="detalhes-transferencia">
+            Nenhuma transferência registrada.
+          </div>
+        </section>
+      `;
+
+  conteudoDetalhesServidor.innerHTML = `
+    <div class="detalhes-resumo">
+      <div class="detalhes-resumo-avatar">
+        <span class="material-symbols-outlined">
+          person
+        </span>
+      </div>
+
+      <div class="detalhes-resumo-texto">
+        <strong>
+          ${valorDetalhe(servidor.nome)}
+        </strong>
+
+        <span>
+          ${valorDetalhe(servidor.cargo)}
+          ·
+          ${valorDetalhe(obterLocalServidor(servidor))}
+        </span>
+      </div>
+
+      <span
+        class="detalhes-status ${situacaoAtiva ? "ativo" : "inativo"}"
+      >
+        ${valorDetalhe(servidor.situacao)}
+      </span>
+    </div>
+
+    <div class="detalhes-preenchimento">
+      <div class="detalhes-preenchimento-topo">
+        <span>
+          Preenchimento da ficha
+        </span>
+
+        <strong>
+          ${percentual}%
+        </strong>
+      </div>
+
+      <div class="detalhes-preenchimento-barra">
+        <span
+          style="width: ${percentual}%"
+        ></span>
+      </div>
+    </div>
+
+    ${dadosFuncionais}
+    ${endereco}
+    ${dadosPessoais}
+    ${documentos}
+    ${filiacao}
+    ${dadosBancarios}
+    ${ultimaMovimentacao}
+  `;
+
+  drawerDetalhesServidor.classList.add("ativo");
+
+  detalhesServidorOverlay.classList.add("ativo");
+
+  drawerDetalhesServidor.setAttribute("aria-hidden", "false");
+
+  document.body.classList.add("drawer-detalhes-aberto");
+}
+
+function fecharDetalhesServidor() {
+  drawerDetalhesServidor?.classList.remove("ativo");
+
+  detalhesServidorOverlay?.classList.remove("ativo");
+
+  drawerDetalhesServidor?.setAttribute("aria-hidden", "true");
+
+  document.body.classList.remove("drawer-detalhes-aberto");
+
+  servidorDetalhesSelecionado = null;
+}
+
+btnFecharDetalhesServidor?.addEventListener("click", fecharDetalhesServidor);
+
+detalhesServidorOverlay?.addEventListener("click", fecharDetalhesServidor);
+
+btnDetalhesFichaFuncional?.addEventListener("click", () => {
+  if (servidorDetalhesSelecionado) {
+    gerarPDFFichaFuncional(servidorDetalhesSelecionado);
+  }
+});
+
+btnDetalhesCartaEncaminhamento?.addEventListener("click", () => {
+  if (servidorDetalhesSelecionado) {
+    gerarCartaRegistradaDoServidor(servidorDetalhesSelecionado);
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (
+    event.key === "Escape" &&
+    drawerDetalhesServidor?.classList.contains("ativo")
+  ) {
+    fecharDetalhesServidor();
+  }
+});
+
+/* ===============================
    MENU DE AÇÕES DO SERVIDOR
 ================================ */
 
@@ -1001,6 +1440,16 @@ menuEditarServidor?.addEventListener("click", () => {
   }
 });
 
+menuVerDetalhesServidor?.addEventListener("click", () => {
+  const servidor = servidorMenuSelecionado;
+
+  fecharMenuAcoesServidor();
+
+  if (servidor) {
+    abrirDetalhesServidor(servidor);
+  }
+});
+
 menuFichaFuncional?.addEventListener("click", () => {
   const servidor = servidorMenuSelecionado;
 
@@ -1016,50 +1465,9 @@ menuCartaEncaminhamento?.addEventListener("click", () => {
 
   fecharMenuAcoesServidor();
 
-  if (!servidor?._key) {
-    mostrarNotificacao("Servidor não localizado.", "erro");
-
-    return;
+  if (servidor) {
+    gerarCartaRegistradaDoServidor(servidor);
   }
-
-  // O histórico já está ordenado
-  // do mais recente para o mais antigo.
-  const transferencia = historicoTransferencias.find((item) => {
-    return String(item.servidorId) === String(servidor._key);
-  });
-
-  if (!transferencia) {
-    mostrarNotificacao(
-      "Este servidor não possui carta de encaminhamento registrada.",
-      "erro",
-    );
-
-    return;
-  }
-
-  gerarPDFTransferencia({
-    nome: transferencia.servidorNome || servidor.nome || "",
-
-    codigo: transferencia.servidorCodigo || servidor.codigo || "",
-
-    cpf: transferencia.servidorCPF || servidor.cpf || "",
-
-    cargo: transferencia.servidorCargo || servidor.cargo || "",
-
-    vinculo: transferencia.servidorVinculo || servidor.vinculo || "",
-
-    novoLocal: transferencia.para || "",
-
-    dataTransferencia: transferencia.data || "",
-
-    protocolo: transferencia.protocolo || "",
-
-    observacao: transferencia.observacao || "",
-
-    usuario: transferencia.usuario || "",
-
-    criadoEm: transferencia.criadoEm || "",
-  });
 });
 
 menuTransferirServidor?.addEventListener("click", () => {

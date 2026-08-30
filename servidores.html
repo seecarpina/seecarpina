@@ -540,31 +540,42 @@
                     </fieldset>
 
                     <fieldset>
-                      <legend>Filiação e dados bancários</legend>
+                      <legend>Filiação</legend>
 
                       <div class="grade-complementar">
                         <div class="campo-largo">
                           <label for="pai">Nome do pai</label>
+
                           <input type="text" id="pai" />
                         </div>
 
                         <div class="campo-largo">
                           <label for="mae">Nome da mãe</label>
+
                           <input type="text" id="mae" />
                         </div>
+                      </div>
+                    </fieldset>
 
+                    <fieldset>
+                      <legend>Dados bancários</legend>
+
+                      <div class="grade-complementar">
                         <div>
                           <label for="banco">Banco</label>
+
                           <input type="text" id="banco" />
                         </div>
 
                         <div>
                           <label for="agencia">Agência</label>
+
                           <input type="text" id="agencia" />
                         </div>
 
                         <div>
                           <label for="conta">Conta</label>
+
                           <input type="text" id="conta" />
                         </div>
                       </div>
@@ -703,6 +714,60 @@
       <div class="right"></div>
     </div>
 
+    <!-- DRAWER DE DETALHES DO SERVIDOR -->
+    <div id="detalhesServidorOverlay" class="drawer-detalhes-overlay"></div>
+
+    <aside
+      id="drawerDetalhesServidor"
+      class="drawer-detalhes-servidor"
+      aria-hidden="true"
+    >
+      <div class="drawer-detalhes-cabecalho">
+        <div class="drawer-detalhes-titulo">
+          <div class="drawer-detalhes-icone">
+            <span class="material-symbols-outlined">person_search</span>
+          </div>
+
+          <div>
+            <h2>Detalhes do servidor</h2>
+            <span>Consulta dos dados cadastrais e funcionais.</span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="drawer-detalhes-fechar"
+          id="btnFecharDetalhesServidor"
+          title="Fechar"
+          aria-label="Fechar detalhes do servidor"
+        >
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div id="conteudoDetalhesServidor" class="drawer-detalhes-conteudo"></div>
+
+      <div class="drawer-detalhes-rodape">
+        <button
+          type="button"
+          class="btn-detalhes-secundario"
+          id="btnDetalhesFichaFuncional"
+        >
+          <span class="material-symbols-outlined">badge</span>
+          Ficha funcional
+        </button>
+
+        <button
+          type="button"
+          class="btn-detalhes-primario"
+          id="btnDetalhesCartaEncaminhamento"
+        >
+          <span class="material-symbols-outlined">picture_as_pdf</span>
+          Carta de encaminhamento
+        </button>
+      </div>
+    </aside>
+
     <!-- DRAWER DE TRANSFERÊNCIA -->
     <div id="transferenciaOverlay" class="drawer-transferencia-overlay"></div>
 
@@ -795,6 +860,11 @@
     </aside>
     <!-- MENU DE AÇÕES DO SERVIDOR -->
     <div id="menuAcoesServidor" class="menu-acoes-servidor" hidden>
+      <button type="button" id="menuVerDetalhesServidor">
+        <span class="material-symbols-outlined">person_search</span>
+        <span>Ver detalhes</span>
+      </button>
+
       <button type="button" id="menuEditarServidor">
         <span class="material-symbols-outlined">edit_note</span>
         <span>Editar servidor</span>
