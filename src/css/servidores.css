@@ -272,6 +272,114 @@
 }
 
 /* =========================================
+   PAINEL DE PENDÊNCIAS CADASTRAIS
+========================================= */
+
+.painel-pendencias-servidores {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--clr-light);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.painel-pendencias-titulo > div {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.painel-pendencias-titulo > div > .material-symbols-outlined {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.7rem;
+  background: var(--clr-light);
+  color: var(--clr-primary);
+}
+
+.painel-pendencias-titulo strong,
+.painel-pendencias-titulo small {
+  display: block;
+}
+
+.painel-pendencias-titulo strong {
+  color: var(--clr-dark);
+  font-size: 0.9rem;
+}
+
+.painel-pendencias-titulo small {
+  margin-top: 0.15rem;
+  color: var(--clr-dark-variant);
+  font-size: 0.72rem;
+}
+
+.cards-pendencias-servidores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
+  gap: 0.65rem;
+  margin-top: 0.9rem;
+}
+
+.card-pendencia {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 0.05rem 0.55rem;
+  min-width: 0;
+  padding: 0.7rem 0.75rem;
+  border: 1px solid var(--clr-light);
+  border-radius: 0.75rem;
+  background: var(--clr-white);
+  color: var(--clr-dark);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.card-pendencia:hover {
+  border-color: var(--clr-primary);
+  transform: translateY(-2px);
+}
+
+.card-pendencia.ativo {
+  border-color: var(--clr-primary);
+  background: rgba(115, 128, 236, 0.12);
+  box-shadow: inset 0 0 0 1px var(--clr-primary);
+}
+
+.card-pendencia > .material-symbols-outlined {
+  grid-row: 1 / 3;
+  color: var(--clr-primary);
+  font-size: 1.35rem;
+}
+
+.card-pendencia strong {
+  min-width: 0;
+  color: var(--clr-dark);
+  font-size: 1rem;
+  line-height: 1.1;
+}
+
+.card-pendencia small {
+  overflow: hidden;
+  color: var(--clr-dark-variant);
+  font-size: 0.67rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =========================================
    BUSCA
 ========================================= */
 

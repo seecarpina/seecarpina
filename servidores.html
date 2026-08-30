@@ -179,7 +179,6 @@
                       id="localExercicio"
                       placeholder="Digite para buscar ou cadastrar"
                       autocomplete="off"
-                      required
                     />
 
                     <ul id="autocompleteLocal" class="autocomplete-list"></ul>
@@ -637,6 +636,161 @@
 
                   Exportar para Excel
                 </button>
+              </div>
+
+              <div class="painel-pendencias-servidores">
+                <div class="painel-pendencias-titulo">
+                  <div>
+                    <span class="material-symbols-outlined"> filter_alt </span>
+
+                    <div>
+                      <strong> Indicadores cadastrais </strong>
+
+                      <small>
+                        Selecione um indicador para filtrar a lista de
+                        servidores.
+                      </small>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  id="cardsPendenciasServidores"
+                  class="cards-pendencias-servidores"
+                >
+                  <button
+                    type="button"
+                    class="card-pendencia ativo"
+                    data-filtro-pendencia="todos"
+                    aria-pressed="true"
+                  >
+                    <span class="material-symbols-outlined">groups</span>
+                    <strong id="pendenciaTodos">0</strong>
+                    <small>Todos</small>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="card-pendencia"
+                    data-filtro-pendencia="ativos"
+                    aria-pressed="false"
+                  >
+                    <span class="material-symbols-outlined">
+                      person_check
+                    </span>
+
+                    <strong id="indicadorServidoresAtivos"> 0 </strong>
+
+                    <small>Ativos</small>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="card-pendencia"
+                    data-filtro-pendencia="inativos"
+                    aria-pressed="false"
+                  >
+                    <span class="material-symbols-outlined">
+                      person_cancel
+                    </span>
+
+                    <strong id="indicadorServidoresInativos"> 0 </strong>
+
+                    <small>Inativos</small>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="card-pendencia"
+                    data-filtro-pendencia="sem-codigo"
+                    aria-pressed="false"
+                  >
+                    <span class="material-symbols-outlined">pin</span>
+                    <strong id="pendenciaSemCodigo">0</strong>
+                    <small>Sem código</small>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="card-pendencia"
+                    data-filtro-pendencia="sem-admissao"
+                    aria-pressed="false"
+                  >
+                    <span class="material-symbols-outlined">event_busy</span>
+                    <strong id="pendenciaSemAdmissao">0</strong>
+                    <small>Sem admissão</small>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="card-pendencia"
+                    data-filtro-pendencia="sem-cargo"
+                    aria-pressed="false"
+                  >
+                    <span class="material-symbols-outlined">work_off</span>
+                    <strong id="pendenciaSemCargo">0</strong>
+                    <small>Sem cargo</small>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="card-pendencia"
+                    data-filtro-pendencia="sem-vinculo"
+                    aria-pressed="false"
+                  >
+                    <span class="material-symbols-outlined">link_off</span>
+                    <strong id="pendenciaSemVinculo">0</strong>
+                    <small>Sem vínculo</small>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="card-pendencia"
+                    data-filtro-pendencia="sem-local"
+                    aria-pressed="false"
+                  >
+                    <span class="material-symbols-outlined">location_off</span>
+                    <strong id="pendenciaSemLocal">0</strong>
+                    <small>Sem local</small>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="card-pendencia"
+                    data-filtro-pendencia="ficha-incompleta"
+                    aria-pressed="false"
+                  >
+                    <span class="material-symbols-outlined">
+                      assignment_late
+                    </span>
+                    <strong id="pendenciaFichaIncompleta">0</strong>
+                    <small>Ficha incompleta</small>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="card-pendencia"
+                    data-filtro-pendencia="cpf-invalido"
+                    aria-pressed="false"
+                  >
+                    <span class="material-symbols-outlined">warning</span>
+                    <strong id="pendenciaCpfInvalido">0</strong>
+                    <small>CPF inválido</small>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="card-pendencia"
+                    data-filtro-pendencia="cpf-duplicado"
+                    aria-pressed="false"
+                  >
+                    <span class="material-symbols-outlined">
+                      content_copy
+                    </span>
+                    <strong id="pendenciaCpfDuplicado">0</strong>
+                    <small>CPF duplicado</small>
+                  </button>
+                </div>
               </div>
 
               <div class="campo-busca-servidores">

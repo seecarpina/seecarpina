@@ -54,6 +54,34 @@ const boxLocal = document.getElementById("autocompleteLocal");
 
 const contadorServidores = document.getElementById("contadorServidores");
 
+const cardsPendenciasServidores = document.getElementById(
+  "cardsPendenciasServidores",
+);
+
+const elementosContagemPendencias = {
+  todos: document.getElementById("pendenciaTodos"),
+
+  ativos: document.getElementById("indicadorServidoresAtivos"),
+
+  inativos: document.getElementById("indicadorServidoresInativos"),
+
+  "sem-codigo": document.getElementById("pendenciaSemCodigo"),
+
+  "sem-admissao": document.getElementById("pendenciaSemAdmissao"),
+
+  "sem-cargo": document.getElementById("pendenciaSemCargo"),
+
+  "sem-vinculo": document.getElementById("pendenciaSemVinculo"),
+
+  "sem-local": document.getElementById("pendenciaSemLocal"),
+
+  "ficha-incompleta": document.getElementById("pendenciaFichaIncompleta"),
+
+  "cpf-invalido": document.getElementById("pendenciaCpfInvalido"),
+
+  "cpf-duplicado": document.getElementById("pendenciaCpfDuplicado"),
+};
+
 const listaHistoricoTransferencias = document.getElementById(
   "listaHistoricoTransferencias",
 );
@@ -338,6 +366,7 @@ const transferenciasRef = ref(rtdb, "servidores/transferencias");
 ================================ */
 let servidores = [];
 let paginaAtual = 1;
+let filtroPendenciaAtual = "todos";
 const itensPorPagina = 100;
 let editando = false;
 let chaveEdicao = null;
@@ -845,12 +874,187 @@ listaHistoricoTransferencias?.addEventListener("click", (event) => {
 });
 
 /* ===============================
+   PENDÊNCIAS CADASTRAIS
+================================ */
+
+function somenteNumeros(valor) {
+  return String(valor || "").replace(/\D/g, "");
+}
+
+function cpfValido(cpf) {
+  const numeros = somenteNumeros(cpf);
+
+  if (numeros.length !== 11 || /^(\d)\1{10}$/.test(numeros)) {
+    return false;
+  }
+
+  function calcularDigito(quantidade) {
+    let soma = 0;
+
+    for (let i = 0; i < quantidade; i++) {
+      soma += Number(numeros[i]) * (quantidade + 1 - i);
+    }
+
+    const resto = (soma * 10) % 11;
+
+    return resto === 10 ? 0 : resto;
+  }
+
+  return (
+    calcularDigito(9) === Number(numeros[9]) &&
+    calcularDigito(10) === Number(numeros[10])
+  );
+}
+
+function criarContagemCPFs() {
+  const contagem = new Map();
+
+  servidores.forEach((servidor) => {
+    const cpf = somenteNumeros(servidor.cpf);
+
+    if (!cpf) return;
+
+    const quantidadeAtual = contagem.get(cpf) || 0;
+
+    contagem.set(cpf, quantidadeAtual + 1);
+  });
+
+  return contagem;
+}
+
+function servidorSemCodigo(servidor) {
+  const codigo = String(servidor.codigo || "").trim();
+
+  return !codigo || /^0+$/.test(codigo);
+}
+
+function servidorCorrespondePendencia(servidor, filtro, contagemCPFs) {
+  switch (filtro) {
+    case "ativos":
+      return (
+        String(servidor.situacao || "")
+          .trim()
+          .toLowerCase() === "ativo"
+      );
+
+    case "inativos":
+      return (
+        String(servidor.situacao || "")
+          .trim()
+          .toLowerCase() === "inativo"
+      );
+
+    case "sem-codigo":
+      return servidorSemCodigo(servidor);
+
+    case "sem-admissao":
+      return !String(servidor.dataAdmissao || "").trim();
+
+    case "sem-cargo":
+      return !String(servidor.cargo || "").trim();
+
+    case "sem-vinculo":
+      return !String(servidor.vinculo || "").trim();
+
+    case "sem-local":
+      return !String(obterLocalServidor(servidor) || "").trim();
+
+    case "ficha-incompleta":
+      return calcularPreenchimentoFicha(servidor) < 100;
+
+    case "cpf-invalido":
+      return !cpfValido(servidor.cpf);
+
+    case "cpf-duplicado": {
+      const cpf = somenteNumeros(servidor.cpf);
+
+      return Boolean(cpf) && (contagemCPFs.get(cpf) || 0) > 1;
+    }
+
+    case "todos":
+    default:
+      return true;
+  }
+}
+
+function atualizarPainelPendencias(contagemCPFs) {
+  const contagens = {
+    todos: servidores.length,
+
+    ativos: 0,
+
+    inativos: 0,
+
+    "sem-codigo": 0,
+
+    "sem-admissao": 0,
+
+    "sem-cargo": 0,
+
+    "sem-vinculo": 0,
+
+    "sem-local": 0,
+
+    "ficha-incompleta": 0,
+
+    "cpf-invalido": 0,
+
+    "cpf-duplicado": 0,
+  };
+
+  servidores.forEach((servidor) => {
+    Object.keys(contagens).forEach((filtro) => {
+      if (
+        filtro !== "todos" &&
+        servidorCorrespondePendencia(servidor, filtro, contagemCPFs)
+      ) {
+        contagens[filtro]++;
+      }
+    });
+  });
+
+  Object.entries(contagens).forEach(([filtro, quantidade]) => {
+    const elemento = elementosContagemPendencias[filtro];
+
+    if (elemento) {
+      elemento.textContent = quantidade.toLocaleString("pt-BR");
+    }
+  });
+}
+
+cardsPendenciasServidores?.addEventListener("click", (event) => {
+  const botao = event.target.closest("[data-filtro-pendencia]");
+
+  if (!botao) return;
+
+  filtroPendenciaAtual = botao.dataset.filtroPendencia || "todos";
+
+  paginaAtual = 1;
+
+  cardsPendenciasServidores
+    .querySelectorAll("[data-filtro-pendencia]")
+    .forEach((item) => {
+      const ativo = item === botao;
+
+      item.classList.toggle("ativo", ativo);
+
+      item.setAttribute("aria-pressed", String(ativo));
+    });
+
+  renderTabela();
+});
+
+/* ===============================
    RENDER TABELA
 ================================ */
 function renderTabela() {
   tabela.innerHTML = "";
 
   const termo = normalizarTextoLocal(busca.value);
+
+  const contagemCPFs = criarContagemCPFs();
+
+  atualizarPainelPendencias(contagemCPFs);
 
   const filtrados = servidores
     .filter((s) => {
@@ -866,6 +1070,13 @@ function renderTabela() {
     `);
 
       return textoBusca.includes(termo);
+    })
+    .filter((servidor) => {
+      return servidorCorrespondePendencia(
+        servidor,
+        filtroPendenciaAtual,
+        contagemCPFs,
+      );
     })
     .sort((a, b) =>
       a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" }),
@@ -1666,6 +1877,9 @@ async function salvarServidor() {
 
 async function obterOuCriarLocalId(nomeLocal) {
   if (!nomeLocal) return null;
+  if (normalizarTextoLocal(nomeLocal) === "nao informado") {
+    return null;
+  }
 
   // Se o usuário selecionou
   // pelo autocomplete
