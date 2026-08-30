@@ -53,6 +53,10 @@
   margin-bottom: 0.45rem;
 }
 
+.campo-material[hidden] {
+  display: none;
+}
+
 .campos-material {
   display: grid;
   grid-template-columns:
@@ -942,6 +946,32 @@ body.drawer-aberto {
 
 .btn-editar-material .material-symbols-outlined {
   font-size: 21px;
+}
+
+.material-identificacao {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.material-identificacao .material-nome {
+  margin: 0;
+}
+
+.material-codigo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--clr-info-dark);
+  font-size: 0.8rem;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.material-codigo .material-symbols-outlined {
+  font-size: 1rem;
 }
 
 @media (max-width: 600px) {

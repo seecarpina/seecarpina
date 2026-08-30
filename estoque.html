@@ -87,6 +87,37 @@
                   </div>
                 </div>
 
+                <div class="campo-material">
+                  <label for="codigoMaterial">
+                    Código de barras
+                    <small>(opcional)</small>
+                  </label>
+
+                  <input
+                    type="text"
+                    id="codigoMaterial"
+                    placeholder="Digite ou escaneie o código"
+                    inputmode="numeric"
+                    maxlength="50"
+                    autocomplete="off"
+                  />
+                </div>
+
+                <div id="campoJustificativaEntrada" class="campo-material">
+                  <label for="justificativaEntrada"
+                    >Justificativa da entrada</label
+                  >
+
+                  <input
+                    type="text"
+                    id="justificativaEntrada"
+                    placeholder="Ex.: Referente à Nota Fiscal nº 12345"
+                    maxlength="200"
+                    autocomplete="off"
+                    required
+                  />
+                </div>
+
                 <div class="campos-material">
                   <div>
                     <label for="categoriaMaterial"> Categoria </label>
@@ -170,7 +201,7 @@
                   <input
                     type="search"
                     id="busca"
-                    placeholder="Buscar material"
+                    placeholder="Buscar por material ou código"
                     autocomplete="off"
                   />
 
@@ -350,7 +381,7 @@
             <input
               type="search"
               id="materialEntrega"
-              placeholder="Digite para buscar o material"
+              placeholder="Digite ou escaneie o material"
               autocomplete="off"
             />
 

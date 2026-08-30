@@ -85,8 +85,8 @@ async function registrarMovimentacaoEstoque({
   quantidade,
   estoqueAnterior,
   estoquePosterior,
+  justificativa = "",
   destinoId = null,
-  destino = null,
 }) {
   await push(historicoEstoqueRef, {
     tipo,
@@ -105,6 +105,8 @@ async function registrarMovimentacaoEstoque({
     estoqueAnterior: Number(estoqueAnterior || 0),
 
     estoquePosterior: Number(estoquePosterior || 0),
+
+    justificativa: justificativa.trim(),
 
     destinoId,
     destino,
@@ -356,11 +358,15 @@ function preencherFiltroCategoriasEstoque() {
   }
 }
 
-function selecionarMaterialCadastro(nomeSelecionado) {
+function selecionarMaterialCadastro(valorSelecionado) {
   if (materialEmEdicaoId) return;
 
+  const valorNormalizado = normalizarBusca(valorSelecionado);
+
   const material = obterMateriaisPermitidos().find(
-    (item) => item.nome === nomeSelecionado,
+    (item) =>
+      normalizarBusca(item.nome) === valorNormalizado ||
+      normalizarBusca(item.codigo) === valorNormalizado,
   );
 
   if (!material) {
@@ -369,6 +375,9 @@ function selecionarMaterialCadastro(nomeSelecionado) {
   }
 
   materialCadastroSelecionadoId = material._key;
+
+  inputMaterial.value = material.nome || "";
+  inputCodigoMaterial.value = material.codigo || "";
 
   selectCategoriaMaterial.value = material.categoriaId || "";
   selectUnidadeMaterial.value = material.unidade || "Unidade";
@@ -464,11 +473,19 @@ document.addEventListener("click", (event) => {
 ========================= */
 
 const inputMaterial = document.getElementById("nomeMaterial");
+const inputCodigoMaterial = document.getElementById("codigoMaterial");
 const boxMaterial = document.getElementById("autocompleteMaterial");
 const selectCategoriaMaterial = document.getElementById("categoriaMaterial");
 const selectUnidadeMaterial = document.getElementById("unidade");
 
 const inputQuantidade = document.getElementById("quantidade");
+const inputJustificativaEntrada = document.getElementById(
+  "justificativaEntrada",
+);
+
+const campoJustificativaEntrada = document.getElementById(
+  "campoJustificativaEntrada",
+);
 const inputQuantidadeEntrega = document.getElementById("quantidadeEntrega");
 inputQuantidade?.addEventListener("input", () => {
   formatarQuantidadeInput(inputQuantidade);
@@ -604,27 +621,55 @@ onValue(destinosRef, (snapshot) => {
 function atualizarAutocompletesMateriais() {
   const permitidos = obterMateriaisPermitidos();
 
-  const nomes = permitidos.map((material) => material.nome).filter(Boolean);
+  const nomesECodigos = permitidos.flatMap((material) => {
+    const valores = [];
+
+    if (material.nome) {
+      valores.push(material.nome);
+    }
+
+    if (material.codigo) {
+      valores.push(material.codigo);
+    }
+
+    return valores;
+  });
 
   /* CADASTRO / ENTRADA NO ESTOQUE */
   mostrarSugestoes(
     inputMaterial,
-    nomes,
+    nomesECodigos,
     boxMaterial,
 
-    // Ao clicar em uma sugestão
-    (nomeSelecionado) => {
-      selecionarMaterialCadastro(nomeSelecionado);
+    (valorSelecionado) => {
+      selecionarMaterialCadastro(valorSelecionado);
     },
 
-    // Ao voltar a digitar
     () => {
       liberarDadosMaterialCadastro();
     },
   );
 
   /* ROMANEIO */
-  mostrarSugestoes(inputMaterialEntrega, nomes, boxEntrega);
+  mostrarSugestoes(
+    inputMaterialEntrega,
+    nomesECodigos,
+    boxEntrega,
+
+    (valorSelecionado) => {
+      const valorNormalizado = normalizarBusca(valorSelecionado);
+
+      const material = permitidos.find(
+        (item) =>
+          normalizarBusca(item.nome) === valorNormalizado ||
+          normalizarBusca(item.codigo) === valorNormalizado,
+      );
+
+      if (material) {
+        inputMaterialEntrega.value = material.nome || "";
+      }
+    },
+  );
 }
 
 /* =========================
@@ -678,6 +723,11 @@ function encerrarEdicaoMaterial() {
 
   inputQuantidade.disabled = false;
   inputQuantidade.required = true;
+
+  inputJustificativaEntrada.disabled = false;
+  inputJustificativaEntrada.required = true;
+  campoJustificativaEntrada.hidden = false;
+
   selectUnidadeMaterial.disabled = false;
 
   btnAdicionarEstoque.value = "Adicionar ao estoque";
@@ -701,6 +751,7 @@ function editarMaterial(materialId) {
   materialCadastroSelecionadoId = null;
 
   inputMaterial.value = material.nome || "";
+  inputCodigoMaterial.value = material.codigo || "";
   selectCategoriaMaterial.value = material.categoriaId || "";
   selectUnidadeMaterial.value = material.unidade || "Unidade";
   inputQuantidade.value = "";
@@ -710,6 +761,11 @@ function editarMaterial(materialId) {
 
   inputQuantidade.disabled = true;
   inputQuantidade.required = false;
+
+  inputJustificativaEntrada.value = "";
+  inputJustificativaEntrada.disabled = true;
+  inputJustificativaEntrada.required = false;
+  campoJustificativaEntrada.hidden = true;
 
   btnAdicionarEstoque.value = "Salvar alterações";
 
@@ -737,14 +793,25 @@ formMaterial.addEventListener("submit", async (event) => {
 
   const nome = padronizarTexto(inputMaterial.value);
 
+  const codigo = inputCodigoMaterial.value.trim().replace(/\s+/g, "");
+
   const categoriaId = selectCategoriaMaterial.value;
 
   const unidade = document.getElementById("unidade").value;
 
   const quantidade = obterQuantidadeNumerica(inputQuantidade.value);
 
-  if (!nome || !categoriaId || (!materialEmEdicaoId && quantidade <= 0)) {
-    mostrarNotificacao("Preencha os campos corretamente.", "erro");
+  const justificativa = inputJustificativaEntrada.value.trim();
+
+  if (
+    !nome ||
+    !categoriaId ||
+    (!materialEmEdicaoId && (quantidade <= 0 || !justificativa))
+  ) {
+    mostrarNotificacao(
+      "Informe o material, a quantidade e a justificativa da entrada.",
+      "erro",
+    );
 
     return;
   }
@@ -789,8 +856,27 @@ formMaterial.addEventListener("submit", async (event) => {
         return;
       }
 
+      const codigoDuplicado = codigo
+        ? materiais.some(
+            (material) =>
+              material._key !== materialEmEdicaoId &&
+              String(material.codigo || "").trim() === codigo,
+          )
+        : false;
+
+      if (codigoDuplicado) {
+        mostrarNotificacao(
+          "Este código já está vinculado a outro material.",
+          "erro",
+        );
+
+        inputCodigoMaterial.focus();
+        return;
+      }
+
       await update(ref(rtdb, `materiais/${materialEmEdicaoId}`), {
         nome,
+        codigo: codigo || null,
         categoriaId,
         atualizadoEm: new Date().toISOString(),
       });
@@ -812,6 +898,24 @@ formMaterial.addEventListener("submit", async (event) => {
             normalizarBusca(material.nome) === normalizarBusca(nome),
         );
 
+    const materialComMesmoCodigo = codigo
+      ? materiais.find(
+          (material) =>
+            String(material.codigo || "").trim() === codigo &&
+            material._key !== existente?._key,
+        )
+      : null;
+
+    if (materialComMesmoCodigo) {
+      mostrarNotificacao(
+        `Este código já pertence ao material "${materialComMesmoCodigo.nome}".`,
+        "erro",
+      );
+
+      inputCodigoMaterial.focus();
+      return;
+    }
+
     if (existente && existente.unidade !== unidade) {
       mostrarNotificacao(
         `Este material já está cadastrado com a unidade "${existente.unidade}".`,
@@ -827,6 +931,7 @@ formMaterial.addEventListener("submit", async (event) => {
       const estoquePosterior = estoqueAnterior + quantidade;
 
       await update(ref(rtdb, `materiais/${existente._key}`), {
+        codigo: codigo || existente.codigo || null,
         estoque: estoquePosterior,
         atualizadoEm: new Date().toISOString(),
       });
@@ -843,10 +948,12 @@ formMaterial.addEventListener("submit", async (event) => {
         quantidade,
         estoqueAnterior,
         estoquePosterior,
+        justificativa,
       });
     } else {
       const novoMaterialRef = await push(materiaisRef, {
         nome,
+        codigo: codigo || null,
         categoriaId,
         unidade,
         estoque: quantidade,
@@ -866,6 +973,7 @@ formMaterial.addEventListener("submit", async (event) => {
         quantidade,
         estoqueAnterior: 0,
         estoquePosterior: quantidade,
+        justificativa,
       });
     }
 
@@ -899,7 +1007,12 @@ function renderTabela() {
   const categoriaSelecionada = filtroCategoriaEstoque?.value || "";
 
   const filtrados = obterMateriaisPermitidos()
-    .filter((material) => normalizarBusca(material.nome).includes(busca))
+    .filter((material) => {
+      const nome = normalizarBusca(material.nome);
+      const codigo = normalizarBusca(material.codigo);
+
+      return nome.includes(busca) || codigo.includes(busca);
+    })
     .filter(
       (material) =>
         !categoriaSelecionada || material.categoriaId === categoriaSelecionada,
@@ -956,9 +1069,27 @@ function renderTabela() {
       return `
         <article class="card-material">
           <div class="material-cabecalho">
-            <h3 class="material-nome">
-              ${escaparHtmlEstoque(material.nome || "-")}
-            </h3>
+            <div class="material-identificacao">
+              <h3 class="material-nome">
+                ${escaparHtmlEstoque(material.nome || "-")}
+              </h3>
+
+              ${
+                material.codigo
+                  ? `
+                    <span class="material-codigo">
+                      <span class="material-symbols-outlined">
+                        barcode
+                      </span>
+
+                      <span>
+                        ${escaparHtmlEstoque(material.codigo)}
+                      </span>
+                    </span>
+                  `
+                  : ""
+              }
+            </div>
 
             <div
               class="material-estoque ${estoque <= 5 ? "baixo" : ""}"
@@ -1051,6 +1182,7 @@ btnExportarExcel?.addEventListener("click", () => {
 
   const dadosExcel = materiaisExportar.map((material) => ({
     Material: material.nome || "",
+    Código: material.codigo || "",
     Categoria: obterNomeCategoria(material.categoriaId),
     Unidade: material.unidade || "Unidade",
     "Quantidade em Estoque": Number(material.estoque || 0),
@@ -1066,11 +1198,12 @@ btnExportarExcel?.addEventListener("click", () => {
   XLSX.utils.book_append_sheet(workbook, planilha, "Estoque");
 
   planilha["!cols"] = [
-    { wch: 45 },
-    { wch: 22 },
-    { wch: 15 },
-    { wch: 22 },
-    { wch: 22 },
+    { wch: 45 }, // Material
+    { wch: 20 }, // Código
+    { wch: 22 }, // Categoria
+    { wch: 15 }, // Unidade
+    { wch: 22 }, // Quantidade
+    { wch: 22 }, // Última movimentação
   ];
 
   const hoje = new Date();
@@ -1129,8 +1262,12 @@ btnAdicionarItem.addEventListener("click", () => {
 
   const quantidade = obterQuantidadeNumerica(inputQuantidadeEntrega.value);
 
+  const valorPesquisado = normalizarBusca(nomeMaterial);
+
   const material = obterMateriaisPermitidos().find(
-    (item) => normalizarBusca(item.nome) === normalizarBusca(nomeMaterial),
+    (item) =>
+      normalizarBusca(item.nome) === valorPesquisado ||
+      normalizarBusca(item.codigo) === valorPesquisado,
   );
 
   if (!material) {
@@ -2212,6 +2349,7 @@ function renderMovimentacoes() {
         ${movimentacao.usuario || ""}
         ${movimentacao.responsavel || ""}
         ${movimentacao.material || ""}
+        ${movimentacao.justificativa || ""}
         ${nomesItens}
         ${formatarData(movimentacao.data)}
       `);
@@ -2371,6 +2509,17 @@ function renderMovimentacoes() {
                     ${escaparHtmlEstoque(movimentacao.material || "-")}
                   </strong>.
                 </p>
+
+                ${
+                  movimentacao.justificativa
+                    ? `
+                      <p>
+                        <strong>Justificativa:</strong>
+                        ${escaparHtmlEstoque(movimentacao.justificativa)}
+                      </p>
+                    `
+                    : ""
+                }
 
                 <div class="movimentacao-detalhes">
                   <span>
