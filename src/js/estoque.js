@@ -87,6 +87,7 @@ async function registrarMovimentacaoEstoque({
   estoquePosterior,
   justificativa = "",
   destinoId = null,
+  destino = "",
 }) {
   await push(historicoEstoqueRef, {
     tipo,
