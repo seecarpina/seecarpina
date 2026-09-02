@@ -1977,7 +1977,9 @@ async function excluirRomaneio(romaneioId) {
     titulo: "Excluir romaneio permanentemente",
     mensagem:
       `Deseja excluir o romaneio destinado à "${obterDestinoRomaneio(movimentacao)}"?\n\n` +
-      "Os itens serão devolvidos ao estoque e as movimentações vinculadas serão removidas.",
+      (movimentacao.cancelado === true
+        ? "As movimentações vinculadas serão removidas. O estoque não será alterado, pois este romaneio já foi cancelado."
+        : "Os itens serão devolvidos ao estoque e as movimentações vinculadas serão removidas."),
     tipo: "perigo",
     textoConfirmar: "Excluir definitivamente",
     textoCancelar: "Voltar",
@@ -1991,15 +1993,18 @@ async function excluirRomaneio(romaneioId) {
     const atualizacoes = {};
     const agora = new Date().toISOString();
 
-    for (const item of movimentacao.itens) {
-      const quantidade = Number(item.quantidade || 0);
+    if (movimentacao.cancelado !== true) {
+      for (const item of movimentacao.itens) {
+        const quantidade = Number(item.quantidade || 0);
 
-      if (!item.materialId || quantidade <= 0) {
-        throw new Error(`Item inválido no romaneio: ${item.nome || "-"}`);
+        if (!item.materialId || quantidade <= 0) {
+          throw new Error(`Item inválido no romaneio: ${item.nome || "-"}`);
+        }
+
+        atualizacoes[`materiais/${item.materialId}/estoque`] =
+          increment(quantidade);
+        atualizacoes[`materiais/${item.materialId}/atualizadoEm`] = agora;
       }
-
-      atualizacoes[`materiais/${item.materialId}/estoque`] = increment(quantidade);
-      atualizacoes[`materiais/${item.materialId}/atualizadoEm`] = agora;
     }
 
     historicoEstoque
