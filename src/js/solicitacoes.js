@@ -16,7 +16,11 @@ import {
   query,
   orderByChild,
   equalTo,
+  update,
+  increment,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+const { jsPDF } = window.jspdf;
 
 /* =========================================
    ELEMENTOS
@@ -1460,6 +1464,241 @@ function obterQuantidadesEntreguesMateriais(tipoAtendimento) {
   };
 }
 
+
+function obterNomeResponsavelRomaneio() {
+  return String(dadosUsuarioAtual?.nome || "Usuário").split(" ")[0];
+}
+
+function formatarDataRomaneio(data) {
+  return data ? new Date(data).toLocaleDateString("pt-BR") : "-";
+}
+
+function formatarUnidadeRomaneio(unidade, quantidade) {
+  if (Number(quantidade) === 1) return unidade || "Unidade";
+  const plurais = {
+    Unidade: "Unidades", Caixa: "Caixas", Resma: "Resmas",
+    Pacote: "Pacotes", Fardo: "Fardos", Kit: "Kits", Kg: "Kg",
+    Quilograma: "Quilogramas", Grama: "Gramas", Litro: "Litros",
+    Mililitro: "Mililitros", Saco: "Sacos", Lata: "Latas",
+    Garrafa: "Garrafas", Pote: "Potes", Frasco: "Frascos",
+    "Mão (50 unidades)": "Mãos (50 unidades)",
+  };
+  return plurais[unidade] || unidade || "Unidades";
+}
+
+async function prepararRomaneioSolicitacao({
+  solicitacao, dadosEntregaMateriais, tipoAtendimento, observacao,
+}) {
+  const itensComEntrega = dadosEntregaMateriais.itensEntregues.filter(
+    (item) => Number(item.quantidadeEntregue || 0) > 0,
+  );
+
+  const romaneioId = push(ref(rtdb, "movimentacoes")).key;
+  if (!romaneioId) throw new Error("Não foi possível gerar o romaneio.");
+
+  const data = new Date().toISOString();
+  const responsavel = obterNomeResponsavelRomaneio();
+  const atualizacoes = {};
+  const itens = [];
+
+  for (const itemEntregue of itensComEntrega) {
+    const materialId = String(itemEntregue.materialId || "").trim();
+    const quantidade = Number(itemEntregue.quantidadeEntregue || 0);
+
+    if (!materialId) {
+      throw new Error(`O material "${itemEntregue.nome}" não possui vínculo com o estoque.`);
+    }
+
+    const snapshot = await get(ref(rtdb, `materiais/${materialId}`));
+    if (!snapshot.exists()) {
+      throw new Error(`O material "${itemEntregue.nome}" não foi encontrado no estoque.`);
+    }
+
+    const material = snapshot.val();
+    const estoqueAnterior = Number(material.estoque || 0);
+    if (quantidade > estoqueAnterior) {
+      throw new Error(
+        `Estoque insuficiente para "${material.nome || itemEntregue.nome}". Disponível: ${estoqueAnterior}.`,
+      );
+    }
+
+    const historicoId = push(ref(rtdb, "historicoEstoque")).key;
+    if (!historicoId) throw new Error("Não foi possível registrar a saída.");
+
+    atualizacoes[`materiais/${materialId}/estoque`] = increment(-quantidade);
+    atualizacoes[`materiais/${materialId}/atualizadoEm`] = data;
+    atualizacoes[`historicoEstoque/${historicoId}`] = {
+      tipo: "saida",
+      acao: "romaneio",
+      materialId,
+      material: material.nome || itemEntregue.nome || "",
+      categoriaId: material.categoriaId || null,
+      unidade: material.unidade || itemEntregue.unidade || "Unidade",
+      quantidade,
+      estoqueAnterior,
+      estoquePosterior: estoqueAnterior - quantidade,
+      justificativa: `Atendimento da solicitação ${solicitacao.protocolo || ""}`.trim(),
+      destinoId: solicitacao.escolaId || null,
+      destino: solicitacao.escolaNome || "",
+      usuario: responsavel,
+      data,
+      romaneioId,
+      solicitacaoId: solicitacao.id,
+      protocolo: solicitacao.protocolo || "",
+    };
+
+    itens.push({
+      nome: material.nome || itemEntregue.nome || "Material",
+      categoriaId: material.categoriaId || null,
+      unidade: material.unidade || itemEntregue.unidade || "Unidade",
+      quantidade,
+      materialId,
+    });
+  }
+
+  const movimentacao = {
+    destinoId: solicitacao.escolaId || null,
+    destino: solicitacao.escolaNome || "Unidade escolar",
+    data, observacao, itens, responsavel,
+    origem: "SOLICITACAO_PORTAL_GESTOR",
+    solicitacaoId: solicitacao.id,
+    protocolo: solicitacao.protocolo || "",
+    tipoAtendimento,
+  };
+
+  atualizacoes[`movimentacoes/${romaneioId}`] = movimentacao;
+  return { romaneioId, movimentacao, atualizacoes };
+}
+
+function gerarPDFRomaneioSolicitacao(dados) {
+  if (!jsPDF) {
+    notificar("O gerador de PDF não foi carregado.", "erro");
+    return;
+  }
+
+  const doc = new jsPDF();
+  const img = new Image();
+  img.src = "./src/images/papel-timbrado.png";
+
+  img.onload = () => {
+    const largura = doc.internal.pageSize.getWidth();
+    const altura = doc.internal.pageSize.getHeight();
+    const margem = 20;
+    const larguraTexto = largura - 40;
+    let pagina = 1;
+    let y = 0;
+
+    function cabecalho(primeira = false) {
+      doc.addImage(img, "PNG", 0, 0, largura, altura);
+
+      if (primeira) {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.text("ROMANEIO DE ENTREGA", largura / 2, 48, { align: "center" });
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(12);
+        doc.text(`Destino: ${dados.destino || "-"}`, margem, 68);
+        doc.text(`Data: ${formatarDataRomaneio(dados.data)}`, margem, 76);
+        doc.text(`Responsável: ${dados.responsavel || "-"}`, margem, 84);
+        doc.text(`Solicitação: ${dados.protocolo || "-"}`, margem, 92);
+        doc.setFont("helvetica", "bold");
+        doc.text("ITENS:", margem, 106);
+        y = 116;
+      } else {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.text("CONTINUAÇÃO DOS ITENS:", margem, 48);
+        y = 58;
+      }
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.text(`Página ${pagina}`, largura - margem, altura - 10, { align: "right" });
+      doc.setFontSize(12);
+    }
+
+    function novaPagina() {
+      doc.addPage();
+      pagina++;
+      cabecalho(false);
+    }
+
+    cabecalho(true);
+
+    dados.itens.forEach((item, indice) => {
+      const descricao =
+        `${indice + 1}. ${item.nome} - ${item.quantidade} ` +
+        formatarUnidadeRomaneio(item.unidade, item.quantidade);
+      const linhas = doc.splitTextToSize(descricao, larguraTexto);
+      if (y + linhas.length * 7 > 235) novaPagina();
+      doc.text(linhas, margem, y);
+      y += linhas.length * 7 + 3;
+    });
+
+    if (y + 55 > altura - 20) novaPagina();
+    y += 7;
+    doc.setFont("helvetica", "bold");
+    doc.text(
+      `Total: ${dados.itens.length} ${dados.itens.length === 1 ? "item" : "itens"}`,
+      margem, y,
+    );
+
+    y += 35;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.line(20, y, 85, y);
+    doc.line(125, y, 190, y);
+    doc.text("Responsável pela Entrega", 52, y + 7, { align: "center" });
+    doc.text("Responsável pelo Recebimento", 157, y + 7, { align: "center" });
+
+    y += 20;
+    if (y + 63 > altura - 20) {
+      novaPagina();
+      y += 5;
+    }
+
+    doc.rect(margem, y, larguraTexto, 63);
+    doc.setFont("helvetica", "bold");
+    doc.text("CONFORMIDADE", margem + 5, y + 8);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text("Conformidade:", margem + 5, y + 18);
+    doc.rect(margem + 32, y + 14, 4, 4);
+    doc.text("Sim", margem + 39, y + 18);
+    doc.rect(margem + 55, y + 14, 4, 4);
+    doc.text("Não", margem + 62, y + 18);
+    doc.text("Em caso de desconformidade, descrever:", margem + 5, y + 29);
+    [37, 44, 51, 58].forEach((n) => doc.line(margem + 5, y + n, largura - margem - 5, y + n));
+
+    if (dados.observacao?.trim()) {
+      y += 71;
+      const linhas = doc.splitTextToSize(dados.observacao.trim(), larguraTexto - 10);
+      const alturaObs = Math.max(28, linhas.length * 6 + 18);
+      if (y + alturaObs > altura - 20) {
+        novaPagina();
+        y += 5;
+      }
+      doc.rect(margem, y, larguraTexto, alturaObs);
+      doc.setFont("helvetica", "bold");
+      doc.text("OBSERVAÇÕES", margem + 5, y + 8);
+      doc.setFont("helvetica", "normal");
+      doc.text(linhas, margem + 5, y + 17);
+    }
+
+    const dataArquivo = new Date(dados.data)
+      .toLocaleDateString("pt-BR").replace(/\//g, ".");
+
+    window.abrirOuBaixarPDF(
+      doc,
+      `Romaneio - ${dados.destino || "Unidade escolar"} - ${dataArquivo}.pdf`,
+    );
+  };
+
+  img.onerror = () => {
+    notificar("O romaneio foi registrado, mas o PDF não pôde ser aberto.", "erro");
+  };
+}
+
 function atualizarCampoTipoAtendimento() {
   const deveExibir = novoStatusSolicitacao.value === "AGUARDANDO_CONFIRMACAO";
 
@@ -1504,6 +1743,7 @@ async function salvarAtualizacaoSolicitacao() {
   const ehManutencao = solicitacaoSelecionada.modulo === "MANUTENCAO";
 
   let dadosEntregaMateriais = null;
+  let preparacaoRomaneio = null;
 
   if (!novoStatus) {
     throw new Error("Selecione a nova situação.");
@@ -1518,6 +1758,15 @@ async function salvarAtualizacaoSolicitacao() {
 
   if (ehPedidoMateriais && novoStatus === "AGUARDANDO_CONFIRMACAO") {
     dadosEntregaMateriais = obterQuantidadesEntreguesMateriais(tipoAtendimento);
+  }
+
+  if (ehPedidoMateriais && novoStatus === "AGUARDANDO_CONFIRMACAO") {
+    preparacaoRomaneio = await prepararRomaneioSolicitacao({
+      solicitacao: solicitacaoSelecionada,
+      dadosEntregaMateriais,
+      tipoAtendimento,
+      observacao,
+    });
   }
 
   const transicoesPermitidas = obterTransicoesPermitidas(
@@ -1586,6 +1835,7 @@ async function salvarAtualizacaoSolicitacao() {
           informadoPorUid: dadosUsuarioAtual.uid,
           informadoPorNome: dadosUsuarioAtual.nome || "Usuário",
           observacao,
+          romaneioId: preparacaoRomaneio?.romaneioId || null,
 
           ...(dadosEntregaMateriais
             ? {
@@ -1654,6 +1904,7 @@ async function salvarAtualizacaoSolicitacao() {
             : null,
 
         observacao,
+        romaneioId: preparacaoRomaneio?.romaneioId || null,
         responsavelUid: dadosUsuarioAtual.uid,
         responsavelNome: dadosUsuarioAtual.nome || "Usuário",
         criadoEm: agora,
@@ -1677,6 +1928,39 @@ async function salvarAtualizacaoSolicitacao() {
     throw new Error(
       mensagens[motivoFalha] || "Não foi possível atualizar a solicitação.",
     );
+  }
+
+  if (preparacaoRomaneio) {
+    try {
+      await update(ref(rtdb), preparacaoRomaneio.atualizacoes);
+      gerarPDFRomaneioSolicitacao(preparacaoRomaneio.movimentacao);
+    } catch (erroRomaneio) {
+      console.error("Erro ao registrar o romaneio:", erroRomaneio);
+
+      await runTransaction(solicitacaoRef, (solicitacaoAtual) => {
+        if (
+          !solicitacaoAtual ||
+          solicitacaoAtual.status !== novoStatus ||
+          solicitacaoAtual.confirmacaoEntrega?.romaneioId !==
+            preparacaoRomaneio.romaneioId
+        ) return;
+
+        solicitacaoAtual.status = statusAnterior;
+        solicitacaoAtual.atualizadoEm = Date.now();
+        solicitacaoAtual.atualizadoPorUid = dadosUsuarioAtual.uid;
+        solicitacaoAtual.atualizadoPorNome = dadosUsuarioAtual.nome || "Usuário";
+        delete solicitacaoAtual.confirmacaoEntrega;
+        if (solicitacaoAtual.historico?.[historicoId]) {
+          delete solicitacaoAtual.historico[historicoId];
+        }
+        return solicitacaoAtual;
+      });
+
+      throw new Error(
+        erroRomaneio.message ||
+          "Não foi possível baixar o estoque e gerar o romaneio.",
+      );
+    }
   }
 
   return {
