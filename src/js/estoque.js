@@ -1,4 +1,4 @@
-import { rtdb } from "./firebaseConfig.js";
+import { auth, rtdb } from "./firebaseConfig.js";
 
 import {
   ref,
@@ -75,6 +75,15 @@ function getNomeResponsavel() {
   return window.dadosUsuario?.nome?.split(" ")[0] || "Usuário";
 }
 
+const EMAIL_EXCLUSAO_ROMANEIO = "raphaelcardoso@email.com";
+
+function usuarioPodeExcluirRomaneio() {
+  return (
+    String(auth.currentUser?.email || "").trim().toLowerCase() ===
+    EMAIL_EXCLUSAO_ROMANEIO
+  );
+}
+
 async function registrarMovimentacaoEstoque({
   tipo,
   acao,
@@ -88,6 +97,9 @@ async function registrarMovimentacaoEstoque({
   justificativa = "",
   destinoId = null,
   destino = "",
+  romaneioId = null,
+  solicitacaoId = null,
+  protocolo = "",
 }) {
   await push(historicoEstoqueRef, {
     tipo,
@@ -111,6 +123,9 @@ async function registrarMovimentacaoEstoque({
 
     destinoId,
     destino,
+    romaneioId,
+    solicitacaoId,
+    protocolo,
 
     usuario: getNomeResponsavel(),
 
@@ -1469,6 +1484,13 @@ btnGerarRomaneio.addEventListener("click", async () => {
   btnGerarRomaneio.textContent = "Gerando...";
 
   try {
+    const movimentacaoRef = push(movimentacoesRef);
+    const romaneioId = movimentacaoRef.key;
+
+    if (!romaneioId) {
+      throw new Error("Não foi possível gerar o identificador do romaneio.");
+    }
+
     for (const item of itensEntrega) {
       const material = materiais.find(
         (registro) => registro._key === item.materialId,
@@ -1495,6 +1517,7 @@ btnGerarRomaneio.addEventListener("click", async () => {
         estoquePosterior,
         destinoId: destinoSelecionado.id,
         destino: destinoSelecionado.nome,
+        romaneioId,
       });
     }
 
@@ -1514,7 +1537,7 @@ btnGerarRomaneio.addEventListener("click", async () => {
       responsavel: getNomeResponsavel(),
     };
 
-    await push(movimentacoesRef, movimentacao);
+    await update(movimentacaoRef, movimentacao);
 
     gerarPDF(movimentacao);
 
@@ -1921,6 +1944,90 @@ onValue(
   },
 );
 
+
+/* =========================
+   EXCLUIR ROMANEIO
+========================= */
+
+let excluindoRomaneio = false;
+
+async function excluirRomaneio(romaneioId) {
+  if (excluindoRomaneio) return;
+
+  if (!usuarioPodeExcluirRomaneio()) {
+    mostrarNotificacao("Você não possui permissão para excluir romaneios.", "erro");
+    return;
+  }
+
+  const movimentacao = historicoRomaneios.find(
+    (item) => item._key === romaneioId,
+  );
+
+  if (!movimentacao) {
+    mostrarNotificacao("Romaneio não encontrado.", "erro");
+    return;
+  }
+
+  if (!Array.isArray(movimentacao.itens) || !movimentacao.itens.length) {
+    mostrarNotificacao("Este romaneio não possui itens.", "erro");
+    return;
+  }
+
+  const confirmou = await window.mostrarConfirmacao({
+    titulo: "Excluir romaneio permanentemente",
+    mensagem:
+      `Deseja excluir o romaneio destinado à "${obterDestinoRomaneio(movimentacao)}"?\n\n` +
+      (movimentacao.cancelado === true
+        ? "As movimentações vinculadas serão removidas. O estoque não será alterado, pois este romaneio já foi cancelado."
+        : "Os itens serão devolvidos ao estoque e as movimentações vinculadas serão removidas."),
+    tipo: "perigo",
+    textoConfirmar: "Excluir definitivamente",
+    textoCancelar: "Voltar",
+  });
+
+  if (!confirmou) return;
+
+  excluindoRomaneio = true;
+
+  try {
+    const atualizacoes = {};
+    const agora = new Date().toISOString();
+
+    if (movimentacao.cancelado !== true) {
+      for (const item of movimentacao.itens) {
+        const quantidade = Number(item.quantidade || 0);
+
+        if (!item.materialId || quantidade <= 0) {
+          throw new Error(`Item inválido no romaneio: ${item.nome || "-"}`);
+        }
+
+        atualizacoes[`materiais/${item.materialId}/estoque`] =
+          increment(quantidade);
+        atualizacoes[`materiais/${item.materialId}/atualizadoEm`] = agora;
+      }
+    }
+
+    historicoEstoque
+      .filter((registro) => registro.romaneioId === romaneioId)
+      .forEach((registro) => {
+        atualizacoes[`historicoEstoque/${registro._key}`] = null;
+      });
+
+    atualizacoes[`movimentacoes/${romaneioId}`] = null;
+
+    await update(ref(rtdb), atualizacoes);
+
+    mostrarNotificacao(
+      "Romaneio excluído e itens devolvidos ao estoque com sucesso!",
+    );
+  } catch (erro) {
+    console.error("Erro ao excluir romaneio:", erro);
+    mostrarNotificacao(erro.message || "Erro ao excluir romaneio.", "erro");
+  } finally {
+    excluindoRomaneio = false;
+  }
+}
+
 /* =========================
    CANCELAR ROMANEIO
 ========================= */
@@ -2211,6 +2318,24 @@ function renderHistorico() {
             </button>
 
             ${
+              usuarioPodeExcluirRomaneio()
+                ? `
+                  <button
+                    class="btn-cancelar-romaneio btn-excluir-romaneio"
+                    type="button"
+                    data-id="${movimentacao._key}"
+                    title="Excluir romaneio permanentemente"
+                    aria-label="Excluir romaneio permanentemente"
+                  >
+                    <span class="material-symbols-outlined">
+                      delete_forever
+                    </span>
+                  </button>
+                `
+                : ""
+            }
+
+            ${
               movimentacao.cancelado !== true
                 ? `
                   <button
@@ -2235,6 +2360,17 @@ function renderHistorico() {
 }
 
 listaHistorico.addEventListener("click", async (event) => {
+  /* =========================
+     EXCLUIR ROMANEIO
+  ========================= */
+
+  const btnExcluir = event.target.closest(".btn-excluir-romaneio");
+
+  if (btnExcluir) {
+    await excluirRomaneio(btnExcluir.dataset.id);
+    return;
+  }
+
   /* =========================
      CANCELAR ROMANEIO
   ========================= */
