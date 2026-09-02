@@ -378,6 +378,20 @@
   white-space: nowrap;
 }
 
+.escola-card-minha-solicitacao {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: -5px 0 12px;
+  color: var(--clr-dark-variant);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.escola-card-minha-solicitacao .material-symbols-outlined {
+  font-size: 16px;
+}
+
 .rodape-card-minha-solicitacao {
   display: flex;
   align-items: center;

@@ -228,6 +228,7 @@ function renderizarSolicitacoesRecentes(solicitacoes) {
             </strong>
 
             <small>
+              ${escaparHtml(solicitacao.escolaNome || "Unidade não informada")} •
               ${formatarDataHora(solicitacao.criadoEm)}
             </small>
           </div>
@@ -245,8 +246,8 @@ function renderizarSolicitacoesRecentes(solicitacoes) {
     .join("");
 }
 
-function carregarSolicitacoesRecentes(escolaId) {
-  if (!escolaId) {
+function carregarSolicitacoesRecentes(solicitanteUid) {
+  if (!solicitanteUid) {
     return;
   }
 
@@ -262,14 +263,14 @@ function carregarSolicitacoesRecentes(escolaId) {
 
   const registrosRef = ref(rtdb, "portalGestor/solicitacoes/registros");
 
-  const consultaEscola = query(
+  const consultaUsuario = query(
     registrosRef,
-    orderByChild("escolaId"),
-    equalTo(escolaId),
+    orderByChild("solicitanteUid"),
+    equalTo(solicitanteUid),
   );
 
   onValue(
-    consultaEscola,
+    consultaUsuario,
 
     (snapshot) => {
       let solicitacoes = [];
@@ -444,7 +445,7 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     preencherDadosGestor(user, dadosUsuario);
-    carregarSolicitacoesRecentes(dadosUsuario.escolaId);
+    carregarSolicitacoesRecentes(user.uid);
 
     document.body.classList.remove("verificando-acesso");
   } catch (error) {

@@ -251,6 +251,7 @@ function obterSolicitacoesFiltradas() {
         solicitacao.categoriaNome,
         solicitacao.justificativa,
         solicitacao.observacoes,
+        solicitacao.escolaNome,
         solicitacao.status,
         obterDadosStatus(solicitacao.status).nome,
         obterDadosModulo(solicitacao.modulo).nome,
@@ -329,6 +330,11 @@ function renderizarSolicitacoes() {
               ${escaparHtml(obterTituloSolicitacao(solicitacao))}
             </h3>
 
+            <span class="escola-card-minha-solicitacao">
+              <span class="material-symbols-outlined">location_on</span>
+              ${escaparHtml(solicitacao.escolaNome || "Unidade não informada")}
+            </span>
+
             <div class="rodape-card-minha-solicitacao">
               <span>
                 ${formatarDataHora(solicitacao.criadoEm)}
@@ -348,21 +354,21 @@ function renderizarSolicitacoes() {
     .join("");
 }
 
-function carregarSolicitacoes(escolaId) {
-  if (!escolaId) {
+function carregarSolicitacoes(solicitanteUid) {
+  if (!solicitanteUid) {
     return;
   }
 
   const registrosRef = ref(rtdb, "portalGestor/solicitacoes/registros");
 
-  const consultaEscola = query(
+  const consultaUsuario = query(
     registrosRef,
-    orderByChild("escolaId"),
-    equalTo(escolaId),
+    orderByChild("solicitanteUid"),
+    equalTo(solicitanteUid),
   );
 
   cancelarEscutaSolicitacoes = onValue(
-    consultaEscola,
+    consultaUsuario,
 
     (snapshot) => {
       solicitacoesEscola = snapshot.exists()
@@ -534,7 +540,7 @@ onAuthStateChanged(auth, async (user) => {
 
     preencherDadosGestor(user, dadosUsuario);
 
-    carregarSolicitacoes(dadosUsuario.escolaId);
+    carregarSolicitacoes(user.uid);
 
     document.body.classList.remove("verificando-acesso");
   } catch (error) {
