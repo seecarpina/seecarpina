@@ -216,6 +216,12 @@
   width: 100%;
 }
 
+.usuario-admin-aviso {
+  color: var(--clr-warning);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
 .usuario-admin-footer {
   display: flex;
   justify-content: space-between;
