@@ -972,9 +972,14 @@ function abrirDetalhesSolicitacao(solicitacaoId) {
 
   renderizarHistoricoDetalhes(solicitacao);
 
-  const podeCancelar = solicitacao.status === "RECEBIDA";
+  const pertenceEscolaAtual =
+    String(solicitacao.escolaId) === String(dadosGestorAtual?.escolaId);
+
+  const podeCancelar =
+    pertenceEscolaAtual && solicitacao.status === "RECEBIDA";
 
   const podeConfirmarRecebimento =
+    pertenceEscolaAtual &&
     solicitacao.status === "AGUARDANDO_CONFIRMACAO" &&
     solicitacao.confirmacaoEntrega?.pendente === true;
 
@@ -1483,6 +1488,7 @@ function atualizarBloqueioNovaSolicitacao() {
   confirmacaoPendenteAtual = solicitacoesEscola.find(
     (solicitacao) =>
       solicitacao.modulo === "MATERIAIS_EXPEDIENTE" &&
+      String(solicitacao.escolaId) === String(dadosGestorAtual?.escolaId) &&
       solicitacao.status === "AGUARDANDO_CONFIRMACAO" &&
       solicitacao.confirmacaoEntrega?.pendente === true,
   );
@@ -1639,6 +1645,7 @@ function renderizarSolicitacoes() {
         solicitacao.status,
         obterDadosStatus(solicitacao.status).nome,
         solicitacao.justificativa,
+        solicitacao.escolaNome,
         nomesMateriais,
       ].join(" "),
     );
@@ -1737,6 +1744,11 @@ function renderizarSolicitacoes() {
                   ${formatarDataHora(solicitacao.criadoEm)}
                 </strong>
               </div>
+
+              <div>
+                <small>Unidade escolar</small>
+                <strong>${escaparHtml(solicitacao.escolaNome || "Não informada")}</strong>
+              </div>
             </div>
 
             <div class="justificativa-card">
@@ -1768,7 +1780,7 @@ function renderizarSolicitacoes() {
 }
 
 function carregarSolicitacoesEscola() {
-  if (!dadosGestorAtual?.escolaId) {
+  if (!dadosGestorAtual?.uid) {
     return;
   }
 
@@ -1788,14 +1800,14 @@ function carregarSolicitacoesEscola() {
 
   const registrosRef = ref(rtdb, "portalGestor/solicitacoes/registros");
 
-  const consultaEscola = query(
+  const consultaUsuario = query(
     registrosRef,
-    orderByChild("escolaId"),
-    equalTo(dadosGestorAtual.escolaId),
+    orderByChild("solicitanteUid"),
+    equalTo(dadosGestorAtual.uid),
   );
 
   cancelarEscutaSolicitacoes = onValue(
-    consultaEscola,
+    consultaUsuario,
 
     (snapshot) => {
       solicitacoesEscola = [];
@@ -1894,6 +1906,7 @@ async function salvarSolicitacao() {
   const confirmacaoPendente = solicitacoesEscola.find(
     (solicitacao) =>
       solicitacao.modulo === "MATERIAIS_EXPEDIENTE" &&
+      String(solicitacao.escolaId) === String(dadosGestorAtual?.escolaId) &&
       solicitacao.status === "AGUARDANDO_CONFIRMACAO" &&
       solicitacao.confirmacaoEntrega?.pendente === true,
   );
