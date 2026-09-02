@@ -4,6 +4,7 @@ import {
   ref,
   push,
   onValue,
+  get,
   update,
   increment,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
@@ -2455,6 +2456,118 @@ onValue(
   },
 );
 
+
+let excluindoMovimentacao = false;
+
+async function excluirMovimentacaoEstoque(movimentacaoId) {
+  if (excluindoMovimentacao) return;
+
+  if (!usuarioPodeExcluirRomaneio()) {
+    mostrarNotificacao(
+      "Você não possui permissão para excluir movimentações.",
+      "erro",
+    );
+    return;
+  }
+
+  const movimentacao = historicoEstoque.find(
+    (registro) => registro._key === movimentacaoId,
+  );
+
+  if (!movimentacao) {
+    mostrarNotificacao("Movimentação não encontrada.", "erro");
+    return;
+  }
+
+  if (movimentacao.romaneioId) {
+    mostrarNotificacao(
+      "Esta movimentação pertence a um romaneio. Exclua o romaneio correspondente.",
+      "erro",
+    );
+    return;
+  }
+
+  if (movimentacao.acao === "cancelamento_romaneio") {
+    mostrarNotificacao(
+      "Esta movimentação pertence ao cancelamento de um romaneio.",
+      "erro",
+    );
+    return;
+  }
+
+  const materialId = String(movimentacao.materialId || "").trim();
+  const quantidade = Number(movimentacao.quantidade || 0);
+
+  if (!materialId || quantidade <= 0) {
+    mostrarNotificacao(
+      "Esta movimentação não possui dados suficientes para corrigir o estoque.",
+      "erro",
+    );
+    return;
+  }
+
+  const ehEntrada = movimentacao.tipo === "entrada";
+  const acaoEstoque = ehEntrada
+    ? "retirada do estoque"
+    : "devolução ao estoque";
+
+  const confirmou = await window.mostrarConfirmacao({
+    titulo: "Excluir movimentação",
+    mensagem:
+      `Deseja excluir a movimentação de ${quantidade} ` +
+      `${formatarUnidade(movimentacao.unidade || "Unidade", quantidade)} ` +
+      `de "${movimentacao.material || "Material"}"?\n\n` +
+      `A exclusão realizará a ${acaoEstoque} automaticamente.`,
+    tipo: "perigo",
+    textoConfirmar: "Excluir movimentação",
+    textoCancelar: "Voltar",
+  });
+
+  if (!confirmou) return;
+
+  excluindoMovimentacao = true;
+
+  try {
+    const materialSnapshot = await get(ref(rtdb, `materiais/${materialId}`));
+
+    if (!materialSnapshot.exists()) {
+      throw new Error("O material vinculado não foi encontrado no estoque.");
+    }
+
+    const material = materialSnapshot.val();
+    const estoqueAtual = Number(material.estoque || 0);
+
+    if (ehEntrada && quantidade > estoqueAtual) {
+      throw new Error(
+        `Não é possível excluir esta entrada. O estoque atual é ${estoqueAtual}, menor que a quantidade da movimentação.`,
+      );
+    }
+
+    const variacaoEstoque = ehEntrada ? -quantidade : quantidade;
+    const atualizacoes = {};
+
+    atualizacoes[`materiais/${materialId}/estoque`] =
+      increment(variacaoEstoque);
+    atualizacoes[`materiais/${materialId}/atualizadoEm`] =
+      new Date().toISOString();
+    atualizacoes[`historicoEstoque/${movimentacaoId}`] = null;
+
+    await update(ref(rtdb), atualizacoes);
+
+    mostrarNotificacao(
+      "Movimentação excluída e saldo do estoque corrigido com sucesso!",
+    );
+  } catch (erro) {
+    console.error("Erro ao excluir movimentação:", erro);
+    mostrarNotificacao(
+      erro.message || "Não foi possível excluir a movimentação.",
+      "erro",
+    );
+  } finally {
+    excluindoMovimentacao = false;
+  }
+}
+
 function renderMovimentacoes() {
   if (!listaMovimentacoes) return;
 
@@ -2677,12 +2790,40 @@ function renderMovimentacoes() {
                       : ""
                   }
                 </div>
+
+                ${
+                  usuarioPodeExcluirRomaneio() &&
+                  !movimentacao.romaneioId &&
+                  movimentacao.acao !== "cancelamento_romaneio"
+                    ? `
+                      <button
+                        type="button"
+                        class="cancel-btn btn-excluir-movimentacao"
+                        data-id="${movimentacao._key}"
+                        title="Excluir movimentação"
+                        aria-label="Excluir movimentação"
+                      >
+                        <span class="material-symbols-outlined">
+                          delete_forever
+                        </span>
+                      </button>
+                    `
+                    : ""
+                }
               </div>
             </article>
           `;
     })
     .join("");
 }
+
+listaMovimentacoes?.addEventListener("click", async (event) => {
+  const botaoExcluir = event.target.closest(".btn-excluir-movimentacao");
+
+  if (!botaoExcluir) return;
+
+  await excluirMovimentacaoEstoque(botaoExcluir.dataset.id);
+});
 
 inputBuscaMovimentacoes?.addEventListener("input", renderMovimentacoes);
 
