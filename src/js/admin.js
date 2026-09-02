@@ -1434,6 +1434,20 @@ function renderUsuarios() {
     .forEach((usuario) => {
       const ativo = usuario.ativo !== false;
 
+      const gestorEscolar =
+        String(usuario.cargo || "").trim().toUpperCase() === "GESTOR" ||
+        String(usuario.perfil || "").trim().toUpperCase() === "GESTOR_ESCOLAR";
+
+      const escolasOrdenadas = [...locaisExercicio].sort((a, b) =>
+        String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR", {
+          sensitivity: "base",
+        }),
+      );
+
+      const escolaAtualForaDaLista =
+        usuario.escolaId &&
+        !escolasOrdenadas.some((escola) => escola.id === usuario.escolaId);
+
       const card = document.createElement("div");
 
       card.className = "usuario-admin-card";
@@ -1482,6 +1496,49 @@ function renderUsuarios() {
 
           </div>
 
+          ${
+            gestorEscolar
+              ? `
+                <div class="usuario-admin-campo usuario-admin-campo-escola">
+                  <label>Unidade escolar</label>
+
+                  <select class="select-escola-usuario">
+                    <option value="">Selecione uma unidade escolar</option>
+
+                    ${
+                      escolaAtualForaDaLista
+                        ? `
+                          <option value="${escaparHtml(usuario.escolaId)}" selected>
+                            ${escaparHtml(usuario.escolaNome || "Unidade vinculada")}
+                          </option>
+                        `
+                        : ""
+                    }
+
+                    ${escolasOrdenadas
+                      .map(
+                        (escola) => `
+                          <option
+                            value="${escaparHtml(escola.id)}"
+                            ${usuario.escolaId === escola.id ? "selected" : ""}
+                          >
+                            ${escaparHtml(escola.nome)}
+                          </option>
+                        `,
+                      )
+                      .join("")}
+                  </select>
+
+                  ${
+                    !usuario.escolaId
+                      ? `<small class="usuario-admin-aviso">Vincule uma escola para liberar o Portal do Gestor.</small>`
+                      : ""
+                  }
+                </div>
+              `
+              : ""
+          }
+
         </div>
 
         <div class="usuario-admin-footer">
@@ -1511,10 +1568,16 @@ function renderUsuarios() {
 
       const selectPerfil = card.querySelector(".select-perfil-usuario");
 
+      const selectEscola = card.querySelector(".select-escola-usuario");
+
       const switchUsuario = card.querySelector(".switch-usuario");
 
       selectPerfil.addEventListener("change", async () => {
         await alterarPerfilUsuario(usuario, selectPerfil.value);
+      });
+
+      selectEscola?.addEventListener("change", async () => {
+        await alterarEscolaUsuario(usuario, selectEscola.value);
       });
 
       switchUsuario.addEventListener("change", async () => {
@@ -1545,12 +1608,26 @@ async function alterarPerfilUsuario(usuario, novoPerfil) {
   }
 
   try {
-    await updateDoc(doc(db, "usuarios", usuario._uid), {
+    const dadosAtualizacao = {
       cargo: novoPerfil,
       atualizadoEm: new Date().toISOString(),
-    });
+    };
+
+    if (String(novoPerfil).trim().toUpperCase() !== "GESTOR") {
+      dadosAtualizacao.perfil = null;
+      dadosAtualizacao.escolaId = null;
+      dadosAtualizacao.escolaNome = null;
+    }
+
+    await updateDoc(doc(db, "usuarios", usuario._uid), dadosAtualizacao);
 
     usuario.cargo = novoPerfil;
+
+    if (String(novoPerfil).trim().toUpperCase() !== "GESTOR") {
+      usuario.perfil = null;
+      usuario.escolaId = null;
+      usuario.escolaNome = null;
+    }
 
     await sincronizarUsuarioControleAcesso(usuario);
 
@@ -1563,6 +1640,63 @@ async function alterarPerfilUsuario(usuario, novoPerfil) {
     console.error("Erro ao alterar perfil:", erro);
 
     notificar("Erro ao alterar perfil.", "erro");
+
+    renderUsuarios();
+  }
+}
+
+/* =========================================
+   VINCULAR ESCOLA AO GESTOR
+========================================= */
+
+async function alterarEscolaUsuario(usuario, escolaId) {
+  const escola = locaisExercicio.find((item) => item.id === escolaId) || null;
+  const escolaNome = escola?.nome || "";
+  const removendoVinculo = !escolaId;
+
+  const confirmou = await window.mostrarConfirmacao({
+    titulo: removendoVinculo ? "Remover vínculo" : "Vincular escola",
+    mensagem: removendoVinculo
+      ? `Deseja remover a unidade escolar vinculada a "${usuario.nome}"?`
+      : `Deseja vincular "${usuario.nome}" à unidade "${escolaNome}"?`,
+    tipo: "alerta",
+    textoConfirmar: removendoVinculo ? "Remover vínculo" : "Vincular escola",
+    textoCancelar: "Cancelar",
+  });
+
+  if (!confirmou) {
+    renderUsuarios();
+    return;
+  }
+
+  try {
+    const atualizadoEm = new Date().toISOString();
+
+    await updateDoc(doc(db, "usuarios", usuario._uid), {
+      perfil: removendoVinculo ? null : "GESTOR_ESCOLAR",
+      escolaId: removendoVinculo ? null : escolaId,
+      escolaNome: removendoVinculo ? null : escolaNome,
+      atualizadoEm,
+    });
+
+    usuario.perfil = removendoVinculo ? null : "GESTOR_ESCOLAR";
+    usuario.escolaId = removendoVinculo ? null : escolaId;
+    usuario.escolaNome = removendoVinculo ? null : escolaNome;
+    usuario.atualizadoEm = atualizadoEm;
+
+    await sincronizarUsuarioControleAcesso(usuario);
+
+    notificar(
+      removendoVinculo
+        ? "Vínculo com a escola removido."
+        : "Escola vinculada ao gestor com sucesso!",
+    );
+
+    renderUsuarios();
+  } catch (erro) {
+    console.error("Erro ao vincular escola ao usuário:", erro);
+
+    notificar("Não foi possível atualizar a escola do gestor.", "erro");
 
     renderUsuarios();
   }
@@ -2409,6 +2543,8 @@ onValue(locaisExercicioRef, (snapshot) => {
     : [];
 
   renderLocais();
+
+  renderUsuarios();
 });
 
 onValue(servidoresRef, (snapshot) => {
