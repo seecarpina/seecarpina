@@ -1392,3 +1392,88 @@ body.drawer-solicitacao-aberto {
     width: 100%;
   }
 }
+
+
+/* Materiais utilizados nos chamados de manutenção */
+.bloco-materiais-manutencao {
+  padding: 1rem;
+  border: 1px solid var(--clr-info-light);
+  border-radius: 0.9rem;
+  background: var(--clr-background);
+}
+
+.adicionar-material-manutencao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 8rem auto;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.adicionar-material-manutencao select,
+.adicionar-material-manutencao input {
+  width: 100%;
+  min-width: 0;
+}
+
+.adicionar-material-manutencao button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.7rem 1rem;
+  border: 0;
+  border-radius: 0.7rem;
+  background: var(--clr-primary);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.lista-materiais-manutencao {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.item-material-manutencao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem;
+  border: 1px solid var(--clr-info-light);
+  border-radius: 0.7rem;
+  background: var(--clr-white);
+}
+
+.item-material-manutencao div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.item-material-manutencao small {
+  color: var(--clr-info-dark);
+}
+
+.item-material-manutencao button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 159, 10, 0.14);
+  color: var(--clr-danger);
+  cursor: pointer;
+}
+
+@media screen and (max-width: 700px) {
+  .adicionar-material-manutencao {
+    grid-template-columns: 1fr;
+  }
+
+  .adicionar-material-manutencao button {
+    width: 100%;
+  }
+}

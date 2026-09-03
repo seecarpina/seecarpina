@@ -131,6 +131,23 @@ const resumoQuantidadesMateriais = document.getElementById(
   "resumoQuantidadesMateriais",
 );
 
+const blocoMateriaisManutencao = document.getElementById(
+  "blocoMateriaisManutencao",
+);
+const materialManutencao = document.getElementById("materialManutencao");
+const quantidadeMaterialManutencao = document.getElementById(
+  "quantidadeMaterialManutencao",
+);
+const btnAdicionarMaterialManutencao = document.getElementById(
+  "btnAdicionarMaterialManutencao",
+);
+const listaMateriaisManutencao = document.getElementById(
+  "listaMateriaisManutencao",
+);
+const resumoMateriaisManutencao = document.getElementById(
+  "resumoMateriaisManutencao",
+);
+
 const observacaoAtualizacao = document.getElementById("observacaoAtualizacao");
 
 const contadorObservacaoAtualizacao = document.getElementById(
@@ -160,6 +177,8 @@ let moduloSelecionado = "TODOS";
 let solicitacoes = [];
 let solicitacaoSelecionada = null;
 let solicitacoesPorModulo = {};
+let materiaisEstoqueManutencao = [];
+let materiaisSelecionadosManutencao = [];
 
 /* =========================================
    UTILITÁRIOS
@@ -1094,6 +1113,8 @@ function preencherDrawerSolicitacao(solicitacao) {
 
     ${renderizarInformacoesEntrega(solicitacao)}
 
+    ${renderizarMateriaisUtilizadosManutencao(solicitacao)}
+
     <section class="secao-detalhe-central">
       <h3>Unidade solicitante</h3>
 
@@ -1443,6 +1464,25 @@ function gerarPDFPedidoSolicitacao(solicitacao) {
         );
       });
 
+      const materiaisUtilizados = obterListaPedido(
+        entrega.materiaisUtilizados,
+      );
+
+      if (materiaisUtilizados.length) {
+        adicionarCampo("Materiais utilizados na manutenção", " ");
+
+        materiaisUtilizados.forEach((item, indice) => {
+          adicionarParagrafo(
+            `${indice + 1}. ${item.nome || "Material"} — ` +
+              `${item.quantidade} ${formatarUnidadeRomaneio(
+                item.unidade || "Unidade",
+                item.quantidade,
+              )}`,
+            2,
+          );
+        });
+      }
+
       if (entrega.romaneioId) {
         adicionarCampo("Romaneio vinculado", entrega.romaneioId);
       }
@@ -1599,6 +1639,13 @@ function abrirDialogoAtualizacao() {
   blocoTipoAtendimento.hidden = true;
   tipoAtendimentoEntrega.required = false;
   ocultarQuantidadesMateriais();
+  materiaisSelecionadosManutencao = [];
+  materiaisEstoqueManutencao = [];
+  blocoMateriaisManutencao.hidden = true;
+  materialManutencao.innerHTML =
+    '<option value="">Carregando materiais...</option>';
+  quantidadeMaterialManutencao.value = "";
+  renderizarMateriaisManutencao();
   observacaoAtualizacao.value = "";
   contadorObservacaoAtualizacao.textContent = "0";
   avisoObservacaoObrigatoria.classList.remove("ativo");
@@ -1616,6 +1663,13 @@ function fecharDialogoAtualizacao() {
   blocoTipoAtendimento.hidden = true;
   tipoAtendimentoEntrega.required = false;
   ocultarQuantidadesMateriais();
+  materiaisSelecionadosManutencao = [];
+  materiaisEstoqueManutencao = [];
+  blocoMateriaisManutencao.hidden = true;
+  materialManutencao.innerHTML =
+    '<option value="">Selecione um material</option>';
+  quantidadeMaterialManutencao.value = "";
+  renderizarMateriaisManutencao();
   observacaoAtualizacao.value = "";
   contadorObservacaoAtualizacao.textContent = "0";
 
@@ -1781,6 +1835,239 @@ function obterQuantidadesEntreguesMateriais(tipoAtendimento) {
   };
 }
 
+
+
+async function carregarMateriaisEstoqueManutencao() {
+  const snapshot = await get(ref(rtdb, "materiais"));
+
+  materiaisEstoqueManutencao = snapshot.exists()
+    ? Object.entries(snapshot.val())
+        .map(([id, dados]) => ({ id, ...dados }))
+        .filter((material) => Number(material.estoque || 0) > 0)
+        .sort((a, b) =>
+          String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR", {
+            sensitivity: "base",
+          }),
+        )
+    : [];
+
+  preencherSelectMateriaisManutencao();
+}
+
+function preencherSelectMateriaisManutencao() {
+  const selecionados = new Set(
+    materiaisSelecionadosManutencao.map((item) => item.materialId),
+  );
+
+  materialManutencao.innerHTML =
+    '<option value="">Selecione um material do estoque</option>';
+
+  materiaisEstoqueManutencao
+    .filter((material) => !selecionados.has(material.id))
+    .forEach((material) => {
+      const option = document.createElement("option");
+      option.value = material.id;
+      option.textContent =
+        `${material.nome || "Material"} — saldo: ${Number(material.estoque || 0)} ${material.unidade || "Unidade"}`;
+      materialManutencao.appendChild(option);
+    });
+}
+
+function renderizarMateriaisManutencao() {
+  resumoMateriaisManutencao.textContent =
+    `${materiaisSelecionadosManutencao.length} material${materiaisSelecionadosManutencao.length === 1 ? "" : "is"}`;
+
+  if (!materiaisSelecionadosManutencao.length) {
+    listaMateriaisManutencao.innerHTML =
+      '<p class="texto-detalhe-central">Nenhum material adicionado.</p>';
+    preencherSelectMateriaisManutencao();
+    return;
+  }
+
+  listaMateriaisManutencao.innerHTML = materiaisSelecionadosManutencao
+    .map(
+      (item, indice) => `
+        <div class="item-material-manutencao">
+          <div>
+            <strong>${escaparHtml(item.nome)}</strong>
+            <small>
+              ${item.quantidade}
+              ${escaparHtml(formatarUnidadeRomaneio(item.unidade, item.quantidade))}
+            </small>
+          </div>
+          <button
+            type="button"
+            class="btn-remover-material-manutencao"
+            data-indice="${indice}"
+            title="Remover material"
+            aria-label="Remover material"
+          >
+            <span class="material-symbols-outlined">delete</span>
+          </button>
+        </div>
+      `,
+    )
+    .join("");
+
+  preencherSelectMateriaisManutencao();
+}
+
+function atualizarBlocoMateriaisManutencao() {
+  const exibir =
+    solicitacaoSelecionada?.modulo === "MANUTENCAO" &&
+    novoStatusSolicitacao.value === "AGUARDANDO_CONFIRMACAO";
+
+  blocoMateriaisManutencao.hidden = !exibir;
+
+  if (exibir && !materiaisEstoqueManutencao.length) {
+    carregarMateriaisEstoqueManutencao().catch((erro) => {
+      console.error("Erro ao carregar materiais:", erro);
+      notificar("Não foi possível carregar os materiais do estoque.", "erro");
+    });
+  }
+
+  if (exibir) renderizarMateriaisManutencao();
+}
+
+function adicionarMaterialManutencao() {
+  const materialId = materialManutencao.value;
+  const quantidade = Number(quantidadeMaterialManutencao.value || 0);
+  const material = materiaisEstoqueManutencao.find(
+    (item) => item.id === materialId,
+  );
+
+  if (!material) {
+    notificar("Selecione um material do estoque.", "erro");
+    return;
+  }
+
+  if (!Number.isInteger(quantidade) || quantidade <= 0) {
+    notificar("Informe uma quantidade válida.", "erro");
+    return;
+  }
+
+  if (quantidade > Number(material.estoque || 0)) {
+    notificar(
+      `Estoque insuficiente. Disponível: ${Number(material.estoque || 0)}.`,
+      "erro",
+    );
+    return;
+  }
+
+  materiaisSelecionadosManutencao.push({
+    materialId,
+    nome: material.nome || "Material",
+    categoriaId: material.categoriaId || null,
+    unidade: material.unidade || "Unidade",
+    quantidade,
+  });
+
+  materialManutencao.value = "";
+  quantidadeMaterialManutencao.value = "";
+  renderizarMateriaisManutencao();
+}
+
+async function prepararBaixaMateriaisManutencao(solicitacao) {
+  if (!materiaisSelecionadosManutencao.length) return null;
+
+  const atualizacoes = {};
+  const itens = [];
+  const data = new Date().toISOString();
+  const responsavel = String(dadosUsuarioAtual?.nome || "Usuário");
+
+  for (const itemSelecionado of materiaisSelecionadosManutencao) {
+    const snapshot = await get(
+      ref(rtdb, `materiais/${itemSelecionado.materialId}`),
+    );
+
+    if (!snapshot.exists()) {
+      throw new Error(
+        `O material "${itemSelecionado.nome}" não foi encontrado no estoque.`,
+      );
+    }
+
+    const material = snapshot.val();
+    const quantidade = Number(itemSelecionado.quantidade || 0);
+    const estoqueAnterior = Number(material.estoque || 0);
+
+    if (quantidade > estoqueAnterior) {
+      throw new Error(
+        `Estoque insuficiente para "${material.nome || itemSelecionado.nome}". Disponível: ${estoqueAnterior}.`,
+      );
+    }
+
+    const historicoId = push(ref(rtdb, "historicoEstoque")).key;
+    if (!historicoId) throw new Error("Não foi possível registrar a saída.");
+
+    atualizacoes[`materiais/${itemSelecionado.materialId}/estoque`] =
+      increment(-quantidade);
+    atualizacoes[`materiais/${itemSelecionado.materialId}/atualizadoEm`] = data;
+    atualizacoes[`historicoEstoque/${historicoId}`] = {
+      tipo: "saida",
+      acao: "manutencao",
+      materialId: itemSelecionado.materialId,
+      material: material.nome || itemSelecionado.nome,
+      categoriaId: material.categoriaId || itemSelecionado.categoriaId || null,
+      unidade: material.unidade || itemSelecionado.unidade || "Unidade",
+      quantidade,
+      estoqueAnterior,
+      estoquePosterior: estoqueAnterior - quantidade,
+      justificativa: `Utilizado no chamado de manutenção ${solicitacao.protocolo || ""}`.trim(),
+      destinoId: solicitacao.escolaId || null,
+      destino: solicitacao.escolaNome || "",
+      usuario: responsavel,
+      data,
+      solicitacaoId: solicitacao.id,
+      protocolo: solicitacao.protocolo || "",
+    };
+
+    itens.push({
+      materialId: itemSelecionado.materialId,
+      nome: material.nome || itemSelecionado.nome,
+      categoriaId: material.categoriaId || itemSelecionado.categoriaId || null,
+      unidade: material.unidade || itemSelecionado.unidade || "Unidade",
+      quantidade,
+    });
+  }
+
+  return { atualizacoes, itens };
+}
+
+function renderizarMateriaisUtilizadosManutencao(solicitacao) {
+  const itens = obterListaPedido(
+    solicitacao.confirmacaoEntrega?.materiaisUtilizados,
+  );
+
+  if (!itens.length) return "";
+
+  return `
+    <section class="secao-detalhe-central">
+      <h3>Materiais utilizados na manutenção</h3>
+      <div class="lista-materiais-manutencao">
+        ${itens
+          .map(
+            (item) => `
+              <div class="item-material-manutencao">
+                <div>
+                  <strong>${escaparHtml(item.nome || "Material")}</strong>
+                  <small>
+                    ${Number(item.quantidade || 0)}
+                    ${escaparHtml(
+                      formatarUnidadeRomaneio(
+                        item.unidade || "Unidade",
+                        Number(item.quantidade || 0),
+                      ),
+                    )}
+                  </small>
+                </div>
+              </div>
+            `,
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+}
 
 function obterNomeResponsavelRomaneio() {
   return String(dadosUsuarioAtual?.nome || "Usuário").split(" ")[0];
@@ -2027,6 +2314,7 @@ function atualizarCampoTipoAtendimento() {
   }
 
   renderizarQuantidadesMateriais();
+  atualizarBlocoMateriaisManutencao();
   atualizarAvisoObservacao();
 }
 
@@ -2061,6 +2349,7 @@ async function salvarAtualizacaoSolicitacao() {
 
   let dadosEntregaMateriais = null;
   let preparacaoRomaneio = null;
+  let preparacaoMateriaisManutencao = null;
 
   if (!novoStatus) {
     throw new Error("Selecione a nova situação.");
@@ -2084,6 +2373,11 @@ async function salvarAtualizacaoSolicitacao() {
       tipoAtendimento,
       observacao,
     });
+  }
+
+  if (ehManutencao && novoStatus === "AGUARDANDO_CONFIRMACAO") {
+    preparacaoMateriaisManutencao =
+      await prepararBaixaMateriaisManutencao(solicitacaoSelecionada);
   }
 
   const transicoesPermitidas = obterTransicoesPermitidas(
@@ -2153,6 +2447,8 @@ async function salvarAtualizacaoSolicitacao() {
           informadoPorNome: dadosUsuarioAtual.nome || "Usuário",
           observacao,
           romaneioId: preparacaoRomaneio?.romaneioId || null,
+          materiaisUtilizados:
+            preparacaoMateriaisManutencao?.itens || null,
 
           ...(dadosEntregaMateriais
             ? {
@@ -2189,6 +2485,19 @@ async function salvarAtualizacaoSolicitacao() {
               : "Entrega parcial informada. Aguardando confirmação da unidade escolar." +
                 (observacao ? ` Observação: ${observacao}` : "");
         }
+
+        if (preparacaoMateriaisManutencao?.itens.length) {
+          const resumoMateriais = preparacaoMateriaisManutencao.itens
+            .map(
+              (item) =>
+                `${item.nome}: ${item.quantidade} ${formatarUnidadeRomaneio(
+                  item.unidade,
+                  item.quantidade,
+                )}`,
+            )
+            .join(", ");
+          descricaoAtualizacao += ` Materiais utilizados: ${resumoMateriais}.`;
+        }
       } else {
         descricaoAtualizacao =
           `Situação alterada de ${statusAnteriorNome} para ${novoStatusNome}.` +
@@ -2222,6 +2531,8 @@ async function salvarAtualizacaoSolicitacao() {
 
         observacao,
         romaneioId: preparacaoRomaneio?.romaneioId || null,
+        materiaisUtilizados:
+          preparacaoMateriaisManutencao?.itens || null,
         responsavelUid: dadosUsuarioAtual.uid,
         responsavelNome: dadosUsuarioAtual.nome || "Usuário",
         criadoEm: agora,
@@ -2280,6 +2591,41 @@ async function salvarAtualizacaoSolicitacao() {
     }
   }
 
+  if (preparacaoMateriaisManutencao) {
+    try {
+      await update(ref(rtdb), preparacaoMateriaisManutencao.atualizacoes);
+    } catch (erroEstoque) {
+      console.error(
+        "Erro ao registrar materiais da manutenção:",
+        erroEstoque,
+      );
+
+      await runTransaction(solicitacaoRef, (solicitacaoAtual) => {
+        if (
+          !solicitacaoAtual ||
+          solicitacaoAtual.status !== novoStatus ||
+          !solicitacaoAtual.confirmacaoEntrega?.materiaisUtilizados
+        ) return;
+
+        solicitacaoAtual.status = statusAnterior;
+        solicitacaoAtual.atualizadoEm = Date.now();
+        solicitacaoAtual.atualizadoPorUid = dadosUsuarioAtual.uid;
+        solicitacaoAtual.atualizadoPorNome =
+          dadosUsuarioAtual.nome || "Usuário";
+        delete solicitacaoAtual.confirmacaoEntrega;
+        if (solicitacaoAtual.historico?.[historicoId]) {
+          delete solicitacaoAtual.historico[historicoId];
+        }
+        return solicitacaoAtual;
+      });
+
+      throw new Error(
+        erroEstoque.message ||
+          "Não foi possível baixar os materiais utilizados do estoque.",
+      );
+    }
+  }
+
   return {
     id: solicitacaoId,
     ...resultado.snapshot.val(),
@@ -2297,6 +2643,22 @@ btnCancelarAtualizacao.addEventListener("click", fecharDialogoAtualizacao);
 overlayAtualizacao.addEventListener("click", fecharDialogoAtualizacao);
 
 novoStatusSolicitacao.addEventListener("change", atualizarCampoTipoAtendimento);
+
+btnAdicionarMaterialManutencao?.addEventListener(
+  "click",
+  adicionarMaterialManutencao,
+);
+
+listaMateriaisManutencao?.addEventListener("click", (event) => {
+  const botao = event.target.closest(".btn-remover-material-manutencao");
+  if (!botao) return;
+
+  const indice = Number(botao.dataset.indice);
+  if (!Number.isInteger(indice)) return;
+
+  materiaisSelecionadosManutencao.splice(indice, 1);
+  renderizarMateriaisManutencao();
+});
 
 tipoAtendimentoEntrega.addEventListener("change", () => {
   atualizarAvisoObservacao();
