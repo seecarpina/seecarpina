@@ -1113,6 +1113,8 @@ function preencherDrawerSolicitacao(solicitacao) {
 
     ${renderizarInformacoesEntrega(solicitacao)}
 
+    ${renderizarMateriaisUtilizadosManutencao(solicitacao)}
+
     <section class="secao-detalhe-central">
       <h3>Unidade solicitante</h3>
 
@@ -1462,6 +1464,25 @@ function gerarPDFPedidoSolicitacao(solicitacao) {
         );
       });
 
+      const materiaisUtilizados = obterListaPedido(
+        entrega.materiaisUtilizados,
+      );
+
+      if (materiaisUtilizados.length) {
+        adicionarCampo("Materiais utilizados na manutenção", " ");
+
+        materiaisUtilizados.forEach((item, indice) => {
+          adicionarParagrafo(
+            `${indice + 1}. ${item.nome || "Material"} — ` +
+              `${item.quantidade} ${formatarUnidadeRomaneio(
+                item.unidade || "Unidade",
+                item.quantidade,
+              )}`,
+            2,
+          );
+        });
+      }
+
       if (entrega.romaneioId) {
         adicionarCampo("Romaneio vinculado", entrega.romaneioId);
       }
@@ -1618,6 +1639,13 @@ function abrirDialogoAtualizacao() {
   blocoTipoAtendimento.hidden = true;
   tipoAtendimentoEntrega.required = false;
   ocultarQuantidadesMateriais();
+  materiaisSelecionadosManutencao = [];
+  materiaisEstoqueManutencao = [];
+  blocoMateriaisManutencao.hidden = true;
+  materialManutencao.innerHTML =
+    '<option value="">Carregando materiais...</option>';
+  quantidadeMaterialManutencao.value = "";
+  renderizarMateriaisManutencao();
   observacaoAtualizacao.value = "";
   contadorObservacaoAtualizacao.textContent = "0";
   avisoObservacaoObrigatoria.classList.remove("ativo");
@@ -1635,6 +1663,13 @@ function fecharDialogoAtualizacao() {
   blocoTipoAtendimento.hidden = true;
   tipoAtendimentoEntrega.required = false;
   ocultarQuantidadesMateriais();
+  materiaisSelecionadosManutencao = [];
+  materiaisEstoqueManutencao = [];
+  blocoMateriaisManutencao.hidden = true;
+  materialManutencao.innerHTML =
+    '<option value="">Selecione um material</option>';
+  quantidadeMaterialManutencao.value = "";
+  renderizarMateriaisManutencao();
   observacaoAtualizacao.value = "";
   contadorObservacaoAtualizacao.textContent = "0";
 
@@ -2279,6 +2314,7 @@ function atualizarCampoTipoAtendimento() {
   }
 
   renderizarQuantidadesMateriais();
+  atualizarBlocoMateriaisManutencao();
   atualizarAvisoObservacao();
 }
 
@@ -2313,6 +2349,7 @@ async function salvarAtualizacaoSolicitacao() {
 
   let dadosEntregaMateriais = null;
   let preparacaoRomaneio = null;
+  let preparacaoMateriaisManutencao = null;
 
   if (!novoStatus) {
     throw new Error("Selecione a nova situação.");
@@ -2336,6 +2373,11 @@ async function salvarAtualizacaoSolicitacao() {
       tipoAtendimento,
       observacao,
     });
+  }
+
+  if (ehManutencao && novoStatus === "AGUARDANDO_CONFIRMACAO") {
+    preparacaoMateriaisManutencao =
+      await prepararBaixaMateriaisManutencao(solicitacaoSelecionada);
   }
 
   const transicoesPermitidas = obterTransicoesPermitidas(
@@ -2405,6 +2447,8 @@ async function salvarAtualizacaoSolicitacao() {
           informadoPorNome: dadosUsuarioAtual.nome || "Usuário",
           observacao,
           romaneioId: preparacaoRomaneio?.romaneioId || null,
+          materiaisUtilizados:
+            preparacaoMateriaisManutencao?.itens || null,
 
           ...(dadosEntregaMateriais
             ? {
@@ -2441,6 +2485,19 @@ async function salvarAtualizacaoSolicitacao() {
               : "Entrega parcial informada. Aguardando confirmação da unidade escolar." +
                 (observacao ? ` Observação: ${observacao}` : "");
         }
+
+        if (preparacaoMateriaisManutencao?.itens.length) {
+          const resumoMateriais = preparacaoMateriaisManutencao.itens
+            .map(
+              (item) =>
+                `${item.nome}: ${item.quantidade} ${formatarUnidadeRomaneio(
+                  item.unidade,
+                  item.quantidade,
+                )}`,
+            )
+            .join(", ");
+          descricaoAtualizacao += ` Materiais utilizados: ${resumoMateriais}.`;
+        }
       } else {
         descricaoAtualizacao =
           `Situação alterada de ${statusAnteriorNome} para ${novoStatusNome}.` +
@@ -2474,6 +2531,8 @@ async function salvarAtualizacaoSolicitacao() {
 
         observacao,
         romaneioId: preparacaoRomaneio?.romaneioId || null,
+        materiaisUtilizados:
+          preparacaoMateriaisManutencao?.itens || null,
         responsavelUid: dadosUsuarioAtual.uid,
         responsavelNome: dadosUsuarioAtual.nome || "Usuário",
         criadoEm: agora,
@@ -2532,6 +2591,41 @@ async function salvarAtualizacaoSolicitacao() {
     }
   }
 
+  if (preparacaoMateriaisManutencao) {
+    try {
+      await update(ref(rtdb), preparacaoMateriaisManutencao.atualizacoes);
+    } catch (erroEstoque) {
+      console.error(
+        "Erro ao registrar materiais da manutenção:",
+        erroEstoque,
+      );
+
+      await runTransaction(solicitacaoRef, (solicitacaoAtual) => {
+        if (
+          !solicitacaoAtual ||
+          solicitacaoAtual.status !== novoStatus ||
+          !solicitacaoAtual.confirmacaoEntrega?.materiaisUtilizados
+        ) return;
+
+        solicitacaoAtual.status = statusAnterior;
+        solicitacaoAtual.atualizadoEm = Date.now();
+        solicitacaoAtual.atualizadoPorUid = dadosUsuarioAtual.uid;
+        solicitacaoAtual.atualizadoPorNome =
+          dadosUsuarioAtual.nome || "Usuário";
+        delete solicitacaoAtual.confirmacaoEntrega;
+        if (solicitacaoAtual.historico?.[historicoId]) {
+          delete solicitacaoAtual.historico[historicoId];
+        }
+        return solicitacaoAtual;
+      });
+
+      throw new Error(
+        erroEstoque.message ||
+          "Não foi possível baixar os materiais utilizados do estoque.",
+      );
+    }
+  }
+
   return {
     id: solicitacaoId,
     ...resultado.snapshot.val(),
@@ -2549,6 +2643,22 @@ btnCancelarAtualizacao.addEventListener("click", fecharDialogoAtualizacao);
 overlayAtualizacao.addEventListener("click", fecharDialogoAtualizacao);
 
 novoStatusSolicitacao.addEventListener("change", atualizarCampoTipoAtendimento);
+
+btnAdicionarMaterialManutencao?.addEventListener(
+  "click",
+  adicionarMaterialManutencao,
+);
+
+listaMateriaisManutencao?.addEventListener("click", (event) => {
+  const botao = event.target.closest(".btn-remover-material-manutencao");
+  if (!botao) return;
+
+  const indice = Number(botao.dataset.indice);
+  if (!Number.isInteger(indice)) return;
+
+  materiaisSelecionadosManutencao.splice(indice, 1);
+  renderizarMateriaisManutencao();
+});
 
 tipoAtendimentoEntrega.addEventListener("change", () => {
   atualizarAvisoObservacao();
