@@ -87,6 +87,8 @@ const btnAtualizarSolicitacao = document.getElementById(
   "btnAtualizarSolicitacao",
 );
 
+const btnImprimirPedido = document.getElementById("btnImprimirPedido");
+
 const iconeSolicitacaoDrawer = document.getElementById(
   "iconeSolicitacaoDrawer",
 );
@@ -1190,6 +1192,316 @@ function preencherDrawerSolicitacao(solicitacao) {
   btnAtualizarSolicitacao.style.display = possuiTransicoes ? "flex" : "none";
 }
 
+
+function obterListaPedido(valor) {
+  if (Array.isArray(valor)) return valor.filter(Boolean);
+  return valor && typeof valor === "object" ? Object.values(valor) : [];
+}
+
+function formatarDataPedido(valor, incluirHora = false) {
+  if (!valor) return "-";
+
+  const data = new Date(valor);
+
+  if (Number.isNaN(data.getTime())) return String(valor);
+
+  if (incluirHora) {
+    return data.toLocaleString("pt-BR", {
+      dateStyle: "short",
+      timeStyle: "short",
+    });
+  }
+
+  return data.toLocaleDateString("pt-BR");
+}
+
+function gerarPDFPedidoSolicitacao(solicitacao) {
+  if (!solicitacao) {
+    notificar("Solicitação não localizada.", "erro");
+    return;
+  }
+
+  if (!jsPDF) {
+    notificar("O gerador de PDF não foi carregado.", "erro");
+    return;
+  }
+
+  const documento = new jsPDF();
+  const imagem = new Image();
+  imagem.src = "./src/images/papel-timbrado.png";
+
+  imagem.onload = () => {
+    const larguraPagina = documento.internal.pageSize.getWidth();
+    const alturaPagina = documento.internal.pageSize.getHeight();
+    const margem = 20;
+    const larguraTexto = larguraPagina - margem * 2;
+    const limiteInferior = alturaPagina - 24;
+    let pagina = 1;
+    let y = 0;
+
+    function adicionarFundoPagina() {
+      documento.addImage(
+        imagem,
+        "PNG",
+        0,
+        0,
+        larguraPagina,
+        alturaPagina,
+      );
+
+      documento.setFont("helvetica", "normal");
+      documento.setFontSize(8);
+      documento.setTextColor(90);
+      documento.text(
+        `Página ${pagina}`,
+        larguraPagina - margem,
+        alturaPagina - 10,
+        { align: "right" },
+      );
+      documento.setTextColor(0);
+    }
+
+    function novaPagina() {
+      documento.addPage();
+      pagina++;
+      adicionarFundoPagina();
+
+      documento.setFont("helvetica", "bold");
+      documento.setFontSize(11);
+      documento.text("CONTINUAÇÃO DO PEDIDO", margem, 48);
+      y = 58;
+    }
+
+    function garantirEspaco(alturaNecessaria) {
+      if (y + alturaNecessaria > limiteInferior) novaPagina();
+    }
+
+    function adicionarTituloSecao(titulo) {
+      garantirEspaco(14);
+      y += 4;
+      documento.setFillColor(238, 242, 247);
+      documento.rect(margem, y - 5, larguraTexto, 10, "F");
+      documento.setFont("helvetica", "bold");
+      documento.setFontSize(10);
+      documento.text(titulo, margem + 4, y + 1.5);
+      y += 10;
+    }
+
+    function adicionarCampo(rotulo, valor) {
+      if (valor === null || valor === undefined || String(valor).trim() === "") {
+        return;
+      }
+
+      documento.setFontSize(10);
+      documento.setFont("helvetica", "bold");
+      const prefixo = `${rotulo}: `;
+      const larguraPrefixo = documento.getTextWidth(prefixo);
+      const linhas = documento.splitTextToSize(
+        String(valor),
+        larguraTexto - larguraPrefixo,
+      );
+
+      garantirEspaco(Math.max(7, linhas.length * 5.5));
+      documento.text(prefixo, margem, y);
+      documento.setFont("helvetica", "normal");
+      documento.text(linhas, margem + larguraPrefixo, y);
+      y += Math.max(7, linhas.length * 5.5);
+    }
+
+    function adicionarParagrafo(texto, recuo = 0) {
+      if (!texto) return;
+
+      documento.setFont("helvetica", "normal");
+      documento.setFontSize(10);
+      const linhas = documento.splitTextToSize(
+        String(texto),
+        larguraTexto - recuo,
+      );
+
+      garantirEspaco(linhas.length * 5.5 + 2);
+      documento.text(linhas, margem + recuo, y);
+      y += linhas.length * 5.5 + 2;
+    }
+
+    adicionarFundoPagina();
+
+    documento.setFont("helvetica", "bold");
+    documento.setFontSize(14);
+    documento.text("PEDIDO DA UNIDADE ESCOLAR", larguraPagina / 2, 48, {
+      align: "center",
+    });
+
+    documento.setFontSize(11);
+    documento.text(
+      `PROTOCOLO: ${solicitacao.protocolo || "-"}`,
+      larguraPagina / 2,
+      57,
+      { align: "center" },
+    );
+
+    y = 70;
+
+    adicionarTituloSecao("IDENTIFICAÇÃO");
+    adicionarCampo("Escola", solicitacao.escolaNome || "-");
+    adicionarCampo("Solicitante", solicitacao.solicitanteNome || "-");
+    adicionarCampo("E-mail", solicitacao.solicitanteEmail || "");
+    adicionarCampo("Data do pedido", formatarDataPedido(solicitacao.criadoEm, true));
+    adicionarCampo("Módulo", obterDadosModulo(solicitacao.modulo).nome);
+    adicionarCampo("Situação", obterDadosStatus(solicitacao.status).nome);
+    adicionarCampo("Prioridade", solicitacao.prioridade || "");
+    adicionarCampo(
+      "Data da necessidade",
+      solicitacao.dataNecessidade
+        ? formatarDataPedido(solicitacao.dataNecessidade)
+        : "",
+    );
+
+    adicionarTituloSecao("DADOS DO PEDIDO");
+
+    const itens = obterListaPedido(solicitacao.itens);
+
+    if (itens.length) {
+      itens.forEach((item, indice) => {
+        const quantidade = Number(
+          item.quantidadeSolicitada ?? item.quantidade ?? 0,
+        );
+
+        adicionarParagrafo(
+          `${indice + 1}. ${item.nome || item.tipoNome || "Item"} — ` +
+            `${quantidade} ${item.unidade || "Unidade"}`,
+          2,
+        );
+      });
+
+      const quantidadeTotal = itens.reduce(
+        (total, item) =>
+          total +
+          Number(item.quantidadeSolicitada ?? item.quantidade ?? 0),
+        0,
+      );
+
+      adicionarCampo("Quantidade total solicitada", quantidadeTotal);
+    } else {
+      adicionarCampo(
+        "Tipo",
+        solicitacao.tipoNome || solicitacao.tipo || solicitacao.categoria || "",
+      );
+      adicionarCampo(
+        "Quantidade",
+        solicitacao.quantidade
+          ? `${solicitacao.quantidade} ${solicitacao.unidade || ""}`
+          : "",
+      );
+    }
+
+    adicionarCampo("Categoria", solicitacao.categoria || "");
+    adicionarCampo("Ambiente", solicitacao.ambiente || "");
+    adicionarCampo(
+      "Descrição do problema",
+      solicitacao.descricaoProblema || "",
+    );
+    adicionarCampo("Justificativa", solicitacao.justificativa || "");
+    adicionarCampo("Observações", solicitacao.observacoes || "");
+
+    const entrega = solicitacao.confirmacaoEntrega;
+
+    if (entrega?.tipoAtendimento) {
+      adicionarTituloSecao("ATENDIMENTO / ENTREGA");
+      adicionarCampo(
+        "Resultado",
+        entrega.tipoAtendimento === "TOTAL"
+          ? "Entrega total"
+          : "Entrega parcial",
+      );
+      adicionarCampo("Informado por", entrega.informadoPorNome || "");
+      adicionarCampo(
+        "Data",
+        formatarDataPedido(entrega.informadoEm, true),
+      );
+      adicionarCampo("Observação", entrega.observacao || "");
+      adicionarCampo(
+        "Confirmação da escola",
+        entrega.pendente === false
+          ? `Confirmada por ${entrega.confirmadoPorNome || "gestor"} em ${formatarDataPedido(entrega.confirmadoEm, true)}`
+          : "Pendente",
+      );
+
+      const itensEntregues = obterListaPedido(entrega.itensEntregues).filter(
+        (item) => Number(item.quantidadeEntregue || 0) > 0,
+      );
+
+      itensEntregues.forEach((item, indice) => {
+        adicionarParagrafo(
+          `${indice + 1}. ${item.nome || "Material"} — entregue: ` +
+            `${item.quantidadeEntregue} de ${item.quantidadeSolicitada} ${item.unidade || "Unidade"}`,
+          2,
+        );
+      });
+
+      if (entrega.romaneioId) {
+        adicionarCampo("Romaneio vinculado", entrega.romaneioId);
+      }
+    }
+
+    const historico = obterListaPedido(solicitacao.historico).sort(
+      (a, b) => Number(a.criadoEm || 0) - Number(b.criadoEm || 0),
+    );
+
+    if (historico.length) {
+      adicionarTituloSecao("HISTÓRICO");
+
+      historico.forEach((registro) => {
+        const data = formatarDataPedido(registro.criadoEm, true);
+        const responsavel =
+          registro.responsavelNome || registro.usuarioNome || "Usuário";
+        const descricao =
+          registro.descricao ||
+          `Situação: ${obterDadosStatus(registro.status).nome}`;
+
+        adicionarParagrafo(
+          `${data} — ${responsavel}: ${descricao}`,
+          2,
+        );
+      });
+    }
+
+    garantirEspaco(45);
+    y += 25;
+    documento.line(margem + 15, y, margem + 80, y);
+    documento.line(
+      larguraPagina - margem - 80,
+      y,
+      larguraPagina - margem - 15,
+      y,
+    );
+
+    documento.setFont("helvetica", "normal");
+    documento.setFontSize(9);
+    documento.text("Responsável pela solicitação", margem + 47.5, y + 6, {
+      align: "center",
+    });
+    documento.text(
+      "Responsável pelo atendimento",
+      larguraPagina - margem - 47.5,
+      y + 6,
+      { align: "center" },
+    );
+
+    const protocoloArquivo = String(solicitacao.protocolo || "pedido")
+      .replace(/[^\w-]+/g, "-");
+
+    window.abrirOuBaixarPDF(
+      documento,
+      `Pedido - ${protocoloArquivo}.pdf`,
+    );
+  };
+
+  imagem.onerror = () => {
+    console.error("Não foi possível carregar o papel timbrado.");
+    notificar("Não foi possível gerar o PDF do pedido.", "erro");
+  };
+}
+
 function abrirDrawerSolicitacao(solicitacaoId) {
   const solicitacao = solicitacoes.find((item) => item.id === solicitacaoId);
 
@@ -1968,6 +2280,10 @@ async function salvarAtualizacaoSolicitacao() {
     ...resultado.snapshot.val(),
   };
 }
+
+btnImprimirPedido?.addEventListener("click", () => {
+  gerarPDFPedidoSolicitacao(solicitacaoSelecionada);
+});
 
 btnAtualizarSolicitacao.addEventListener("click", abrirDialogoAtualizacao);
 
