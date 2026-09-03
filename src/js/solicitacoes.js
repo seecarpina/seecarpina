@@ -1201,6 +1201,11 @@ function obterListaPedido(valor) {
 function formatarDataPedido(valor, incluirHora = false) {
   if (!valor) return "-";
 
+  if (!incluirHora && /^\d{4}-\d{2}-\d{2}$/.test(String(valor))) {
+    const [ano, mes, dia] = String(valor).split("-");
+    return `${dia}/${mes}/${ano}`;
+  }
+
   const data = new Date(valor);
 
   if (Number.isNaN(data.getTime())) return String(valor);
@@ -1346,7 +1351,7 @@ function gerarPDFPedidoSolicitacao(solicitacao) {
     adicionarCampo("Solicitante", solicitacao.solicitanteNome || "-");
     adicionarCampo("E-mail", solicitacao.solicitanteEmail || "");
     adicionarCampo("Data do pedido", formatarDataPedido(solicitacao.criadoEm, true));
-    adicionarCampo("Módulo", obterDadosModulo(solicitacao.modulo).nome);
+    adicionarCampo("Módulo", obterNomeModulo(solicitacao.modulo));
     adicionarCampo("Situação", obterDadosStatus(solicitacao.status).nome);
     adicionarCampo("Prioridade", solicitacao.prioridade || "");
     adicionarCampo(
