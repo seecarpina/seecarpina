@@ -278,6 +278,44 @@
           ></div>
         </div>
 
+        <div
+          id="blocoMateriaisManutencao"
+          class="bloco-materiais-manutencao"
+          hidden
+        >
+          <div class="cabecalho-quantidades-materiais">
+            <div>
+              <strong>Materiais utilizados</strong>
+              <p>Opcional. Adicione os itens utilizados no serviço.</p>
+            </div>
+            <span id="resumoMateriaisManutencao">0 materiais</span>
+          </div>
+
+          <div class="adicionar-material-manutencao">
+            <select id="materialManutencao">
+              <option value="">Selecione um material do estoque</option>
+            </select>
+
+            <input
+              type="number"
+              id="quantidadeMaterialManutencao"
+              min="1"
+              step="1"
+              placeholder="Quantidade"
+            />
+
+            <button type="button" id="btnAdicionarMaterialManutencao">
+              <span class="material-symbols-outlined"> add </span>
+              Adicionar
+            </button>
+          </div>
+
+          <div
+            id="listaMateriaisManutencao"
+            class="lista-materiais-manutencao"
+          ></div>
+        </div>
+
         <div class="campo-atualizacao">
           <label for="observacaoAtualizacao">
             Observação da atualização
