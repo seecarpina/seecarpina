@@ -783,6 +783,11 @@ function renderHistoricoTransferencias() {
                 <strong>Protocolo:</strong>
                 ${escaparHtmlServidor(movimentacao.protocolo || "-")}
               </span>
+
+              <span>
+                <strong>Horário:</strong>
+                ${escaparHtmlServidor(movimentacao.horario || "-")}
+              </span>
             </div>
 
             ${
@@ -864,6 +869,7 @@ listaHistoricoTransferencias?.addEventListener("click", (event) => {
     vinculo: movimentacao.servidorVinculo || servidorAtual?.vinculo || "",
 
     novoLocal: movimentacao.para || "",
+    horario: movimentacao.horario || "",
     dataTransferencia: movimentacao.data || "",
     protocolo: movimentacao.protocolo || "",
     observacao: movimentacao.observacao || "",
@@ -2209,6 +2215,10 @@ const boxNovoLocal = document.getElementById("autocompleteNovoLocal");
 
 let novoLocalIdSelecionado = null;
 
+const inputHorarioTransferencia = document.getElementById(
+  "horarioTransferencia",
+);
+
 const inputDataTransferencia = document.getElementById("dataTransferencia");
 
 const inputObsTransferencia = document.getElementById("obsTransferencia");
@@ -2235,12 +2245,9 @@ function mostrarSugestoesNovoLocal() {
     return;
   }
 
-  const filtrados = locais.filter((local) => {
-    const mesmoLocalAtual =
-      String(local.id) === String(servidorSelecionado?.localExercicioId || "");
-
-    return !mesmoLocalAtual && normalizarTextoLocal(local.nome).includes(texto);
-  });
+  const filtrados = locais.filter((local) =>
+    normalizarTextoLocal(local.nome).includes(texto),
+  );
 
   filtrados.forEach((local) => {
     const li = document.createElement("li");
@@ -2282,6 +2289,7 @@ function abrirTransferencia(servidor) {
   boxNovoLocal.innerHTML = "";
   boxNovoLocal.style.display = "none";
 
+  inputHorarioTransferencia.value = servidor.horario || "";
   inputDataTransferencia.value = new Date().toLocaleDateString("sv-SE");
 
   inputObsTransferencia.value = "";
@@ -2309,6 +2317,7 @@ function fecharDrawerTransferencia() {
   boxNovoLocal.style.display = "none";
 
   novoLocalIdSelecionado = null;
+  inputHorarioTransferencia.value = "";
   inputDataTransferencia.value = "";
   inputObsTransferencia.value = "";
 
@@ -2341,6 +2350,8 @@ async function transferirServidor() {
 
   const novoLocalId = novoLocalIdSelecionado;
 
+  const horario = inputHorarioTransferencia.value;
+
   const dataTransferencia = inputDataTransferencia.value;
 
   const observacao = inputObsTransferencia.value.trim();
@@ -2361,21 +2372,18 @@ async function transferirServidor() {
     return;
   }
 
-  if (!dataTransferencia) {
-    mostrarNotificacao("Informe a data da transferência.", "erro");
+  if (!horario) {
+    mostrarNotificacao("Selecione o horário.", "erro");
 
-    inputDataTransferencia.focus();
+    inputHorarioTransferencia.focus();
 
     return;
   }
 
-  if (
-    String(novoLocalId) === String(servidorSelecionado.localExercicioId || "")
-  ) {
-    mostrarNotificacao(
-      "Selecione um local diferente da lotação atual.",
-      "erro",
-    );
+  if (!dataTransferencia) {
+    mostrarNotificacao("Informe a data da transferência.", "erro");
+
+    inputDataTransferencia.focus();
 
     return;
   }
@@ -2395,6 +2403,7 @@ async function transferirServidor() {
   // 🔄 Atualiza o local do servidor
   await update(servidorRef, {
     localExercicioId: novoLocalId,
+    horario,
   });
 
   // 📜 Histórico (opcional, mas recomendado)
@@ -2417,6 +2426,8 @@ async function transferirServidor() {
 
     de: obterLocalServidor(servidorSelecionado),
     para: novoLocal,
+    horarioAnterior: servidorSelecionado.horario || "",
+    horario,
 
     data: dataTransferencia,
     observacao,
@@ -2433,6 +2444,7 @@ async function transferirServidor() {
     cargo: servidorSelecionado.cargo || "",
     vinculo: servidorSelecionado.vinculo || "",
     novoLocal,
+    horario,
     dataTransferencia,
     protocolo,
     observacao,
@@ -2442,6 +2454,7 @@ async function transferirServidor() {
 
   // Atualiza visualmente
   servidorSelecionado.localExercicioId = novoLocalId;
+  servidorSelecionado.horario = horario;
 
   fecharDrawerTransferencia();
 
@@ -3056,7 +3069,19 @@ function gerarPDFTransferencia(dados) {
 
       y += 8;
       doc.text("HORÁRIO:", xInicial + 5, y);
-      doc.text("[  ] Manhã    [  ] Tarde    [  ] Noite", xInicial + 40, y);
+
+      const horarioSelecionado = String(dados.horario || "").toUpperCase();
+      const marcarHorario = (valor) =>
+        horarioSelecionado === valor ? "[X]" : "[  ]";
+
+      doc.text(
+        `${marcarHorario("MANHÃ")} Manhã    ` +
+          `${marcarHorario("TARDE")} Tarde    ` +
+          `${marcarHorario("NOITE")} Noite    ` +
+          `${marcarHorario("INTEGRAL")} Integral`,
+        xInicial + 40,
+        y,
+      );
 
       y += 8;
       doc.text("OBS.:", xInicial + 5, y);
