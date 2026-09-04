@@ -22,6 +22,8 @@ const POR_PAGINA = 25;
 let anoSelecionado = ANO_ATUAL;
 let nomeResponsavel = "Usuário";
 let todosCirculares = [];
+let destinosDisponiveis = [];
+let destinosSelecionados = [];
 let paginaAtual = 1;
 let editando = false;
 let chaveEdicao = null;
@@ -41,6 +43,12 @@ const filtroAno = document.getElementById("filtroAnoCircular");
 const inputBusca = document.getElementById("buscaCircular");
 const paginacao = document.getElementById("paginacaoCircular");
 const btnExportar = document.getElementById("btnExportarCircular");
+const inputDestino = document.getElementById("destinoCircular");
+const boxDestino = document.getElementById("autocompleteDestinoCircular");
+const listaDestinosSelecionados = document.getElementById(
+  "destinosSelecionadosCircular",
+);
+const destinosRef = ref(rtdb, "destinos");
 
 function notificar(mensagem, tipo = "sucesso") {
   if (typeof window.mostrarNotificacao === "function") {
@@ -75,6 +83,114 @@ function getCircularesRef(ano = anoSelecionado) {
   return ref(rtdb, `oficiosCirculares/${ano}`);
 }
 
+function obterLista(valor) {
+  if (Array.isArray(valor)) return valor.filter(Boolean);
+  return valor && typeof valor === "object" ? Object.values(valor) : [];
+}
+
+function obterDestinosCircular(circular) {
+  const salvos = obterLista(circular?.destinos);
+  if (salvos.length) return salvos;
+
+  return obterLista(circular?.destinoIds)
+    .map((id) => destinosDisponiveis.find((destino) => destino.id === id))
+    .filter(Boolean);
+}
+
+function renderizarDestinosSelecionados() {
+  if (!destinosSelecionados.length) {
+    listaDestinosSelecionados.innerHTML =
+      '<span class="nenhum-destino-circular">Nenhum destino selecionado.</span>';
+    return;
+  }
+
+  listaDestinosSelecionados.innerHTML = destinosSelecionados
+    .map(
+      (destino) => `
+        <span class="destino-selecionado-circular">
+          ${escaparHtml(destino.nome)}
+          <button
+            type="button"
+            data-destino-id="${escaparHtml(destino.id)}"
+            title="Remover destino"
+            aria-label="Remover ${escaparHtml(destino.nome)}"
+          >
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </span>
+      `,
+    )
+    .join("");
+}
+
+function mostrarSugestoesDestinos() {
+  const termo = normalizarTexto(inputDestino.value);
+  boxDestino.innerHTML = "";
+
+  if (!termo) {
+    boxDestino.style.display = "none";
+    return;
+  }
+
+  const idsSelecionados = new Set(destinosSelecionados.map((item) => item.id));
+  const filtrados = destinosDisponiveis.filter(
+    (destino) =>
+      !idsSelecionados.has(destino.id) &&
+      normalizarTexto(destino.nome).includes(termo),
+  );
+
+  filtrados.forEach((destino) => {
+    const item = document.createElement("li");
+    item.textContent = destino.nome;
+    item.addEventListener("click", () => {
+      destinosSelecionados.push(destino);
+      inputDestino.value = "";
+      boxDestino.style.display = "none";
+      renderizarDestinosSelecionados();
+      inputDestino.focus();
+    });
+    boxDestino.appendChild(item);
+  });
+
+  boxDestino.style.display = filtrados.length ? "block" : "none";
+}
+
+inputDestino?.addEventListener("input", mostrarSugestoesDestinos);
+
+listaDestinosSelecionados?.addEventListener("click", (event) => {
+  const botao = event.target.closest("button[data-destino-id]");
+  if (!botao) return;
+
+  destinosSelecionados = destinosSelecionados.filter(
+    (destino) => destino.id !== botao.dataset.destinoId,
+  );
+  renderizarDestinosSelecionados();
+});
+
+document.addEventListener("click", (event) => {
+  const autocomplete = inputDestino?.closest(".autocomplete");
+  if (autocomplete && !autocomplete.contains(event.target)) {
+    boxDestino.style.display = "none";
+  }
+});
+
+onValue(destinosRef, (snapshot) => {
+  destinosDisponiveis = snapshot.exists()
+    ? Object.entries(snapshot.val())
+        .map(([id, valor]) => ({
+          id,
+          nome:
+            typeof valor === "string"
+              ? valor
+              : String(valor?.nome || "").trim(),
+        }))
+        .filter((destino) => destino.nome)
+        .sort((a, b) =>
+          a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" }),
+        )
+    : [];
+});
+
 function podeAlterar(circular) {
   return (
     !circular.responsavel ||
@@ -88,7 +204,9 @@ function obterFiltrados() {
 
   return todosCirculares.filter((circular) => {
     const texto = normalizarTexto(
-      `${circular.numero || ""} ${formatarNumero(circular.numero)} ${circular.assunto || ""}`,
+      `${circular.numero || ""} ${formatarNumero(circular.numero)} ${circular.assunto || ""} ${obterDestinosCircular(circular)
+        .map((destino) => destino.nome)
+        .join(" ")}`,
     );
 
     return texto.includes(termo);
@@ -157,7 +275,7 @@ function renderTabela() {
   if (!registros.length) {
     tabela.innerHTML = `
       <tr>
-        <td colspan="3" style="text-align:center;">
+        <td colspan="4" style="text-align:center;">
           Nenhum Ofício Circular encontrado.
         </td>
       </tr>
@@ -174,6 +292,17 @@ function renderTabela() {
 
           <td class="assunto">
             ${escaparHtml(circular.assunto || "-")}
+          </td>
+
+          <td>
+            <div class="destinos-tabela-circular">
+              ${obterDestinosCircular(circular)
+                .map(
+                  (destino) =>
+                    `<span>${escaparHtml(destino.nome || "-")}</span>`,
+                )
+                .join("") || "-"}
+            </div>
           </td>
 
           <td>
@@ -215,6 +344,8 @@ function resetarEdicao() {
   editando = false;
   chaveEdicao = null;
   formCircular.reset();
+  destinosSelecionados = [];
+  renderizarDestinosSelecionados();
   btnCadastrar.style.display = "inline-flex";
   botoesEdicao.style.display = "none";
   msgEdicao.style.display = "none";
@@ -230,6 +361,14 @@ async function cadastrarCircular() {
     inputAssunto.focus();
     return;
   }
+
+  if (!destinosSelecionados.length) {
+    notificar("Selecione pelo menos um destino.", "erro");
+    inputDestino.focus();
+    return;
+  }
+
+  const destinos = destinosSelecionados.map(({ id, nome }) => ({ id, nome }));
 
   const registroRef = push(getCircularesRef(ANO_ATUAL));
   const chave = registroRef.key;
@@ -254,6 +393,8 @@ async function cadastrarCircular() {
     dados[chave] = {
       numero: numeroGerado,
       assunto,
+      destinos,
+      destinoIds: destinos.map((destino) => destino.id),
       responsavel: nomeResponsavel,
       criadoEm: agora,
       atualizadoEm: agora,
@@ -268,6 +409,8 @@ async function cadastrarCircular() {
 
   notificar(`Ofício Circular nº ${formatarNumero(numeroGerado, ANO_ATUAL)} cadastrado com sucesso!`);
   formCircular.reset();
+  destinosSelecionados = [];
+  renderizarDestinosSelecionados();
   inputAssunto.focus();
 }
 
@@ -306,6 +449,10 @@ function iniciarEdicao(circular) {
   editando = true;
   chaveEdicao = circular._key;
   inputAssunto.value = circular.assunto || "";
+  destinosSelecionados = obterDestinosCircular(circular).map(
+    ({ id, nome }) => ({ id, nome }),
+  );
+  renderizarDestinosSelecionados();
   btnCadastrar.style.display = "none";
   botoesEdicao.style.display = "flex";
 
@@ -334,11 +481,21 @@ btnSalvarEdicao?.addEventListener("click", async () => {
     return;
   }
 
+  if (!destinosSelecionados.length) {
+    notificar("Selecione pelo menos um destino.", "erro");
+    inputDestino.focus();
+    return;
+  }
+
+  const destinos = destinosSelecionados.map(({ id, nome }) => ({ id, nome }));
+
   btnSalvarEdicao.disabled = true;
 
   try {
     await update(ref(rtdb, `oficiosCirculares/${anoSelecionado}/${chaveEdicao}`), {
       assunto,
+      destinos,
+      destinoIds: destinos.map((destino) => destino.id),
       atualizadoEm: new Date().toISOString(),
       atualizadoPor: nomeResponsavel,
     });
@@ -411,7 +568,7 @@ function carregarCirculares() {
 
   tabela.innerHTML = `
     <tr>
-      <td colspan="3" style="text-align:center;">
+      <td colspan="4" style="text-align:center;">
         Carregando...
       </td>
     </tr>
@@ -433,7 +590,7 @@ function carregarCirculares() {
       console.error("Erro ao carregar Ofícios Circulares:", erro);
       tabela.innerHTML = `
         <tr>
-          <td colspan="3" style="text-align:center;">
+          <td colspan="4" style="text-align:center;">
             Não foi possível carregar os Ofícios Circulares.
           </td>
         </tr>
@@ -497,6 +654,9 @@ btnExportar?.addEventListener("click", () => {
   const dados = registros.map((circular) => ({
     Número: formatarNumero(circular.numero),
     Assunto: circular.assunto || "",
+    Destinos: obterDestinosCircular(circular)
+      .map((destino) => destino.nome)
+      .join("; "),
   }));
 
   const planilha = window.XLSX.utils.json_to_sheet(dados);
@@ -535,4 +695,5 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 botoesEdicao.style.display = "none";
+renderizarDestinosSelecionados();
 carregarAnos();
