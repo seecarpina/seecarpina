@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Controle de DFD - SEE Carpina</title>
+    <link rel="stylesheet" href="./src/css/style.css" />
+    <link rel="stylesheet" href="./src/css/oficios.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+  </head>
+
+  <body>
+    <button id="btnTopo">↑</button>
+
+    <div class="loading">
+      <svg class="svg-spinner" viewBox="0 0 50 50" role="img" aria-label="Carregando">
+        <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="4" />
+      </svg>
+    </div>
+
+    <div class="container">
+      <aside id="sidebar"></aside>
+
+      <main>
+        <h1>Controle de DFD</h1>
+
+        <div class="oficios-grid">
+          <section class="box glass">
+            <div class="info-card">
+              <span class="material-symbols-outlined">contract_edit</span>
+
+              <div>
+                <strong>Controle de DFD</strong><br />
+                Cadastre, consulte e acompanhe a numeração dos Documentos de
+                Formalização da Demanda.
+              </div>
+            </div>
+          </section>
+
+          <section class="box glass">
+            <form id="formDfd" class="oficios-form">
+              <div class="campo-assunto">
+                <label for="assuntoDfd">Assunto</label>
+
+                <input
+                  type="text"
+                  id="assuntoDfd"
+                  required
+                  maxlength="500"
+                  placeholder="Digite o assunto do DFD"
+                  autocomplete="off"
+                />
+              </div>
+
+              <div class="campos-oficio">
+                <div id="botoesCadastro" class="campo-botao-oficio">
+                  <label class="label-invisivel">Ação</label>
+
+                  <button class="btn" id="btnCadastrarDfd" type="submit">
+                    <span class="material-symbols-outlined">add_circle</span>
+                    Cadastrar
+                  </button>
+
+                  <div id="botoesEdicao">
+                    <button type="button" class="btn" id="btnSalvarEdicaoDfd">
+                      <span class="material-symbols-outlined">save</span>
+                      Salvar edição
+                    </button>
+
+                    <button
+                      type="button"
+                      class="btn btn-cancelar"
+                      id="btnCancelarEdicaoDfd"
+                    >
+                      <span class="material-symbols-outlined">close</span>
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <p id="msgEdicao"></p>
+            </form>
+          </section>
+
+          <section class="box glass">
+            <div class="oficios-cabecalho">
+              <div>
+                <h2>DFDs cadastrados</h2>
+                <span id="contadorDfds" class="oficios-contador"></span>
+              </div>
+
+              <button id="btnExportarDfd" class="btn-excel" type="button">
+                <span class="material-symbols-outlined">table_view</span>
+                Exportar para Excel
+              </button>
+            </div>
+
+            <div class="oficios-filtros box glass">
+              <div class="filtro-ano">
+                <label for="filtroAnoDfd">Ano</label>
+                <select id="filtroAnoDfd"></select>
+              </div>
+
+              <div class="filtro-busca">
+                <label for="buscaDfd">Buscar</label>
+
+                <div class="campo-busca-oficios">
+                  <span class="material-symbols-outlined">search</span>
+
+                  <input
+                    type="search"
+                    id="buscaDfd"
+                    placeholder="Número ou assunto"
+                    autocomplete="off"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="table-wrapper tabela-oficios-wrapper">
+              <table id="tabelaDfds">
+                <thead>
+                  <tr>
+                    <th>Número</th>
+                    <th>Assunto</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+
+                <tbody></tbody>
+              </table>
+            </div>
+
+            <div class="paginacao" id="paginacaoDfd"></div>
+          </section>
+        </div>
+      </main>
+
+      <div class="right"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script type="module" src="./src/js/scripts.js"></script>
+    <script type="module" src="./src/js/dfd.js"></script>
+  </body>
+</html>
