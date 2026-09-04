@@ -1,0 +1,97 @@
+.oficios-filtros {
+  grid-template-columns: minmax(120px, 0.25fr) minmax(260px, 1fr);
+}
+
+#tabelaDfds {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--clr-white);
+}
+
+#tabelaDfds thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+#tabelaDfds thead th {
+  background: var(--clr-primary);
+  color: var(--clr-white);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+}
+
+#tabelaDfds th,
+#tabelaDfds td {
+  padding: 0.8rem 0.75rem;
+  vertical-align: middle;
+}
+
+#tabelaDfds tbody tr {
+  transition: background 0.2s ease;
+}
+
+#tabelaDfds tbody tr:nth-child(even) {
+  background: var(--clr-light);
+}
+
+#tabelaDfds tbody tr:hover {
+  background: rgba(115, 128, 236, 0.12);
+}
+
+#tabelaDfds td:first-child {
+  width: 150px;
+  color: var(--clr-primary);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+#tabelaDfds td:nth-child(2) {
+  min-width: 320px;
+}
+
+#tabelaDfds th:last-child,
+#tabelaDfds td:last-child {
+  width: 130px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+#tabelaDfds .edit-btn,
+#tabelaDfds .cancel-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+#tabelaDfds .edit-btn:hover,
+#tabelaDfds .cancel-btn:hover {
+  background: var(--clr-light);
+}
+
+#tabelaDfds .edit-btn {
+  color: var(--clr-primary);
+}
+
+#tabelaDfds .cancel-btn {
+  color: crimson;
+}
+
+@media (max-width: 650px) {
+  .oficios-filtros {
+    grid-template-columns: 1fr;
+  }
+
+  .filtro-busca {
+    grid-column: auto;
+  }
+}
