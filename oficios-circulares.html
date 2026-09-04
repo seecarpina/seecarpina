@@ -55,7 +55,32 @@
                 />
               </div>
 
-              <div class="campos-oficio">
+              <div class="campos-oficio campos-circular">
+                <div class="autocomplete campo-destinos-circular">
+                  <label for="destinoCircular">Destinos</label>
+
+                  <input
+                    type="search"
+                    id="destinoCircular"
+                    placeholder="Digite para buscar e adicionar destinos"
+                    autocomplete="off"
+                  />
+
+                  <ul
+                    id="autocompleteDestinoCircular"
+                    class="autocomplete-list"
+                  ></ul>
+
+                  <div
+                    id="destinosSelecionadosCircular"
+                    class="destinos-selecionados-circular"
+                  ></div>
+
+                  <small class="ajuda-destinos-circular">
+                    Selecione um ou mais destinos.
+                  </small>
+                </div>
+
                 <div id="botoesCadastro" class="campo-botao-oficio">
                   <label class="label-invisivel">Ação</label>
 
@@ -127,6 +152,7 @@
                   <tr>
                     <th>Número</th>
                     <th>Assunto</th>
+                    <th>Destinos</th>
                     <th>Ações</th>
                   </tr>
                 </thead>
