@@ -16,15 +16,14 @@ import {
   update,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-const ANO_ATUAL = String(new Date().getFullYear());
 const POR_PAGINA = 25;
 
-let anoSelecionado = ANO_ATUAL;
 let nomeResponsavel = "Usuário";
 let todosDfds = [];
 let paginaAtual = 1;
 let editando = false;
 let chaveEdicao = null;
+let caminhoEdicao = null;
 let salvando = false;
 let pararEscuta = null;
 
@@ -37,7 +36,6 @@ const btnCancelarEdicao = document.getElementById("btnCancelarEdicaoDfd");
 const msgEdicao = document.getElementById("msgEdicao");
 const tabela = document.querySelector("#tabelaDfds tbody");
 const contador = document.getElementById("contadorDfds");
-const filtroAno = document.getElementById("filtroAnoDfd");
 const inputBusca = document.getElementById("buscaDfd");
 const paginacao = document.getElementById("paginacaoDfd");
 const btnExportar = document.getElementById("btnExportarDfd");
@@ -65,14 +63,49 @@ function escaparHtml(texto) {
   return elemento.innerHTML;
 }
 
-function formatarNumero(numero, ano = anoSelecionado) {
+function formatarNumero(numero) {
   const valor = Number(numero);
   if (!Number.isFinite(valor) || valor <= 0) return "-";
-  return `${String(valor).padStart(3, "0")}/${ano}`;
+  return String(valor).padStart(3, "0");
 }
 
-function getDfdsRef(ano = anoSelecionado) {
-  return ref(rtdb, `dfds/${ano}`);
+function getDfdsRef() {
+  return ref(rtdb, "dfds");
+}
+
+function extrairRegistrosDfd(dadosRaiz) {
+  if (!dadosRaiz || typeof dadosRaiz !== "object") return [];
+
+  const registros = [];
+
+  if (dadosRaiz.registros && typeof dadosRaiz.registros === "object") {
+    Object.entries(dadosRaiz.registros).forEach(([key, dados]) => {
+      if (!dados || typeof dados !== "object") return;
+      registros.push({
+        _key: key,
+        _path: `dfds/registros/${key}`,
+        ...dados,
+      });
+    });
+  }
+
+  Object.entries(dadosRaiz).forEach(([ano, dadosAno]) => {
+    if (!/^\d{4}$/.test(ano) || !dadosAno || typeof dadosAno !== "object") {
+      return;
+    }
+
+    Object.entries(dadosAno).forEach(([key, dados]) => {
+      if (!dados || typeof dados !== "object") return;
+      registros.push({
+        _key: key,
+        _path: `dfds/${ano}/${key}`,
+        _anoLegado: ano,
+        ...dados,
+      });
+    });
+  });
+
+  return registros;
 }
 
 function podeAlterar(dfd) {
@@ -214,6 +247,7 @@ function renderTabela() {
 function resetarEdicao() {
   editando = false;
   chaveEdicao = null;
+  caminhoEdicao = null;
   formDfd.reset();
   btnCadastrar.style.display = "inline-flex";
   botoesEdicao.style.display = "none";
@@ -231,7 +265,7 @@ async function cadastrarDfd() {
     return;
   }
 
-  const registroRef = push(getDfdsRef(ANO_ATUAL));
+  const registroRef = push(ref(rtdb, "dfds/registros"));
   const chave = registroRef.key;
 
   if (!chave) {
@@ -241,17 +275,22 @@ async function cadastrarDfd() {
   let numeroGerado = 0;
   const agora = new Date().toISOString();
 
-  const resultado = await runTransaction(getDfdsRef(ANO_ATUAL), (dadosAtuais) => {
+  const resultado = await runTransaction(getDfdsRef(), (dadosAtuais) => {
     const dados = dadosAtuais || {};
+    const registrosExistentes = extrairRegistrosDfd(dados);
 
-    const maiorNumero = Object.values(dados).reduce((maior, item) => {
+    const maiorNumero = registrosExistentes.reduce((maior, item) => {
       const numero = Number(item?.numero || 0);
       return numero > maior ? numero : maior;
     }, 0);
 
     numeroGerado = maiorNumero + 1;
 
-    dados[chave] = {
+    if (!dados.registros || typeof dados.registros !== "object") {
+      dados.registros = {};
+    }
+
+    dados.registros[chave] = {
       numero: numeroGerado,
       assunto,
       responsavel: nomeResponsavel,
@@ -266,7 +305,7 @@ async function cadastrarDfd() {
     throw new Error("Não foi possível reservar a numeração do DFD.");
   }
 
-  notificar(`DFD nº ${formatarNumero(numeroGerado, ANO_ATUAL)} cadastrado com sucesso!`);
+  notificar(`DFD nº ${formatarNumero(numeroGerado)} cadastrado com sucesso!`);
   formDfd.reset();
   inputAssunto.focus();
 }
@@ -305,6 +344,7 @@ formDfd?.addEventListener("submit", async (event) => {
 function iniciarEdicao(dfd) {
   editando = true;
   chaveEdicao = dfd._key;
+  caminhoEdicao = dfd._path;
   inputAssunto.value = dfd.assunto || "";
   btnCadastrar.style.display = "none";
   botoesEdicao.style.display = "flex";
@@ -325,7 +365,7 @@ function iniciarEdicao(dfd) {
 }
 
 btnSalvarEdicao?.addEventListener("click", async () => {
-  if (!editando || !chaveEdicao) return;
+  if (!editando || !chaveEdicao || !caminhoEdicao) return;
 
   const assunto = inputAssunto.value.trim();
 
@@ -337,7 +377,7 @@ btnSalvarEdicao?.addEventListener("click", async () => {
   btnSalvarEdicao.disabled = true;
 
   try {
-    await update(ref(rtdb, `dfds/${anoSelecionado}/${chaveEdicao}`), {
+    await update(ref(rtdb, caminhoEdicao), {
       assunto,
       atualizadoEm: new Date().toISOString(),
       atualizadoPor: nomeResponsavel,
@@ -374,7 +414,7 @@ async function cancelarDfd(dfd) {
   if (!confirmou) return;
 
   try {
-    await update(ref(rtdb, `dfds/${anoSelecionado}/${dfd._key}`), {
+    await update(ref(rtdb, dfd._path), {
       assunto: "CANCELADO",
       assuntoAnterior: dfd.assunto || "",
       cancelado: true,
@@ -421,10 +461,9 @@ function carregarDfds() {
     getDfdsRef(),
     (snapshot) => {
       todosDfds = snapshot.exists()
-        ? Object.entries(snapshot.val())
-            .filter(([, dados]) => dados && typeof dados === "object")
-            .map(([key, dados]) => ({ _key: key, ...dados }))
-            .sort((a, b) => Number(b.numero || 0) - Number(a.numero || 0))
+        ? extrairRegistrosDfd(snapshot.val()).sort(
+            (a, b) => Number(b.numero || 0) - Number(a.numero || 0),
+          )
         : [];
 
       renderTabela();
@@ -442,37 +481,6 @@ function carregarDfds() {
     },
   );
 }
-
-async function carregarAnos() {
-  try {
-    const snapshot = await get(ref(rtdb, "dfds"));
-    const anos = snapshot.exists()
-      ? Object.keys(snapshot.val()).filter((ano) => /^\d{4}$/.test(ano))
-      : [];
-
-    if (!anos.includes(ANO_ATUAL)) anos.push(ANO_ATUAL);
-
-    anos.sort((a, b) => Number(b) - Number(a));
-
-    filtroAno.innerHTML = anos
-      .map((ano) => `<option value="${ano}">${ano}</option>`)
-      .join("");
-
-    filtroAno.value = anoSelecionado;
-  } catch (erro) {
-    console.error("Erro ao carregar anos dos DFDs:", erro);
-    filtroAno.innerHTML = `<option value="${ANO_ATUAL}">${ANO_ATUAL}</option>`;
-  }
-
-  carregarDfds();
-}
-
-filtroAno?.addEventListener("change", () => {
-  anoSelecionado = filtroAno.value;
-  paginaAtual = 1;
-  resetarEdicao();
-  carregarDfds();
-});
 
 inputBusca?.addEventListener("input", () => {
   paginaAtual = 1;
@@ -503,7 +511,7 @@ btnExportar?.addEventListener("click", () => {
   const arquivo = window.XLSX.utils.book_new();
 
   window.XLSX.utils.book_append_sheet(arquivo, planilha, "DFDs");
-  window.XLSX.writeFile(arquivo, `dfds_${anoSelecionado}.xlsx`);
+  window.XLSX.writeFile(arquivo, "dfds.xlsx");
 });
 
 onAuthStateChanged(auth, async (user) => {
@@ -535,4 +543,4 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 botoesEdicao.style.display = "none";
-carregarAnos();
+carregarDfds();
