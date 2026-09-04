@@ -23,6 +23,7 @@ let todosDfds = [];
 let paginaAtual = 1;
 let editando = false;
 let chaveEdicao = null;
+let caminhoEdicao = null;
 let salvando = false;
 let pararEscuta = null;
 
@@ -246,6 +247,7 @@ function renderTabela() {
 function resetarEdicao() {
   editando = false;
   chaveEdicao = null;
+  caminhoEdicao = null;
   formDfd.reset();
   btnCadastrar.style.display = "inline-flex";
   botoesEdicao.style.display = "none";
@@ -342,6 +344,7 @@ formDfd?.addEventListener("submit", async (event) => {
 function iniciarEdicao(dfd) {
   editando = true;
   chaveEdicao = dfd._key;
+  caminhoEdicao = dfd._path;
   inputAssunto.value = dfd.assunto || "";
   btnCadastrar.style.display = "none";
   botoesEdicao.style.display = "flex";
@@ -362,7 +365,7 @@ function iniciarEdicao(dfd) {
 }
 
 btnSalvarEdicao?.addEventListener("click", async () => {
-  if (!editando || !chaveEdicao) return;
+  if (!editando || !chaveEdicao || !caminhoEdicao) return;
 
   const assunto = inputAssunto.value.trim();
 
@@ -374,7 +377,7 @@ btnSalvarEdicao?.addEventListener("click", async () => {
   btnSalvarEdicao.disabled = true;
 
   try {
-    await update(ref(rtdb, todosDfds.find((item) => item._key === chaveEdicao)?._path), {
+    await update(ref(rtdb, caminhoEdicao), {
       assunto,
       atualizadoEm: new Date().toISOString(),
       atualizadoPor: nomeResponsavel,
