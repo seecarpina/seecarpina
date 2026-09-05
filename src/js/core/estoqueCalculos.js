@@ -55,3 +55,62 @@ export function formatarUnidade(unidade, quantidade) {
 
   return plurais[unidade] || unidade;
 }
+
+export function prepararItensSaidaEstoque(itens, materiais) {
+  if (!Array.isArray(itens) || !itens.length) {
+    throw new Error("Adicione pelo menos um item.");
+  }
+
+  const materiaisPorId = new Map(
+    (materiais || []).map((material) => [
+      String(material._key || material.id || ""),
+      material,
+    ]),
+  );
+  const idsProcessados = new Set();
+
+  return itens.map((item) => {
+    const materialId = String(item.materialId || "");
+
+    if (!materialId || idsProcessados.has(materialId)) {
+      throw new Error(
+        idsProcessados.has(materialId)
+          ? `O material "${item.nome || "Material"}" está duplicado no romaneio.`
+          : "O item do romaneio não possui identificação.",
+      );
+    }
+
+    idsProcessados.add(materialId);
+
+    const material = materiaisPorId.get(materialId);
+
+    if (!material) {
+      throw new Error(
+        `O material "${item.nome || "Material"}" não foi encontrado.`,
+      );
+    }
+
+    const quantidade = Number(item.quantidade || 0);
+
+    if (!Number.isFinite(quantidade) || quantidade <= 0) {
+      throw new Error(
+        `A quantidade de "${item.nome || material.nome || "Material"}" é inválida.`,
+      );
+    }
+
+    const estoqueAnterior = Number(material.estoque || 0);
+    const estoquePosterior = calcularEstoquePosterior(
+      estoqueAnterior,
+      quantidade,
+    );
+
+    return {
+      item,
+      material,
+      materialId,
+      quantidade,
+      estoqueAnterior,
+      estoquePosterior,
+    };
+  });
+}
