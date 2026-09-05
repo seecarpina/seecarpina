@@ -1,4 +1,5 @@
 import { rtdb } from "./firebaseConfig.js";
+import { exportarTabelaExcel } from "./core/exportarExcel.js";
 
 import {
   ref,
@@ -1852,20 +1853,18 @@ inputBusca?.addEventListener("input", renderEscolas);
    EXPORTAR EXCEL
 ========================================= */
 
-btnExportarExcel?.addEventListener("click", () => {
+btnExportarExcel?.addEventListener("click", async () => {
   const escolasExportar = obterEscolasFiltradas();
 
   if (!escolasExportar.length) {
     notificar("Não há escolas para exportar.", "erro");
-
     return;
   }
 
-  const dadosExcel = escolasExportar.map((escola) => {
+  const linhasExcel = escolasExportar.map((escola) => {
     const coordenadores = (escola.coordenadores || [])
       .map((coordenador) => {
         const nome = obterNomeServidor(coordenador.servidorId);
-
         const modalidades = Array.isArray(coordenador.modalidades)
           ? coordenador.modalidades.join(", ")
           : "";
@@ -1875,50 +1874,52 @@ btnExportarExcel?.addEventListener("click", () => {
       .filter(Boolean)
       .join("; ");
 
-    const modalidades = obterModalidades(escola.modalidades).join(", ");
-
     return {
-      Escola: obterNomeLocal(escola.localExercicioId) || "",
-
-      "Código INEP": escola.codigoInep || "",
-
-      Endereço: escola.endereco || "",
-
-      Gestor: obterNomeServidor(escola.gestorId) || "",
-
-      Secretário: obterNomeServidor(escola.secretarioId) || "",
-
-      Coordenadores: coordenadores,
-
-      "Modalidades de Ensino": modalidades,
+      escola: obterNomeLocal(escola.localExercicioId) || "",
+      codigoInep: escola.codigoInep || "",
+      endereco: escola.endereco || "",
+      gestor: obterNomeServidor(escola.gestorId) || "",
+      secretario: obterNomeServidor(escola.secretarioId) || "",
+      coordenadores,
+      modalidades: obterModalidades(escola.modalidades).join(", "),
     };
   });
 
-  const worksheet = XLSX.utils.json_to_sheet(dadosExcel);
-
-  const workbook = XLSX.utils.book_new();
-
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Escolas");
-
-  worksheet["!cols"] = [
-    { wch: 45 },
-    { wch: 15 },
-    { wch: 45 },
-    { wch: 35 },
-    { wch: 35 },
-    { wch: 55 },
-    { wch: 50 },
-  ];
-
   const hoje = new Date();
-
   const dataArquivo = [
     hoje.getFullYear(),
     String(hoje.getMonth() + 1).padStart(2, "0"),
     String(hoje.getDate()).padStart(2, "0"),
   ].join("-");
 
-  XLSX.writeFile(workbook, `escolas_${dataArquivo}.xlsx`);
+  btnExportarExcel.disabled = true;
 
-  notificar("Escolas exportadas com sucesso!");
+  try {
+    await exportarTabelaExcel({
+      nomeArquivo: `escolas_${dataArquivo}.xlsx`,
+      nomePlanilha: "Escolas",
+      nomeTabela: "TabelaEscolas",
+      colunas: [
+        { titulo: "Escola", chave: "escola", largura: 45 },
+        { titulo: "Código INEP", chave: "codigoInep", largura: 18 },
+        { titulo: "Endereço", chave: "endereco", largura: 45 },
+        { titulo: "Gestor", chave: "gestor", largura: 35 },
+        { titulo: "Secretário", chave: "secretario", largura: 35 },
+        { titulo: "Coordenadores", chave: "coordenadores", largura: 55 },
+        {
+          titulo: "Modalidades de Ensino",
+          chave: "modalidades",
+          largura: 50,
+        },
+      ],
+      linhas: linhasExcel,
+    });
+
+    notificar("Escolas exportadas com sucesso!");
+  } catch (erro) {
+    console.error("Erro ao exportar escolas:", erro);
+    notificar("Não foi possível gerar o arquivo Excel.", "erro");
+  } finally {
+    btnExportarExcel.disabled = false;
+  }
 });
