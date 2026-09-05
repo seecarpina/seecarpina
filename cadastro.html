@@ -103,6 +103,24 @@
               </div>
             </div>
 
+            <div class="campo-login">
+              <label for="confirmarSenha">Confirmar senha</label>
+
+              <div class="campo-input">
+                <span class="material-symbols-outlined">lock_reset</span>
+
+                <input
+                  type="password"
+                  id="confirmarSenha"
+                  name="confirmarSenha"
+                  placeholder="Digite novamente a senha"
+                  autocomplete="new-password"
+                  minlength="6"
+                  required
+                />
+              </div>
+            </div>
+
             <div
               id="mensagemCadastro"
               class="mensagem-login"
@@ -155,6 +173,7 @@
       const inputNome = document.getElementById("nome");
       const inputEmail = document.getElementById("email");
       const inputSenha = document.getElementById("senha");
+      const inputConfirmarSenha = document.getElementById("confirmarSenha");
       const btnCadastrar = document.getElementById("btnCadastrar");
       const btnMostrarSenha = document.getElementById("btnMostrarSenha");
       const mensagemCadastro = document.getElementById("mensagemCadastro");
@@ -234,8 +253,9 @@
         const nome = inputNome.value.trim();
         const email = inputEmail.value.trim();
         const senha = inputSenha.value;
+        const confirmacaoSenha = inputConfirmarSenha.value;
 
-        if (!nome || !email || !senha) {
+        if (!nome || !email || !senha || !confirmacaoSenha) {
           mostrarMensagem("Preencha todos os campos.");
           return;
         }
@@ -243,6 +263,12 @@
         if (senha.length < 6) {
           mostrarMensagem("A senha deve possuir pelo menos 6 caracteres.");
 
+          return;
+        }
+
+        if (senha !== confirmacaoSenha) {
+          mostrarMensagem("As senhas informadas não coincidem.");
+          inputConfirmarSenha.focus();
           return;
         }
 
@@ -293,6 +319,7 @@
         const senhaVisivel = inputSenha.type === "text";
 
         inputSenha.type = senhaVisivel ? "password" : "text";
+        inputConfirmarSenha.type = senhaVisivel ? "password" : "text";
 
         btnMostrarSenha.innerHTML = `
       <span class="material-symbols-outlined">
