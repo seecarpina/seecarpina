@@ -826,7 +826,7 @@ onAuthStateChanged(auth, async (user) => {
     // USUÁRIO DESATIVADO
     // ==================================
 
-    if (dadosUsuario?.ativo === false) {
+    if (dadosUsuario?.ativo !== true) {
       localStorage.removeItem("usuarioCache");
 
       localStorage.removeItem("configuracaoSidebar");
