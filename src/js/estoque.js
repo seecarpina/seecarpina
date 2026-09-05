@@ -1,4 +1,9 @@
 import { auth, rtdb } from "./firebaseConfig.js";
+import {
+  calcularEstoquePosterior,
+  formatarUnidade,
+  obterQuantidadeNumerica,
+} from "./core/estoqueCalculos.js";
 
 import {
   ref,
@@ -66,10 +71,6 @@ function formatarQuantidadeInput(input) {
   valor = String(Number(valor));
 
   input.value = Number(valor).toLocaleString("pt-BR");
-}
-
-function obterQuantidadeNumerica(valor) {
-  return Number(String(valor || "").replace(/\./g, ""));
 }
 
 function getNomeResponsavel() {
@@ -169,34 +170,6 @@ function obterDestinoRomaneio(movimentacao) {
    * usa o nome histórico salvo.
    */
   return movimentacao.destino || "-";
-}
-
-function formatarUnidade(unidade, quantidade) {
-  if (quantidade === 1) {
-    return unidade;
-  }
-
-  const plurais = {
-    Unidade: "Unidades",
-    Caixa: "Caixas",
-    Resma: "Resmas",
-    Pacote: "Pacotes",
-    Fardo: "Fardos",
-    Kit: "Kits",
-    Kg: "Kg",
-    Quilograma: "Quilogramas",
-    Grama: "Gramas",
-    Litro: "Litros",
-    Mililitro: "Mililitros",
-    Saco: "Sacos",
-    Lata: "Latas",
-    Garrafa: "Garrafas",
-    Pote: "Potes",
-    Frasco: "Frascos",
-    "Mão (50 unidades)": "Mãos (50 unidades)",
-  };
-
-  return plurais[unidade] || unidade;
 }
 
 function padronizarTexto(str) {
@@ -1494,7 +1467,10 @@ btnGerarRomaneio.addEventListener("click", async () => {
 
       const estoqueAnterior = Number(material.estoque || 0);
 
-      const estoquePosterior = estoqueAnterior - Number(item.quantidade);
+      const estoquePosterior = calcularEstoquePosterior(
+        estoqueAnterior,
+        item.quantidade,
+      );
 
       await update(ref(rtdb, `materiais/${item.materialId}`), {
         estoque: estoquePosterior,
