@@ -1,0 +1,95 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function estaAutenticado() {
+      return request.auth != null;
+    }
+
+    function possuiCadastro() {
+      return estaAutenticado() &&
+        exists(
+          /databases/$(database)/documents/usuarios/$(request.auth.uid)
+        );
+    }
+
+    function dadosUsuario() {
+      return get(
+        /databases/$(database)/documents/usuarios/$(request.auth.uid)
+      ).data;
+    }
+
+    function usuarioAtivo() {
+      return possuiCadastro() &&
+        dadosUsuario().get("ativo", false) == true;
+    }
+
+    function gestorEscolar() {
+      return usuarioAtivo() &&
+        dadosUsuario().get("perfil", "") == "GESTOR_ESCOLAR";
+    }
+
+    function cargoValido() {
+      return usuarioAtivo() &&
+        dadosUsuario().get("cargo", "") is string &&
+        dadosUsuario().get("cargo", "").size() > 0;
+    }
+
+    function administrador() {
+      return cargoValido() &&
+        dadosUsuario().get("cargo", "") == "ADM";
+    }
+
+    function usuarioInterno() {
+      return cargoValido() && !gestorEscolar();
+    }
+
+    match /usuarios/{uid} {
+      allow get: if estaAutenticado() &&
+        (
+          request.auth.uid == uid ||
+          usuarioInterno()
+        );
+
+      allow list: if usuarioInterno();
+
+      allow create: if administrador() ||
+        (
+          estaAutenticado() &&
+          request.auth.uid == uid &&
+          request.resource.data.keys().hasOnly([
+            "nome",
+            "email",
+            "ativo",
+            "criadoEm"
+          ]) &&
+          request.resource.data.nome is string &&
+          request.resource.data.nome.size() > 0 &&
+          request.resource.data.email is string &&
+          request.resource.data.email == request.auth.token.email &&
+          request.resource.data.ativo == false
+        );
+
+      allow update: if administrador() ||
+        (
+          usuarioAtivo() &&
+          request.auth.uid == uid &&
+          request.resource.data
+            .diff(resource.data)
+            .affectedKeys()
+            .hasOnly([
+              "foto",
+              "lembretes",
+              "atualizadoEm"
+            ])
+        );
+
+      allow delete: if administrador();
+    }
+
+    match /{colecao}/{documento=**} {
+      allow read, write: if colecao != "usuarios" &&
+        usuarioInterno();
+    }
+  }
+}
