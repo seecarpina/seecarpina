@@ -1,4 +1,5 @@
 import { rtdb } from "./firebaseConfig.js";
+import { exportarTabelaExcel } from "./core/exportarExcel.js";
 import {
   ref,
   push,
@@ -667,7 +668,7 @@ function resetarEdicao() {
 const btnExportarContratos = document.getElementById("btnExportarContratos");
 
 if (btnExportarContratos) {
-  btnExportarContratos.addEventListener("click", () => {
+  btnExportarContratos.addEventListener("click", async () => {
     if (!contratos.length) {
       mostrarNotificacao("Nenhum contrato para exportar", "erro");
       return;
@@ -676,15 +677,15 @@ if (btnExportarContratos) {
     const filtroTexto = busca.value.toLowerCase();
     const filtroTipo = filtroTipoContrato.value;
 
-    let dadosFiltrados = contratos.filter((c) =>
-      `${c.numero} ${c.credor} ${c.modalidade} ${c.gestor} ${c.fiscal} ${c.situacao} ${c.tipoContrato}`
+    let dadosFiltrados = contratos.filter((contrato) =>
+      `${contrato.numero} ${contrato.credor} ${contrato.modalidade} ${contrato.gestor} ${contrato.fiscal} ${contrato.situacao} ${contrato.tipoContrato}`
         .toLowerCase()
         .includes(filtroTexto),
     );
 
     if (filtroTipo) {
       dadosFiltrados = dadosFiltrados.filter(
-        (c) => c.tipoContrato === filtroTipo,
+        (contrato) => contrato.tipoContrato === filtroTipo,
       );
     }
 
@@ -693,37 +694,67 @@ if (btnExportarContratos) {
       return;
     }
 
-    // Ordena pelo número do contrato
     dadosFiltrados.sort((a, b) =>
       String(a.numero).localeCompare(String(b.numero), "pt-BR", {
         numeric: true,
       }),
     );
 
-    // Monta os dados do Excel
-    const dadosExcel = dadosFiltrados.map((c) => ({
-      "Nº Contrato": c.numero,
-      Credor: c.credor,
-      Modalidade: c.modalidade,
-      Gestor: c.gestor,
-      Fiscal: c.fiscal,
-      Situação: c.situacao,
-      "Tipo de Contrato": c.tipoContrato,
-      "Valor Global": formatarMoedaTabela(c.valorGlobal),
-      "Saldo Atual": formatarMoedaTabela(calcularSaldo(c)),
-      Vigência: formatarDataBR(c.vigencia),
-    }));
+    btnExportarContratos.disabled = true;
 
-    // Gera planilha
-    const worksheet = XLSX.utils.json_to_sheet(dadosExcel);
-    const workbook = XLSX.utils.book_new();
+    try {
+      await exportarTabelaExcel({
+        nomeArquivo: `contratos_${new Date()
+          .toISOString()
+          .slice(0, 10)}.xlsx`,
+        nomePlanilha: "Contratos",
+        nomeTabela: "TabelaContratos",
+        colunas: [
+          { titulo: "Nº Contrato", chave: "numero", largura: 18 },
+          { titulo: "Credor", chave: "credor", largura: 38 },
+          { titulo: "Modalidade", chave: "modalidade", largura: 24 },
+          { titulo: "Gestor", chave: "gestor", largura: 30 },
+          { titulo: "Fiscal", chave: "fiscal", largura: 30 },
+          { titulo: "Situação", chave: "situacao", largura: 20 },
+          {
+            titulo: "Tipo de Contrato",
+            chave: "tipoContrato",
+            largura: 24,
+          },
+          {
+            titulo: "Valor Global",
+            chave: "valorGlobal",
+            largura: 20,
+            formato: '"R$" #,##0.00',
+          },
+          {
+            titulo: "Saldo Atual",
+            chave: "saldoAtual",
+            largura: 20,
+            formato: '"R$" #,##0.00',
+          },
+          { titulo: "Vigência", chave: "vigencia", largura: 16 },
+        ],
+        linhas: dadosFiltrados.map((contrato) => ({
+          numero: contrato.numero || "",
+          credor: contrato.credor || "",
+          modalidade: contrato.modalidade || "",
+          gestor: contrato.gestor || "",
+          fiscal: contrato.fiscal || "",
+          situacao: contrato.situacao || "",
+          tipoContrato: contrato.tipoContrato || "",
+          valorGlobal: Number(contrato.valorGlobal || 0),
+          saldoAtual: calcularSaldo(contrato),
+          vigencia: formatarDataBR(contrato.vigencia),
+        })),
+      });
 
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Contratos");
-
-    const nomeArquivo = `contratos_${new Date()
-      .toISOString()
-      .slice(0, 10)}.xlsx`;
-
-    XLSX.writeFile(workbook, nomeArquivo);
+      mostrarNotificacao("Contratos exportados com sucesso!");
+    } catch (erro) {
+      console.error("Erro ao exportar contratos:", erro);
+      mostrarNotificacao("Não foi possível gerar o arquivo Excel.", "erro");
+    } finally {
+      btnExportarContratos.disabled = false;
+    }
   });
 }
