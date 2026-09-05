@@ -1422,27 +1422,22 @@ btnGerarRomaneio.addEventListener("click", async () => {
     return;
   }
 
-  if (!destinoIdSelecionado) {
-    mostrarNotificacao("Selecione o destino entre as sugestões.", "erro");
+  const destinoCadastrado =
+    destinos.find(
+      (item) => String(item.id) === String(destinoIdSelecionado || ""),
+    ) ||
+    destinos.find(
+      (item) => normalizarBusca(item.nome) === normalizarBusca(destino),
+    );
 
-    inputDestinoEntrega.focus();
-
-    return;
-  }
-
-  const destinoSelecionado = destinos.find(
-    (item) => String(item.id) === String(destinoIdSelecionado),
-  );
-
-  if (!destinoSelecionado) {
-    mostrarNotificacao("O destino selecionado não foi encontrado.", "erro");
-
-    destinoIdSelecionado = null;
-
-    inputDestinoEntrega.focus();
-
-    return;
-  }
+  /*
+   * Se o usuário selecionar uma sugestão, mantém o vínculo com o local.
+   * Se apenas digitar, salva o texto somente neste romaneio.
+   */
+  const destinoSelecionado = destinoCadastrado || {
+    id: null,
+    nome: destino,
+  };
 
   if (!itensEntrega.length) {
     mostrarNotificacao("Adicione pelo menos um item.", "erro");
