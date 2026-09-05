@@ -1,8 +1,8 @@
 import { auth, rtdb } from "./firebaseConfig.js";
 import {
-  calcularEstoquePosterior,
   formatarUnidade,
   obterQuantidadeNumerica,
+  prepararItensSaidaEstoque,
 } from "./core/estoqueCalculos.js";
 
 import {
@@ -1417,34 +1417,25 @@ btnGerarRomaneio.addEventListener("click", async () => {
     return;
   }
 
-  for (const item of itensEntrega) {
-    const material = materiais.find(
-      (registro) => registro._key === item.materialId,
-    );
+  let itensPreparados;
 
-    if (!material) {
-      mostrarNotificacao(
-        `O material "${item.nome}" não foi encontrado.`,
-        "erro",
+  try {
+    for (const item of itensEntrega) {
+      const material = materiais.find(
+        (registro) => registro._key === item.materialId,
       );
 
-      return;
+      if (material && !categoriaPermitida(material.categoriaId)) {
+        throw new Error(
+          `Você não possui permissão para movimentar "${item.nome}".`,
+        );
+      }
     }
 
-    if (!categoriaPermitida(material.categoriaId)) {
-      mostrarNotificacao(
-        `Você não possui permissão para movimentar "${item.nome}".`,
-        "erro",
-      );
-
-      return;
-    }
-
-    if (Number(item.quantidade) > Number(material.estoque || 0)) {
-      mostrarNotificacao(`Estoque insuficiente para "${item.nome}".`, "erro");
-
-      return;
-    }
+    itensPreparados = prepararItensSaidaEstoque(itensEntrega, materiais);
+  } catch (erroValidacao) {
+    mostrarNotificacao(erroValidacao.message, "erro");
+    return;
   }
 
   gerandoRomaneio = true;
@@ -1460,56 +1451,68 @@ btnGerarRomaneio.addEventListener("click", async () => {
       throw new Error("Não foi possível gerar o identificador do romaneio.");
     }
 
-    for (const item of itensEntrega) {
-      const material = materiais.find(
-        (registro) => registro._key === item.materialId,
-      );
-
-      const estoqueAnterior = Number(material.estoque || 0);
-
-      const estoquePosterior = calcularEstoquePosterior(
-        estoqueAnterior,
-        item.quantidade,
-      );
-
-      await update(ref(rtdb, `materiais/${item.materialId}`), {
-        estoque: estoquePosterior,
-        atualizadoEm: new Date().toISOString(),
-      });
-
-      await registrarMovimentacaoEstoque({
-        tipo: "saida",
-        acao: "romaneio",
-        materialId: material._key,
-        material: material.nome,
-        categoriaId: material.categoriaId,
-        unidade: material.unidade,
-        quantidade: item.quantidade,
-        estoqueAnterior,
-        estoquePosterior,
-        destinoId: destinoSelecionado.id,
-        destino: destinoSelecionado.nome,
-        romaneioId,
-      });
-    }
+    const agora = new Date().toISOString();
 
     const movimentacao = {
       destinoId: destinoSelecionado.id,
-
       destino: destinoSelecionado.nome,
-
-      data: new Date().toISOString(),
-
+      data: agora,
       observacao,
-
-      itens: itensEntrega.map((item) => ({
-        ...item,
-      })),
-
+      itens: itensEntrega.map((item) => ({ ...item })),
       responsavel: getNomeResponsavel(),
     };
 
-    await update(movimentacaoRef, movimentacao);
+    /*
+     * Uma única atualização multipath garante que o romaneio, as saídas,
+     * os históricos e os saldos sejam confirmados juntos pelo Firebase.
+     */
+    const atualizacoes = {
+      [`movimentacoes/${romaneioId}`]: movimentacao,
+    };
+
+    for (const registro of itensPreparados) {
+      const {
+        item,
+        material,
+        materialId,
+        quantidade,
+        estoqueAnterior,
+        estoquePosterior,
+      } = registro;
+
+      const historicoRef = push(historicoEstoqueRef);
+      const historicoId = historicoRef.key;
+
+      if (!historicoId) {
+        throw new Error("Não foi possível gerar o histórico do estoque.");
+      }
+
+      atualizacoes[`materiais/${materialId}/estoque`] =
+        increment(-quantidade);
+      atualizacoes[`materiais/${materialId}/atualizadoEm`] = agora;
+
+      atualizacoes[`historicoEstoque/${historicoId}`] = {
+        tipo: "saida",
+        acao: "romaneio",
+        materialId,
+        material: material.nome || item.nome || "",
+        categoriaId: material.categoriaId || null,
+        unidade: material.unidade || item.unidade || "Unidade",
+        quantidade,
+        estoqueAnterior,
+        estoquePosterior,
+        justificativa: "",
+        destinoId: destinoSelecionado.id,
+        destino: destinoSelecionado.nome,
+        romaneioId,
+        solicitacaoId: null,
+        protocolo: "",
+        usuario: getNomeResponsavel(),
+        data: agora,
+      };
+    }
+
+    await update(ref(rtdb), atualizacoes);
 
     gerarPDF(movimentacao);
 
