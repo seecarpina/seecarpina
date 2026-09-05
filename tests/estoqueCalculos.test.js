@@ -5,6 +5,7 @@ import {
   calcularEstoquePosterior,
   formatarUnidade,
   obterQuantidadeNumerica,
+  prepararItensSaidaEstoque,
 } from "../src/js/core/estoqueCalculos.js";
 
 test("converte quantidade formatada em pt-BR", () => {
@@ -41,4 +42,52 @@ test("mantém singular e aplica plural das unidades conhecidas", () => {
   assert.equal(formatarUnidade("Caixa", 2), "Caixas");
   assert.equal(formatarUnidade("Kg", 2), "Kg");
   assert.equal(formatarUnidade("Bobina", 2), "Bobina");
+});
+
+test("prepara todos os itens de um romaneio sem alterar os materiais", () => {
+  const materiais = [
+    { _key: "papel", nome: "Papel", estoque: 20 },
+    { _key: "caneta", nome: "Caneta", estoque: 8 },
+  ];
+
+  const resultado = prepararItensSaidaEstoque(
+    [
+      { materialId: "papel", nome: "Papel", quantidade: 5 },
+      { materialId: "caneta", nome: "Caneta", quantidade: 3 },
+    ],
+    materiais,
+  );
+
+  assert.deepEqual(
+    resultado.map((registro) => registro.estoquePosterior),
+    [15, 5],
+  );
+  assert.equal(materiais[0].estoque, 20);
+});
+
+test("bloqueia material inexistente no romaneio", () => {
+  assert.throws(
+    () =>
+      prepararItensSaidaEstoque(
+        [{ materialId: "inexistente", nome: "Item", quantidade: 1 }],
+        [],
+      ),
+    /não foi encontrado/,
+  );
+});
+
+test("bloqueia o mesmo material duplicado", () => {
+  const material = { _key: "papel", nome: "Papel", estoque: 20 };
+
+  assert.throws(
+    () =>
+      prepararItensSaidaEstoque(
+        [
+          { materialId: "papel", quantidade: 2 },
+          { materialId: "papel", quantidade: 3 },
+        ],
+        [material],
+      ),
+    /duplicado/,
+  );
 });
