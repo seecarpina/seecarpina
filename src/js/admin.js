@@ -1295,7 +1295,7 @@ async function sincronizarControleAcessoUsuarios() {
       nome: usuario.nome || "",
       perfil: perfilAcesso,
       cargo,
-      ativo: usuario.ativo !== false,
+      ativo: usuario.ativo === true,
       escolaId: usuario.escolaId || null,
       atualizadoEm: agora,
     };
@@ -1324,7 +1324,7 @@ async function sincronizarUsuarioControleAcesso(usuario) {
     nome: usuario.nome || "",
     perfil: perfilAcesso,
     cargo,
-    ativo: usuario.ativo !== false,
+    ativo: usuario.ativo === true,
     escolaId: usuario.escolaId || null,
     atualizadoEm: new Date().toISOString(),
   });
@@ -1390,7 +1390,7 @@ function obterUsuariosFiltrados() {
       return false;
     }
 
-    const ativo = usuario.ativo !== false;
+    const ativo = usuario.ativo === true;
 
     if (situacao === "ativo" && !ativo) {
       return false;
@@ -1432,7 +1432,7 @@ function renderUsuarios() {
       String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR"),
     )
     .forEach((usuario) => {
-      const ativo = usuario.ativo !== false;
+      const ativo = usuario.ativo === true;
 
       const gestorEscolar =
         String(usuario.cargo || "").trim().toUpperCase() === "GESTOR" ||
