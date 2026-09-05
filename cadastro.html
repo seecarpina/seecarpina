@@ -132,6 +132,7 @@
         getAuth,
         createUserWithEmailAndPassword,
         updateProfile,
+        signOut,
       } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
       import {
@@ -264,16 +265,19 @@
           await setDoc(doc(db, "usuarios", usuario.uid), {
             nome,
             email,
+            ativo: false,
             criadoEm: new Date().toISOString(),
           });
 
+          await signOut(auth);
+
           mostrarMensagem(
-            "Cadastro realizado com sucesso. Redirecionando...",
+            "Cadastro realizado. Aguarde a liberação do administrador.",
             "sucesso",
           );
 
           setTimeout(() => {
-            window.location.replace("./");
+            window.location.replace("./login");
           }, 1200);
         } catch (error) {
           console.error("Erro ao cadastrar usuário:", error);
