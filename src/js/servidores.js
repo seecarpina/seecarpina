@@ -1,4 +1,5 @@
 import { rtdb } from "./firebaseConfig.js";
+import { exportarTabelaExcel } from "./core/exportarExcel.js";
 import {
   ref,
   push,
@@ -2139,7 +2140,7 @@ async function salvarSeNaoExistir(refBase, valor) {
 const btnExportarExcel = document.getElementById("btnExportarServidores");
 
 if (btnExportarExcel) {
-  btnExportarExcel.addEventListener("click", () => {
+  btnExportarExcel.addEventListener("click", async () => {
     if (!servidores.length) {
       mostrarNotificacao("Nenhum servidor para exportar", "erro");
       return;
@@ -2150,48 +2151,69 @@ if (btnExportarExcel) {
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase();
 
-    // Aplica o mesmo filtro da tabela
-    const filtrados = servidores.filter((s) =>
-      `${s.codigo} ${s.nome} ${s.cpf} ${s.cargo} ${s.vinculo} ${obterLocalServidor(s)}`
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .includes(termo),
-    );
+    const filtrados = servidores
+      .filter((servidor) =>
+        `${servidor.codigo} ${servidor.nome} ${servidor.cpf} ${servidor.cargo} ${servidor.vinculo} ${obterLocalServidor(servidor)}`
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .includes(termo),
+      )
+      .sort((a, b) =>
+        a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" }),
+      );
 
     if (!filtrados.length) {
       mostrarNotificacao("Nenhum registro encontrado", "erro");
       return;
     }
 
-    // Ordena por nome
-    filtrados.sort((a, b) =>
-      a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" }),
-    );
+    btnExportarExcel.disabled = true;
 
-    // Monta planilha
-    const dadosExcel = filtrados.map((s) => ({
-      Código: s.codigo,
-      Nome: s.nome,
-      CPF: formatarCPF(s.cpf),
-      Cargo: s.cargo,
-      Vínculo: s.vinculo,
-      "Data de Admissão": formatarDataBR(s.dataAdmissao),
-      Situação: s.situacao,
-      "Local de Exercício": obterLocalServidor(s),
-    }));
+    try {
+      await exportarTabelaExcel({
+        nomeArquivo: `servidores_${new Date()
+          .toISOString()
+          .slice(0, 10)}.xlsx`,
+        nomePlanilha: "Servidores",
+        nomeTabela: "TabelaServidores",
+        colunas: [
+          { titulo: "Código", chave: "codigo", largura: 15 },
+          { titulo: "Nome", chave: "nome", largura: 38 },
+          { titulo: "CPF", chave: "cpf", largura: 18 },
+          { titulo: "Cargo", chave: "cargo", largura: 28 },
+          { titulo: "Vínculo", chave: "vinculo", largura: 18 },
+          {
+            titulo: "Data de Admissão",
+            chave: "dataAdmissao",
+            largura: 20,
+          },
+          { titulo: "Situação", chave: "situacao", largura: 18 },
+          {
+            titulo: "Local de Exercício",
+            chave: "localExercicio",
+            largura: 38,
+          },
+        ],
+        linhas: filtrados.map((servidor) => ({
+          codigo: servidor.codigo || "",
+          nome: servidor.nome || "",
+          cpf: formatarCPF(servidor.cpf),
+          cargo: servidor.cargo || "",
+          vinculo: servidor.vinculo || "",
+          dataAdmissao: formatarDataBR(servidor.dataAdmissao),
+          situacao: servidor.situacao || "",
+          localExercicio: obterLocalServidor(servidor),
+        })),
+      });
 
-    // Gera Excel
-    const worksheet = XLSX.utils.json_to_sheet(dadosExcel);
-    const workbook = XLSX.utils.book_new();
-
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Servidores");
-
-    const nomeArquivo = `servidores_${new Date()
-      .toISOString()
-      .slice(0, 10)}.xlsx`;
-
-    XLSX.writeFile(workbook, nomeArquivo);
+      mostrarNotificacao("Servidores exportados com sucesso!");
+    } catch (erro) {
+      console.error("Erro ao exportar servidores:", erro);
+      mostrarNotificacao("Não foi possível gerar o arquivo Excel.", "erro");
+    } finally {
+      btnExportarExcel.disabled = false;
+    }
   });
 }
 
