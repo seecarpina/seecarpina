@@ -113,11 +113,6 @@ export async function exportarTabelaExcel({
     });
   });
 
-  planilha.autoFilter = {
-    from: { row: 1, column: 1 },
-    to: { row: 1, column: colunas.length },
-  };
-
   const buffer = await workbook.xlsx.writeBuffer();
   baixarArquivo(buffer, nomeArquivo);
 }
