@@ -1,4 +1,5 @@
 import { auth, db, rtdb } from "./firebaseConfig.js";
+import { exportarTabelaExcel } from "./core/exportarExcel.js";
 
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
@@ -1291,18 +1292,11 @@ filtroDataFim?.addEventListener("change", () => {
    EXPORTAÇÃO PARA EXCEL
 ========================================= */
 
-btnExportar?.addEventListener("click", () => {
-  if (typeof window.XLSX === "undefined") {
-    notificar("A biblioteca de exportação não foi carregada.", "erro");
-
-    return;
-  }
-
+btnExportar?.addEventListener("click", async () => {
   const dadosFiltrados = obterOficiosFiltrados();
 
   if (!dadosFiltrados.length) {
     notificar("Nenhum registro encontrado para exportar.", "erro");
-
     return;
   }
 
@@ -1310,26 +1304,54 @@ btnExportar?.addEventListener("click", () => {
     (a, b) => Number(a.numero) - Number(b.numero),
   );
 
-  const dadosExcel = dadosOrdenados.map((oficio) => ({
-    Número: formatarNumeroOficio(oficio.numero, anoSelecionado),
-    Assunto: oficio.assunto || "",
-    Data: formatarDataBR(oficio.data),
-    Destino: obterDestinoOficio(oficio),
-    Cópia: obterCopiaOficio(oficio),
-    "Encaminhado ao Carpina Digital":
-      oficio.sistemaCarpinaDigital === true ? "Sim" : "Não",
-    "Número do Processo":
-      oficio.sistemaCarpinaDigital === true ? oficio.numeroProcesso || "" : "",
-    Responsável: oficio.responsavel || "",
-  }));
+  btnExportar.disabled = true;
 
-  const worksheet = window.XLSX.utils.json_to_sheet(dadosExcel);
+  try {
+    await exportarTabelaExcel({
+      nomeArquivo: `oficios_${anoSelecionado}.xlsx`,
+      nomePlanilha: "Ofícios",
+      nomeTabela: "TabelaOficios",
+      colunas: [
+        { titulo: "Número", chave: "numero", largura: 18 },
+        { titulo: "Assunto", chave: "assunto", largura: 48 },
+        { titulo: "Data", chave: "data", largura: 15 },
+        { titulo: "Destino", chave: "destino", largura: 32 },
+        { titulo: "Cópia", chave: "copia", largura: 32 },
+        {
+          titulo: "Encaminhado ao Carpina Digital",
+          chave: "carpinaDigital",
+          largura: 32,
+        },
+        {
+          titulo: "Número do Processo",
+          chave: "numeroProcesso",
+          largura: 24,
+        },
+        { titulo: "Responsável", chave: "responsavel", largura: 24 },
+      ],
+      linhas: dadosOrdenados.map((oficio) => ({
+        numero: formatarNumeroOficio(oficio.numero, anoSelecionado),
+        assunto: oficio.assunto || "",
+        data: formatarDataBR(oficio.data),
+        destino: obterDestinoOficio(oficio),
+        copia: obterCopiaOficio(oficio),
+        carpinaDigital:
+          oficio.sistemaCarpinaDigital === true ? "Sim" : "Não",
+        numeroProcesso:
+          oficio.sistemaCarpinaDigital === true
+            ? oficio.numeroProcesso || ""
+            : "",
+        responsavel: oficio.responsavel || "",
+      })),
+    });
 
-  const workbook = window.XLSX.utils.book_new();
-
-  window.XLSX.utils.book_append_sheet(workbook, worksheet, "Ofícios");
-
-  window.XLSX.writeFile(workbook, `oficios_${anoSelecionado}.xlsx`);
+    notificar("Ofícios exportados com sucesso!");
+  } catch (erro) {
+    console.error("Erro ao exportar ofícios:", erro);
+    notificar("Não foi possível gerar o arquivo Excel.", "erro");
+  } finally {
+    btnExportar.disabled = false;
+  }
 });
 
 /* =========================================
