@@ -1,4 +1,5 @@
 import { auth, db, rtdb } from "./firebaseConfig.js";
+import { exportarTabelaExcel } from "./core/exportarExcel.js";
 
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
@@ -636,12 +637,7 @@ inputBusca?.addEventListener("input", () => {
   renderTabela();
 });
 
-btnExportar?.addEventListener("click", () => {
-  if (typeof window.XLSX === "undefined") {
-    notificar("A biblioteca de exportação não foi carregada.", "erro");
-    return;
-  }
-
+btnExportar?.addEventListener("click", async () => {
   const registros = [...obterFiltrados()].sort(
     (a, b) => Number(a.numero || 0) - Number(b.numero || 0),
   );
@@ -651,19 +647,34 @@ btnExportar?.addEventListener("click", () => {
     return;
   }
 
-  const dados = registros.map((circular) => ({
-    Número: formatarNumero(circular.numero),
-    Assunto: circular.assunto || "",
-    Destinos: obterDestinosCircular(circular)
-      .map((destino) => destino.nome)
-      .join("; "),
-  }));
+  btnExportar.disabled = true;
 
-  const planilha = window.XLSX.utils.json_to_sheet(dados);
-  const arquivo = window.XLSX.utils.book_new();
+  try {
+    await exportarTabelaExcel({
+      nomeArquivo: `oficios-circulares_${anoSelecionado}.xlsx`,
+      nomePlanilha: "Ofícios Circulares",
+      nomeTabela: "TabelaOficiosCirculares",
+      colunas: [
+        { titulo: "Número", chave: "numero", largura: 18 },
+        { titulo: "Assunto", chave: "assunto", largura: 50 },
+        { titulo: "Destinos", chave: "destinos", largura: 60 },
+      ],
+      linhas: registros.map((circular) => ({
+        numero: formatarNumero(circular.numero),
+        assunto: circular.assunto || "",
+        destinos: obterDestinosCircular(circular)
+          .map((destino) => destino.nome)
+          .join("; "),
+      })),
+    });
 
-  window.XLSX.utils.book_append_sheet(arquivo, planilha, "Ofícios Circulares");
-  window.XLSX.writeFile(arquivo, `oficios-circulares_${anoSelecionado}.xlsx`);
+    notificar("Planilha exportada com sucesso.", "sucesso");
+  } catch (erro) {
+    console.error("Erro ao exportar Ofícios Circulares:", erro);
+    notificar("Não foi possível exportar a planilha.", "erro");
+  } finally {
+    btnExportar.disabled = false;
+  }
 });
 
 onAuthStateChanged(auth, async (user) => {
