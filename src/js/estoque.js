@@ -1,4 +1,5 @@
 import { auth, rtdb } from "./firebaseConfig.js";
+import { exportarTabelaExcel } from "./core/exportarExcel.js";
 import {
   formatarUnidade,
   obterQuantidadeNumerica,
@@ -1161,52 +1162,64 @@ listaMateriais?.addEventListener("click", (event) => {
    EXPORTAR ESTOQUE PARA EXCEL
 ========================= */
 
-btnExportarExcel?.addEventListener("click", () => {
+btnExportarExcel?.addEventListener("click", async () => {
   const materiaisExportar = obterMateriaisPermitidos();
 
   if (!materiaisExportar.length) {
     mostrarNotificacao("Não há materiais disponíveis para exportar.", "erro");
-
     return;
   }
 
-  const dadosExcel = materiaisExportar.map((material) => ({
-    Material: material.nome || "",
-    Código: material.codigo || "",
-    Categoria: obterNomeCategoria(material.categoriaId),
-    Unidade: material.unidade || "Unidade",
-    "Quantidade em Estoque": Number(material.estoque || 0),
-    "Última Movimentação": material.atualizadoEm
-      ? formatarData(material.atualizadoEm)
-      : "",
-  }));
-
-  const planilha = XLSX.utils.json_to_sheet(dadosExcel);
-
-  const workbook = XLSX.utils.book_new();
-
-  XLSX.utils.book_append_sheet(workbook, planilha, "Estoque");
-
-  planilha["!cols"] = [
-    { wch: 45 }, // Material
-    { wch: 20 }, // Código
-    { wch: 22 }, // Categoria
-    { wch: 15 }, // Unidade
-    { wch: 22 }, // Quantidade
-    { wch: 22 }, // Última movimentação
-  ];
-
   const hoje = new Date();
-
   const dataArquivo = [
     hoje.getFullYear(),
     String(hoje.getMonth() + 1).padStart(2, "0"),
     String(hoje.getDate()).padStart(2, "0"),
   ].join("-");
 
-  XLSX.writeFile(workbook, `estoque_${dataArquivo}.xlsx`);
+  btnExportarExcel.disabled = true;
 
-  mostrarNotificacao("Estoque exportado com sucesso!");
+  try {
+    await exportarTabelaExcel({
+      nomeArquivo: `estoque_${dataArquivo}.xlsx`,
+      nomePlanilha: "Estoque",
+      nomeTabela: "TabelaEstoque",
+      colunas: [
+        { titulo: "Material", chave: "material", largura: 45 },
+        { titulo: "Código", chave: "codigo", largura: 20 },
+        { titulo: "Categoria", chave: "categoria", largura: 22 },
+        { titulo: "Unidade", chave: "unidade", largura: 15 },
+        {
+          titulo: "Quantidade em Estoque",
+          chave: "quantidade",
+          largura: 22,
+          formato: "#,##0",
+        },
+        {
+          titulo: "Última Movimentação",
+          chave: "ultimaMovimentacao",
+          largura: 22,
+        },
+      ],
+      linhas: materiaisExportar.map((material) => ({
+        material: material.nome || "",
+        codigo: material.codigo || "",
+        categoria: obterNomeCategoria(material.categoriaId),
+        unidade: material.unidade || "Unidade",
+        quantidade: Number(material.estoque || 0),
+        ultimaMovimentacao: material.atualizadoEm
+          ? formatarData(material.atualizadoEm)
+          : "",
+      })),
+    });
+
+    mostrarNotificacao("Estoque exportado com sucesso!");
+  } catch (erro) {
+    console.error("Erro ao exportar estoque:", erro);
+    mostrarNotificacao("Não foi possível gerar o arquivo Excel.", "erro");
+  } finally {
+    btnExportarExcel.disabled = false;
+  }
 });
 
 /* =========================
