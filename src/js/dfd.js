@@ -1,4 +1,5 @@
 import { auth, db, rtdb } from "./firebaseConfig.js";
+import { exportarTabelaExcel } from "./core/exportarExcel.js";
 
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
@@ -487,12 +488,7 @@ inputBusca?.addEventListener("input", () => {
   renderTabela();
 });
 
-btnExportar?.addEventListener("click", () => {
-  if (typeof window.XLSX === "undefined") {
-    notificar("A biblioteca de exportação não foi carregada.", "erro");
-    return;
-  }
-
+btnExportar?.addEventListener("click", async () => {
   const registros = [...obterFiltrados()].sort(
     (a, b) => Number(a.numero || 0) - Number(b.numero || 0),
   );
@@ -502,16 +498,30 @@ btnExportar?.addEventListener("click", () => {
     return;
   }
 
-  const dados = registros.map((dfd) => ({
-    Número: formatarNumero(dfd.numero),
-    Assunto: dfd.assunto || "",
-  }));
+  btnExportar.disabled = true;
 
-  const planilha = window.XLSX.utils.json_to_sheet(dados);
-  const arquivo = window.XLSX.utils.book_new();
+  try {
+    await exportarTabelaExcel({
+      nomeArquivo: "dfds.xlsx",
+      nomePlanilha: "DFDs",
+      nomeTabela: "TabelaDFDs",
+      colunas: [
+        { titulo: "Número", chave: "numero", largura: 18 },
+        { titulo: "Assunto", chave: "assunto", largura: 70 },
+      ],
+      linhas: registros.map((dfd) => ({
+        numero: formatarNumero(dfd.numero),
+        assunto: dfd.assunto || "",
+      })),
+    });
 
-  window.XLSX.utils.book_append_sheet(arquivo, planilha, "DFDs");
-  window.XLSX.writeFile(arquivo, "dfds.xlsx");
+    notificar("Planilha exportada com sucesso.", "sucesso");
+  } catch (erro) {
+    console.error("Erro ao exportar DFDs:", erro);
+    notificar("Não foi possível exportar a planilha.", "erro");
+  } finally {
+    btnExportar.disabled = false;
+  }
 });
 
 onAuthStateChanged(auth, async (user) => {
