@@ -1,4 +1,9 @@
 import { auth, db, rtdb } from "./firebaseConfig.js";
+import {
+  observacaoEhObrigatoria,
+  obterTransicoesPermitidas,
+  validarEntregaMateriais,
+} from "./core/solicitacoesRegras.js";
 
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
@@ -1056,26 +1061,6 @@ function renderizarInformacoesEntrega(solicitacao) {
   `;
 }
 
-const transicoesStatus = {
-  RECEBIDA: ["EM_ATENDIMENTO"],
-
-  EM_ATENDIMENTO: ["AGUARDANDO_CONFIRMACAO"],
-
-  AGUARDANDO_CONFIRMACAO: [],
-  CONCLUIDA: [],
-  ATENDIDA_PARCIALMENTE: [],
-  CANCELADA: [],
-
-  // Compatibilidade com solicitações antigas
-  EM_ANALISE: ["EM_ATENDIMENTO"],
-  APROVADA: ["EM_ATENDIMENTO"],
-  INDEFERIDA: [],
-};
-
-function obterTransicoesPermitidas(statusAtual) {
-  return transicoesStatus[statusAtual] || [];
-}
-
 function preencherDrawerSolicitacao(solicitacao) {
   const status = obterDadosStatus(solicitacao.status);
   const possuiObservacoes = Boolean(
@@ -1769,73 +1754,24 @@ function renderizarQuantidadesMateriais() {
 function obterQuantidadesEntreguesMateriais(tipoAtendimento) {
   const itensSolicitados = obterItensMateriaisSolicitacao();
 
-  if (!itensSolicitados.length) {
-    throw new Error("A solicitação não possui materiais.");
-  }
-
   const camposQuantidade = Array.from(
     listaQuantidadesMateriais.querySelectorAll(".quantidade-entregue-material"),
   );
 
-  const itensEntregues = itensSolicitados.map((item, indice) => {
-    const quantidadeSolicitada = Number(item.quantidadeSolicitada || 0);
-
+  const quantidadesInformadas = itensSolicitados.map((item, indice) => {
     const campo = camposQuantidade.find(
       (elemento) => Number(elemento.dataset.indice) === indice,
     );
 
-    const quantidadeEntregue =
-      tipoAtendimento === "TOTAL"
-        ? quantidadeSolicitada
-        : Number(campo?.value || 0);
-
-    if (!Number.isFinite(quantidadeEntregue) || quantidadeEntregue < 0) {
-      throw new Error(
-        `Informe uma quantidade válida para ${item.nome || "o material"}.`,
-      );
-    }
-
-    if (quantidadeEntregue > quantidadeSolicitada) {
-      throw new Error(
-        `A quantidade entregue de ${item.nome || "o material"} não pode ser maior que a solicitada.`,
-      );
-    }
-
-    return {
-      materialId: item.materialId || "",
-      nome: item.nome || "Material",
-      unidade: item.unidade || "Unidade",
-      quantidadeSolicitada,
-      quantidadeEntregue,
-    };
+    return Number(campo?.value || 0);
   });
 
-  const quantidadeTotalEntregue = itensEntregues.reduce(
-    (total, item) => total + item.quantidadeEntregue,
-    0,
-  );
-
-  if (quantidadeTotalEntregue <= 0) {
-    throw new Error("Informe a quantidade entregue de pelo menos um material.");
-  }
-
-  const todosEntreguesIntegralmente = itensEntregues.every(
-    (item) => item.quantidadeEntregue === item.quantidadeSolicitada,
-  );
-
-  if (tipoAtendimento === "PARCIAL" && todosEntreguesIntegralmente) {
-    throw new Error(
-      "Todas as quantidades foram entregues. Selecione Entrega completa.",
-    );
-  }
-
-  return {
-    itensEntregues,
-    quantidadeTotalEntregue,
-  };
+  return validarEntregaMateriais({
+    itensSolicitados,
+    quantidadesInformadas,
+    tipoAtendimento,
+  });
 }
-
-
 
 async function carregarMateriaisEstoqueManutencao() {
   const snapshot = await get(ref(rtdb, "materiais"));
@@ -2316,10 +2252,6 @@ function atualizarCampoTipoAtendimento() {
   renderizarQuantidadesMateriais();
   atualizarBlocoMateriaisManutencao();
   atualizarAvisoObservacao();
-}
-
-function observacaoEhObrigatoria(status, tipoAtendimento) {
-  return status === "AGUARDANDO_CONFIRMACAO" && tipoAtendimento === "PARCIAL";
 }
 
 function atualizarAvisoObservacao() {
