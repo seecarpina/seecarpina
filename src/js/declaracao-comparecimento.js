@@ -109,9 +109,13 @@ function montarTextoDeclaracao(dados) {
   const inicio = formatarHorario(dados.horaInicio);
   const fim = formatarHorario(dados.horaFim);
 
+  const feminino = dados.tratamento === "sra.";
+  const artigo = feminino ? "a" : "o";
+  const inscricao = feminino ? "inscrita" : "inscrito";
+
   return (
-    `Declaro, para os devidos fins, que o ${dados.tratamento} ${pessoa}, ` +
-    `inscrito no CPF sob o nº ${cpfPessoa}, exercendo a função de ${cargo}, ` +
+    `Declaro, para os devidos fins, que ${artigo} ${dados.tratamento} ${pessoa}, ` +
+    `${inscricao} no CPF sob o nº ${cpfPessoa}, exercendo a função de ${cargo}, ` +
     "compareceu ao Setor de Recursos Humanos da Secretaria Municipal de " +
     `Educação e Esportes para tratar de assuntos relacionados à ${motivo}.\n\n` +
     `O atendimento ocorreu no dia ${data}, das ${inicio} às ${fim}.`
@@ -266,9 +270,13 @@ function gerarPDF(dados) {
     doc.setFontSize(11.5);
     doc.setLineHeightFactor(1.7);
 
+    const feminino = dados.tratamento === "sra.";
+    const artigo = feminino ? "a" : "o";
+    const inscricao = feminino ? "inscrita" : "inscrito";
+
     const primeiroParagrafo =
-      `Declaro, para os devidos fins, que o ${dados.tratamento} ` +
-      `${dados.nome.toUpperCase()}, inscrito no CPF sob o nº ${dados.cpf}, ` +
+      `Declaro, para os devidos fins, que ${artigo} ${dados.tratamento} ` +
+      `${dados.nome.toUpperCase()}, ${inscricao} no CPF sob o nº ${dados.cpf}, ` +
       `exercendo a função de ${dados.funcao}, compareceu ao Setor de Recursos ` +
       "Humanos da Secretaria Municipal de Educação e Esportes para tratar de " +
       `assuntos relacionados à ${dados.assunto}.`;
