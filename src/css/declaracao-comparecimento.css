@@ -1,0 +1,214 @@
+.declaracao-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.2rem;
+}
+
+.declaracao-form {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.campo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.campo label {
+  font-weight: 500;
+  color: var(--clr-dark);
+}
+
+.campo input,
+.campo select,
+.campo textarea {
+  width: 100%;
+  min-height: 3.5rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--clr-primary);
+  border-radius: 0.55rem;
+  background: var(--clr-white);
+  color: var(--clr-dark);
+  font: inherit;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.campo textarea {
+  min-height: 6rem;
+  resize: vertical;
+  line-height: 1.5;
+  text-transform: none;
+}
+
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus {
+  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.13);
+}
+
+.campo small {
+  color: var(--clr-info-dark);
+  font-size: 0.78rem;
+}
+
+.campos-tres,
+.campos-data-hora {
+  display: grid;
+  grid-template-columns: 0.55fr 1fr 1.6fr;
+  gap: 1rem;
+}
+
+.campos-data-hora {
+  grid-template-columns: 1.4fr 1fr 1fr;
+}
+
+.autocomplete-servidor {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% - 1.25rem);
+  left: 0;
+  right: 0;
+  display: none;
+  max-height: 18rem;
+  margin: 0;
+  padding: 0.4rem;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--clr-light);
+  border-radius: 0.6rem;
+  background: var(--clr-white);
+  box-shadow: var(--box-shadow);
+}
+
+.autocomplete-servidor.ativo {
+  display: block;
+}
+
+.autocomplete-servidor button {
+  display: grid;
+  width: 100%;
+  padding: 0.75rem 0.8rem;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: var(--clr-dark);
+  text-align: left;
+  cursor: pointer;
+}
+
+.autocomplete-servidor button:hover,
+.autocomplete-servidor button:focus {
+  background: var(--clr-light);
+}
+
+.autocomplete-servidor strong {
+  font-size: 0.88rem;
+}
+
+.autocomplete-servidor span {
+  margin-top: 0.2rem;
+  color: var(--clr-info-dark);
+  font-size: 0.75rem;
+}
+
+.acoes-declaracao {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.acoes-declaracao .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-width: 13rem;
+}
+
+.btn-secundario {
+  background: var(--clr-light);
+  color: var(--clr-dark);
+}
+
+.previa-box {
+  overflow: hidden;
+}
+
+.previa-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.previa-cabecalho h2,
+.previa-cabecalho p {
+  margin: 0;
+}
+
+.previa-cabecalho p {
+  margin-top: 0.25rem;
+  color: var(--clr-info-dark);
+  font-size: 0.82rem;
+}
+
+.previa-cabecalho > span {
+  color: var(--clr-primary);
+  font-size: 2rem;
+}
+
+.previa-documento {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 3.5rem);
+  border: 1px solid var(--clr-light);
+  border-radius: 0.5rem;
+  background: var(--clr-white);
+  color: var(--clr-dark);
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.06);
+}
+
+.previa-documento h2 {
+  margin: 0 0 2.5rem;
+  text-align: center;
+  font-size: 1.15rem;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+}
+
+.previa-documento p {
+  margin: 0 0 1.5rem;
+  line-height: 1.9;
+  text-align: justify;
+  white-space: pre-line;
+}
+
+@media screen and (max-width: 900px) {
+  .campos-tres,
+  .campos-data-hora {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .acoes-declaracao {
+    display: grid;
+  }
+
+  .acoes-declaracao .btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .previa-documento {
+    padding: 1.5rem 1.15rem;
+  }
+}
