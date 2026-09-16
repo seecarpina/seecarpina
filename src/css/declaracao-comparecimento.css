@@ -19,7 +19,7 @@
 
 .campo label {
   font-weight: 500;
-  color: var(--color-dark);
+  color: var(--clr-dark);
 }
 
 .campo input,
@@ -28,10 +28,10 @@
   width: 100%;
   min-height: 3.5rem;
   padding: 0.9rem 1rem;
-  border: 1px solid var(--color-primary);
+  border: 1px solid var(--clr-primary);
   border-radius: 0.55rem;
-  background: var(--color-white);
-  color: var(--color-dark);
+  background: var(--clr-white);
+  color: var(--clr-dark);
   font: inherit;
   outline: none;
   transition:
@@ -53,7 +53,7 @@
 }
 
 .campo small {
-  color: var(--color-info-dark);
+  color: var(--clr-info-dark);
   font-size: 0.78rem;
 }
 
@@ -80,9 +80,9 @@
   padding: 0.4rem;
   overflow-y: auto;
   list-style: none;
-  border: 1px solid var(--color-light);
+  border: 1px solid var(--clr-light);
   border-radius: 0.6rem;
-  background: var(--color-white);
+  background: var(--clr-white);
   box-shadow: var(--box-shadow);
 }
 
@@ -97,14 +97,14 @@
   border: 0;
   border-radius: 0.45rem;
   background: transparent;
-  color: var(--color-dark);
+  color: var(--clr-dark);
   text-align: left;
   cursor: pointer;
 }
 
 .autocomplete-servidor button:hover,
 .autocomplete-servidor button:focus {
-  background: var(--color-light);
+  background: var(--clr-light);
 }
 
 .autocomplete-servidor strong {
@@ -113,7 +113,7 @@
 
 .autocomplete-servidor span {
   margin-top: 0.2rem;
-  color: var(--color-info-dark);
+  color: var(--clr-info-dark);
   font-size: 0.75rem;
 }
 
@@ -133,8 +133,8 @@
 }
 
 .btn-secundario {
-  background: var(--color-light);
-  color: var(--color-dark);
+  background: var(--clr-light);
+  color: var(--clr-dark);
 }
 
 .previa-box {
@@ -156,12 +156,12 @@
 
 .previa-cabecalho p {
   margin-top: 0.25rem;
-  color: var(--color-info-dark);
+  color: var(--clr-info-dark);
   font-size: 0.82rem;
 }
 
 .previa-cabecalho > span {
-  color: var(--color-primary);
+  color: var(--clr-primary);
   font-size: 2rem;
 }
 
@@ -169,10 +169,10 @@
   max-width: 50rem;
   margin: 0 auto;
   padding: clamp(1.5rem, 4vw, 3.5rem);
-  border: 1px solid var(--color-light);
+  border: 1px solid var(--clr-light);
   border-radius: 0.5rem;
-  background: var(--color-white);
-  color: var(--color-dark);
+  background: var(--clr-white);
+  color: var(--clr-dark);
   box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.06);
 }
 
