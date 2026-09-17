@@ -1,5 +1,5 @@
 import { auth, rtdb } from "./firebaseConfig.js";
-import { exportarTabelaExcel } from "./core/exportarExcel.js";
+import { exportarPlanilhasExcel } from "./core/exportarExcel.js";
 import {
   formatarUnidade,
   obterQuantidadeNumerica,
@@ -1162,6 +1162,102 @@ listaMateriais?.addEventListener("click", (event) => {
    EXPORTAR ESTOQUE PARA EXCEL
 ========================= */
 
+function obterRotuloAcaoMovimentacao(acao) {
+  const rotulos = {
+    cadastro: "Cadastro inicial",
+    adicao: "Adição ao estoque",
+    romaneio: "Entrega por romaneio",
+    cancelamento_romaneio: "Cancelamento de romaneio",
+  };
+
+  if (rotulos[acao]) {
+    return rotulos[acao];
+  }
+
+  return String(acao || "")
+    .replace(/_/g, " ")
+    .replace(/^./, (letra) => letra.toUpperCase());
+}
+
+function obterDestinoMovimentacao(movimentacao) {
+  if (movimentacao.destinoId) {
+    const nomeAtual = obterNomeDestino(movimentacao.destinoId);
+
+    if (nomeAtual) {
+      return nomeAtual;
+    }
+  }
+
+  return movimentacao.destino || "";
+}
+
+function obterDataExcel(valor) {
+  if (!valor) return "";
+
+  const data = new Date(valor);
+
+  return Number.isNaN(data.getTime()) ? "" : data;
+}
+
+function obterMovimentacoesParaExportacao() {
+  return historicoEstoque.flatMap((movimentacao) => {
+    const dadosComuns = {
+      data: obterDataExcel(movimentacao.data),
+      destino: obterDestinoMovimentacao(movimentacao),
+      responsavel:
+        movimentacao.usuario || movimentacao.responsavel || "",
+      justificativa:
+        movimentacao.justificativa || movimentacao.motivo || "",
+      romaneio: movimentacao.romaneioId || "",
+    };
+
+    if (movimentacao.acao === "cancelamento_romaneio") {
+      return (movimentacao.itens || [])
+        .filter((item) => categoriaPermitida(item.categoriaId))
+        .map((item) => ({
+          ...dadosComuns,
+          material: item.material || item.nome || "",
+          categoria: obterNomeCategoria(item.categoriaId),
+          tipo: "Devolução",
+          acao: obterRotuloAcaoMovimentacao(movimentacao.acao),
+          quantidade: Number(item.quantidade || 0),
+          unidade: item.unidade || "Unidade",
+          estoqueAnterior: "",
+          estoquePosterior: "",
+        }));
+    }
+
+    if (!categoriaPermitida(movimentacao.categoriaId)) {
+      return [];
+    }
+
+    return [
+      {
+        ...dadosComuns,
+        material: movimentacao.material || "",
+        categoria: obterNomeCategoria(movimentacao.categoriaId),
+        tipo:
+          movimentacao.tipo === "entrada"
+            ? "Entrada"
+            : movimentacao.tipo === "saida"
+              ? "Saída"
+              : movimentacao.tipo || "",
+        acao: obterRotuloAcaoMovimentacao(movimentacao.acao),
+        quantidade: Number(movimentacao.quantidade || 0),
+        unidade: movimentacao.unidade || "Unidade",
+        estoqueAnterior:
+          movimentacao.estoqueAnterior === undefined
+            ? ""
+            : Number(movimentacao.estoqueAnterior),
+        estoquePosterior:
+          movimentacao.estoquePosterior === undefined
+            ? ""
+            : Number(movimentacao.estoquePosterior),
+      },
+    ];
+  });
+}
+
 btnExportarExcel?.addEventListener("click", async () => {
   const materiaisExportar = obterMateriaisPermitidos();
 
@@ -1180,40 +1276,88 @@ btnExportarExcel?.addEventListener("click", async () => {
   btnExportarExcel.disabled = true;
 
   try {
-    await exportarTabelaExcel({
+    const movimentacoesExportar = obterMovimentacoesParaExportacao();
+
+    await exportarPlanilhasExcel({
       nomeArquivo: `estoque_${dataArquivo}.xlsx`,
-      nomePlanilha: "Estoque",
-      nomeTabela: "TabelaEstoque",
-      colunas: [
-        { titulo: "Material", chave: "material", largura: 45 },
-        { titulo: "Código", chave: "codigo", largura: 20 },
-        { titulo: "Categoria", chave: "categoria", largura: 22 },
-        { titulo: "Unidade", chave: "unidade", largura: 15 },
+      planilhas: [
         {
-          titulo: "Quantidade em Estoque",
-          chave: "quantidade",
-          largura: 22,
-          formato: "#,##0",
+          nomePlanilha: "Estoque atual",
+          nomeTabela: "TabelaEstoqueAtual",
+          colunas: [
+            { titulo: "Material", chave: "material", largura: 45 },
+            { titulo: "Código", chave: "codigo", largura: 20 },
+            { titulo: "Categoria", chave: "categoria", largura: 22 },
+            { titulo: "Unidade", chave: "unidade", largura: 15 },
+            {
+              titulo: "Quantidade em Estoque",
+              chave: "quantidade",
+              largura: 22,
+              formato: "#,##0",
+            },
+            {
+              titulo: "Última Movimentação",
+              chave: "ultimaMovimentacao",
+              largura: 22,
+            },
+          ],
+          linhas: materiaisExportar.map((material) => ({
+            material: material.nome || "",
+            codigo: material.codigo || "",
+            categoria: obterNomeCategoria(material.categoriaId),
+            unidade: material.unidade || "Unidade",
+            quantidade: Number(material.estoque || 0),
+            ultimaMovimentacao: material.atualizadoEm
+              ? formatarData(material.atualizadoEm)
+              : "",
+          })),
         },
         {
-          titulo: "Última Movimentação",
-          chave: "ultimaMovimentacao",
-          largura: 22,
+          nomePlanilha: "Movimentações",
+          nomeTabela: "TabelaMovimentacoesEstoque",
+          colunas: [
+            {
+              titulo: "Data e hora",
+              chave: "data",
+              largura: 21,
+              formato: "dd/mm/yyyy hh:mm",
+            },
+            { titulo: "Material", chave: "material", largura: 40 },
+            { titulo: "Categoria", chave: "categoria", largura: 22 },
+            { titulo: "Tipo", chave: "tipo", largura: 14 },
+            { titulo: "Ação", chave: "acao", largura: 24 },
+            {
+              titulo: "Quantidade",
+              chave: "quantidade",
+              largura: 15,
+              formato: "#,##0",
+            },
+            { titulo: "Unidade", chave: "unidade", largura: 15 },
+            { titulo: "Destino/Escola", chave: "destino", largura: 38 },
+            { titulo: "Responsável", chave: "responsavel", largura: 22 },
+            { titulo: "Justificativa", chave: "justificativa", largura: 42 },
+            { titulo: "Romaneio", chave: "romaneio", largura: 24 },
+            {
+              titulo: "Estoque anterior",
+              chave: "estoqueAnterior",
+              largura: 18,
+              formato: "#,##0",
+            },
+            {
+              titulo: "Estoque posterior",
+              chave: "estoquePosterior",
+              largura: 18,
+              formato: "#,##0",
+            },
+          ],
+          linhas: movimentacoesExportar,
         },
       ],
-      linhas: materiaisExportar.map((material) => ({
-        material: material.nome || "",
-        codigo: material.codigo || "",
-        categoria: obterNomeCategoria(material.categoriaId),
-        unidade: material.unidade || "Unidade",
-        quantidade: Number(material.estoque || 0),
-        ultimaMovimentacao: material.atualizadoEm
-          ? formatarData(material.atualizadoEm)
-          : "",
-      })),
     });
 
-    mostrarNotificacao("Estoque exportado com sucesso!");
+    mostrarNotificacao(
+      `Estoque e ${movimentacoesExportar.length} movimentação${movimentacoesExportar.length === 1 ? "" : "ões"} exportados com sucesso!`,
+    );
   } catch (erro) {
     console.error("Erro ao exportar estoque:", erro);
     mostrarNotificacao("Não foi possível gerar o arquivo Excel.", "erro");
