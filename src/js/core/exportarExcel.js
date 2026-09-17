@@ -19,20 +19,13 @@ function baixarArquivo(buffer, nomeArquivo) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export async function exportarTabelaExcel({
-  nomeArquivo,
-  nomePlanilha,
-  nomeTabela,
-  colunas,
-  linhas,
-}) {
-  if (!window.ExcelJS) {
-    throw new Error("A biblioteca de exportação do Excel não foi carregada.");
-  }
-
-  const workbook = new window.ExcelJS.Workbook();
-  workbook.creator = "SEE Carpina";
-  workbook.created = new Date();
+function adicionarTabelaAoWorkbook(workbook, configuracao) {
+  const {
+    nomePlanilha,
+    nomeTabela,
+    colunas,
+    linhas,
+  } = configuracao;
 
   const planilha = workbook.addWorksheet(nomePlanilha, {
     views: [{ state: "frozen", ySplit: 1 }],
@@ -108,11 +101,55 @@ export async function exportarTabelaExcel({
         celula.alignment = {
           vertical: "middle",
           horizontal: "left",
+          wrapText: true,
         };
       }
     });
   });
 
+  return planilha;
+}
+
+export async function exportarPlanilhasExcel({
+  nomeArquivo,
+  planilhas,
+}) {
+  if (!window.ExcelJS) {
+    throw new Error("A biblioteca de exportação do Excel não foi carregada.");
+  }
+
+  if (!Array.isArray(planilhas) || !planilhas.length) {
+    throw new Error("Nenhuma planilha foi informada para exportação.");
+  }
+
+  const workbook = new window.ExcelJS.Workbook();
+  workbook.creator = "SEE Carpina";
+  workbook.created = new Date();
+
+  planilhas.forEach((planilha) => {
+    adicionarTabelaAoWorkbook(workbook, planilha);
+  });
+
   const buffer = await workbook.xlsx.writeBuffer();
   baixarArquivo(buffer, nomeArquivo);
+}
+
+export async function exportarTabelaExcel({
+  nomeArquivo,
+  nomePlanilha,
+  nomeTabela,
+  colunas,
+  linhas,
+}) {
+  return exportarPlanilhasExcel({
+    nomeArquivo,
+    planilhas: [
+      {
+        nomePlanilha,
+        nomeTabela,
+        colunas,
+        linhas,
+      },
+    ],
+  });
 }
