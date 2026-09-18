@@ -779,7 +779,7 @@ function formatarAssunto(oficio) {
             account_tree
           </span>
 
-          Processo nº ${numeroProcessoEscapado}
+          ${numeroProcessoEscapado}
         </a>
       </div>
     `;
