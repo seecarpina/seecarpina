@@ -529,6 +529,7 @@ function obterOficiosFiltrados() {
       ${obterDestinoOficio(oficio)}
       ${obterCopiaOficio(oficio)}
       ${oficio.responsavel || ""}
+      ${oficio.numeroProcesso || ""}
     `);
 
     return texto.includes(termo);
@@ -741,31 +742,46 @@ function renderTabela() {
 
 function formatarAssunto(oficio) {
   const assunto = String(oficio.assunto || "");
-
   const assuntoEscapado = escaparHtml(assunto);
 
   if (oficio.sistemaCarpinaDigital === true && oficio.numeroProcesso) {
     const numeroProcesso = String(oficio.numeroProcesso).trim();
+    const numeroProcessoEscapado = escaparHtml(numeroProcesso);
 
     const link =
       "https://digital.carpina.pe.gov.br/" +
       `app/processos/manage/${encodeURIComponent(numeroProcesso)}`;
 
     return `
-      <a
-        href="${link}"
-        target="_blank"
-        rel="noopener noreferrer"
-        title="Abrir processo nº ${escaparHtml(numeroProcesso)}"
-      >
-        ${assuntoEscapado}
-
-        <span
-          class="material-symbols-outlined"
+      <div class="assunto-com-processo">
+        <a
+          class="assunto-link-processo"
+          href="${link}"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Abrir processo nº ${numeroProcessoEscapado}"
         >
-          link_2
-        </span>
-      </a>
+          <span>${assuntoEscapado}</span>
+
+          <span class="material-symbols-outlined" aria-hidden="true">
+            open_in_new
+          </span>
+        </a>
+
+        <a
+          class="badge-processo-digital"
+          href="${link}"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Abrir processo nº ${numeroProcessoEscapado} no Sistema Carpina Digital"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">
+            account_tree
+          </span>
+
+          ${numeroProcessoEscapado}
+        </a>
+      </div>
     `;
   }
 

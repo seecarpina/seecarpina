@@ -463,6 +463,57 @@
   min-width: 170px;
 }
 
+.assunto-com-processo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+}
+
+.assunto-link-processo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--clr-dark);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.assunto-link-processo:hover {
+  color: var(--clr-primary);
+}
+
+.assunto-link-processo .material-symbols-outlined {
+  flex-shrink: 0;
+  font-size: 1rem;
+}
+
+.badge-processo-digital {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  max-width: 100%;
+  padding: 0.28rem 0.55rem;
+  border: 1px solid rgba(191, 90, 242, 0.3);
+  border-radius: 999px;
+  background: rgba(191, 90, 242, 0.12);
+  color: var(--clr-warning);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.badge-processo-digital:hover {
+  background: rgba(191, 90, 242, 0.2);
+}
+
+.badge-processo-digital .material-symbols-outlined {
+  flex-shrink: 0;
+  font-size: 0.95rem;
+}
+
 /* =========================================
    AÇÕES
 ========================================= */
