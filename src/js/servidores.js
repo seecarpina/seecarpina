@@ -2172,9 +2172,7 @@ if (btnExportarExcel) {
 
     try {
       await exportarTabelaExcel({
-        nomeArquivo: `servidores_${new Date()
-          .toISOString()
-          .slice(0, 10)}.xlsx`,
+        nomeArquivo: `servidores_${new Date().toISOString().slice(0, 10)}.xlsx`,
         nomePlanilha: "Servidores",
         nomeTabela: "TabelaServidores",
         colunas: [
@@ -3060,7 +3058,7 @@ function gerarPDFTransferencia(dados) {
       doc.text(
         `Matrícula: ${
           dados.codigo
-        } para ser lotado(a) nesta Unidade de Ensino a partir de ${formatarDataBR(
+        } para ser lotado(a) nesta Unidade a partir de ${formatarDataBR(
           dados.dataTransferencia,
         )}.`,
         xInicial,
