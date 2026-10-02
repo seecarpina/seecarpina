@@ -1,0 +1,408 @@
+[
+  {
+    "data": "01-01",
+    "nome": "Confraternização Universal",
+    "categoria": "Geral"
+  },
+  { "data": "01-01", "nome": "Dia Mundial da Paz", "categoria": "Geral" },
+  {
+    "data": "01-02",
+    "nome": "Dia do Sanitarista",
+    "categoria": "Profissional"
+  },
+  {
+    "data": "01-04",
+    "nome": "Dia Mundial do Braille",
+    "categoria": "Educação"
+  },
+  {
+    "data": "01-05",
+    "nome": "Dia Nacional da Tipografia",
+    "categoria": "Cultura"
+  },
+  { "data": "01-06", "nome": "Dia de Reis", "categoria": "Religiosa" },
+  { "data": "01-06", "nome": "Dia da Gratidão", "categoria": "Geral" },
+  { "data": "01-07", "nome": "Dia do Leitor", "categoria": "Educação" },
+  {
+    "data": "01-07",
+    "nome": "Dia da Liberdade de Culto",
+    "categoria": "Geral"
+  },
+  { "data": "01-09", "nome": "Dia do Fico", "categoria": "História" },
+  { "data": "01-09", "nome": "Dia do Astronauta", "categoria": "Profissional" },
+  { "data": "01-15", "nome": "Dia do Compositor", "categoria": "Cultura" },
+  {
+    "data": "01-20",
+    "nome": "Dia do Farmacêutico",
+    "categoria": "Profissional"
+  },
+  {
+    "data": "01-24",
+    "nome": "Dia Internacional da Educação",
+    "categoria": "Educação"
+  },
+  { "data": "01-25", "nome": "Dia do Carteiro", "categoria": "Profissional" },
+  {
+    "data": "01-27",
+    "nome": "Dia Internacional em Memória das Vítimas do Holocausto",
+    "categoria": "História"
+  },
+  {
+    "data": "01-30",
+    "nome": "Dia Nacional das Histórias em Quadrinhos",
+    "categoria": "Cultura"
+  },
+  { "data": "01-31", "nome": "Dia Mundial do Mágico", "categoria": "Cultura" },
+
+  { "data": "02-04", "nome": "Dia Mundial do Câncer", "categoria": "Saúde" },
+  {
+    "data": "02-06",
+    "nome": "Dia do Agente de Defesa Ambiental",
+    "categoria": "Profissional"
+  },
+  { "data": "02-11", "nome": "Dia do Zelador", "categoria": "Profissional" },
+  {
+    "data": "02-21",
+    "nome": "Dia Internacional da Língua Materna",
+    "categoria": "Educação"
+  },
+  {
+    "data": "02-22",
+    "nome": "Dia do Auxiliar de Serviços Gerais",
+    "categoria": "Profissional"
+  },
+  {
+    "data": "02-27",
+    "nome": "Dia do Agente Fiscal da Receita Federal",
+    "categoria": "Profissional"
+  },
+
+  {
+    "data": "03-08",
+    "nome": "Dia Internacional da Mulher",
+    "categoria": "Geral"
+  },
+  { "data": "03-12", "nome": "Dia do Bibliotecário", "categoria": "Educação" },
+  { "data": "03-14", "nome": "Dia Nacional dos Animais", "categoria": "Geral" },
+  { "data": "03-15", "nome": "Dia da Escola", "categoria": "Educação" },
+  { "data": "03-15", "nome": "Dia do Consumidor", "categoria": "Geral" },
+  { "data": "03-20", "nome": "Início do Outono", "categoria": "Geral" },
+  {
+    "data": "03-21",
+    "nome": "Dia Internacional da Síndrome de Down",
+    "categoria": "Inclusão"
+  },
+  { "data": "03-21", "nome": "Dia Mundial da Poesia", "categoria": "Educação" },
+  {
+    "data": "03-22",
+    "nome": "Dia Mundial da Água",
+    "categoria": "Meio Ambiente"
+  },
+  { "data": "03-27", "nome": "Dia do Circo", "categoria": "Cultura" },
+
+  {
+    "data": "04-02",
+    "nome": "Dia Mundial de Conscientização do Autismo",
+    "categoria": "Inclusão"
+  },
+  {
+    "data": "04-02",
+    "nome": "Dia Internacional do Livro Infantil",
+    "categoria": "Educação"
+  },
+  {
+    "data": "04-07",
+    "nome": "Dia Nacional de Combate ao Bullying e à Violência na Escola",
+    "categoria": "Educação"
+  },
+  {
+    "data": "04-08",
+    "nome": "Dia Mundial de Combate ao Câncer",
+    "categoria": "Saúde"
+  },
+  {
+    "data": "04-09",
+    "nome": "Dia Nacional da Biblioteca",
+    "categoria": "Educação"
+  },
+  {
+    "data": "04-13",
+    "nome": "Dia do Hino Nacional Brasileiro",
+    "categoria": "Cultura"
+  },
+  {
+    "data": "04-18",
+    "nome": "Dia Nacional do Livro Infantil",
+    "categoria": "Educação"
+  },
+  {
+    "data": "04-19",
+    "nome": "Dia dos Povos Indígenas",
+    "categoria": "Cultura"
+  },
+  { "data": "04-21", "nome": "Tiradentes", "categoria": "História" },
+  {
+    "data": "04-22",
+    "nome": "Descobrimento do Brasil",
+    "categoria": "História"
+  },
+  { "data": "04-23", "nome": "Dia Mundial do Livro", "categoria": "Educação" },
+  {
+    "data": "04-24",
+    "nome": "Dia Nacional da Família na Escola",
+    "categoria": "Educação"
+  },
+  { "data": "04-28", "nome": "Dia da Educação", "categoria": "Educação" },
+
+  { "data": "05-01", "nome": "Dia do Trabalho", "categoria": "Geral" },
+  {
+    "data": "05-13",
+    "nome": "Abolição da Escravatura",
+    "categoria": "História"
+  },
+  {
+    "data": "05-18",
+    "nome": "Dia Nacional de Combate ao Abuso e à Exploração Sexual de Crianças e Adolescentes",
+    "categoria": "Proteção"
+  },
+  { "data": "05-20", "nome": "Dia do Pedagogo", "categoria": "Educação" },
+  { "data": "05-25", "nome": "Dia da Indústria", "categoria": "Geral" },
+  {
+    "data": "05-28",
+    "nome": "Dia Internacional de Luta pela Saúde da Mulher",
+    "categoria": "Saúde"
+  },
+
+  {
+    "data": "06-03",
+    "nome": "Dia da Conscientização contra a Obesidade Mórbida Infantil",
+    "categoria": "Saúde"
+  },
+  {
+    "data": "06-05",
+    "nome": "Dia Mundial do Meio Ambiente",
+    "categoria": "Meio Ambiente"
+  },
+  {
+    "data": "06-12",
+    "nome": "Dia Mundial contra o Trabalho Infantil",
+    "categoria": "Proteção"
+  },
+  {
+    "data": "06-14",
+    "nome": "Dia Mundial do Doador de Sangue",
+    "categoria": "Saúde"
+  },
+  { "data": "06-18", "nome": "Dia do Químico", "categoria": "Profissional" },
+  { "data": "06-21", "nome": "Início do Inverno", "categoria": "Geral" },
+  { "data": "06-24", "nome": "Dia de São João", "categoria": "Cultura" },
+  {
+    "data": "06-28",
+    "nome": "Dia Internacional do Orgulho LGBTQIA+",
+    "categoria": "Geral"
+  },
+  { "data": "06-29", "nome": "Dia de São Pedro", "categoria": "Cultura" },
+
+  {
+    "data": "07-02",
+    "nome": "Dia do Bombeiro Brasileiro",
+    "categoria": "Profissional"
+  },
+  {
+    "data": "07-08",
+    "nome": "Dia Nacional do Pesquisador",
+    "categoria": "Educação"
+  },
+  { "data": "07-13", "nome": "Dia Mundial do Rock", "categoria": "Cultura" },
+  {
+    "data": "07-16",
+    "nome": "Dia do Comerciante",
+    "categoria": "Profissional"
+  },
+  { "data": "07-20", "nome": "Dia do Amigo", "categoria": "Geral" },
+  { "data": "07-25", "nome": "Dia do Escritor", "categoria": "Educação" },
+  { "data": "07-25", "nome": "Dia do Motorista", "categoria": "Profissional" },
+  { "data": "07-26", "nome": "Dia dos Avós", "categoria": "Geral" },
+  { "data": "07-28", "nome": "Dia do Agricultor", "categoria": "Profissional" },
+
+  {
+    "data": "08-06",
+    "nome": "Dia Nacional dos Profissionais da Educação",
+    "categoria": "Educação"
+  },
+  { "data": "08-09", "nome": "Dia dos Pais", "categoria": "Família" },
+  { "data": "08-11", "nome": "Dia do Estudante", "categoria": "Educação" },
+  { "data": "08-11", "nome": "Dia do Advogado", "categoria": "Profissional" },
+  { "data": "08-16", "nome": "Dia do Filósofo", "categoria": "Educação" },
+  { "data": "08-22", "nome": "Dia do Folclore", "categoria": "Cultura" },
+  {
+    "data": "08-22",
+    "nome": "Dia do Supervisor Escolar",
+    "categoria": "Educação"
+  },
+  {
+    "data": "08-22",
+    "nome": "Dia do Coordenador Pedagógico",
+    "categoria": "Educação"
+  },
+  { "data": "08-25", "nome": "Dia do Soldado", "categoria": "Geral" },
+  {
+    "data": "08-26",
+    "nome": "Dia Nacional dos Surdos",
+    "categoria": "Inclusão"
+  },
+  { "data": "08-30", "nome": "Dia da Secretaria", "categoria": "Profissional" },
+
+  {
+    "data": "09-01",
+    "nome": "Dia do Professor de Educação Física",
+    "categoria": "Educação"
+  },
+  { "data": "09-05", "nome": "Dia da Amazônia", "categoria": "Meio Ambiente" },
+  {
+    "data": "09-07",
+    "nome": "Independência do Brasil",
+    "categoria": "História"
+  },
+  {
+    "data": "09-08",
+    "nome": "Dia Mundial da Alfabetização",
+    "categoria": "Educação"
+  },
+  {
+    "data": "09-09",
+    "nome": "Dia do Administrador",
+    "categoria": "Profissional"
+  },
+  { "data": "09-21", "nome": "Dia da Árvore", "categoria": "Meio Ambiente" },
+  { "data": "09-21", "nome": "Dia do Radialista", "categoria": "Profissional" },
+  { "data": "09-22", "nome": "Início da Primavera", "categoria": "Geral" },
+  {
+    "data": "09-23",
+    "nome": "Dia Internacional das Línguas de Sinais",
+    "categoria": "Inclusão"
+  },
+  { "data": "09-25", "nome": "Dia Nacional do Trânsito", "categoria": "Geral" },
+  { "data": "09-30", "nome": "Dia da Secretária", "categoria": "Profissional" },
+  {
+    "data": "09-30",
+    "nome": "Dia do Secretário Escolar",
+    "categoria": "Educação"
+  },
+
+  { "data": "10-01", "nome": "Dia do Vereador", "categoria": "Cidadania" },
+  {
+    "data": "10-01",
+    "nome": "Dia Internacional das Pessoas Idosas",
+    "categoria": "Geral"
+  },
+  {
+    "data": "10-01",
+    "nome": "Dia Internacional da Música",
+    "categoria": "Cultura"
+  },
+  {
+    "data": "10-04",
+    "nome": "Dia Mundial dos Animais",
+    "categoria": "Meio Ambiente"
+  },
+  {
+    "data": "10-05",
+    "nome": "Dia Mundial dos Professores",
+    "categoria": "Educação"
+  },
+  { "data": "10-08", "nome": "Dia do Nordestino", "categoria": "Cultura" },
+  { "data": "10-12", "nome": "Dia das Crianças", "categoria": "Educação" },
+  {
+    "data": "10-12",
+    "nome": "Nossa Senhora Aparecida",
+    "categoria": "Religiosa"
+  },
+  { "data": "10-15", "nome": "Dia do Professor", "categoria": "Educação" },
+  {
+    "data": "10-16",
+    "nome": "Dia Mundial da Alimentação",
+    "categoria": "Educação"
+  },
+  {
+    "data": "10-20",
+    "nome": "Dia Mundial de Combate ao Bullying",
+    "categoria": "Educação"
+  },
+  {
+    "data": "10-21",
+    "nome": "Dia Nacional da Alimentação Escolar",
+    "categoria": "Educação"
+  },
+  {
+    "data": "10-28",
+    "nome": "Dia do Servidor Público",
+    "categoria": "Profissional"
+  },
+  { "data": "10-29", "nome": "Dia Nacional do Livro", "categoria": "Educação" },
+  {
+    "data": "10-30",
+    "nome": "Dia da Merendeira Escolar",
+    "categoria": "Educação"
+  },
+  { "data": "10-31", "nome": "Dia do Saci", "categoria": "Cultura" },
+
+  { "data": "11-02", "nome": "Finados", "categoria": "Geral" },
+  {
+    "data": "11-05",
+    "nome": "Dia Nacional da Língua Portuguesa",
+    "categoria": "Educação"
+  },
+  {
+    "data": "11-05",
+    "nome": "Dia da Cultura e da Ciência",
+    "categoria": "Educação"
+  },
+  {
+    "data": "11-12",
+    "nome": "Dia do Diretor de Escola",
+    "categoria": "Educação"
+  },
+  {
+    "data": "11-15",
+    "nome": "Proclamação da República",
+    "categoria": "História"
+  },
+  { "data": "11-19", "nome": "Dia da Bandeira", "categoria": "História" },
+  {
+    "data": "11-20",
+    "nome": "Dia Nacional de Zumbi e da Consciência Negra",
+    "categoria": "História"
+  },
+  { "data": "11-21", "nome": "Dia Mundial da Televisão", "categoria": "Geral" },
+  {
+    "data": "11-28",
+    "nome": "Dia Nacional de Ação de Graças",
+    "categoria": "Geral"
+  },
+
+  {
+    "data": "12-03",
+    "nome": "Dia Internacional da Pessoa com Deficiência",
+    "categoria": "Inclusão"
+  },
+  {
+    "data": "12-04",
+    "nome": "Dia do Orientador Educacional",
+    "categoria": "Educação"
+  },
+  { "data": "12-08", "nome": "Dia da Família", "categoria": "Família" },
+  {
+    "data": "12-10",
+    "nome": "Dia Internacional dos Direitos Humanos",
+    "categoria": "Cidadania"
+  },
+  {
+    "data": "12-15",
+    "nome": "Dia do Arquiteto e Urbanista",
+    "categoria": "Profissional"
+  },
+  { "data": "12-21", "nome": "Início do Verão", "categoria": "Geral" },
+  { "data": "12-25", "nome": "Natal", "categoria": "Religiosa" },
+  { "data": "12-31", "nome": "Réveillon", "categoria": "Geral" }
+]

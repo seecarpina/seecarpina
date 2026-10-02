@@ -1198,7 +1198,6 @@ function preencherDrawerSolicitacao(solicitacao) {
   btnAtualizarSolicitacao.style.display = possuiTransicoes ? "flex" : "none";
 }
 
-
 function obterListaPedido(valor) {
   if (Array.isArray(valor)) return valor.filter(Boolean);
   return valor && typeof valor === "object" ? Object.values(valor) : [];
@@ -1251,14 +1250,7 @@ function gerarPDFPedidoSolicitacao(solicitacao) {
     let y = 0;
 
     function adicionarFundoPagina() {
-      documento.addImage(
-        imagem,
-        "PNG",
-        0,
-        0,
-        larguraPagina,
-        alturaPagina,
-      );
+      documento.addImage(imagem, "PNG", 0, 0, larguraPagina, alturaPagina);
 
       documento.setFont("helvetica", "normal");
       documento.setFontSize(8);
@@ -1299,7 +1291,11 @@ function gerarPDFPedidoSolicitacao(solicitacao) {
     }
 
     function adicionarCampo(rotulo, valor) {
-      if (valor === null || valor === undefined || String(valor).trim() === "") {
+      if (
+        valor === null ||
+        valor === undefined ||
+        String(valor).trim() === ""
+      ) {
         return;
       }
 
@@ -1356,7 +1352,10 @@ function gerarPDFPedidoSolicitacao(solicitacao) {
     adicionarCampo("Escola", solicitacao.escolaNome || "-");
     adicionarCampo("Solicitante", solicitacao.solicitanteNome || "-");
     adicionarCampo("E-mail", solicitacao.solicitanteEmail || "");
-    adicionarCampo("Data do pedido", formatarDataPedido(solicitacao.criadoEm, true));
+    adicionarCampo(
+      "Data do pedido",
+      formatarDataPedido(solicitacao.criadoEm, true),
+    );
     adicionarCampo("Módulo", obterNomeModulo(solicitacao.modulo));
     adicionarCampo("Situação", obterDadosStatus(solicitacao.status).nome);
     adicionarCampo("Prioridade", solicitacao.prioridade || "");
@@ -1386,8 +1385,7 @@ function gerarPDFPedidoSolicitacao(solicitacao) {
 
       const quantidadeTotal = itens.reduce(
         (total, item) =>
-          total +
-          Number(item.quantidadeSolicitada ?? item.quantidade ?? 0),
+          total + Number(item.quantidadeSolicitada ?? item.quantidade ?? 0),
         0,
       );
 
@@ -1425,10 +1423,7 @@ function gerarPDFPedidoSolicitacao(solicitacao) {
           : "Entrega parcial",
       );
       adicionarCampo("Informado por", entrega.informadoPorNome || "");
-      adicionarCampo(
-        "Data",
-        formatarDataPedido(entrega.informadoEm, true),
-      );
+      adicionarCampo("Data", formatarDataPedido(entrega.informadoEm, true));
       adicionarCampo("Observação", entrega.observacao || "");
       adicionarCampo(
         "Confirmação da escola",
@@ -1449,9 +1444,7 @@ function gerarPDFPedidoSolicitacao(solicitacao) {
         );
       });
 
-      const materiaisUtilizados = obterListaPedido(
-        entrega.materiaisUtilizados,
-      );
+      const materiaisUtilizados = obterListaPedido(entrega.materiaisUtilizados);
 
       if (materiaisUtilizados.length) {
         adicionarCampo("Materiais utilizados na manutenção", " ");
@@ -1488,10 +1481,7 @@ function gerarPDFPedidoSolicitacao(solicitacao) {
           registro.descricao ||
           `Situação: ${obterDadosStatus(registro.status).nome}`;
 
-        adicionarParagrafo(
-          `${data} — ${responsavel}: ${descricao}`,
-          2,
-        );
+        adicionarParagrafo(`${data} — ${responsavel}: ${descricao}`, 2);
       });
     }
 
@@ -1517,13 +1507,12 @@ function gerarPDFPedidoSolicitacao(solicitacao) {
       { align: "center" },
     );
 
-    const protocoloArquivo = String(solicitacao.protocolo || "pedido")
-      .replace(/[^\w-]+/g, "-");
-
-    window.abrirOuBaixarPDF(
-      documento,
-      `Pedido - ${protocoloArquivo}.pdf`,
+    const protocoloArquivo = String(solicitacao.protocolo || "pedido").replace(
+      /[^\w-]+/g,
+      "-",
     );
+
+    window.abrirOuBaixarPDF(documento, `Pedido - ${protocoloArquivo}.pdf`);
   };
 
   imagem.onerror = () => {
@@ -1803,15 +1792,13 @@ function preencherSelectMateriaisManutencao() {
     .forEach((material) => {
       const option = document.createElement("option");
       option.value = material.id;
-      option.textContent =
-        `${material.nome || "Material"} — saldo: ${Number(material.estoque || 0)} ${material.unidade || "Unidade"}`;
+      option.textContent = `${material.nome || "Material"} — saldo: ${Number(material.estoque || 0)} ${material.unidade || "Unidade"}`;
       materialManutencao.appendChild(option);
     });
 }
 
 function renderizarMateriaisManutencao() {
-  resumoMateriaisManutencao.textContent =
-    `${materiaisSelecionadosManutencao.length} material${materiaisSelecionadosManutencao.length === 1 ? "" : "is"}`;
+  resumoMateriaisManutencao.textContent = `${materiaisSelecionadosManutencao.length} material${materiaisSelecionadosManutencao.length === 1 ? "" : "is"}`;
 
   if (!materiaisSelecionadosManutencao.length) {
     listaMateriaisManutencao.innerHTML =
@@ -1948,7 +1935,8 @@ async function prepararBaixaMateriaisManutencao(solicitacao) {
       quantidade,
       estoqueAnterior,
       estoquePosterior: estoqueAnterior - quantidade,
-      justificativa: `Utilizado no chamado de manutenção ${solicitacao.protocolo || ""}`.trim(),
+      justificativa:
+        `Utilizado no chamado de manutenção ${solicitacao.protocolo || ""}`.trim(),
       destinoId: solicitacao.escolaId || null,
       destino: solicitacao.escolaNome || "",
       usuario: responsavel,
@@ -2016,18 +2004,32 @@ function formatarDataRomaneio(data) {
 function formatarUnidadeRomaneio(unidade, quantidade) {
   if (Number(quantidade) === 1) return unidade || "Unidade";
   const plurais = {
-    Unidade: "Unidades", Caixa: "Caixas", Resma: "Resmas",
-    Pacote: "Pacotes", Fardo: "Fardos", Kit: "Kits", Kg: "Kg",
-    Quilograma: "Quilogramas", Grama: "Gramas", Litro: "Litros",
-    Mililitro: "Mililitros", Saco: "Sacos", Lata: "Latas",
-    Garrafa: "Garrafas", Pote: "Potes", Frasco: "Frascos",
+    Unidade: "Unidades",
+    Caixa: "Caixas",
+    Resma: "Resmas",
+    Pacote: "Pacotes",
+    Fardo: "Fardos",
+    Kit: "Kits",
+    Kg: "Kg",
+    Quilograma: "Quilogramas",
+    Grama: "Gramas",
+    Litro: "Litros",
+    Mililitro: "Mililitros",
+    Saco: "Sacos",
+    Lata: "Latas",
+    Garrafa: "Garrafas",
+    Pote: "Potes",
+    Frasco: "Frascos",
     "Mão (50 unidades)": "Mãos (50 unidades)",
   };
   return plurais[unidade] || unidade || "Unidades";
 }
 
 async function prepararRomaneioSolicitacao({
-  solicitacao, dadosEntregaMateriais, tipoAtendimento, observacao,
+  solicitacao,
+  dadosEntregaMateriais,
+  tipoAtendimento,
+  observacao,
 }) {
   const itensComEntrega = dadosEntregaMateriais.itensEntregues.filter(
     (item) => Number(item.quantidadeEntregue || 0) > 0,
@@ -2046,12 +2048,16 @@ async function prepararRomaneioSolicitacao({
     const quantidade = Number(itemEntregue.quantidadeEntregue || 0);
 
     if (!materialId) {
-      throw new Error(`O material "${itemEntregue.nome}" não possui vínculo com o estoque.`);
+      throw new Error(
+        `O material "${itemEntregue.nome}" não possui vínculo com o estoque.`,
+      );
     }
 
     const snapshot = await get(ref(rtdb, `materiais/${materialId}`));
     if (!snapshot.exists()) {
-      throw new Error(`O material "${itemEntregue.nome}" não foi encontrado no estoque.`);
+      throw new Error(
+        `O material "${itemEntregue.nome}" não foi encontrado no estoque.`,
+      );
     }
 
     const material = snapshot.val();
@@ -2077,7 +2083,8 @@ async function prepararRomaneioSolicitacao({
       quantidade,
       estoqueAnterior,
       estoquePosterior: estoqueAnterior - quantidade,
-      justificativa: `Atendimento da solicitação ${solicitacao.protocolo || ""}`.trim(),
+      justificativa:
+        `Atendimento da solicitação ${solicitacao.protocolo || ""}`.trim(),
       destinoId: solicitacao.escolaId || null,
       destino: solicitacao.escolaNome || "",
       usuario: responsavel,
@@ -2099,7 +2106,10 @@ async function prepararRomaneioSolicitacao({
   const movimentacao = {
     destinoId: solicitacao.escolaId || null,
     destino: solicitacao.escolaNome || "Unidade escolar",
-    data, observacao, itens, responsavel,
+    data,
+    observacao,
+    itens,
+    responsavel,
     origem: "SOLICITACAO_PORTAL_GESTOR",
     solicitacaoId: solicitacao.id,
     protocolo: solicitacao.protocolo || "",
@@ -2153,7 +2163,9 @@ function gerarPDFRomaneioSolicitacao(dados) {
 
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9);
-      doc.text(`Página ${pagina}`, largura - margem, altura - 10, { align: "right" });
+      doc.text(`Página ${pagina}`, largura - margem, altura - 10, {
+        align: "right",
+      });
       doc.setFontSize(12);
     }
 
@@ -2180,7 +2192,8 @@ function gerarPDFRomaneioSolicitacao(dados) {
     doc.setFont("helvetica", "bold");
     doc.text(
       `Total: ${dados.itens.length} ${dados.itens.length === 1 ? "item" : "itens"}`,
-      margem, y,
+      margem,
+      y,
     );
 
     y += 35;
@@ -2208,11 +2221,16 @@ function gerarPDFRomaneioSolicitacao(dados) {
     doc.rect(margem + 55, y + 14, 4, 4);
     doc.text("Não", margem + 62, y + 18);
     doc.text("Em caso de desconformidade, descrever:", margem + 5, y + 29);
-    [37, 44, 51, 58].forEach((n) => doc.line(margem + 5, y + n, largura - margem - 5, y + n));
+    [37, 44, 51, 58].forEach((n) =>
+      doc.line(margem + 5, y + n, largura - margem - 5, y + n),
+    );
 
     if (dados.observacao?.trim()) {
       y += 71;
-      const linhas = doc.splitTextToSize(dados.observacao.trim(), larguraTexto - 10);
+      const linhas = doc.splitTextToSize(
+        dados.observacao.trim(),
+        larguraTexto - 10,
+      );
       const alturaObs = Math.max(28, linhas.length * 6 + 18);
       if (y + alturaObs > altura - 20) {
         novaPagina();
@@ -2226,7 +2244,8 @@ function gerarPDFRomaneioSolicitacao(dados) {
     }
 
     const dataArquivo = new Date(dados.data)
-      .toLocaleDateString("pt-BR").replace(/\//g, ".");
+      .toLocaleDateString("pt-BR")
+      .replace(/\//g, ".");
 
     window.abrirOuBaixarPDF(
       doc,
@@ -2235,7 +2254,10 @@ function gerarPDFRomaneioSolicitacao(dados) {
   };
 
   img.onerror = () => {
-    notificar("O romaneio foi registrado, mas o PDF não pôde ser aberto.", "erro");
+    notificar(
+      "O romaneio foi registrado, mas o PDF não pôde ser aberto.",
+      "erro",
+    );
   };
 }
 
@@ -2308,8 +2330,9 @@ async function salvarAtualizacaoSolicitacao() {
   }
 
   if (ehManutencao && novoStatus === "AGUARDANDO_CONFIRMACAO") {
-    preparacaoMateriaisManutencao =
-      await prepararBaixaMateriaisManutencao(solicitacaoSelecionada);
+    preparacaoMateriaisManutencao = await prepararBaixaMateriaisManutencao(
+      solicitacaoSelecionada,
+    );
   }
 
   const transicoesPermitidas = obterTransicoesPermitidas(
@@ -2379,8 +2402,7 @@ async function salvarAtualizacaoSolicitacao() {
           informadoPorNome: dadosUsuarioAtual.nome || "Usuário",
           observacao,
           romaneioId: preparacaoRomaneio?.romaneioId || null,
-          materiaisUtilizados:
-            preparacaoMateriaisManutencao?.itens || null,
+          materiaisUtilizados: preparacaoMateriaisManutencao?.itens || null,
 
           ...(dadosEntregaMateriais
             ? {
@@ -2463,8 +2485,7 @@ async function salvarAtualizacaoSolicitacao() {
 
         observacao,
         romaneioId: preparacaoRomaneio?.romaneioId || null,
-        materiaisUtilizados:
-          preparacaoMateriaisManutencao?.itens || null,
+        materiaisUtilizados: preparacaoMateriaisManutencao?.itens || null,
         responsavelUid: dadosUsuarioAtual.uid,
         responsavelNome: dadosUsuarioAtual.nome || "Usuário",
         criadoEm: agora,
@@ -2503,12 +2524,14 @@ async function salvarAtualizacaoSolicitacao() {
           solicitacaoAtual.status !== novoStatus ||
           solicitacaoAtual.confirmacaoEntrega?.romaneioId !==
             preparacaoRomaneio.romaneioId
-        ) return;
+        )
+          return;
 
         solicitacaoAtual.status = statusAnterior;
         solicitacaoAtual.atualizadoEm = Date.now();
         solicitacaoAtual.atualizadoPorUid = dadosUsuarioAtual.uid;
-        solicitacaoAtual.atualizadoPorNome = dadosUsuarioAtual.nome || "Usuário";
+        solicitacaoAtual.atualizadoPorNome =
+          dadosUsuarioAtual.nome || "Usuário";
         delete solicitacaoAtual.confirmacaoEntrega;
         if (solicitacaoAtual.historico?.[historicoId]) {
           delete solicitacaoAtual.historico[historicoId];
@@ -2527,17 +2550,15 @@ async function salvarAtualizacaoSolicitacao() {
     try {
       await update(ref(rtdb), preparacaoMateriaisManutencao.atualizacoes);
     } catch (erroEstoque) {
-      console.error(
-        "Erro ao registrar materiais da manutenção:",
-        erroEstoque,
-      );
+      console.error("Erro ao registrar materiais da manutenção:", erroEstoque);
 
       await runTransaction(solicitacaoRef, (solicitacaoAtual) => {
         if (
           !solicitacaoAtual ||
           solicitacaoAtual.status !== novoStatus ||
           !solicitacaoAtual.confirmacaoEntrega?.materiaisUtilizados
-        ) return;
+        )
+          return;
 
         solicitacaoAtual.status = statusAnterior;
         solicitacaoAtual.atualizadoEm = Date.now();

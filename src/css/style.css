@@ -2785,3 +2785,266 @@ body.dialogo-aberto {
     transform: translateX(-100%);
   }
 }
+
+/* ============================================================
+   DATAS COMEMORATIVAS — LIQUID GLASS
+   ============================================================ */
+
+#datasComemorativas {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+/* ------------------------------------------------------------
+   CABEÇALHO
+   ------------------------------------------------------------ */
+
+.datas-comemorativas-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin-bottom: 14px;
+}
+
+.datas-comemorativas-titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.datas-comemorativas-titulo > .material-symbols-outlined {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 38px;
+  height: 38px;
+
+  border-radius: 12px;
+
+  background: color-mix(in srgb, var(--clr-primary) 14%, transparent);
+
+  color: var(--clr-primary);
+
+  font-size: 21px;
+}
+
+.datas-comemorativas-titulo div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.datas-comemorativas-titulo strong {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--clr-dark);
+}
+
+.datas-comemorativas-titulo span {
+  font-size: 0.72rem;
+  color: var(--clr-info-dark);
+}
+
+.datas-comemorativas-data {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 6px 10px;
+
+  border-radius: 10px;
+
+  font-size: 0.72rem;
+  font-weight: 600;
+
+  background: color-mix(in srgb, var(--clr-primary) 9%, transparent);
+
+  color: var(--clr-primary);
+}
+
+/* ------------------------------------------------------------
+   LISTA
+   ------------------------------------------------------------ */
+
+.datas-comemorativas-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ------------------------------------------------------------
+   ITEM
+   ------------------------------------------------------------ */
+
+.data-comemorativa-item {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  gap: 11px;
+
+  padding: 11px;
+
+  border-radius: 16px;
+
+  background: var(--glass-bg);
+
+  border: 1px solid var(--glass-border);
+
+  box-shadow:
+    var(--glass-shadow),
+    inset 0 1px 0 var(--glass-highlight);
+
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.data-comemorativa-item:hover {
+  transform: translateY(-2px);
+
+  background: color-mix(in srgb, var(--clr-primary) 7%, var(--glass-bg));
+
+  box-shadow:
+    var(--glass-shadow),
+    0 8px 25px rgba(0, 0, 0, 0.06);
+}
+
+/* ------------------------------------------------------------
+   ÍCONE
+   ------------------------------------------------------------ */
+
+.data-comemorativa-icone {
+  flex-shrink: 0;
+
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: color-mix(in srgb, var(--clr-primary) 12%, transparent);
+
+  color: var(--clr-primary);
+}
+
+.data-comemorativa-icone .material-symbols-outlined {
+  font-size: 20px;
+}
+
+/* ------------------------------------------------------------
+   TEXTO
+   ------------------------------------------------------------ */
+
+.data-comemorativa-conteudo {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.data-comemorativa-conteudo strong {
+  color: var(--clr-dark);
+
+  font-size: 0.82rem;
+  font-weight: 600;
+
+  line-height: 1.25;
+}
+
+.data-comemorativa-conteudo span {
+  color: var(--clr-info-dark);
+
+  font-size: 0.68rem;
+
+  text-transform: capitalize;
+}
+
+/* ------------------------------------------------------------
+   SEM DATAS
+   ------------------------------------------------------------ */
+
+.datas-comemorativas-vazio,
+.datas-comemorativas-erro {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+
+  padding: 14px;
+
+  border-radius: 16px;
+
+  background: var(--glass-bg);
+
+  border: 1px solid var(--glass-border);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.datas-comemorativas-vazio .material-symbols-outlined,
+.datas-comemorativas-erro .material-symbols-outlined {
+  font-size: 22px;
+  color: var(--clr-info-dark);
+}
+
+.datas-comemorativas-vazio div,
+.datas-comemorativas-erro div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.datas-comemorativas-vazio strong,
+.datas-comemorativas-erro strong {
+  font-size: 0.8rem;
+  color: var(--clr-dark);
+}
+
+.datas-comemorativas-vazio span,
+.datas-comemorativas-erro span {
+  font-size: 0.7rem;
+  color: var(--clr-info-dark);
+}
+
+/* ------------------------------------------------------------
+   ERRO
+   ------------------------------------------------------------ */
+
+.datas-comemorativas-erro {
+  border-color: color-mix(in srgb, var(--clr-danger) 20%, var(--glass-border));
+}
+
+.datas-comemorativas-erro .material-symbols-outlined {
+  color: var(--clr-danger);
+}
+
+/* ------------------------------------------------------------
+   RESPONSIVO
+   ------------------------------------------------------------ */
+
+@media (max-width: 600px) {
+  .data-comemorativa-item {
+    padding: 10px;
+  }
+
+  .data-comemorativa-icone {
+    width: 35px;
+    height: 35px;
+  }
+
+  .data-comemorativa-conteudo strong {
+    font-size: 0.78rem;
+  }
+}
