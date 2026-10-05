@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { resolve, dirname } from "node:path";
+import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 
 for (const pasta of [".", "gestao-escolar"]) {
   test(`instalação em ${pasta} resolve os recursos na raiz de cada publicação`, () => {
@@ -18,7 +19,7 @@ for (const pasta of [".", "gestao-escolar"]) {
     for (const dimensao of [192, 512]) {
       const icone = manifesto.icons.find(item => item.sizes === `${dimensao}x${dimensao}`);
       assert.ok(icone);
-      const png = readFileSync(resolve(base, icone.src));
+      const png = readFileSync(new URL(icone.src, pathToFileURL(resolve(base, "manifest.webmanifest"))));
       assert.equal(png.readUInt32BE(16), dimensao);
       assert.equal(png.readUInt32BE(20), dimensao);
     }
@@ -28,7 +29,7 @@ for (const pasta of [".", "gestao-escolar"]) {
       assert.match(html, /rel="manifest" href="\.\/manifest\.webmanifest"/, arquivo);
       const iconeApple = html.match(/rel="apple-touch-icon"[^>]*href="([^"]+)"/);
       assert.ok(iconeApple, arquivo);
-      const png = readFileSync(resolve(dirname(caminho), iconeApple[1]));
+      const png = readFileSync(new URL(iconeApple[1], pathToFileURL(caminho)));
       assert.equal(png.readUInt32BE(16), 180);
       assert.equal(png.readUInt32BE(20), 180);
     }
