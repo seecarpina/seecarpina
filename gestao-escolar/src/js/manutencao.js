@@ -1,3 +1,4 @@
+import { gerarPDFPedidoSolicitacao } from "./pedidoPDF.js";
 import { auth, db, rtdb } from "./firebaseConfig.js";
 
 import {
@@ -1732,4 +1733,9 @@ onAuthStateChanged(auth, async (user) => {
     console.error("Erro ao validar gestor:", error);
     await encerrarAcesso("ERRO_VALIDACAO");
   }
+});
+
+// O pedido usa apenas a solicitação já carregada nos detalhes do gestor.
+document.getElementById("btnImprimirPedido")?.addEventListener("click", () => {
+  gerarPDFPedidoSolicitacao(solicitacaoSelecionada, { notificar: mostrarNotificacao });
 });
