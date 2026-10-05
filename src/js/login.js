@@ -101,7 +101,7 @@ formLogin.addEventListener("submit", async (event) => {
   try {
     await signInWithEmailAndPassword(auth, email, senha);
 
-    window.location.replace("./");
+    window.location.replace(destinoAposLogin());
   } catch (error) {
     console.error("Erro ao entrar no sistema:", error);
 
@@ -133,6 +133,14 @@ btnMostrarSenha.addEventListener("click", () => {
 
 onAuthStateChanged(auth, (user) => {
   if (user && !loginEmAndamento) {
-    window.location.replace("./");
+    window.location.replace(destinoAposLogin());
   }
 });
+
+function destinoAposLogin() {
+  try {
+    const pedido = sessionStorage.getItem("pedidoPushPendente");
+    if (pedido && /^[A-Za-z0-9_-]+$/.test(pedido)) return `./solicitacoes.html?pedido=${encodeURIComponent(pedido)}`;
+  } catch {}
+  return "./";
+}

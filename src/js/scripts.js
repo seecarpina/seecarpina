@@ -1,3 +1,4 @@
+import { desativarPushNesteDispositivo } from "./pushSolicitacoes.js";
 document.addEventListener("keyup", (e) => {
   if (e.target.tagName === "INPUT" && e.target.type !== "date") {
     e.target.value = e.target.value.toUpperCase();
@@ -167,6 +168,7 @@ async function montarSidebarDinamica(dadosUsuario) {
       event.preventDefault();
 
       try {
+        try { await desativarPushNesteDispositivo(); } catch (erroPush) { console.error("Falha ao remover inscrição push:", erroPush); }
         await signOut(auth);
         window.location.href = "./login";
       } catch (erro) {
