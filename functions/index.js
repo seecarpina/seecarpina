@@ -7,7 +7,7 @@ import { logger } from "firebase-functions";
 import { chavesModulos, podeReceberPedido, criarAvisoPedido } from "./regrasPush.js";
 
 initializeApp();
-const origemSecretaria = defineString("ORIGEM_SECRETARIA", { description: "Origem HTTPS do sistema da secretaria (sem caminho)." });
+const origemSecretaria = defineString("ORIGEM_SECRETARIA", { default: "https://seecarpina.online", description: "Origem HTTPS do sistema da secretaria (sem caminho)." });
 
 export const notificarNovoPedido = onValueCreated({
   ref: "/portalGestor/solicitacoes/registros/{pedidoId}",
