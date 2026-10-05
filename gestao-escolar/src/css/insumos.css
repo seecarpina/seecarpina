@@ -1304,3 +1304,7 @@ body.drawer-aberto {
     width: 100%;
   }
 }
+
+/* Permite as ações do pedido em telas estreitas. */
+.drawer-detalhes-rodape { flex-wrap: wrap; }
+#btnImprimirPedido { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
