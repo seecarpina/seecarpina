@@ -1477,12 +1477,3 @@ body.drawer-solicitacao-aberto {
     width: 100%;
   }
 }
-
-.btn-indeferir-solicitacao {
-  color: #a4262c;
-  background: #fde9ea;
-}
-
-.drawer-solicitacao-rodape {
-  flex-wrap: wrap;
-}
