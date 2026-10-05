@@ -1,14 +1,14 @@
 const TRANSICOES_STATUS = Object.freeze({
-  RECEBIDA: ["EM_ATENDIMENTO"],
-  EM_ATENDIMENTO: ["AGUARDANDO_CONFIRMACAO"],
+  RECEBIDA: ["EM_ATENDIMENTO", "INDEFERIDA"],
+  EM_ATENDIMENTO: ["AGUARDANDO_CONFIRMACAO", "INDEFERIDA"],
   AGUARDANDO_CONFIRMACAO: [],
   CONCLUIDA: [],
   ATENDIDA_PARCIALMENTE: [],
   CANCELADA: [],
 
   // Compatibilidade com solicitações antigas.
-  EM_ANALISE: ["EM_ATENDIMENTO"],
-  APROVADA: ["EM_ATENDIMENTO"],
+  EM_ANALISE: ["EM_ATENDIMENTO", "INDEFERIDA"],
+  APROVADA: ["EM_ATENDIMENTO", "INDEFERIDA"],
   INDEFERIDA: [],
 });
 
@@ -17,7 +17,8 @@ export function obterTransicoesPermitidas(statusAtual) {
 }
 
 export function observacaoEhObrigatoria(status, tipoAtendimento) {
-  return status === "AGUARDANDO_CONFIRMACAO" && tipoAtendimento === "PARCIAL";
+  return status === "INDEFERIDA" ||
+    (status === "AGUARDANDO_CONFIRMACAO" && tipoAtendimento === "PARCIAL");
 }
 
 export function validarEntregaMateriais({
@@ -80,4 +81,17 @@ export function validarEntregaMateriais({
     itensEntregues,
     quantidadeTotalEntregue,
   };
+}
+
+export function validarObservacaoAtualizacao(status, tipoAtendimento, observacao) {
+  const texto = String(observacao || "").trim();
+  if (observacaoEhObrigatoria(status, tipoAtendimento) && !texto) {
+    throw new Error(status === "INDEFERIDA"
+      ? "Informe a justificativa do indeferimento."
+      : "Informe na observação o que foi entregue parcialmente.");
+  }
+  if (texto.length > 1000) {
+    throw new Error("A justificativa ou observação deve ter até 1000 caracteres.");
+  }
+  return texto;
 }

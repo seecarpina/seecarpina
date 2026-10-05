@@ -4,6 +4,7 @@ import {
   observacaoEhObrigatoria,
   obterTransicoesPermitidas,
   validarEntregaMateriais,
+  validarObservacaoAtualizacao,
 } from "./core/solicitacoesRegras.js";
 
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
@@ -89,6 +90,7 @@ const btnFecharSolicitacaoRodape = document.getElementById(
   "btnFecharSolicitacaoRodape",
 );
 
+const btnIndeferirSolicitacao = document.getElementById("btnIndeferirSolicitacao");
 const btnAtualizarSolicitacao = document.getElementById(
   "btnAtualizarSolicitacao",
 );
@@ -1197,6 +1199,8 @@ function preencherDrawerSolicitacao(solicitacao) {
     obterTransicoesPermitidas(solicitacao.status).length > 0;
 
   btnAtualizarSolicitacao.style.display = possuiTransicoes ? "flex" : "none";
+  btnIndeferirSolicitacao.style.display = obterTransicoesPermitidas(solicitacao.status)
+    .includes("INDEFERIDA") ? "flex" : "none";
 }
 
 function abrirDrawerSolicitacao(solicitacaoId) {
@@ -1232,7 +1236,7 @@ function fecharDrawerSolicitacao() {
   solicitacaoSelecionada = null;
 }
 
-function abrirDialogoAtualizacao() {
+function abrirDialogoAtualizacao(statusInicial = "") {
   if (!solicitacaoSelecionada) {
     notificar("Solicitação não localizada.", "erro");
     return;
@@ -1302,8 +1306,16 @@ function abrirDialogoAtualizacao() {
   contadorObservacaoAtualizacao.textContent = "0";
   avisoObservacaoObrigatoria.classList.remove("ativo");
 
+  const indeferimento = statusInicial === "INDEFERIDA" && transicoes.includes(statusInicial);
+  novoStatusSolicitacao.value = indeferimento ? statusInicial : "";
+  novoStatusSolicitacao.disabled = indeferimento;
+  document.getElementById("tituloDialogoAtualizacao").textContent = indeferimento
+    ? "Indeferir solicitação" : "Atualizar situação";
+  atualizarCampoTipoAtendimento();
+
   overlayAtualizacao.classList.add("ativo");
   dialogoAtualizacao.classList.add("ativo");
+  if (indeferimento) observacaoAtualizacao.focus();
 }
 
 function fecharDialogoAtualizacao() {
@@ -1311,6 +1323,7 @@ function fecharDialogoAtualizacao() {
   dialogoAtualizacao.classList.remove("ativo");
 
   novoStatusSolicitacao.value = "";
+  novoStatusSolicitacao.disabled = false;
   tipoAtendimentoEntrega.value = "";
   blocoTipoAtendimento.hidden = true;
   tipoAtendimentoEntrega.required = false;
@@ -1960,6 +1973,14 @@ function atualizarAvisoObservacao() {
     tipoAtendimentoEntrega.value,
   );
 
+  const indeferimento = novoStatusSolicitacao.value === "INDEFERIDA";
+  observacaoAtualizacao.required = obrigatoria;
+  observacaoAtualizacao.labels[0].innerHTML = indeferimento
+    ? 'Justificativa do indeferimento <span>Obrigatória</span>'
+    : `Observação da atualização <span>${obrigatoria ? "Obrigatória" : "Opcional"}</span>`;
+  observacaoAtualizacao.placeholder = indeferimento
+    ? "Explique por que a solicitação está sendo indeferida. A justificativa ficará visível ao gestor."
+    : "Informe orientações ou detalhes sobre a atualização.";
   avisoObservacaoObrigatoria.classList.toggle("ativo", obrigatoria);
 }
 
@@ -1970,7 +1991,9 @@ async function salvarAtualizacaoSolicitacao() {
 
   const novoStatus = novoStatusSolicitacao.value;
   const tipoAtendimento = tipoAtendimentoEntrega.value;
-  const observacao = observacaoAtualizacao.value.trim();
+  const observacao = validarObservacaoAtualizacao(
+    novoStatus, tipoAtendimento, observacaoAtualizacao.value,
+  );
 
   const ehPedidoMateriais = [
     "MATERIAIS_EXPEDIENTE",
@@ -2019,10 +2042,6 @@ async function salvarAtualizacaoSolicitacao() {
 
   if (!transicoesPermitidas.includes(novoStatus)) {
     throw new Error("Esta alteração de situação não é permitida.");
-  }
-
-  if (observacaoEhObrigatoria(novoStatus, tipoAtendimento) && !observacao) {
-    throw new Error("Informe na observação o que foi entregue parcialmente.");
   }
 
   const solicitacaoId = solicitacaoSelecionada.id;
@@ -2130,6 +2149,8 @@ async function salvarAtualizacaoSolicitacao() {
             .join(", ");
           descricaoAtualizacao += ` Materiais utilizados: ${resumoMateriais}.`;
         }
+      } else if (novoStatus === "INDEFERIDA") {
+        descricaoAtualizacao = `Solicitação indeferida. Justificativa: ${observacao}`;
       } else {
         descricaoAtualizacao =
           `Situação alterada de ${statusAnteriorNome} para ${novoStatusNome}.` +
@@ -2145,7 +2166,7 @@ async function salvarAtualizacaoSolicitacao() {
             ? ehManutencao
               ? "SERVICO_INFORMADO"
               : "ENTREGA_INFORMADA"
-            : "STATUS_ATUALIZADO",
+            : novoStatus === "INDEFERIDA" ? "SOLICITACAO_INDEFERIDA" : "STATUS_ATUALIZADO",
 
         descricao: descricaoAtualizacao,
         tipoAtendimento:
@@ -2271,7 +2292,8 @@ btnImprimirPedido?.addEventListener("click", () => {
   });
 });
 
-btnAtualizarSolicitacao.addEventListener("click", abrirDialogoAtualizacao);
+btnAtualizarSolicitacao.addEventListener("click", () => abrirDialogoAtualizacao());
+btnIndeferirSolicitacao.addEventListener("click", () => abrirDialogoAtualizacao("INDEFERIDA"));
 
 btnCancelarAtualizacao.addEventListener("click", fecharDialogoAtualizacao);
 

@@ -5,6 +5,7 @@ import {
   observacaoEhObrigatoria,
   obterTransicoesPermitidas,
   validarEntregaMateriais,
+  validarObservacaoAtualizacao,
 } from "../src/js/core/solicitacoesRegras.js";
 
 const itens = [
@@ -13,10 +14,10 @@ const itens = [
 ];
 
 test("permite somente as transições previstas no fluxo", () => {
-  assert.deepEqual(obterTransicoesPermitidas("RECEBIDA"), ["EM_ATENDIMENTO"]);
+  assert.deepEqual(obterTransicoesPermitidas("RECEBIDA"), ["EM_ATENDIMENTO", "INDEFERIDA"]);
   assert.deepEqual(
     obterTransicoesPermitidas("EM_ATENDIMENTO"),
-    ["AGUARDANDO_CONFIRMACAO"],
+    ["AGUARDANDO_CONFIRMACAO", "INDEFERIDA"],
   );
   assert.deepEqual(obterTransicoesPermitidas("CONCLUIDA"), []);
   assert.deepEqual(obterTransicoesPermitidas("DESCONHECIDA"), []);
@@ -89,4 +90,21 @@ test("exige observação somente no atendimento parcial pendente", () => {
     false,
   );
   assert.equal(observacaoEhObrigatoria("EM_ATENDIMENTO", "PARCIAL"), false);
+});
+
+test("indeferimento exige justificativa e encerra o fluxo", () => {
+  for (const status of ["RECEBIDA", "EM_ATENDIMENTO", "EM_ANALISE", "APROVADA"]) {
+    assert.ok(obterTransicoesPermitidas(status).includes("INDEFERIDA"));
+  }
+  for (const status of ["INDEFERIDA", "CANCELADA", "CONCLUIDA", "ATENDIDA_PARCIALMENTE", "AGUARDANDO_CONFIRMACAO"]) {
+    assert.ok(!obterTransicoesPermitidas(status).includes("INDEFERIDA"));
+  }
+  assert.equal(observacaoEhObrigatoria("INDEFERIDA", ""), true);
+  for (const texto of ["", "   ", "\n\t"]) {
+    assert.throws(() => validarObservacaoAtualizacao("INDEFERIDA", "", texto), /justificativa do indeferimento/);
+  }
+  assert.equal(validarObservacaoAtualizacao("INDEFERIDA", "", "  Item indisponível.  "), "Item indisponível.");
+  assert.throws(() => validarObservacaoAtualizacao("INDEFERIDA", "", "a".repeat(1001)), /1000/);
+  assert.throws(() => validarObservacaoAtualizacao("AGUARDANDO_CONFIRMACAO", "PARCIAL", "  "), /entregue parcialmente/);
+  assert.equal(validarObservacaoAtualizacao("EM_ATENDIMENTO", "", ""), "");
 });
