@@ -90,7 +90,6 @@ const btnFecharSolicitacaoRodape = document.getElementById(
   "btnFecharSolicitacaoRodape",
 );
 
-const btnIndeferirSolicitacao = document.getElementById("btnIndeferirSolicitacao");
 const btnAtualizarSolicitacao = document.getElementById(
   "btnAtualizarSolicitacao",
 );
@@ -1199,8 +1198,6 @@ function preencherDrawerSolicitacao(solicitacao) {
     obterTransicoesPermitidas(solicitacao.status).length > 0;
 
   btnAtualizarSolicitacao.style.display = possuiTransicoes ? "flex" : "none";
-  btnIndeferirSolicitacao.style.display = obterTransicoesPermitidas(solicitacao.status)
-    .includes("INDEFERIDA") ? "flex" : "none";
 }
 
 function abrirDrawerSolicitacao(solicitacaoId) {
@@ -1236,7 +1233,7 @@ function fecharDrawerSolicitacao() {
   solicitacaoSelecionada = null;
 }
 
-function abrirDialogoAtualizacao(statusInicial = "") {
+function abrirDialogoAtualizacao() {
   if (!solicitacaoSelecionada) {
     notificar("Solicitação não localizada.", "erro");
     return;
@@ -1306,16 +1303,11 @@ function abrirDialogoAtualizacao(statusInicial = "") {
   contadorObservacaoAtualizacao.textContent = "0";
   avisoObservacaoObrigatoria.classList.remove("ativo");
 
-  const indeferimento = statusInicial === "INDEFERIDA" && transicoes.includes(statusInicial);
-  novoStatusSolicitacao.value = indeferimento ? statusInicial : "";
-  novoStatusSolicitacao.disabled = indeferimento;
-  document.getElementById("tituloDialogoAtualizacao").textContent = indeferimento
-    ? "Indeferir solicitação" : "Atualizar situação";
+  novoStatusSolicitacao.value = "";
   atualizarCampoTipoAtendimento();
 
   overlayAtualizacao.classList.add("ativo");
   dialogoAtualizacao.classList.add("ativo");
-  if (indeferimento) observacaoAtualizacao.focus();
 }
 
 function fecharDialogoAtualizacao() {
@@ -1323,7 +1315,6 @@ function fecharDialogoAtualizacao() {
   dialogoAtualizacao.classList.remove("ativo");
 
   novoStatusSolicitacao.value = "";
-  novoStatusSolicitacao.disabled = false;
   tipoAtendimentoEntrega.value = "";
   blocoTipoAtendimento.hidden = true;
   tipoAtendimentoEntrega.required = false;
@@ -2293,7 +2284,6 @@ btnImprimirPedido?.addEventListener("click", () => {
 });
 
 btnAtualizarSolicitacao.addEventListener("click", () => abrirDialogoAtualizacao());
-btnIndeferirSolicitacao.addEventListener("click", () => abrirDialogoAtualizacao("INDEFERIDA"));
 
 btnCancelarAtualizacao.addEventListener("click", fecharDialogoAtualizacao);
 
