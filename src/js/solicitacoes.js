@@ -2418,12 +2418,6 @@ document.addEventListener("keydown", (event) => {
    CARREGAR REGISTROS
 ========================================= */
 
-let pedidoPushPendente = new URLSearchParams(location.search).get("pedido");
-try {
-  if (pedidoPushPendente) sessionStorage.setItem("pedidoPushPendente", pedidoPushPendente);
-  else pedidoPushPendente = sessionStorage.getItem("pedidoPushPendente");
-} catch { /* O link direto continua funcionando sem armazenamento. */ }
-
 function consolidarSolicitacoes() {
   solicitacoes = Object.values(solicitacoesPorModulo).flat();
 
@@ -2433,12 +2427,6 @@ function consolidarSolicitacoes() {
 
   atualizarIndicadores();
   renderizarSolicitacoes();
-  if (pedidoPushPendente && solicitacoes.some(item => item.id === pedidoPushPendente)) {
-    const id = pedidoPushPendente;
-    pedidoPushPendente = null;
-    try { sessionStorage.removeItem("pedidoPushPendente"); } catch {}
-    abrirDrawerSolicitacao(id);
-  }
 }
 
 function carregarSolicitacoes() {

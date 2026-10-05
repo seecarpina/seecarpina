@@ -1,4 +1,0 @@
-{
-  "functions": [{ "source": "functions", "codebase": "notificacoes" }],
-  "database": { "rules": "database.rules.json" }
-}

@@ -110,34 +110,6 @@
       "$registroId": {
         ".write": "auth != null && root.child('controleAcesso/usuarios/' + auth.uid + '/ativo').val() === true && root.child('controleAcesso/usuarios/' + auth.uid + '/perfil').val() !== null && root.child('controleAcesso/usuarios/' + auth.uid + '/perfil').val() !== '' && root.child('controleAcesso/usuarios/' + auth.uid + '/perfil').val() !== 'GESTOR_ESCOLAR' && ((!data.exists() && newData.exists()) || (data.exists() && !newData.exists() && auth.token.email === 'raphaelcardoso@email.com'))"
       }
-    },
-    "push": {
-      "dispositivos": {
-        "$id": {
-          ".read": "auth != null && root.child('controleAcesso/usuarios/' + auth.uid + '/ativo').val() === true && root.child('controleAcesso/usuarios/' + auth.uid + '/perfil').val() !== 'GESTOR_ESCOLAR' && data.child('uid').val() === auth.uid",
-          ".write": "auth != null && root.child('controleAcesso/usuarios/' + auth.uid + '/ativo').val() === true && root.child('controleAcesso/usuarios/' + auth.uid + '/perfil').val() !== 'GESTOR_ESCOLAR' && ((!newData.exists() && data.child('uid').val() === auth.uid) || (newData.exists() && newData.child('uid').val() === auth.uid))",
-          ".validate": "newData.hasChildren(['uid', 'token', 'origem', 'atualizadoEm'])",
-          "uid": {
-            ".validate": "newData.isString() && newData.val() === auth.uid"
-          },
-          "token": {
-            ".validate": "newData.isString() && newData.val().length >= 20 && newData.val().length <= 4096"
-          },
-          "origem": {
-            ".validate": "newData.isString() && newData.val().length <= 256"
-          },
-          "atualizadoEm": {
-            ".validate": "newData.isNumber() && newData.val() <= now + 60000"
-          },
-          "$outro": {
-            ".validate": false
-          }
-        }
-      },
-      "enviados": {
-        ".read": false,
-        ".write": false
-      }
     }
   }
 }
