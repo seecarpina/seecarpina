@@ -13,7 +13,7 @@ export const notificarNovoPedido = onValueCreated({
   ref: "/portalGestor/solicitacoes/registros/{pedidoId}",
   instance: "see-carpina-2a774-default-rtdb",
   region: "us-central1",
-  retry: true,
+  retry: false,
 }, async (event) => {
   const pedido = event.data.val();
   if (!pedido || pedido.status !== "RECEBIDA" || !chavesModulos[pedido.modulo]) return;
