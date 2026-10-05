@@ -1,4 +1,4 @@
-import { gerarPDFPedidoSolicitacao } from "./pedidoPDF.js";
+import { imprimirPedido } from "./imprimirPedido.js";
 import { auth, db, rtdb } from "./firebaseConfig.js";
 
 import {
@@ -1737,5 +1737,5 @@ onAuthStateChanged(auth, async (user) => {
 
 // O pedido usa apenas a solicitação já carregada nos detalhes do gestor.
 document.getElementById("btnImprimirPedido")?.addEventListener("click", () => {
-  gerarPDFPedidoSolicitacao(solicitacaoSelecionada, { notificar: mostrarNotificacao });
+  imprimirPedido(solicitacaoSelecionada, mostrarNotificacao);
 });
