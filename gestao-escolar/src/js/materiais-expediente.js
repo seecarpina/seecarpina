@@ -250,15 +250,13 @@ function configurarDataNecessidade() {
 }
 
 function preencherSelectMateriais() {
-  const permitirTodas = configuracaoCategoriasPermitidas.todas === true;
-
   const categoriasPermitidas =
     configuracaoCategoriasPermitidas.categorias || {};
 
   const categoriasDisponiveis = categoriasEstoque
     .filter(
       (categoria) =>
-        permitirTodas || categoriasPermitidas[categoria.id] === true,
+        categoriasPermitidas[categoria.id] === true,
     )
     .sort((a, b) =>
       String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR", {

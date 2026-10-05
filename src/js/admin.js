@@ -311,14 +311,6 @@ const btnSalvarPermissoesSolicitacoes = document.getElementById(
   "btnSalvarPermissoesSolicitacoes",
 );
 
-const todasCategoriasMateriaisGestores = document.getElementById(
-  "todasCategoriasMateriaisGestores",
-);
-
-const blocoCategoriasMateriaisGestores = document.getElementById(
-  "blocoCategoriasMateriaisGestores",
-);
-
 const listaCategoriasMateriaisGestores = document.getElementById(
   "listaCategoriasMateriaisGestores",
 );
@@ -842,12 +834,6 @@ function renderCategoriasMateriaisGestores() {
     return;
   }
 
-  const acessoTodas = configuracaoCategoriasMateriais.todas === true;
-
-  todasCategoriasMateriaisGestores.checked = acessoTodas;
-
-  blocoCategoriasMateriaisGestores.style.opacity = acessoTodas ? "0.5" : "1";
-
   if (!categoriasEstoque.length) {
     listaCategoriasMateriaisGestores.innerHTML = `
       <div class="estado-vazio">
@@ -872,7 +858,6 @@ function renderCategoriasMateriaisGestores() {
                   ? "checked"
                   : ""
               }
-              ${acessoTodas ? "disabled" : ""}
             />
 
             <span>
@@ -936,18 +921,6 @@ function renderCategoriasMateriaisLimpeza() {
     .join("");
 }
 
-todasCategoriasMateriaisGestores?.addEventListener("change", () => {
-  const acessoTodas = todasCategoriasMateriaisGestores.checked;
-
-  blocoCategoriasMateriaisGestores.style.opacity = acessoTodas ? "0.5" : "1";
-
-  document
-    .querySelectorAll(".categoria-material-gestor")
-    .forEach((checkbox) => {
-      checkbox.disabled = acessoTodas;
-    });
-});
-
 todasCategoriasMateriaisLimpeza?.addEventListener("change", () => {
   const acessoTodas = todasCategoriasMateriaisLimpeza.checked;
 
@@ -961,30 +934,26 @@ todasCategoriasMateriaisLimpeza?.addEventListener("change", () => {
 });
 
 btnSalvarCategoriasMateriaisGestores?.addEventListener("click", async () => {
-  const todas = todasCategoriasMateriaisGestores.checked;
-
   const categorias = {};
 
-  if (!todas) {
-    document
-      .querySelectorAll(".categoria-material-gestor:checked")
-      .forEach((checkbox) => {
-        categorias[checkbox.value] = true;
-      });
+  document
+    .querySelectorAll(".categoria-material-gestor:checked")
+    .forEach((checkbox) => {
+      categorias[checkbox.value] = true;
+    });
 
-    if (!Object.keys(categorias).length) {
-      notificar("Selecione pelo menos uma categoria.", "erro");
+  if (!Object.keys(categorias).length) {
+    notificar("Selecione pelo menos uma categoria.", "erro");
 
-      return;
-    }
+    return;
   }
 
   btnSalvarCategoriasMateriaisGestores.disabled = true;
 
   try {
     await update(categoriasMateriaisGestoresRef, {
-      todas,
-      categorias: todas ? null : categorias,
+      todas: false,
+      categorias,
       atualizadoEm: new Date().toISOString(),
     });
 
