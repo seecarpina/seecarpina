@@ -19,10 +19,11 @@ Com uma conta autorizada no Firebase CLI:
 ```sh
 npm ci --prefix functions
 firebase login
+printf 'ORIGEM_SECRETARIA=https://seecarpina.online\n' > functions/.env.see-carpina-2a774
 firebase deploy --only database,functions:notificacoes --project see-carpina-2a774
 ```
 
-No parâmetro `ORIGEM_SECRETARIA`, informar a origem HTTPS de produção do sistema da secretaria, por exemplo `https://seecarpina.online` **somente se esse for o endereço correto**. Os dispositivos registrados em domínios de preview não recebem envios de produção.
+O domínio de produção confirmado para `ORIGEM_SECRETARIA` é `https://seecarpina.online`. Os dispositivos registrados em domínios de preview não recebem envios de produção.
 
 A implantação das regras usa o arquivo completo `database.rules.json`. Comparar com as regras ativas no console antes de publicar, preservando alterações que existam apenas no console.
 
@@ -35,7 +36,7 @@ A implantação das regras usa o arquivo completo `database.rules.json`. Compara
 5. Tocar no aviso e conferir abertura do pedido, também após login.
 6. Testar os quatro módulos, desativação por dispositivo, logout e troca de usuário. O logout tenta remover a inscrição antes de encerrar a sessão; falha de rede não impede sair. O aviso não contém escola nem conteúdo do pedido.
 
-A função consulta permissões atuais antes do envio. Tokens inválidos são removidos. Sucessos ficam registrados para não reenviar em novas tentativas; falhas temporárias permitem retentativa. Como o gatilho tem entrega pelo menos uma vez, uma falha entre envio e registro pode repetir um aviso; a tag por pedido substitui a notificação anterior no dispositivo.
+A função consulta permissões atuais antes do envio. Tokens inválidos são removidos. Sucessos ficam registrados para reduzir reenvios em caso de repetição do evento. Falhas de envio são registradas nos logs; as retentativas prolongadas da função estão desativadas. Uma falha entre envio e registro pode repetir um aviso; a tag por pedido substitui a notificação anterior no dispositivo.
 
 A entrega depende de permissões, conexão, suporte do navegador e configurações do sistema operacional. Não foi validada com credenciais ou dispositivos de produção nesta etapa.
 
