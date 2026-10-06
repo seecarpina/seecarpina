@@ -10,7 +10,7 @@
 .dashboard-numero strong { display: block; font-size: 2rem; margin: .5rem 0; }
 .dashboard-numero.urgente { border-top-color: var(--clr-danger); }
 .dashboard-fila { background: var(--clr-white); border-radius: 1rem; margin-top: 1rem; padding: 1.25rem; }
-.dashboard-fila h3 { margin-bottom: .6rem; }
+.dashboard-fila h3 { color: var(--clr-dark); margin-bottom: .6rem; }
 .dashboard-mensagem { color: var(--clr-dark-variant); margin-bottom: 1rem; }
 .dashboard-pedido { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1rem 0; border-top: 1px solid var(--clr-info-light); color: var(--clr-dark); }
 .dashboard-pedido:hover strong { color: var(--clr-primary); }
