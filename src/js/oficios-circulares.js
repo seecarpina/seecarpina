@@ -1,3 +1,4 @@
+import { primeiroEUltimoNome, podeEditarOficio } from "./core/responsavelOficio.js";
 import { auth, db, rtdb } from "./firebaseConfig.js";
 import { exportarTabelaExcel } from "./core/exportarExcel.js";
 
@@ -193,11 +194,7 @@ onValue(destinosRef, (snapshot) => {
 });
 
 function podeAlterar(circular) {
-  return (
-    !circular.responsavel ||
-    circular.responsavel === nomeResponsavel ||
-    nomeResponsavel === "Raphael"
-  );
+  return podeEditarOficio(circular, nomeResponsavel, auth.currentUser?.uid);
 }
 
 function obterFiltrados() {
@@ -397,6 +394,7 @@ async function cadastrarCircular() {
       destinos,
       destinoIds: destinos.map((destino) => destino.id),
       responsavel: nomeResponsavel,
+      responsavelUid: auth.currentUser.uid,
       criadoEm: agora,
       atualizadoEm: agora,
     };
@@ -685,7 +683,7 @@ onAuthStateChanged(auth, async (user) => {
 
   try {
     const cache = JSON.parse(localStorage.getItem("usuarioCache") || "null");
-    if (cache?.nome) nomeResponsavel = cache.nome.split(" ")[0];
+    if (cache?.nome) nomeResponsavel = primeiroEUltimoNome(cache.nome);
   } catch (erro) {
     console.error("Erro ao ler usuário em cache:", erro);
   }
@@ -694,9 +692,9 @@ onAuthStateChanged(auth, async (user) => {
     const snapshot = await getDoc(doc(db, "usuarios", user.uid));
 
     if (snapshot.exists()) {
-      nomeResponsavel = snapshot.data().nome?.split(" ")[0] || nomeResponsavel;
+      nomeResponsavel = primeiroEUltimoNome(snapshot.data().nome || nomeResponsavel);
     } else if (user.displayName) {
-      nomeResponsavel = user.displayName.split(" ")[0];
+      nomeResponsavel = primeiroEUltimoNome(user.displayName);
     }
   } catch (erro) {
     console.error("Erro ao identificar usuário:", erro);

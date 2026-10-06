@@ -1,3 +1,4 @@
+import { primeiroEUltimoNome, podeEditarOficio } from "./core/responsavelOficio.js";
 import { auth, db, rtdb } from "./firebaseConfig.js";
 import { exportarTabelaExcel } from "./core/exportarExcel.js";
 
@@ -125,7 +126,7 @@ onAuthStateChanged(auth, async (user) => {
       const dadosCache = JSON.parse(cache);
 
       if (dadosCache?.nome) {
-        nomeResponsavel = dadosCache.nome.split(" ")[0];
+        nomeResponsavel = primeiroEUltimoNome(dadosCache.nome);
 
         if (inputResponsavel) {
           inputResponsavel.value = nomeResponsavel;
@@ -144,9 +145,9 @@ onAuthStateChanged(auth, async (user) => {
     const usuarioSnap = await getDoc(doc(db, "usuarios", user.uid));
 
     if (usuarioSnap.exists()) {
-      nomeResponsavel = usuarioSnap.data().nome?.split(" ")[0] || "Usuário";
+      nomeResponsavel = primeiroEUltimoNome(usuarioSnap.data().nome) || "Usuário";
     } else if (user.displayName) {
-      nomeResponsavel = user.displayName.split(" ")[0];
+      nomeResponsavel = primeiroEUltimoNome(user.displayName);
     }
 
     if (inputResponsavel) {
@@ -162,7 +163,7 @@ onAuthStateChanged(auth, async (user) => {
     console.error("Erro ao identificar responsável:", erro);
 
     if (nomeResponsavel === "Usuário") {
-      nomeResponsavel = user.displayName?.split(" ")[0] || "Usuário";
+      nomeResponsavel = primeiroEUltimoNome(user.displayName) || "Usuário";
     }
 
     if (inputResponsavel) {
@@ -481,6 +482,7 @@ formOficio?.addEventListener("submit", async (event) => {
       sistemaCarpinaDigital,
       numeroProcesso,
       responsavel: nomeResponsavel,
+      responsavelUid: auth.currentUser.uid,
       criadoEm: new Date().toISOString(),
     });
 
@@ -667,10 +669,7 @@ function renderTabela() {
 
     const assuntoFormatado = formatarAssunto(oficio);
 
-    const podeEditar =
-      oficio.responsavel === nomeResponsavel ||
-      nomeResponsavel === "Raphael" ||
-      !oficio.responsavel;
+    const podeEditar = podeEditarOficio(oficio, nomeResponsavel, auth.currentUser?.uid);
 
     tr.innerHTML = `
         <td>
