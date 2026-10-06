@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Revisar texto formal - SEE Carpina</title>
+  <link rel="stylesheet" href="./src/css/style.css" />
+  <link rel="stylesheet" href="./src/css/revisar-texto.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <meta name="theme-color" content="#0a84ff" />
+  <link rel="apple-touch-icon" href="./src/images/app/icon-180.png?v=2" />
+  <script defer src="./src/js/instalar-app.js"></script>
+</head>
+<body class="pagina-revisao">
+  <div class="loading"><svg class="svg-spinner" viewBox="0 0 50 50" role="img" aria-label="Carregando"><circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="4" /></svg></div>
+  <button id="btnTopo">↑</button>
+  <div class="container">
+    <aside id="sidebar"></aside>
+    <main>
+      <h1>Revisar texto formal</h1>
+      <p class="revisao-introducao">Transforme seu rascunho em um texto mais claro e formal. Confira a versão sugerida antes de usar.</p>
+      <form id="formRevisao" class="revisao-painel">
+        <label for="tipoTexto">Tipo de documento</label>
+        <select id="tipoTexto"><option value="oficio">Ofício</option><option value="email">E-mail</option><option value="requerimento">Requerimento</option><option value="comunicado">Comunicado</option></select>
+        <div class="revisao-colunas">
+          <div><label for="textoOriginal">Seu texto</label><textarea id="textoOriginal" minlength="20" maxlength="6000" required placeholder="Cole aqui o texto que deseja melhorar…"></textarea><small id="contadorTexto">0/6.000 caracteres</small></div>
+          <div><label for="textoRevisado">Versão revisada</label><textarea id="textoRevisado" readonly placeholder="A sugestão da IA aparecerá aqui."></textarea><button type="button" id="copiarTexto" disabled>Copiar texto revisado</button></div>
+        </div>
+        <p class="revisao-aviso">O texto será enviado à Groq para revisão. CPFs com 11 dígitos ou no formato 000.000.000-00 são ocultados automaticamente e recolocados no resultado. Remova dados sensíveis que não sejam necessários, como informações médicas. Esta ferramenta não substitui a conferência do documento.</p>
+        <div class="revisao-acoes"><button id="melhorarTexto" type="submit" disabled>Melhorar texto</button><button id="limparTexto" type="button">Limpar</button></div>
+        <p id="statusRevisao" role="status" aria-live="polite">Validando seu acesso…</p>
+      </form>
+      <a class="revisao-voltar" href="./oficios.html">← Voltar aos ofícios</a>
+    </main>
+    <div class="right"></div>
+  </div>
+  <script type="module" src="./src/js/scripts.js"></script>
+  <script type="module" src="./src/js/revisarTexto.js"></script>
+</body>
+</html>
