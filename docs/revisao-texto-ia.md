@@ -17,3 +17,7 @@ Texto entre 20 e 6.000 caracteres; até 4.000 tokens de conclusão. Há limitaç
 CPFs formatados ou sequências isoladas de 11 dígitos são substituídos antes da chamada à IA e restaurados no resultado. Se a IA remover um marcador, a resposta é rejeitada. Isso não anonimiza nomes, endereços ou demais informações sensíveis: o usuário deve removê-las antes do envio. O aplicativo não persiste os textos em banco ou armazenamento local e não os imprime em logs; o provedor externo processa o texto restante conforme seus termos. A Groq informa não reter conteúdo de inferência por padrão, mas prevê exceções para confiabilidade e abuso; avalie Data Controls antes de uso institucional.
 
 Fontes: https://console.groq.com/docs/your-data, https://console.groq.com/docs/models, https://console.groq.com/docs/openai.
+
+## Se aparecer “a IA ainda não foi ativada”
+
+Confirme que GROQ_API_KEY foi salva no projeto seecarpina com ambiente Preview e, se houver filtro de branch, feat/revisar-texto-ia. Alterar os ambientes não atualiza deployments existentes. Gere uma nova publicação depois de salvar e abra o link Visit desse deployment; use /revisar-texto. Uma chave inválida gera erro do serviço, enquanto a mensagem de ativação indica variável ausente ou vazia na função.
