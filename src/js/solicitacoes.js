@@ -177,6 +177,14 @@ const btnConfirmarAtualizacao = document.getElementById(
    ESTADO
 ========================================= */
 
+const filtrosDashboard = new URLSearchParams(window.location.search);
+const pedidoDashboard = filtrosDashboard.get("pedido");
+let pedidoDashboardAberto = false;
+if ([...filtroStatusSolicitacao.options].some(opcao => opcao.value === filtrosDashboard.get("status"))) {
+  filtroStatusSolicitacao.value = filtrosDashboard.get("status");
+}
+if (filtrosDashboard.get("prioridade") === "URGENTE") filtroPrioridadeSolicitacao.value = "URGENTE";
+
 let dadosUsuarioAtual = null;
 let perfilUsuarioAtual = "";
 let permissaoSolicitacoesAtual = null;
@@ -458,7 +466,11 @@ function obterSolicitacoesFiltradas() {
       return false;
     }
 
-    if (status && solicitacao.status !== status) {
+    if (filtrosDashboard.get("abertos") === "1" &&
+      !["RECEBIDA", "EM_ATENDIMENTO", "EM_ANALISE", "APROVADA"].includes(solicitacao.status)) return false;
+
+    if (status && solicitacao.status !== status &&
+      !(status === "EM_ATENDIMENTO" && ["EM_ANALISE", "APROVADA"].includes(solicitacao.status))) {
       return false;
     }
 
@@ -2391,7 +2403,10 @@ abasSolicitacoes.forEach((aba) => {
 
 buscaSolicitacoes.addEventListener("input", renderizarSolicitacoes);
 
-filtroStatusSolicitacao.addEventListener("change", renderizarSolicitacoes);
+filtroStatusSolicitacao.addEventListener("change", () => {
+  filtrosDashboard.delete("abertos");
+  renderizarSolicitacoes();
+});
 
 filtroPrioridadeSolicitacao.addEventListener("change", renderizarSolicitacoes);
 
@@ -2439,6 +2454,10 @@ function consolidarSolicitacoes() {
 
   atualizarIndicadores();
   renderizarSolicitacoes();
+  if (pedidoDashboard && !pedidoDashboardAberto && solicitacoes.some(item => item.id === pedidoDashboard)) {
+    pedidoDashboardAberto = true;
+    abrirDrawerSolicitacao(pedidoDashboard);
+  }
 }
 
 function carregarSolicitacoes() {

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SEE Carpina</title>
     <link rel="stylesheet" href="./src/css/style.css" />
+    <link rel="stylesheet" href="./src/css/dashboard-atendimento.css" />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
@@ -54,7 +55,30 @@
           <span id="frase-do-dia"></span>
           <button id="btn-pin" title="Fixar frase">
             <span class="material-symbols-outlined">keep</span>
+          </button>
         </div>
+
+        <section id="dashboardAtendimento" class="dashboard-operacional" hidden aria-labelledby="tituloAtendimentoDashboard">
+          <div class="dashboard-cabecalho">
+            <div><h2 id="tituloAtendimentoDashboard">Atendimento às escolas</h2><p>Um panorama dos pedidos que você acompanha.</p></div>
+            <a href="./solicitacoes.html">Abrir Central de Solicitações →</a>
+          </div>
+          <div class="dashboard-numeros">
+            <a class="dashboard-numero" href="./solicitacoes.html?status=RECEBIDA"><span>Recebidas</span><strong id="dashboard-recebidas">—</strong><small>Aguardando início</small></a>
+            <a class="dashboard-numero" href="./solicitacoes.html?status=EM_ATENDIMENTO"><span>Em atendimento</span><strong id="dashboard-atendimento">—</strong><small>Trabalho em andamento</small></a>
+            <a class="dashboard-numero" href="./solicitacoes.html?status=AGUARDANDO_CONFIRMACAO"><span>Aguardando confirmação</span><strong id="dashboard-confirmacao">—</strong><small>Retorno da unidade escolar</small></a>
+            <a class="dashboard-numero urgente" href="./solicitacoes.html?prioridade=URGENTE&amp;abertos=1"><span>Urgentes</span><strong id="dashboard-urgentes">—</strong><small>Aguardando ação da secretaria</small></a>
+          </div>
+          <div class="dashboard-fila">
+            <h3>Pedidos que precisam de atenção</h3>
+            <p id="dashboardAtendimentoMensagem" class="dashboard-mensagem" role="status">Carregando solicitações…</p>
+            <div id="dashboardPedidosAtencao"></div>
+          </div>
+        </section>
+        <section id="dashboardSecaoAtalhos" class="dashboard-operacional" hidden aria-labelledby="tituloAtalhosDashboard">
+          <div class="dashboard-cabecalho"><h2 id="tituloAtalhosDashboard">Atalhos rápidos</h2></div>
+          <nav id="dashboardAtalhos" class="dashboard-atalhos" aria-label="Atalhos rápidos"></nav>
+        </section>
 
         <div class="insights">
           <a>
@@ -240,6 +264,7 @@
     <script type="module" src="./src/js/scripts.js"></script>
     <script type="module" src="./src/js/vanilla-tilt.min.js"></script>
     <script type="module" src="./src/js/dashboard.js"></script>
+    <script type="module" src="./src/js/dashboardAtendimento.js"></script>
     <script>
       // ============================================================
       // DATAS COMEMORATIVAS

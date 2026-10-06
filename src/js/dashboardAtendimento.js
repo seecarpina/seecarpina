@@ -1,0 +1,130 @@
+import { auth, db, rtdb } from './firebaseConfig.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
+import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
+import { ref, get, query, orderByChild, equalTo, onValue } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
+import { modulosDashboardPermitidos, resumirAtendimento, diasDesdePedido } from './core/resumoDashboard.js';
+
+const painel = document.getElementById('dashboardAtendimento');
+const lista = document.getElementById('dashboardPedidosAtencao');
+const mensagem = document.getElementById('dashboardAtendimentoMensagem');
+const nomes = { INSUMOS: 'Água, gás e caminhão-pipa', MATERIAIS_EXPEDIENTE: 'Material de expediente',
+  MATERIAIS_LIMPEZA: 'Material de limpeza', MANUTENCAO: 'Manutenção' };
+let cancelar = [];
+let versao = 0;
+
+function renderizar(registros) {
+  const resumo = resumirAtendimento(registros);
+  for (const chave of ['recebidas', 'atendimento', 'confirmacao', 'urgentes']) {
+    document.getElementById(`dashboard-${chave}`).textContent = resumo[chave];
+  }
+  mensagem.textContent = `${resumo.totalAberto} pedido${resumo.totalAberto === 1 ? '' : 's'} aguardando ação da secretaria. Urgentes aparecem primeiro, seguidos dos mais antigos.`;
+  lista.replaceChildren();
+  if (!resumo.atencao.length) {
+    const vazio = document.createElement('p');
+    vazio.className = 'dashboard-vazio';
+    vazio.textContent = 'Nenhum pedido aguardando atendimento nos módulos que você acompanha.';
+    lista.append(vazio);
+  }
+  for (const pedido of resumo.atencao) {
+    const link = document.createElement('a');
+    link.className = 'dashboard-pedido';
+    link.href = `./solicitacoes.html?pedido=${encodeURIComponent(pedido.id)}`;
+    const texto = document.createElement('div');
+    const titulo = document.createElement('strong');
+    titulo.textContent = pedido.escolaNome || 'Unidade escolar';
+    const detalhe = document.createElement('span');
+    detalhe.textContent = `${pedido.protocolo || 'Sem protocolo'} · ${pedido.tipoNome || pedido.categoriaNome || nomes[pedido.modulo] || 'Pedido'}`;
+    texto.append(titulo, detalhe);
+    const meta = document.createElement('div');
+    meta.className = 'dashboard-pedido-meta';
+    const badge = document.createElement('span');
+    badge.className = pedido.prioridade === 'URGENTE' ? 'dashboard-badge urgente' : 'dashboard-badge';
+    badge.textContent = pedido.prioridade === 'URGENTE' ? 'Urgente' : pedido.status === 'RECEBIDA' ? 'Recebida' : 'Em atendimento';
+    const tempo = document.createElement('small');
+    const dias = diasDesdePedido(pedido.criadoEm);
+    tempo.textContent = dias === null ? 'Data não informada' : dias === 0 ? 'Recebido hoje' : `Há ${dias} dia${dias === 1 ? '' : 's'}`;
+    meta.append(badge, tempo);
+    link.append(texto, meta);
+    lista.append(link);
+  }
+}
+
+onAuthStateChanged(auth, async user => {
+  const atual = ++versao;
+  cancelar.forEach(fn => fn());
+  cancelar = [];
+  painel.hidden = true;
+  if (!user) return;
+  try {
+    const usuario = await getDoc(doc(db, 'usuarios', user.uid));
+    if (!usuario.exists() || usuario.data().ativo === false) return;
+    const perfil = String(usuario.data().cargo || '').trim().toUpperCase();
+    if (!perfil || perfil === 'GESTOR_ESCOLAR') return;
+    const permissoes = await get(ref(rtdb, `configuracoes/solicitacoes/permissoes/${perfil}`));
+    if (atual !== versao) return;
+    const modulos = modulosDashboardPermitidos(permissoes.val());
+    if (!modulos.length) return;
+    painel.hidden = false;
+    mensagem.textContent = 'Carregando os pedidos dos seus módulos…';
+    lista.replaceChildren();
+    for (const chave of ['recebidas', 'atendimento', 'confirmacao', 'urgentes']) {
+      document.getElementById(`dashboard-${chave}`).textContent = '—';
+    }
+    const porModulo = {};
+    const carregados = new Set();
+    const falhas = new Set();
+    const atualizar = () => {
+      if (atual !== versao || carregados.size !== modulos.length) return;
+      if (falhas.size) {
+        mensagem.textContent = 'Não foi possível carregar todos os pedidos. Abra a Central de Solicitações para consultar.';
+        lista.replaceChildren();
+        for (const chave of ['recebidas', 'atendimento', 'confirmacao', 'urgentes']) {
+          document.getElementById(`dashboard-${chave}`).textContent = '—';
+        }
+        return;
+      }
+      renderizar(Object.values(porModulo).flat());
+    };
+    for (const modulo of modulos) {
+      const consulta = query(ref(rtdb, 'portalGestor/solicitacoes/registros'), orderByChild('modulo'), equalTo(modulo));
+      cancelar.push(onValue(consulta, snapshot => {
+        if (atual !== versao) return;
+        porModulo[modulo] = Object.entries(snapshot.val() || {}).map(([id, dados]) => ({ ...dados, id }));
+        falhas.delete(modulo);
+        carregados.add(modulo);
+        atualizar();
+      }, () => { falhas.add(modulo); carregados.add(modulo); atualizar(); }));
+    }
+  } catch (erro) {
+    console.error('Erro ao carregar resumo de atendimento:', erro);
+    if (atual === versao) {
+      painel.hidden = false;
+      mensagem.textContent = 'Resumo indisponível no momento. Tente atualizar a página.';
+    }
+  }
+});
+
+// Reutiliza os links autorizados e já renderizados pelo menu do usuário.
+const menu = document.getElementById('menuSidebar');
+const atalhos = document.getElementById('dashboardAtalhos');
+const secaoAtalhos = document.getElementById('dashboardSecaoAtalhos');
+function atualizarAtalhos() {
+  atalhos.replaceChildren();
+  const destinos = ['solicitacoes', 'oficios', 'oficios-circulares', 'estoque'];
+  for (const destino of destinos) {
+    const origem = [...menu.querySelectorAll('a[href]')].find(a => {
+      const caminho = new URL(a.href, location.href).pathname.replace(/\.html$/, '').replace(/\/$/, '');
+      return caminho === `/${destino}`;
+    });
+    if (!origem) continue;
+    const link = document.createElement('a');
+    link.href = origem.href;
+    link.textContent = origem.querySelector('h3')?.textContent.trim() || destino;
+    atalhos.append(link);
+  }
+  secaoAtalhos.hidden = !atalhos.childElementCount;
+}
+if (menu) {
+  new MutationObserver(atualizarAtalhos).observe(menu, { childList: true, subtree: true });
+  atualizarAtalhos();
+}
