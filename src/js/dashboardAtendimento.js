@@ -104,27 +104,3 @@ onAuthStateChanged(auth, async user => {
   }
 });
 
-// Reutiliza os links autorizados e já renderizados pelo menu do usuário.
-const menu = document.getElementById('menuSidebar');
-const atalhos = document.getElementById('dashboardAtalhos');
-const secaoAtalhos = document.getElementById('dashboardSecaoAtalhos');
-function atualizarAtalhos() {
-  atalhos.replaceChildren();
-  const destinos = ['solicitacoes', 'oficios', 'oficios-circulares', 'estoque'];
-  for (const destino of destinos) {
-    const origem = [...menu.querySelectorAll('a[href]')].find(a => {
-      const caminho = new URL(a.href, location.href).pathname.replace(/\.html$/, '').replace(/\/$/, '');
-      return caminho === `/${destino}`;
-    });
-    if (!origem) continue;
-    const link = document.createElement('a');
-    link.href = origem.href;
-    link.textContent = origem.querySelector('h3')?.textContent.trim() || destino;
-    atalhos.append(link);
-  }
-  secaoAtalhos.hidden = !atalhos.childElementCount;
-}
-if (menu) {
-  new MutationObserver(atualizarAtalhos).observe(menu, { childList: true, subtree: true });
-  atualizarAtalhos();
-}
