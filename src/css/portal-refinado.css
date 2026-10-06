@@ -1,0 +1,150 @@
+/* Camada visual compartilhada do portal da secretaria.
+   Mantém as cores das ações e os layouts específicos de cada módulo.
+   A impressão continua usando os estilos originais. */
+@media screen {
+  .portal-refinado {
+    --card-border-radius: 1.2rem;
+    --card-padding: 1.5rem;
+    --box-shadow: 0 6px 22px rgba(35, 45, 65, 0.07);
+    --glass-shadow: 0 6px 22px rgba(35, 45, 65, 0.08);
+    --clr-dark-variant: #536176;
+    --clr-info-dark: #59677a;
+  }
+
+  .portal-refinado.dark-theme-variables {
+    --clr-dark-variant: #b7c1d0;
+    --clr-info-dark: #b7c1d0;
+    --box-shadow: 0 6px 22px rgba(0, 0, 0, 0.2);
+    --glass-shadow: 0 6px 22px rgba(0, 0, 0, 0.22);
+  }
+
+  .portal-refinado main { min-width: 0; }
+
+  .portal-refinado main > h1:first-child {
+    margin-bottom: 1.25rem;
+    color: var(--clr-dark);
+    font-size: clamp(1.5rem, 1.1rem + 1vw, 2rem);
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.035em;
+    overflow-wrap: anywhere;
+  }
+
+  .portal-refinado main h2 {
+    color: var(--clr-dark);
+    line-height: 1.4;
+    font-weight: 600;
+  }
+
+  .portal-refinado main .box {
+    gap: 1.25rem;
+    border-radius: var(--card-border-radius);
+  }
+
+  .portal-refinado main label {
+    color: var(--clr-dark);
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .portal-refinado main :is(
+    input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+    select, textarea
+  ) {
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 2.75rem;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--clr-info-light);
+    border-radius: 0.7rem;
+    background-color: var(--clr-white);
+    color: var(--clr-dark);
+    font-family: inherit;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+
+  .portal-refinado main :is(input, textarea)::placeholder {
+    color: var(--clr-info-dark);
+    opacity: 1;
+  }
+
+  .portal-refinado main :is(input, select, textarea):focus-visible {
+    border-color: var(--clr-primary);
+    outline: 2px solid var(--clr-primary);
+    outline-offset: 2px;
+  }
+
+  .portal-refinado :is(button, a, summary):focus-visible {
+    outline: 2px solid var(--clr-primary);
+    outline-offset: 3px;
+  }
+
+  .portal-refinado main :is(.btn, .btn-excel, .btn-salvar) {
+    min-height: 2.75rem;
+    padding: 0.75rem 1.1rem;
+    border-radius: 0.7rem;
+    font-family: inherit;
+    font-weight: 600;
+    line-height: 1.5;
+    transition: background-color 150ms ease, box-shadow 150ms ease;
+  }
+
+  .portal-refinado main :is(button, input, select, textarea):disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
+
+  .portal-refinado aside .sidebar a {
+    min-height: 2.75rem;
+    transition: background-color 150ms ease, color 150ms ease;
+  }
+
+  .portal-refinado .dashboard-numero {
+    border-radius: var(--card-border-radius);
+  }
+
+  .portal-refinado .dashboard-fila {
+    border-radius: var(--card-border-radius);
+    box-shadow: var(--box-shadow);
+  }
+
+  .portal-refinado .dashboard-fila h3 {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .portal-refinado .link-revisao-texto {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    margin-bottom: 1rem;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid var(--clr-primary);
+    border-radius: 0.7rem;
+    color: var(--clr-primary);
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  .portal-refinado .link-revisao-texto:hover {
+    background: var(--clr-light);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .portal-refinado { --card-padding: 1.1rem; }
+
+  /* 16px evita o zoom automático do Safari ao preencher os campos. */
+  .portal-refinado main :is(input, select, textarea) { font-size: 16px; }
+
+  .portal-refinado main > h1:first-child { margin-bottom: 0.75rem; }
+  .portal-refinado main .box { gap: 1rem; }
+  .portal-refinado .link-revisao-texto { max-width: 100%; }
+}
+
+@media screen and (prefers-reduced-motion: reduce) {
+  .portal-refinado main :is(input, select, textarea, .btn, .btn-excel, .btn-salvar),
+  .portal-refinado aside .sidebar a { transition: none; }
+}
