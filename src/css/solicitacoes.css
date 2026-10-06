@@ -1477,3 +1477,82 @@ body.drawer-solicitacao-aberto {
     width: 100%;
   }
 }
+
+/* Mantém os componentes dentro da coluna disponível da página. */
+.pagina-solicitacoes .container > main,
+.central-solicitacoes-grid,
+.central-solicitacoes-grid > section,
+.filtros-central-solicitacoes > *,
+.lista-central-solicitacoes {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.filtros-central-solicitacoes {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 220px) minmax(0, 190px);
+}
+
+.card-central-solicitacao,
+.drawer-solicitacao-conteudo {
+  overflow-wrap: anywhere;
+}
+
+.drawer-solicitacao {
+  height: 100dvh;
+  box-sizing: border-box;
+}
+
+.drawer-solicitacao-conteudo {
+  min-height: 0;
+  min-width: 0;
+}
+
+.drawer-solicitacao-cabecalho,
+.drawer-solicitacao-rodape {
+  flex-shrink: 0;
+}
+
+.dialogo-atualizacao {
+  box-sizing: border-box;
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+}
+
+@media (max-width: 1100px) {
+  .filtros-central-solicitacoes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .pagina-solicitacoes main > h1 {
+    font-size: 1.6rem;
+    overflow-wrap: anywhere;
+  }
+
+  .filtros-central-solicitacoes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .central-solicitacoes-grid > .box {
+    padding: 1rem;
+  }
+
+  .cabecalho-central {
+    flex-wrap: wrap;
+  }
+
+  .drawer-solicitacao {
+    width: 100%;
+  }
+
+  .drawer-solicitacao-cabecalho,
+  .drawer-solicitacao-conteudo,
+  .drawer-solicitacao-rodape {
+    padding: 1rem;
+  }
+
+  .drawer-solicitacao-rodape {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
