@@ -1218,6 +1218,8 @@ function gerarCartaRegistradaDoServidor(servidor) {
 
     novoLocal: transferencia.para || "",
 
+    horario: transferencia.horario || "",
+
     dataTransferencia: transferencia.data || "",
 
     protocolo: transferencia.protocolo || "",
