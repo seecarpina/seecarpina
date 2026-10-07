@@ -47,20 +47,44 @@ const paginacaoRomaneios = document.getElementById("paginacaoRomaneios");
 const paginacaoMovimentacoes = document.getElementById("paginacaoMovimentacoes");
 
 function atualizarControlePaginacao(controle, resumo) {
-  controle.hidden = resumo.total === 0;
-  controle.querySelector('[data-pagina="anterior"]').disabled = resumo.pagina === 1;
-  controle.querySelector('[data-pagina="proxima"]').disabled = resumo.pagina === resumo.totalPaginas;
-  controle.querySelector(".estoque-pagina-info").textContent =
-    `Página ${resumo.pagina} de ${resumo.totalPaginas} · ${resumo.primeiro}–${resumo.ultimo} de ${resumo.total}`;
+  controle.innerHTML = "";
+  controle.hidden = resumo.totalPaginas <= 1;
+  if (resumo.totalPaginas <= 1) return;
+
+  const maxPaginasVisiveis = 10;
+  let inicioPagina = Math.max(1, resumo.pagina - 2);
+  const fimPagina = Math.min(resumo.totalPaginas, inicioPagina + maxPaginasVisiveis - 1);
+  if (fimPagina - inicioPagina + 1 < maxPaginasVisiveis) {
+    inicioPagina = Math.max(1, fimPagina - maxPaginasVisiveis + 1);
+  }
+
+  function adicionarBotao(texto, pagina, titulo) {
+    const botao = document.createElement("button");
+    botao.type = "button";
+    botao.textContent = texto;
+    botao.dataset.pagina = pagina;
+    botao.title = titulo;
+    botao.setAttribute("aria-label", titulo);
+    if (pagina === resumo.pagina) {
+      botao.classList.add("ativo");
+      botao.setAttribute("aria-current", "page");
+    }
+    controle.appendChild(botao);
+  }
+
+  if (resumo.pagina > 1) adicionarBotao("‹", resumo.pagina - 1, "Página anterior");
+  for (let pagina = inicioPagina; pagina <= fimPagina; pagina++) {
+    adicionarBotao(pagina, pagina, `Página ${pagina}`);
+  }
+  if (resumo.pagina < resumo.totalPaginas) adicionarBotao("›", resumo.pagina + 1, "Próxima página");
 }
 
-function navegarHistorico(controle, lista, obterPagina, definirPagina, renderizar) {
+function navegarHistorico(controle, definirPagina, renderizar) {
   controle.addEventListener("click", (event) => {
     const botao = event.target.closest("button[data-pagina]");
-    if (!botao || botao.disabled) return;
-    definirPagina(obterPagina() + (botao.dataset.pagina === "anterior" ? -1 : 1));
+    if (!botao) return;
+    definirPagina(Number(botao.dataset.pagina));
     renderizar();
-    lista.scrollIntoView({ block: "start", behavior: "auto" });
   });
 }
 
@@ -3017,8 +3041,8 @@ filtroTipoMovimentacao?.addEventListener("change", () => {
   renderMovimentacoes();
 });
 
-navegarHistorico(paginacaoRomaneios, listaHistorico, () => paginaRomaneios, (pagina) => { paginaRomaneios = pagina; }, renderHistorico);
-navegarHistorico(paginacaoMovimentacoes, listaMovimentacoes, () => paginaMovimentacoes, (pagina) => { paginaMovimentacoes = pagina; }, renderMovimentacoes);
+navegarHistorico(paginacaoRomaneios, (pagina) => { paginaRomaneios = pagina; }, renderHistorico);
+navegarHistorico(paginacaoMovimentacoes, (pagina) => { paginaMovimentacoes = pagina; }, renderMovimentacoes);
 
 /* =========================
    ABAS
