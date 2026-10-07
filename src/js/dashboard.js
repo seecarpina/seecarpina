@@ -18,7 +18,7 @@ const oficiosRef = ref(rtdb, "oficios");
 // Controles
 // ===============================
 function cssVar(nome) {
-  return getComputedStyle(document.documentElement)
+  return getComputedStyle(document.body)
     .getPropertyValue(nome)
     .trim();
 }
@@ -35,6 +35,32 @@ const CNPJ_2 = "59.593.430/0001-07";
 let graficoContratos = null;
 let graficoOficiosMes = null;
 let todosOficios = [];
+let dadosOficios = {};
+const filtroAno = document.getElementById("filtroAno");
+
+function mostrarBloco(canvas) {
+  const bloco = canvas.closest(".card");
+  bloco.querySelector(".dashboard-grafico-erro")?.remove();
+  canvas.hidden = false;
+  bloco.hidden = false;
+  document.getElementById("dashboardGraficos").hidden = false;
+}
+
+function mostrarErroGrafico(idCanvas) {
+  const canvas = document.getElementById(idCanvas);
+  if (!canvas) return;
+  const bloco = canvas.closest(".card");
+  canvas.hidden = true;
+  bloco.querySelector(".dashboard-grafico-erro")?.remove();
+  const mensagem = document.createElement("p");
+  mensagem.className = "dashboard-grafico-erro";
+  mensagem.setAttribute("role", "status");
+  mensagem.textContent = "Não foi possível carregar este resumo. Tente atualizar a página.";
+  bloco.appendChild(mensagem);
+  if (idCanvas === "graficoOficiosMes") document.getElementById("totalOficios").hidden = true;
+  bloco.hidden = false;
+  document.getElementById("dashboardGraficos").hidden = false;
+}
 
 // ===============================
 // 🥧 GRÁFICO 1 — TOTAL CONTRATOS
@@ -54,8 +80,13 @@ onValue(contratosRef, (snap) => {
     });
   }
 
-  desenharGraficoContratos(totalCnpj1, totalCnpj2, totalAtas);
-});
+  try {
+    desenharGraficoContratos(totalCnpj1, totalCnpj2, totalAtas);
+  } catch (erro) {
+    console.error("Erro ao desenhar resumo de contratos:", erro);
+    mostrarErroGrafico("graficoContratos");
+  }
+}, () => mostrarErroGrafico("graficoContratos"));
 
 // ===============================
 // 🥧 Gráfico de pizza — Contratos
@@ -66,6 +97,7 @@ function desenharGraficoContratos(cnpj1, cnpj2, atas) {
 
   if (graficoContratos) graficoContratos.destroy();
 
+  mostrarBloco(canvas);
   graficoContratos = new Chart(canvas, {
     type: "pie",
     data: {
@@ -105,59 +137,42 @@ function desenharGraficoContratos(cnpj1, cnpj2, atas) {
 // 📊 GRÁFICO 2 — OFÍCIOS POR MÊS
 // ===============================
 onValue(oficiosRef, (snap) => {
-  if (!snap.exists()) return;
+  dadosOficios = snap.exists() ? snap.val() : {};
+  const anos = Object.keys(dadosOficios).filter((a) => /^\d{4}$/.test(a));
+  const selecionado = filtroAno.value;
+  const atual = new Date().getFullYear().toString();
+  // Mesmo sem ofícios, exibe um gráfico válido com total zero.
+  popularSelectAnos(anos.length ? anos : [atual]);
+  if (anos.includes(selecionado)) filtroAno.value = selecionado;
+  carregarOficiosSelecionados();
+}, () => mostrarErroGrafico("graficoOficiosMes"));
 
-  const dados = snap.val();
-
-  // extrai anos válidos
-  const anos = Object.keys(dados).filter((a) => /^\d{4}$/.test(a));
-
-  // popula select
-  popularSelectAnos(anos);
-
-  // ano selecionado (default: atual)
-  const anoAtual = new Date().getFullYear().toString();
-  const anoSelecionado = filtroAno.value || anoAtual;
-
-  // pega os ofícios do ano
-  const oficiosAno = dados[anoSelecionado]
-    ? Object.values(dados[anoSelecionado])
-    : [];
-
-  todosOficios = oficiosAno;
-
-  atualizarTotalGeralOficios();
-  atualizarGraficoOficios();
-});
+function carregarOficiosSelecionados() {
+  todosOficios = Object.values(dadosOficios[filtroAno.value] || {});
+  try {
+    atualizarTotalGeralOficios();
+    atualizarGraficoOficios();
+  } catch (erro) {
+    console.error("Erro ao desenhar resumo de ofícios:", erro);
+    mostrarErroGrafico("graficoOficiosMes");
+  }
+}
 
 // ===============================
 // 🔢 Total geral de ofícios
 // ===============================
 function atualizarTotalGeralOficios() {
   const el = document.querySelector("#totalOficios strong");
-  const svg = document.querySelector("#totalOficios .svg-spinner");
   if (!el) return;
 
   el.textContent = todosOficios.length;
-  svg?.remove();
+  document.getElementById("totalOficios").hidden = false;
 }
 
 // ===============================
 // 🔽 Select de anos
 // ===============================
-const filtroAno = document.getElementById("filtroAno");
-
-filtroAno.addEventListener("change", () => {
-  const ano = filtroAno.value;
-
-  const refAno = ref(rtdb, `oficios/${ano}`);
-
-  onValue(refAno, (snap) => {
-    todosOficios = snap.exists() ? Object.values(snap.val()) : [];
-    atualizarTotalGeralOficios();
-    atualizarGraficoOficios();
-  });
-});
+filtroAno?.addEventListener("change", carregarOficiosSelecionados);
 
 function popularSelectAnos(anos) {
   if (!filtroAno) return;
@@ -180,7 +195,6 @@ function popularSelectAnos(anos) {
   }
 }
 
-filtroAno?.addEventListener("change", atualizarGraficoOficios);
 
 // ===============================
 // 🔄 Atualiza gráfico mensal
@@ -208,6 +222,7 @@ function desenharGraficoOficiosMes(valores, ano) {
 
   if (graficoOficiosMes) graficoOficiosMes.destroy();
 
+  mostrarBloco(canvas);
   graficoOficiosMes = new Chart(canvas, {
     type: "bar",
     data: {
