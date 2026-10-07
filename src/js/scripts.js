@@ -1,3 +1,4 @@
+import { eventosCalendarioPorAno } from "./core/eventosRegras.js";
 import { categoriaCalendario, categoriasDoDia, dataLocalCalendario, datasComemorativasDoDia } from "./core/calendarioEventos.js";
 
 document.addEventListener("keyup", (e) => {
@@ -385,6 +386,7 @@ carregarRight().then(() => {
         const ano = dataAtual.getFullYear();
         const mes = dataAtual.getMonth();
         const hojeISO = dataLocalCalendario();
+        const eventosAno = eventosCalendarioPorAno(eventosPorData, ano);
 
         const textoMes = dataAtual.toLocaleDateString("pt-BR", {
           month: "long",
@@ -424,7 +426,7 @@ carregarRight().then(() => {
           }
 
           const eventosDia = [
-            ...(eventosPorData[dataISO] || []),
+            ...(eventosAno[dataISO] || []),
             ...datasComemorativasDoDia(datasComemorativas, dataISO),
           ];
           if (eventosDia.length) {
@@ -1272,7 +1274,7 @@ carregarUsuarios();
   window.addEventListener("eventosAtualizados", (e) => {
     eventosCarregados = true;
 
-    const eventosPorData = e.detail || {};
+    const eventosPorData = eventosCalendarioPorAno(e.detail || {}, new Date().getFullYear());
     // const hojeISO = new Date().toISOString().split("T")[0];
     const hojeISO = new Date().toLocaleDateString("sv-SE");
     const aviso = criarBox();

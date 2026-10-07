@@ -1,3 +1,4 @@
+import { eventoAtrasado, dataEventoNoAno } from "./core/eventosRegras.js";
 import { rtdb } from "./firebaseConfig.js";
 
 import {
@@ -191,7 +192,7 @@ onValue(
         return Number(a.concluido) - Number(b.concluido);
       }
 
-      return (a.data || "").localeCompare(b.data || "");
+      return dataEventoNoAno(a, new Date().getFullYear()).localeCompare(dataEventoNoAno(b, new Date().getFullYear()));
     });
 
     renderizarEventos();
@@ -267,7 +268,7 @@ function criarCardEvento(evento) {
       <div class="evento-data-bloco">
         <span class="evento-dia">${data.dia}</span>
         <span class="evento-mes">${data.mes}</span>
-        <span class="evento-ano">${data.ano}</span>
+        ${evento.categoria === "aniversario" ? '<span class="evento-ano">Todo ano</span>' : `<span class="evento-ano">${data.ano}</span>`}
       </div>
 
       <div class="evento-conteudo">
@@ -330,7 +331,7 @@ function criarCardEvento(evento) {
               calendar_today
             </span>
 
-            ${formatarDataCompleta(evento.data)}
+            ${evento.categoria === "aniversario" ? `${data.dia} de ${new Date(`${dataEventoNoAno(evento, 2000)}T00:00:00`).toLocaleDateString("pt-BR", { month: "long" })} · Todos os anos` : formatarDataCompleta(evento.data)}
 
             ${
               eventoAtrasado(evento)
@@ -442,7 +443,7 @@ function editarEvento(evento) {
   botoesEdicao.style.display = "flex";
 
   msgEdicao.style.display = "block";
-  msgEdicao.textContent = `✏️ Editando evento de ${formatarData(evento.data)}`;
+  msgEdicao.textContent = `✏️ Editando evento de ${evento.categoria === "aniversario" ? formatarData(evento.data).slice(0, 5) : formatarData(evento.data)}`;
 
   window.scrollTo({
     top: 0,
@@ -646,18 +647,6 @@ function formatarDataCompleta(dataISO) {
   });
 }
 
-function eventoAtrasado(evento) {
-  if (!evento.data || evento.concluido) {
-    return false;
-  }
-
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0);
-
-  const dataEvento = new Date(`${evento.data}T00:00:00`);
-
-  return dataEvento < hoje;
-}
 
 function escaparHtml(texto) {
   const elemento = document.createElement("div");
