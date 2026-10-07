@@ -1,3 +1,4 @@
+import { paginarRegistros } from "./core/paginacaoEstoque.js";
 import { auth, rtdb } from "./firebaseConfig.js";
 import { exportarPlanilhasExcel } from "./core/exportarExcel.js";
 import {
@@ -36,6 +37,33 @@ const permissoesEstoqueRef = ref(rtdb, "configuracoes/estoque/permissoes");
 let materiais = [];
 let historicoRomaneios = [];
 let historicoEstoque = [];
+let paginaRomaneios = 1;
+let paginaMovimentacoes = 1;
+let romaneiosIniciados = false;
+let movimentacoesIniciadas = false;
+let romaneiosCarregados = false;
+let movimentacoesCarregadas = false;
+const paginacaoRomaneios = document.getElementById("paginacaoRomaneios");
+const paginacaoMovimentacoes = document.getElementById("paginacaoMovimentacoes");
+
+function atualizarControlePaginacao(controle, resumo) {
+  controle.hidden = resumo.total === 0;
+  controle.querySelector('[data-pagina="anterior"]').disabled = resumo.pagina === 1;
+  controle.querySelector('[data-pagina="proxima"]').disabled = resumo.pagina === resumo.totalPaginas;
+  controle.querySelector(".estoque-pagina-info").textContent =
+    `Página ${resumo.pagina} de ${resumo.totalPaginas} · ${resumo.primeiro}–${resumo.ultimo} de ${resumo.total}`;
+}
+
+function navegarHistorico(controle, lista, obterPagina, definirPagina, renderizar) {
+  controle.addEventListener("click", (event) => {
+    const botao = event.target.closest("button[data-pagina]");
+    if (!botao || botao.disabled) return;
+    definirPagina(obterPagina() + (botao.dataset.pagina === "anterior" ? -1 : 1));
+    renderizar();
+    lista.scrollIntoView({ block: "start", behavior: "auto" });
+  });
+}
+
 let destinos = [];
 let itensEntrega = [];
 
@@ -2045,36 +2073,43 @@ function gerarPDF(dados) {
    HISTÓRICO DE ROMANEIOS
 ========================= */
 
-onValue(
-  movimentacoesRef,
-  (snapshot) => {
-    historicoRomaneios = snapshot.exists()
-      ? Object.entries(snapshot.val())
-          .map(([key, dados]) => ({
-            ...dados,
-            _key: key,
-          }))
-          .sort(
-            (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime(),
-          )
-      : [];
+function iniciarHistoricoRomaneios() {
+  if (romaneiosIniciados) return;
+  romaneiosIniciados = true;
+  onValue(
+    movimentacoesRef,
+    (snapshot) => {
+      romaneiosCarregados = true;
+      historicoRomaneios = snapshot.exists()
+        ? Object.entries(snapshot.val())
+            .map(([key, dados]) => ({
+              ...dados,
+              _key: key,
+            }))
+            .sort(
+              (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime(),
+            )
+        : [];
 
-    renderHistorico();
-  },
-  (erro) => {
-    console.error("Erro ao carregar histórico:", erro);
+      renderHistorico();
+    },
+    (erro) => {
+      paginacaoRomaneios.hidden = true;
+      console.error("Erro ao carregar histórico:", erro);
 
-    if (listaHistorico) {
-      listaHistorico.innerHTML = `
-        <div class="estoque-vazio">
-          Não foi possível carregar o histórico.
-        </div>
-      `;
-    }
+      if (listaHistorico) {
+        listaHistorico.innerHTML = `
+          <div class="estoque-vazio">
+            Não foi possível carregar o histórico.
+          </div>
+        `;
+      }
 
-    mostrarNotificacao("Erro ao carregar histórico.", "erro");
-  },
-);
+      mostrarNotificacao("Erro ao carregar histórico.", "erro");
+    },
+  );
+}
+
 
 
 /* =========================
@@ -2316,7 +2351,7 @@ async function cancelarRomaneio(romaneioId) {
 }
 
 function renderHistorico() {
-  if (!listaHistorico) return;
+  if (!listaHistorico || !romaneiosCarregados) return;
 
   const busca = normalizarBusca(inputBuscaHistorico.value);
 
@@ -2351,6 +2386,10 @@ function renderHistorico() {
     }`;
   }
 
+  const resumoPagina = paginarRegistros(filtrados, paginaRomaneios);
+  paginaRomaneios = resumoPagina.pagina;
+  atualizarControlePaginacao(paginacaoRomaneios, resumoPagina);
+
   if (!filtrados.length) {
     listaHistorico.innerHTML = `
       <div class="estoque-vazio">
@@ -2361,7 +2400,7 @@ function renderHistorico() {
     return;
   }
 
-  listaHistorico.innerHTML = filtrados
+  listaHistorico.innerHTML = resumoPagina.registros
     .map((movimentacao) => {
       const data = separarDataRomaneio(movimentacao.data);
 
@@ -2552,40 +2591,50 @@ listaHistorico.addEventListener("click", async (event) => {
   });
 });
 
-inputBuscaHistorico.addEventListener("input", renderHistorico);
+inputBuscaHistorico.addEventListener("input", () => {
+  paginaRomaneios = 1;
+  renderHistorico();
+});
 
 /* =========================
    HISTÓRICO DE MOVIMENTAÇÕES
 ========================= */
 
-onValue(
-  historicoEstoqueRef,
-  (snapshot) => {
-    historicoEstoque = snapshot.exists()
-      ? Object.entries(snapshot.val())
-          .map(([key, dados]) => ({
-            ...dados,
-            _key: key,
-          }))
-          .sort(
-            (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime(),
-          )
-      : [];
+function iniciarHistoricoMovimentacoes() {
+  if (movimentacoesIniciadas) return;
+  movimentacoesIniciadas = true;
+  onValue(
+    historicoEstoqueRef,
+    (snapshot) => {
+      movimentacoesCarregadas = true;
+      historicoEstoque = snapshot.exists()
+        ? Object.entries(snapshot.val())
+            .map(([key, dados]) => ({
+              ...dados,
+              _key: key,
+            }))
+            .sort(
+              (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime(),
+            )
+        : [];
 
-    renderMovimentacoes();
-  },
-  (erro) => {
-    console.error("Erro ao carregar movimentações:", erro);
+      renderMovimentacoes();
+    },
+    (erro) => {
+      paginacaoMovimentacoes.hidden = true;
+      console.error("Erro ao carregar movimentações:", erro);
 
-    if (listaMovimentacoes) {
-      listaMovimentacoes.innerHTML = `
-        <div class="estoque-vazio">
-          Não foi possível carregar as movimentações.
-        </div>
-      `;
-    }
-  },
-);
+      if (listaMovimentacoes) {
+        listaMovimentacoes.innerHTML = `
+          <div class="estoque-vazio">
+            Não foi possível carregar as movimentações.
+          </div>
+        `;
+      }
+    },
+  );
+}
+
 
 
 let excluindoMovimentacao = false;
@@ -2700,7 +2749,7 @@ async function excluirMovimentacaoEstoque(movimentacaoId) {
 }
 
 function renderMovimentacoes() {
-  if (!listaMovimentacoes) return;
+  if (!listaMovimentacoes || !movimentacoesCarregadas) return;
 
   const busca = normalizarBusca(inputBuscaMovimentacoes?.value);
 
@@ -2739,10 +2788,12 @@ function renderMovimentacoes() {
     });
 
   if (contadorMovimentacoes) {
-    contadorMovimentacoes.textContent = `${filtrados.length} movimentação${
-      filtrados.length === 1 ? "" : "ões"
-    }`;
+    contadorMovimentacoes.textContent = `${filtrados.length} ${filtrados.length === 1 ? "movimentação" : "movimentações"}`;
   }
+
+  const resumoPagina = paginarRegistros(filtrados, paginaMovimentacoes);
+  paginaMovimentacoes = resumoPagina.pagina;
+  atualizarControlePaginacao(paginacaoMovimentacoes, resumoPagina);
 
   if (!filtrados.length) {
     listaMovimentacoes.innerHTML = `
@@ -2754,7 +2805,7 @@ function renderMovimentacoes() {
     return;
   }
 
-  listaMovimentacoes.innerHTML = filtrados
+  listaMovimentacoes.innerHTML = resumoPagina.registros
     .map((movimentacao) => {
       const data = new Date(movimentacao.data);
 
@@ -2956,9 +3007,18 @@ listaMovimentacoes?.addEventListener("click", async (event) => {
   await excluirMovimentacaoEstoque(botaoExcluir.dataset.id);
 });
 
-inputBuscaMovimentacoes?.addEventListener("input", renderMovimentacoes);
+inputBuscaMovimentacoes?.addEventListener("input", () => {
+  paginaMovimentacoes = 1;
+  renderMovimentacoes();
+});
 
-filtroTipoMovimentacao?.addEventListener("change", renderMovimentacoes);
+filtroTipoMovimentacao?.addEventListener("change", () => {
+  paginaMovimentacoes = 1;
+  renderMovimentacoes();
+});
+
+navegarHistorico(paginacaoRomaneios, listaHistorico, () => paginaRomaneios, (pagina) => { paginaRomaneios = pagina; }, renderHistorico);
+navegarHistorico(paginacaoMovimentacoes, listaMovimentacoes, () => paginaMovimentacoes, (pagina) => { paginaMovimentacoes = pagina; }, renderMovimentacoes);
 
 /* =========================
    ABAS
@@ -2984,6 +3044,8 @@ tabBtns.forEach((botao) => {
 
     if (aba) {
       aba.classList.add("active");
+      if (aba.id === "historicoTab") iniciarHistoricoRomaneios();
+      if (aba.id === "movimentacoesTab") iniciarHistoricoMovimentacoes();
     }
   });
 });
