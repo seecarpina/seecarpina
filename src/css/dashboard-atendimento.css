@@ -24,3 +24,7 @@
 .dashboard-vazio { padding: 1rem 0; color: var(--clr-dark-variant); }
 @media (max-width: 1100px) { .dashboard-numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .dashboard-cabecalho { align-items: flex-start; flex-direction: column; } .dashboard-numeros { gap: .65rem; } .dashboard-numero { padding: 1rem; } .dashboard-pedido { align-items: flex-start; } }
+
+/* Não reserva espaço para gráficos antes do primeiro resultado. */
+#dashboardGraficos[hidden], #resumoOficios[hidden], #resumoContratos[hidden], #dashboardGraficos canvas[hidden] { display: none; }
+.dashboard-grafico-erro { color: var(--clr-dark-variant); padding: 1rem 0; }

@@ -742,6 +742,7 @@ main .line-dash {
 .frase-container #btn-pin {
   cursor: pointer;
   background: none;
+  color: var(--clr-dark);
 }
 
 .frase-container #btn-pin span {
