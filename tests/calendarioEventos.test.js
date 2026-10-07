@@ -16,7 +16,7 @@ test("carregamento global preserva categoria do evento enviada ao calendário", 
     CustomEvent: function(tipo, opcoes) { this.type = tipo; this.detail = opcoes.detail; },
   });
   receber({ exists: () => true, val: () => ({
-    aniversario: { data: "2026-10-06", titulo: "Aniversário de Lucicleide", categoria: "aniversario" },
+    aniversario: { data: "2026-10-06", titulo: "Aniversário de Lucicleide", categoria: "aniversario", concluido: true },
     reuniao: { data: "2026-10-06", titulo: "Reunião", categoria: "reuniao", concluido: true },
   }) });
   assert.equal(publicado.type, "eventosAtualizados");

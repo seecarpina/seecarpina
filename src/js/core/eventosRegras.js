@@ -20,3 +20,11 @@ export function eventosCalendarioPorAno(porData, ano) {
   }
   return resultado;
 }
+
+export function separarEventosPorAba(eventos) {
+  return {
+    futuros: eventos.filter((e) => e.categoria !== "aniversario" && !e.concluido),
+    concluidos: eventos.filter((e) => e.categoria !== "aniversario" && e.concluido),
+    aniversarios: eventos.filter((e) => e.categoria === "aniversario"),
+  };
+}

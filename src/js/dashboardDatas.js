@@ -21,7 +21,7 @@ function renderizar() {
   const hoje = new Date();
   const iso = dataLocalCalendario(hoje);
   const comemoracoes = datas.filter((data) => data.data === iso.slice(5));
-  const cadastrados = eventos.filter((evento) => !evento.concluido && dataEventoNoAno(evento, hoje.getFullYear()) === iso);
+  const cadastrados = eventos.filter((evento) => (evento.categoria === "aniversario" || !evento.concluido) && dataEventoNoAno(evento, hoje.getFullYear()) === iso);
   const icones = { "Educação": "school", "Profissional": "work", "Cultura": "palette", "Saúde": "health_and_safety", "Inclusão": "diversity_1", "Meio Ambiente": "eco", "História": "history_edu", "Religiosa": "church" };
   const iconesEventos = { aniversario: "cake", reuniao: "groups", resposta_mp: "gavel", alerta: "warning", audiencias: "record_voice_over" };
   const itens = [

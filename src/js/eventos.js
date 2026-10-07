@@ -1,4 +1,4 @@
-import { eventoAtrasado, dataEventoNoAno } from "./core/eventosRegras.js";
+import { eventoAtrasado, dataEventoNoAno, separarEventosPorAba } from "./core/eventosRegras.js";
 import { rtdb } from "./firebaseConfig.js";
 
 import {
@@ -188,8 +188,10 @@ onValue(
       : [];
 
     eventosCache.sort((a, b) => {
-      if (a.concluido !== b.concluido) {
-        return Number(a.concluido) - Number(b.concluido);
+      const concluidoA = a.categoria !== "aniversario" && Boolean(a.concluido);
+      const concluidoB = b.categoria !== "aniversario" && Boolean(b.concluido);
+      if (concluidoA !== concluidoB) {
+        return Number(concluidoA) - Number(concluidoB);
       }
 
       return dataEventoNoAno(a, new Date().getFullYear()).localeCompare(dataEventoNoAno(b, new Date().getFullYear()));
@@ -214,29 +216,23 @@ onValue(
 ========================================= */
 
 function renderizarEventos() {
-  const futuros = eventosCache.filter((evento) => !evento.concluido);
-
-  const concluidos = eventosCache.filter((evento) => evento.concluido);
-
+  const abas = separarEventosPorAba(eventosCache);
+  const { futuros, concluidos, aniversarios } = abas;
   if (contadorEventos) {
     contadorEventos.textContent =
       `${futuros.length} futuro${futuros.length === 1 ? "" : "s"} • ` +
-      `${concluidos.length} concluído${concluidos.length === 1 ? "" : "s"}`;
+      `${concluidos.length} concluído${concluidos.length === 1 ? "" : "s"} • ` +
+      `${aniversarios.length} aniversário${aniversarios.length === 1 ? "" : "s"}`;
   }
-
-  const eventosFiltrados = eventosCache.filter((evento) => {
-    if (abaAtiva === "concluidos") {
-      return Boolean(evento.concluido);
-    }
-
-    return !evento.concluido;
-  });
+  const eventosFiltrados = abas[abaAtiva] || [];
 
   if (!eventosFiltrados.length) {
     listaEventos.innerHTML = `
       <div class="eventos-vazio">
         ${
-          abaAtiva === "concluidos"
+          abaAtiva === "aniversarios"
+            ? "Nenhum aniversário cadastrado."
+            : abaAtiva === "concluidos"
             ? "Nenhum evento concluído."
             : "Nenhum evento futuro."
         }
@@ -260,7 +256,7 @@ function criarCardEvento(evento) {
       class="
         card-evento
         categoria-${escaparClasse(categoria.value)}
-        ${evento.concluido ? "concluido" : ""}
+        ${evento.categoria !== "aniversario" && evento.concluido ? "concluido" : ""}
         ${eventoAtrasado(evento) ? "atrasado" : ""}
       "
       data-id="${evento._key}"
@@ -292,6 +288,7 @@ function criarCardEvento(evento) {
             </h3>
           </div>
 
+          ${evento.categoria === "aniversario" ? "" : `
           <label
             class="evento-status"
             title="${
@@ -309,6 +306,7 @@ function criarCardEvento(evento) {
               ${evento.concluido ? "task_alt" : "radio_button_unchecked"}
             </span>
           </label>
+          `}
         </div>
 
         ${
@@ -387,7 +385,7 @@ listaEventos.addEventListener("change", async (event) => {
   const id = checkbox.dataset.id;
   const evento = eventosCache.find((item) => item._key === id);
 
-  if (!evento) return;
+  if (!evento || evento.categoria === "aniversario") return;
 
   checkbox.disabled = true;
 
@@ -565,7 +563,7 @@ function atualizarCalendarioGlobal() {
       eventosPorData[evento.data] = [];
     }
 
-    eventosPorData[evento.data].push(evento);
+    eventosPorData[evento.data].push(evento.categoria === "aniversario" ? { ...evento, concluido: false } : evento);
   });
 
   window.dispatchEvent(
