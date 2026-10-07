@@ -1090,3 +1090,6 @@ body.drawer-aberto {
     grid-column: auto;
   }
 }
+
+/* Usa os mesmos estilos compartilhados da paginação de servidores. */
+.estoque-grid .paginacao[hidden] { display: none; }
