@@ -18,7 +18,7 @@ onValue(eventosRef, (snap) => {
       eventosPorData[e.data].push({
         titulo: e.titulo,
         categoria: e.categoria,
-        concluido: e.concluido ?? false,
+        concluido: e.categoria === "aniversario" ? false : e.concluido ?? false,
       });
     });
   }

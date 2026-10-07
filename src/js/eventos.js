@@ -1,3 +1,4 @@
+import { eventoAtrasado, dataEventoNoAno, separarEventosPorAba } from "./core/eventosRegras.js";
 import { rtdb } from "./firebaseConfig.js";
 
 import {
@@ -187,11 +188,13 @@ onValue(
       : [];
 
     eventosCache.sort((a, b) => {
-      if (a.concluido !== b.concluido) {
-        return Number(a.concluido) - Number(b.concluido);
+      const concluidoA = a.categoria !== "aniversario" && Boolean(a.concluido);
+      const concluidoB = b.categoria !== "aniversario" && Boolean(b.concluido);
+      if (concluidoA !== concluidoB) {
+        return Number(concluidoA) - Number(concluidoB);
       }
 
-      return (a.data || "").localeCompare(b.data || "");
+      return dataEventoNoAno(a, new Date().getFullYear()).localeCompare(dataEventoNoAno(b, new Date().getFullYear()));
     });
 
     renderizarEventos();
@@ -213,29 +216,23 @@ onValue(
 ========================================= */
 
 function renderizarEventos() {
-  const futuros = eventosCache.filter((evento) => !evento.concluido);
-
-  const concluidos = eventosCache.filter((evento) => evento.concluido);
-
+  const abas = separarEventosPorAba(eventosCache);
+  const { futuros, concluidos, aniversarios } = abas;
   if (contadorEventos) {
     contadorEventos.textContent =
       `${futuros.length} futuro${futuros.length === 1 ? "" : "s"} • ` +
-      `${concluidos.length} concluído${concluidos.length === 1 ? "" : "s"}`;
+      `${concluidos.length} concluído${concluidos.length === 1 ? "" : "s"} • ` +
+      `${aniversarios.length} aniversário${aniversarios.length === 1 ? "" : "s"}`;
   }
-
-  const eventosFiltrados = eventosCache.filter((evento) => {
-    if (abaAtiva === "concluidos") {
-      return Boolean(evento.concluido);
-    }
-
-    return !evento.concluido;
-  });
+  const eventosFiltrados = abas[abaAtiva] || [];
 
   if (!eventosFiltrados.length) {
     listaEventos.innerHTML = `
       <div class="eventos-vazio">
         ${
-          abaAtiva === "concluidos"
+          abaAtiva === "aniversarios"
+            ? "Nenhum aniversário cadastrado."
+            : abaAtiva === "concluidos"
             ? "Nenhum evento concluído."
             : "Nenhum evento futuro."
         }
@@ -259,7 +256,7 @@ function criarCardEvento(evento) {
       class="
         card-evento
         categoria-${escaparClasse(categoria.value)}
-        ${evento.concluido ? "concluido" : ""}
+        ${evento.categoria !== "aniversario" && evento.concluido ? "concluido" : ""}
         ${eventoAtrasado(evento) ? "atrasado" : ""}
       "
       data-id="${evento._key}"
@@ -267,7 +264,7 @@ function criarCardEvento(evento) {
       <div class="evento-data-bloco">
         <span class="evento-dia">${data.dia}</span>
         <span class="evento-mes">${data.mes}</span>
-        <span class="evento-ano">${data.ano}</span>
+        ${evento.categoria === "aniversario" ? '<span class="evento-ano">Todo ano</span>' : `<span class="evento-ano">${data.ano}</span>`}
       </div>
 
       <div class="evento-conteudo">
@@ -291,6 +288,7 @@ function criarCardEvento(evento) {
             </h3>
           </div>
 
+          ${evento.categoria === "aniversario" ? "" : `
           <label
             class="evento-status"
             title="${
@@ -308,6 +306,7 @@ function criarCardEvento(evento) {
               ${evento.concluido ? "task_alt" : "radio_button_unchecked"}
             </span>
           </label>
+          `}
         </div>
 
         ${
@@ -330,7 +329,7 @@ function criarCardEvento(evento) {
               calendar_today
             </span>
 
-            ${formatarDataCompleta(evento.data)}
+            ${evento.categoria === "aniversario" ? `${data.dia} de ${new Date(`${dataEventoNoAno(evento, 2000)}T00:00:00`).toLocaleDateString("pt-BR", { month: "long" })} · Todos os anos` : formatarDataCompleta(evento.data)}
 
             ${
               eventoAtrasado(evento)
@@ -386,7 +385,7 @@ listaEventos.addEventListener("change", async (event) => {
   const id = checkbox.dataset.id;
   const evento = eventosCache.find((item) => item._key === id);
 
-  if (!evento) return;
+  if (!evento || evento.categoria === "aniversario") return;
 
   checkbox.disabled = true;
 
@@ -442,7 +441,7 @@ function editarEvento(evento) {
   botoesEdicao.style.display = "flex";
 
   msgEdicao.style.display = "block";
-  msgEdicao.textContent = `✏️ Editando evento de ${formatarData(evento.data)}`;
+  msgEdicao.textContent = `✏️ Editando evento de ${evento.categoria === "aniversario" ? formatarData(evento.data).slice(0, 5) : formatarData(evento.data)}`;
 
   window.scrollTo({
     top: 0,
@@ -564,7 +563,7 @@ function atualizarCalendarioGlobal() {
       eventosPorData[evento.data] = [];
     }
 
-    eventosPorData[evento.data].push(evento);
+    eventosPorData[evento.data].push(evento.categoria === "aniversario" ? { ...evento, concluido: false } : evento);
   });
 
   window.dispatchEvent(
@@ -646,18 +645,6 @@ function formatarDataCompleta(dataISO) {
   });
 }
 
-function eventoAtrasado(evento) {
-  if (!evento.data || evento.concluido) {
-    return false;
-  }
-
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0);
-
-  const dataEvento = new Date(`${evento.data}T00:00:00`);
-
-  return dataEvento < hoje;
-}
 
 function escaparHtml(texto) {
   const elemento = document.createElement("div");
