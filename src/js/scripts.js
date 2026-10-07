@@ -1,4 +1,4 @@
-import { categoriaCalendario, categoriasDoDia, dataLocalCalendario } from "./core/calendarioEventos.js";
+import { categoriaCalendario, categoriasDoDia, dataLocalCalendario, datasComemorativasDoDia } from "./core/calendarioEventos.js";
 
 document.addEventListener("keyup", (e) => {
   if (e.target.tagName === "INPUT" && e.target.type !== "date") {
@@ -364,6 +364,20 @@ carregarRight().then(() => {
     if (calDias && mesAno && prevMes && nextMes) {
       let dataAtual = new Date();
       let eventosPorData = {};
+      let datasComemorativas = [];
+
+      async function carregarDatasCalendario() {
+        try {
+          const resposta = await fetch(new URL("../datasComemorativas.json", import.meta.url));
+          if (!resposta.ok) throw new Error(`Falha ao carregar datas: ${resposta.status}`);
+          const datas = await resposta.json();
+          if (!Array.isArray(datas)) throw new Error("Formato inválido das datas comemorativas");
+          datasComemorativas = datas;
+          renderCalendario();
+        } catch (erro) {
+          console.error("Não foi possível carregar datas comemorativas no calendário:", erro);
+        }
+      }
 
       function renderCalendario() {
         calDias.innerHTML = "";
@@ -409,7 +423,10 @@ carregarRight().then(() => {
             div.setAttribute("aria-current", "date");
           }
 
-          const eventosDia = eventosPorData[dataISO] || [];
+          const eventosDia = [
+            ...(eventosPorData[dataISO] || []),
+            ...datasComemorativasDoDia(datasComemorativas, dataISO),
+          ];
           if (eventosDia.length) {
             div.classList.add("tem-evento");
             div.tabIndex = 0;
@@ -487,7 +504,10 @@ carregarRight().then(() => {
           marcador.style.backgroundColor = categoria.cor;
           marcador.setAttribute("aria-hidden", "true");
           const texto = document.createElement("span");
-          texto.textContent = `${categoria.nome}: ${evento.titulo || "Evento sem título"}`;
+          const descricaoCategoria = evento.categoriaComemorativa
+            ? `${categoria.nome} · ${evento.categoriaComemorativa}`
+            : categoria.nome;
+          texto.textContent = `${descricaoCategoria}: ${evento.titulo || "Evento sem título"}`;
           linha.append(marcador, texto);
           tooltip.appendChild(linha);
         });
@@ -537,6 +557,7 @@ carregarRight().then(() => {
       }
 
       renderCalendario();
+      carregarDatasCalendario();
     }
   }
   if (document.querySelector(".calendario")) {
