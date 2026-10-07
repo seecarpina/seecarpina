@@ -1045,25 +1045,26 @@ function renderTabela() {
   }
 
   listaMateriais.innerHTML = `
-    <table class="estoque-tabela" role="table">
+    <div class="table-wrapper tabela-estoque-wrapper" tabindex="0" role="region" aria-label="Lista de materiais do estoque">
+    <table class="estoque-tabela">
       <caption class="estoque-legenda">Materiais e saldos disponíveis no estoque</caption>
-      <thead role="rowgroup">
-        <tr role="row">
-          <th scope="col" role="columnheader">Material</th>
-          <th scope="col" role="columnheader">Saldo disponível</th>
-          <th scope="col" role="columnheader">Ações</th>
+      <thead>
+        <tr>
+          <th scope="col">Material</th>
+          <th scope="col">Categoria</th>
+          <th scope="col">Saldo disponível</th>
+          <th scope="col">Ações</th>
         </tr>
       </thead>
-      <tbody role="rowgroup">
+      <tbody>
         ${filtrados.map((material) => {
           const estoque = Number(material.estoque || 0);
           const nome = escaparHtmlEstoque(material.nome || "-");
           const unidade = escaparHtmlEstoque(formatarUnidade(material.unidade || "Unidade", estoque));
           return `
-            <tr class="estoque-linha" role="row">
-              <td class="estoque-material" role="cell">
+            <tr class="estoque-linha">
+              <td class="estoque-material">
                 <strong class="material-nome">${nome}</strong>
-                <span class="estoque-categoria">${escaparHtmlEstoque(obterNomeCategoria(material.categoriaId))}</span>
                 <details class="estoque-detalhes">
                   <summary aria-label="Detalhes de ${nome}">Detalhes</summary>
                   <dl>
@@ -1072,17 +1073,16 @@ function renderTabela() {
                   </dl>
                 </details>
               </td>
-              <td class="estoque-saldo" role="cell">
-                <span class="estoque-rotulo-mobile">Saldo disponível</span>
+              <td class="estoque-categoria">${escaparHtmlEstoque(obterNomeCategoria(material.categoriaId))}</td>
+              <td class="estoque-saldo">
                 <strong>${estoque} <span>${unidade}</span></strong>
                 ${estoque <= 0 ? '<span class="estoque-sem-saldo">Sem estoque</span>' : ""}
               </td>
-              <td class="estoque-acoes" role="cell">
+              <td class="estoque-acoes">
                 <button type="button" class="btn-editar-material"
                   data-material-id="${escaparHtmlEstoque(material._key)}"
-                  aria-label="Editar ${nome}">
+                  title="Editar material" aria-label="Editar ${nome}">
                   <span class="material-symbols-outlined" aria-hidden="true">edit</span>
-                  <span>Editar</span>
                 </button>
               </td>
             </tr>
@@ -1090,6 +1090,7 @@ function renderTabela() {
         }).join("")}
       </tbody>
     </table>
+    </div>
   `;
 }
 

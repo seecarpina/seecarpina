@@ -148,40 +148,31 @@
   opacity: 0.75;
 }
 
-/* Lista compacta: colunas no computador e cartões no celular. */
+/* Mesmo padrão de tabela das páginas de ofícios e servidores. */
 .lista-materiais { min-width: 0; }
-.estoque-tabela { width: 100%; table-layout: fixed; border-collapse: collapse; text-align: left; text-transform: none; background: transparent; box-shadow: none; border-radius: 0; }
+.tabela-estoque-wrapper { width: 100%; overflow-x: auto; border-radius: 1rem; }
+.estoque-tabela { width: 100%; min-width: 640px; border-collapse: separate; border-spacing: 0; text-align: left; text-transform: none; background: var(--clr-white); }
 .estoque-legenda { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.estoque-tabela .estoque-linha { height: auto; }
-.estoque-tabela th { padding: .75rem 1rem; color: var(--clr-dark-variant); font-size: .8rem; font-weight: 600; border-bottom: 1px solid var(--clr-info-light); }
-.estoque-tabela th:first-child { width: 55%; }
-.estoque-tabela th:nth-child(2) { width: 27%; }
-.estoque-tabela th:last-child { width: 18%; }
-.estoque-tabela tbody td { padding: 1rem; height: auto; border-bottom: 1px solid var(--clr-info-light); color: var(--clr-dark); vertical-align: top; overflow-wrap: anywhere; }
-.estoque-tabela tbody tr:last-child td { border-bottom: 0; }
-.estoque-tabela .material-nome { display: block; color: var(--clr-dark); font-size: .95rem; font-weight: 600; line-height: 1.5; }
-.estoque-categoria { display: block; margin-top: .15rem; color: var(--clr-dark-variant); font-size: .8rem; }
-.estoque-saldo strong { display: block; font-size: 1rem; font-weight: 600; line-height: 1.5; }
+.estoque-tabela thead { position: sticky; top: 0; z-index: 2; }
+.estoque-tabela thead th { background: var(--clr-primary); color: #fff; font-size: .82rem; font-weight: 700; text-align: left; white-space: nowrap; }
+.estoque-tabela th, .estoque-tabela td { padding: .8rem .75rem; vertical-align: middle; }
+.estoque-tabela th:first-child { width: 45%; }
+.estoque-tabela tbody tr { height: auto; transition: background .2s ease; }
+.estoque-tabela tbody tr:nth-child(even) { background: var(--clr-light); }
+.estoque-tabela tbody tr:hover { background: rgba(115, 128, 236, .12); }
+.estoque-tabela tbody td { color: var(--clr-dark); }
+.estoque-tabela .material-nome { display: block; min-width: 220px; color: var(--clr-primary); font-size: .9rem; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
+.estoque-tabela .estoque-categoria { min-width: 140px; font-size: .85rem; }
+.estoque-saldo { white-space: nowrap; }
+.estoque-saldo strong { display: block; font-size: .95rem; font-weight: 600; line-height: 1.5; }
 .estoque-saldo strong span { font-size: .85rem; font-weight: 400; }
-.estoque-sem-saldo { display: block; margin-top: .3rem; color: var(--clr-dark-variant); font-size: .75rem; }
-.estoque-detalhes { margin-top: .4rem; background: transparent; }
-.estoque-detalhes summary { width: fit-content; margin: 0; padding: .35rem 0; color: var(--clr-dark-variant); font-size: .8rem; cursor: pointer; }
+.estoque-sem-saldo { display: block; margin-top: .2rem; color: var(--clr-dark-variant); font-size: .75rem; }
+.estoque-detalhes { margin-top: .2rem; background: transparent; }
+.estoque-detalhes summary { width: fit-content; margin: 0; padding: .25rem 0; color: var(--clr-dark-variant); font-size: .75rem; cursor: pointer; }
 .estoque-detalhes summary:hover { color: var(--clr-primary); }
 .estoque-detalhes dl { display: grid; gap: .65rem; margin-top: .5rem; padding: .8rem; border-radius: .6rem; background: var(--clr-light); }
 .estoque-detalhes dt { font-size: .75rem; color: var(--clr-dark-variant); }
-.estoque-detalhes dd { margin: .15rem 0 0; font-size: .8rem; color: var(--clr-dark); }
-.estoque-rotulo-mobile { display: none; }
-
-@media (max-width: 700px) {
-  .estoque-tabela, .estoque-tabela tbody { display: block; }
-  .estoque-tabela thead { display: none; }
-  .estoque-tabela .estoque-linha { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .85rem; padding: 1rem; border: 1px solid var(--clr-info-light); border-radius: .8rem; background: var(--clr-white); }
-  .estoque-tabela .estoque-linha + .estoque-linha { margin-top: .75rem; }
-  .estoque-tabela tbody .estoque-linha td { display: block; padding: 0; border: 0; min-width: 0; }
-  .estoque-material { grid-column: 1 / -1; }
-  .estoque-rotulo-mobile { display: block; margin-bottom: .2rem; color: var(--clr-dark-variant); font-size: .75rem; }
-  .estoque-acoes { align-self: end; }
-}
+.estoque-detalhes dd { margin: .15rem 0 0; font-size: .8rem; color: var(--clr-dark); overflow-wrap: anywhere; }
 
 .lista-historico {
   display: flex;
@@ -811,21 +802,20 @@ body.drawer-aberto {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: .35rem;
-  min-height: 2.75rem;
-  padding: .5rem .6rem;
+  flex-shrink: 0;
+  width: 2.2rem;
+  height: 2.2rem;
+  padding: 0;
   border: 0;
-  border-radius: .6rem;
-  color: var(--clr-dark-variant);
+  border-radius: 50%;
+  color: var(--clr-primary);
   background: transparent;
-  font: inherit;
-  font-size: .8rem;
   cursor: pointer;
 }
-.btn-editar-material:hover { color: var(--clr-primary); background: var(--clr-light); }
+.btn-editar-material:hover { background: var(--clr-light); }
 .btn-editar-material:focus-visible { outline: 2px solid var(--clr-primary); outline-offset: 2px; }
 .btn-editar-material .material-symbols-outlined { font-size: 1.2rem; }
-
+@media (max-width: 700px) { .btn-editar-material { width: 2.75rem; height: 2.75rem; } }
 
 @media (max-width: 600px) {
   .acoes-material {
