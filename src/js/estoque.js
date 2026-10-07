@@ -1044,106 +1044,53 @@ function renderTabela() {
     return;
   }
 
-  listaMateriais.innerHTML = filtrados
-    .map((material) => {
-      const estoque = Number(material.estoque || 0);
-      const percentual = Math.min(Math.max(estoque, 0), 100);
-
-      let classeBarra = "";
-
-      if (estoque <= 5) {
-        classeBarra = "estoque-baixo";
-      } else if (estoque <= 15) {
-        classeBarra = "estoque-medio";
-      }
-
-      return `
-        <article class="card-material">
-          <div class="material-cabecalho">
-            <div class="material-identificacao">
-              <h3 class="material-nome">
-                ${escaparHtmlEstoque(material.nome || "-")}
-              </h3>
-
-              ${
-                material.codigo
-                  ? `
-                    <span class="material-codigo">
-                      <span class="material-symbols-outlined">
-                        barcode
-                      </span>
-
-                      <span>
-                        ${escaparHtmlEstoque(material.codigo)}
-                      </span>
-                    </span>
-                  `
-                  : ""
-              }
-            </div>
-
-            <div
-              class="material-estoque ${estoque <= 5 ? "baixo" : ""}"
-            >
-              <strong>
-                ${estoque}
-              </strong>
-            </div>
-          </div>
-
-          <div class="material-info">
-            <div class="material-categoria">
-              <span class="material-symbols-outlined">
-                ${obterIconeCategoria(material.categoriaId)}
-              </span>
-
-              <span>
-                ${escaparHtmlEstoque(obterNomeCategoria(material.categoriaId))}
-              </span>
-            </div>
-
-            <div class="material-unidade-estoque">
-              <span>
-                ${escaparHtmlEstoque(
-                  formatarUnidade(material.unidade || "Unidade", estoque),
-                )}
-              </span>
-
-              <small>em estoque</small>
-            </div>
-          </div>
-
-          <div class="material-barra">
-            <div
-              class="material-barra-preenchida ${classeBarra}"
-              style="width: ${percentual}%"
-            ></div>
-          </div>
-
-          <div class="material-rodape">
-            <span class="material-symbols-outlined">
-              history
-            </span>
-
-            <span>
-              Última movimentação:
-              ${material.atualizadoEm ? formatarData(material.atualizadoEm) : "-"}
-            </span>
-          </div>
-
-          <button
-            type="button"
-            class="btn-editar-material"
-            data-material-id="${escaparHtmlEstoque(material._key)}"
-            title="Editar material"
-            aria-label="Editar material"
-          >
-            <span class="material-symbols-outlined">edit</span>
-          </button>
-        </article>
-      `;
-    })
-    .join("");
+  listaMateriais.innerHTML = `
+    <table class="estoque-tabela" role="table">
+      <caption class="estoque-legenda">Materiais e saldos disponíveis no estoque</caption>
+      <thead role="rowgroup">
+        <tr role="row">
+          <th scope="col" role="columnheader">Material</th>
+          <th scope="col" role="columnheader">Saldo disponível</th>
+          <th scope="col" role="columnheader">Ações</th>
+        </tr>
+      </thead>
+      <tbody role="rowgroup">
+        ${filtrados.map((material) => {
+          const estoque = Number(material.estoque || 0);
+          const nome = escaparHtmlEstoque(material.nome || "-");
+          const unidade = escaparHtmlEstoque(formatarUnidade(material.unidade || "Unidade", estoque));
+          return `
+            <tr class="estoque-linha" role="row">
+              <td class="estoque-material" role="cell">
+                <strong class="material-nome">${nome}</strong>
+                <span class="estoque-categoria">${escaparHtmlEstoque(obterNomeCategoria(material.categoriaId))}</span>
+                <details class="estoque-detalhes">
+                  <summary aria-label="Detalhes de ${nome}">Detalhes</summary>
+                  <dl>
+                    <div><dt>Código de barras</dt><dd>${escaparHtmlEstoque(material.codigo || "Não informado")}</dd></div>
+                    <div><dt>Última movimentação</dt><dd>${escaparHtmlEstoque(material.atualizadoEm ? formatarData(material.atualizadoEm) : "Não registrada")}</dd></div>
+                  </dl>
+                </details>
+              </td>
+              <td class="estoque-saldo" role="cell">
+                <span class="estoque-rotulo-mobile">Saldo disponível</span>
+                <strong>${estoque} <span>${unidade}</span></strong>
+                ${estoque <= 0 ? '<span class="estoque-sem-saldo">Sem estoque</span>' : ""}
+              </td>
+              <td class="estoque-acoes" role="cell">
+                <button type="button" class="btn-editar-material"
+                  data-material-id="${escaparHtmlEstoque(material._key)}"
+                  aria-label="Editar ${nome}">
+                  <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                  <span>Editar</span>
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join("")}
+      </tbody>
+    </table>
+  `;
 }
 
 inputBusca.addEventListener("input", renderTabela);
