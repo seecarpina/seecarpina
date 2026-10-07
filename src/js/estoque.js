@@ -37,12 +37,14 @@ const permissoesEstoqueRef = ref(rtdb, "configuracoes/estoque/permissoes");
 let materiais = [];
 let historicoRomaneios = [];
 let historicoEstoque = [];
+let paginaMateriais = 1;
 let paginaRomaneios = 1;
 let paginaMovimentacoes = 1;
 let romaneiosIniciados = false;
 let movimentacoesIniciadas = false;
 let romaneiosCarregados = false;
 let movimentacoesCarregadas = false;
+const paginacaoMateriais = document.getElementById("paginacaoMateriais");
 const paginacaoRomaneios = document.getElementById("paginacaoRomaneios");
 const paginacaoMovimentacoes = document.getElementById("paginacaoMovimentacoes");
 
@@ -1086,6 +1088,10 @@ function renderTabela() {
     contadorMateriais.textContent = `${total} ${texto}`;
   }
 
+  const resumoPagina = paginarRegistros(filtrados, paginaMateriais);
+  paginaMateriais = resumoPagina.pagina;
+  atualizarControlePaginacao(paginacaoMateriais, resumoPagina);
+
   if (!filtrados.length) {
     listaMateriais.innerHTML = `
       <div class="estoque-vazio">
@@ -1096,7 +1102,7 @@ function renderTabela() {
     return;
   }
 
-  listaMateriais.innerHTML = filtrados
+  listaMateriais.innerHTML = resumoPagina.registros
     .map((material) => {
       const estoque = Number(material.estoque || 0);
       const percentual = Math.min(Math.max(estoque, 0), 100);
@@ -1198,9 +1204,15 @@ function renderTabela() {
     .join("");
 }
 
-inputBusca.addEventListener("input", renderTabela);
+inputBusca.addEventListener("input", () => {
+  paginaMateriais = 1;
+  renderTabela();
+});
 
-filtroCategoriaEstoque?.addEventListener("change", renderTabela);
+filtroCategoriaEstoque?.addEventListener("change", () => {
+  paginaMateriais = 1;
+  renderTabela();
+});
 
 listaMateriais?.addEventListener("click", (event) => {
   const botaoEditar = event.target.closest(".btn-editar-material");
@@ -3041,6 +3053,7 @@ filtroTipoMovimentacao?.addEventListener("change", () => {
   renderMovimentacoes();
 });
 
+navegarHistorico(paginacaoMateriais, (pagina) => { paginaMateriais = pagina; }, renderTabela);
 navegarHistorico(paginacaoRomaneios, (pagina) => { paginaRomaneios = pagina; }, renderHistorico);
 navegarHistorico(paginacaoMovimentacoes, (pagina) => { paginaMovimentacoes = pagina; }, renderMovimentacoes);
 

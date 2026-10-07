@@ -1,4 +1,4 @@
-export function paginarRegistros(registros, paginaAtual = 1, tamanho = 10) {
+export function paginarRegistros(registros, paginaAtual = 1, tamanho = 30) {
   const total = registros.length;
   const totalPaginas = Math.max(1, Math.ceil(total / tamanho));
   const pagina = Math.max(1, Math.min(totalPaginas, Math.trunc(paginaAtual) || 1));
