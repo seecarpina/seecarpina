@@ -1950,17 +1950,24 @@ select {
   border-radius: 50%;
 }
 
-.cal-dias .tem-evento::after {
-  content: "";
-  width: 6px;
-  height: 6px;
-  background: var(--clr-warnig);
+.cal-dias .dia-hoje,
+.cal-dias .dia-hoje:hover {
+  background: var(--clr-light);
+  background: color-mix(in srgb, var(--clr-primary) 16%, var(--clr-white));
   border-radius: 50%;
-  position: absolute;
-  bottom: 0px;
-  left: 50%;
-  transform: translateX(-50%);
+  box-shadow: inset 0 0 0 1px var(--clr-primary);
+  color: var(--clr-dark);
+  font-weight: 700;
 }
+.cal-dias .tem-evento .cal-numero { transform: translateY(-2px); }
+.cal-evento-marcadores { position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 2px; }
+.cal-evento-marcador { display: inline-block; width: 5px; height: 5px; flex-shrink: 0; border-radius: 50%; }
+.cal-evento-mais { font-size: 8px; line-height: 1; color: var(--clr-dark); }
+.cal-dias .tem-evento:focus-visible { outline: 2px solid var(--clr-primary); outline-offset: 1px; border-radius: 50%; }
+.cal-tooltip-evento { display: flex; align-items: baseline; gap: .4rem; }
+.cal-tooltip-evento + .cal-tooltip-evento { margin-top: .35rem; }
+.cal-tooltip-evento .cal-evento-marcador { width: 7px; height: 7px; }
+.cal-tooltip-evento > span:last-child { overflow-wrap: anywhere; }
 
 .calendario .btn {
   display: flex;

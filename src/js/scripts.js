@@ -1,3 +1,5 @@
+import { categoriaCalendario, categoriasDoDia, dataLocalCalendario } from "./core/calendarioEventos.js";
+
 document.addEventListener("keyup", (e) => {
   if (e.target.tagName === "INPUT" && e.target.type !== "date") {
     e.target.value = e.target.value.toUpperCase();
@@ -368,6 +370,7 @@ carregarRight().then(() => {
 
         const ano = dataAtual.getFullYear();
         const mes = dataAtual.getMonth();
+        const hojeISO = dataLocalCalendario();
 
         const textoMes = dataAtual.toLocaleDateString("pt-BR", {
           month: "long",
@@ -387,18 +390,60 @@ carregarRight().then(() => {
 
         for (let dia = 1; dia <= totalDias; dia++) {
           const div = document.createElement("div");
-          div.textContent = dia;
+          const numero = document.createElement("span");
+          numero.className = "cal-numero";
+          numero.textContent = dia;
+          div.appendChild(numero);
 
           const dataISO = `${ano}-${String(mes + 1).padStart(2, "0")}-${String(
             dia,
           ).padStart(2, "0")}`;
 
-          if (eventosPorData[dataISO]) {
-            div.classList.add("tem-evento");
+          const dataExtenso = new Date(ano, mes, dia).toLocaleDateString("pt-BR", {
+            day: "numeric", month: "long", year: "numeric",
+          });
+          const hoje = dataISO === hojeISO;
+          div.setAttribute("aria-label", `${dataExtenso}${hoje ? ", hoje" : ""}`);
+          if (hoje) {
+            div.classList.add("dia-hoje");
+            div.setAttribute("aria-current", "date");
+          }
 
+          const eventosDia = eventosPorData[dataISO] || [];
+          if (eventosDia.length) {
+            div.classList.add("tem-evento");
+            div.tabIndex = 0;
+            div.setAttribute("role", "button");
+            const categorias = categoriasDoDia(eventosDia);
+            const descricao = categorias.map((categoria) => categoria.nome).join(", ");
+            div.setAttribute("aria-label", `${dataExtenso}${hoje ? ", hoje" : ""}: ${eventosDia.length} evento(s). ${descricao}`);
+            div.title = descricao;
+            const marcadores = document.createElement("span");
+            marcadores.className = "cal-evento-marcadores";
+            marcadores.setAttribute("aria-hidden", "true");
+            categorias.slice(0, 3).forEach((categoria) => {
+              const marcador = document.createElement("span");
+              marcador.className = "cal-evento-marcador";
+              marcador.style.backgroundColor = categoria.cor;
+              marcadores.appendChild(marcador);
+            });
+            if (categorias.length > 3) {
+              const mais = document.createElement("span");
+              mais.className = "cal-evento-mais";
+              mais.textContent = "+";
+              marcadores.appendChild(mais);
+            }
+            div.appendChild(marcadores);
             div.addEventListener("click", (e) => {
               e.stopPropagation();
-              mostrarTooltipEvento(div, eventosPorData[dataISO]);
+              mostrarTooltipEvento(div, eventosDia);
+            });
+            div.addEventListener("keydown", (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                mostrarTooltipEvento(div, eventosDia);
+              }
+              if (e.key === "Escape") removerTooltip();
             });
           }
 
@@ -407,12 +452,12 @@ carregarRight().then(() => {
       }
 
       prevMes.onclick = () => {
-        dataAtual.setMonth(dataAtual.getMonth() - 1);
+        dataAtual = new Date(dataAtual.getFullYear(), dataAtual.getMonth() - 1, 1);
         renderCalendario();
       };
 
       nextMes.onclick = () => {
-        dataAtual.setMonth(dataAtual.getMonth() + 1);
+        dataAtual = new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 1, 1);
         renderCalendario();
       };
 
@@ -422,6 +467,10 @@ carregarRight().then(() => {
         renderCalendario();
       });
 
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) renderCalendario();
+      });
+
       // Tooltip eventos
       function mostrarTooltipEvento(elemento, eventos) {
         removerTooltip();
@@ -429,9 +478,19 @@ carregarRight().then(() => {
         const tooltip = document.createElement("div");
         tooltip.className = "tooltip-evento";
 
-        tooltip.innerHTML = eventos
-          .map((e) => `<div>• ${e.titulo}</div>`)
-          .join("");
+        eventos.forEach((evento) => {
+          const categoria = categoriaCalendario(evento.categoria);
+          const linha = document.createElement("div");
+          linha.className = "cal-tooltip-evento";
+          const marcador = document.createElement("span");
+          marcador.className = "cal-evento-marcador";
+          marcador.style.backgroundColor = categoria.cor;
+          marcador.setAttribute("aria-hidden", "true");
+          const texto = document.createElement("span");
+          texto.textContent = `${categoria.nome}: ${evento.titulo || "Evento sem título"}`;
+          linha.append(marcador, texto);
+          tooltip.appendChild(linha);
+        });
 
         document.body.appendChild(tooltip);
 
