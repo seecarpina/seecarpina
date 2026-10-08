@@ -1,3 +1,5 @@
+import { formatarValidade } from "./core/estoqueLotes.js";
+import { garantirLotes, adicionarBaixaLotes } from "./core/estoqueLotesFirebase.js";
 import { gerarPDFPedidoSolicitacao, obterListaPedido } from "../../gestao-escolar/src/js/pedidoPDF.js";
 import { auth, db, rtdb } from "./firebaseConfig.js";
 import {
@@ -1603,7 +1605,7 @@ async function prepararBaixaMateriaisManutencao(solicitacao) {
       );
     }
 
-    const material = snapshot.val();
+    const material = await garantirLotes(itemSelecionado.materialId);
     const quantidade = Number(itemSelecionado.quantidade || 0);
     const estoqueAnterior = Number(material.estoque || 0);
 
@@ -1616,12 +1618,14 @@ async function prepararBaixaMateriaisManutencao(solicitacao) {
     const historicoId = push(ref(rtdb, "historicoEstoque")).key;
     if (!historicoId) throw new Error("Não foi possível registrar a saída.");
 
+    const lotes = adicionarBaixaLotes(atualizacoes, itemSelecionado.materialId, material, quantidade);
     atualizacoes[`materiais/${itemSelecionado.materialId}/estoque`] =
       increment(-quantidade);
     atualizacoes[`materiais/${itemSelecionado.materialId}/atualizadoEm`] = data;
     atualizacoes[`historicoEstoque/${historicoId}`] = {
       tipo: "saida",
       acao: "manutencao",
+      lotes,
       materialId: itemSelecionado.materialId,
       material: material.nome || itemSelecionado.nome,
       categoriaId: material.categoriaId || itemSelecionado.categoriaId || null,
@@ -1640,6 +1644,7 @@ async function prepararBaixaMateriaisManutencao(solicitacao) {
     };
 
     itens.push({
+      lotes,
       materialId: itemSelecionado.materialId,
       nome: material.nome || itemSelecionado.nome,
       categoriaId: material.categoriaId || itemSelecionado.categoriaId || null,
@@ -1754,7 +1759,7 @@ async function prepararRomaneioSolicitacao({
       );
     }
 
-    const material = snapshot.val();
+    const material = await garantirLotes(materialId);
     const estoqueAnterior = Number(material.estoque || 0);
     if (quantidade > estoqueAnterior) {
       throw new Error(
@@ -1765,11 +1770,13 @@ async function prepararRomaneioSolicitacao({
     const historicoId = push(ref(rtdb, "historicoEstoque")).key;
     if (!historicoId) throw new Error("Não foi possível registrar a saída.");
 
+    const lotes = adicionarBaixaLotes(atualizacoes, materialId, material, quantidade);
     atualizacoes[`materiais/${materialId}/estoque`] = increment(-quantidade);
     atualizacoes[`materiais/${materialId}/atualizadoEm`] = data;
     atualizacoes[`historicoEstoque/${historicoId}`] = {
       tipo: "saida",
       acao: "romaneio",
+      lotes,
       materialId,
       material: material.nome || itemEntregue.nome || "",
       categoriaId: material.categoriaId || null,
@@ -1789,6 +1796,7 @@ async function prepararRomaneioSolicitacao({
     };
 
     itens.push({
+      lotes,
       nome: material.nome || itemEntregue.nome || "Material",
       categoriaId: material.categoriaId || null,
       unidade: material.unidade || itemEntregue.unidade || "Unidade",
@@ -1879,6 +1887,14 @@ function gerarPDFRomaneioSolicitacao(dados) {
       if (y + linhas.length * 7 > 235) novaPagina();
       doc.text(linhas, margem, y);
       y += linhas.length * 7 + 3;
+      for (const lote of item.lotes || []) {
+        const linhasLote = doc.splitTextToSize(`${lote.codigo || lote.loteId}: ${lote.quantidade} ${item.unidade || ""} - validade: ${formatarValidade(lote.validade)}`, larguraTexto);
+        for (const linha of linhasLote) {
+          if (y + 7 > 235) novaPagina();
+          doc.text(linha, margem, y);
+          y += 7;
+        }
+      }
     });
 
     if (y + 55 > altura - 20) novaPagina();

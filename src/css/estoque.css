@@ -1093,3 +1093,16 @@ body.drawer-aberto {
 
 /* Usa os mesmos estilos compartilhados da paginação de servidores. */
 .estoque-grid .paginacao[hidden] { display: none; }
+
+#campoValidadeEntrada[hidden] { display: none; }
+.btn-ver-lotes { margin-top: .75rem; padding: .5rem .75rem; border-radius: .6rem; background: var(--clr-light); color: var(--clr-dark); cursor: pointer; }
+.dialog-lotes { width: min(680px, calc(100% - 2rem)); max-height: 85vh; overflow: auto; margin: auto; padding: 1.5rem; border: 1px solid var(--clr-info-light); border-radius: 1rem; background: var(--clr-white); color: var(--clr-dark); }
+.dialog-lotes::backdrop { background: rgba(0, 0, 0, .45); }
+.lotes-cabecalho { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.dialog-lotes button { padding: .5rem .75rem; border-radius: .5rem; background: var(--clr-primary); color: #fff; cursor: pointer; }
+.dialog-lotes > p { margin: 1rem 0; }
+.lote-estoque { display: grid; gap: .45rem; padding: 1rem; border: 1px solid var(--clr-info-light); border-radius: .7rem; margin-top: .7rem; }
+.lote-vencido { border-color: var(--clr-danger); }
+.form-validade-lote { display: flex; align-items: end; flex-wrap: wrap; gap: .75rem; }
+.form-validade-lote input { display: block; padding: .5rem; color: var(--clr-dark); background: var(--clr-color-background); border: 1px solid var(--clr-info-light); border-radius: .4rem; }
+.form-validade-lote input { font-size: 16px; }

@@ -92,7 +92,12 @@
       ".read": "auth != null && root.child('controleAcesso/usuarios/' + auth.uid + '/ativo').val() === true",
       "$materialId": {
         ".write": "auth != null && root.child('controleAcesso/usuarios/' + auth.uid + '/ativo').val() === true && root.child('controleAcesso/usuarios/' + auth.uid + '/perfil').val() !== null && root.child('controleAcesso/usuarios/' + auth.uid + '/perfil').val() !== '' && root.child('controleAcesso/usuarios/' + auth.uid + '/perfil').val() !== 'GESTOR_ESCOLAR' && (root.child('controleAcesso/usuarios/' + auth.uid + '/perfil').val() === 'ADM' || root.child('configuracoes/estoque/permissoes/' + root.child('controleAcesso/usuarios/' + auth.uid + '/perfil').val() + '/todas').val() === true || root.child('configuracoes/estoque/permissoes/' + root.child('controleAcesso/usuarios/' + auth.uid + '/perfil').val() + '/categorias/' + (newData.exists() ? newData.child('categoriaId').val() : data.child('categoriaId').val())).val() === true)",
-        ".validate": "!newData.exists() || (newData.child('estoque').isNumber() && newData.child('estoque').val() >= 0)"
+        ".validate": "!newData.exists() || (newData.child('estoque').isNumber() && newData.child('estoque').val() >= 0)",
+        "lotes": {
+          "$loteId": {
+            ".validate": "newData.hasChildren(['codigo', 'saldo', 'quantidadeInicial', 'validade', 'entradaEm']) && newData.child('codigo').isString() && newData.child('entradaEm').isString() && newData.child('validade').isString() && (newData.child('validade').val() === '' || newData.child('validade').val().matches(/^\\d{4}-\\d{2}-\\d{2}$/)) && newData.child('saldo').isNumber() && newData.child('saldo').val() >= 0 && newData.child('quantidadeInicial').isNumber() && newData.child('quantidadeInicial').val() >= newData.child('saldo').val()"
+          }
+        }
       }
     },
     "$moduloLegado": {
@@ -102,7 +107,8 @@
     "movimentacoes": {
       ".read": "auth != null && root.child('controleAcesso/usuarios/' + auth.uid + '/ativo').val() === true && root.child('controleAcesso/usuarios/' + auth.uid + '/perfil').val() !== null && root.child('controleAcesso/usuarios/' + auth.uid + '/perfil').val() !== '' && root.child('controleAcesso/usuarios/' + auth.uid + '/perfil').val() !== 'GESTOR_ESCOLAR'",
       "$movimentacaoId": {
-        ".write": "auth != null && root.child('controleAcesso/usuarios/' + auth.uid + '/ativo').val() === true && root.child('controleAcesso/usuarios/' + auth.uid + '/perfil').val() !== null && root.child('controleAcesso/usuarios/' + auth.uid + '/perfil').val() !== '' && root.child('controleAcesso/usuarios/' + auth.uid + '/perfil').val() !== 'GESTOR_ESCOLAR' && ((!data.exists() && newData.exists()) || (data.exists() && newData.exists()) || (data.exists() && !newData.exists() && auth.token.email === 'raphaelcardoso@email.com'))"
+        ".write": "auth != null && root.child('controleAcesso/usuarios/' + auth.uid + '/ativo').val() === true && root.child('controleAcesso/usuarios/' + auth.uid + '/perfil').val() !== null && root.child('controleAcesso/usuarios/' + auth.uid + '/perfil').val() !== '' && root.child('controleAcesso/usuarios/' + auth.uid + '/perfil').val() !== 'GESTOR_ESCOLAR' && ((!data.exists() && newData.exists()) || (data.exists() && newData.exists()) || (data.exists() && !newData.exists() && auth.token.email === 'raphaelcardoso@email.com'))",
+        ".validate": "data.child('cancelado').val() !== true"
       }
     },
     "historicoEstoque": {

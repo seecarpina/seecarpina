@@ -45,6 +45,11 @@
     <div class="container">
       <aside id="sidebar"></aside>
 
+      <dialog id="dialogLotes" class="dialog-lotes" aria-labelledby="tituloLotes">
+        <div class="lotes-cabecalho"><h2 id="tituloLotes">Lotes do material</h2><button type="button" id="fecharLotes" aria-label="Fechar lotes">Fechar</button></div>
+        <p>As saídas usam primeiro os lotes que vencem mais cedo. Lotes vencidos e alimentos sem validade não são utilizados.</p>
+        <div id="listaLotes"></div>
+      </dialog>
       <main>
         <h1>Controle de Estoque</h1>
 
@@ -125,6 +130,12 @@
                     autocomplete="off"
                     required
                   />
+                </div>
+
+                <div id="campoValidadeEntrada" class="campo-material" hidden>
+                  <label for="validadeEntrada">Validade do lote</label>
+                  <input type="date" id="validadeEntrada" />
+                  <small>Cada entrada terá seu próprio lote e saldo.</small>
                 </div>
 
                 <div class="campos-material">
