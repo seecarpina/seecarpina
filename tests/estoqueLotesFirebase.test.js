@@ -18,7 +18,7 @@ function iniciar(material) {
       const ultimo = chaves.pop();
       const pai = chaves.reduce((obj, chave) => obj[chave], dados);
       pai[ultimo] = valor;
-      return { committed: true, snapshot: { val: () => structuredClone(valor) } };
+      return { committed: true, snapshot: { exists: () => true, val: () => structuredClone(valor) } };
     },
     increment: quantidade => ({ incremento: quantidade }),
   };
@@ -61,4 +61,26 @@ test("estorno de romaneio anterior aumenta saldo e quantidade inicial do legado"
 test("devolução sem lote de origem falha antes de gravar", async () => {
   const { contexto: c } = iniciar({ estoque: 0, categoriaId: "comida" });
   await assert.rejects(c.adicionarDevolucaoLotes({}, { materialId: "arroz", quantidade: 2, lotes: [{ loteId: "ausente", quantidade: 2 }] }), /origem não encontrado/);
+});
+
+test("cache vazio permite a transação consultar o servidor e usar o saldo mais recente", async () => {
+  const { contexto: c } = iniciar({ estoque: 50, categoriaId: "comida" });
+  c.runTransaction = async (_, fn) => {
+    assert.equal(fn(null), null);
+    const atualizado = fn({ estoque: 35, categoriaId: "comida" });
+    assert.equal(atualizado.lotes.legado.saldo, 35);
+    return { committed: true, snapshot: { exists: () => true, val: () => atualizado } };
+  };
+  const material = await c.garantirLotes("arroz");
+  assert.equal(material.estoque, 35);
+  assert.equal(material.lotes.legado.saldo, 35);
+});
+
+test("material removido no servidor não é recriado a partir da leitura anterior", async () => {
+  const { contexto: c } = iniciar({ estoque: 50, categoriaId: "comida" });
+  c.runTransaction = async (_, fn) => {
+    assert.equal(fn(null), null);
+    return { committed: true, snapshot: { exists: () => false, val: () => null } };
+  };
+  await assert.rejects(c.garantirLotes("arroz"), /Material não encontrado/);
 });
