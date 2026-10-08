@@ -67,6 +67,7 @@ const btnVerConfirmacaoPendente = document.getElementById(
 
 let solicitacoesEscola = [];
 let confirmacaoPendenteAtual = null;
+let enviandoSolicitacao = false;
 let cancelarEscutaSolicitacoes = null;
 
 let dadosGestorAtual = null;
@@ -238,6 +239,8 @@ function configurarDataNecessidade() {
 }
 
 function atualizarConfiguracaoInsumo() {
+  atualizarBloqueioNovaSolicitacao();
+
   const configuracao = configuracoesInsumos[tipoInsumo.value];
 
   quantidadeInsumo.value = "";
@@ -1174,6 +1177,7 @@ function atualizarBloqueioNovaSolicitacao() {
   confirmacaoPendenteAtual = solicitacoesEscola.find(
     (solicitacao) =>
       solicitacao.modulo === "INSUMOS" &&
+      solicitacao.tipo === tipoInsumo.value &&
       String(solicitacao.escolaId) === String(dadosGestorAtual?.escolaId) &&
       solicitacao.status === "AGUARDANDO_CONFIRMACAO" &&
       solicitacao.confirmacaoEntrega?.pendente === true,
@@ -1183,7 +1187,7 @@ function atualizarBloqueioNovaSolicitacao() {
 
   avisoConfirmacaoPendente.style.display = possuiPendencia ? "flex" : "none";
 
-  btnEnviarSolicitacao.disabled = possuiPendencia;
+  btnEnviarSolicitacao.disabled = enviandoSolicitacao || possuiPendencia;
 
   if (!possuiPendencia) {
     textoConfirmacaoPendente.textContent = "";
@@ -1195,7 +1199,8 @@ function atualizarBloqueioNovaSolicitacao() {
 
   textoConfirmacaoPendente.textContent =
     `Confirme o recebimento da solicitação ${protocolo} ` +
-    "antes de realizar um novo pedido.";
+    `de ${obterNomeTipoInsumo(tipoInsumo.value)} antes de realizar um novo pedido desse item. ` +
+    "Você pode selecionar outro insumo para solicitar.";
 }
 
 function renderizarSolicitacoes() {
@@ -1448,6 +1453,8 @@ async function gerarProtocoloInsumo() {
 }
 
 function alterarEstadoEnvio(enviando) {
+  enviandoSolicitacao = enviando;
+  atualizarBloqueioNovaSolicitacao();
   btnEnviarSolicitacao.disabled = enviando || Boolean(confirmacaoPendenteAtual);
 
   if (enviando) {
@@ -1471,6 +1478,12 @@ function alterarEstadoEnvio(enviando) {
 async function salvarSolicitacao() {
   if (!dadosGestorAtual) {
     throw new Error("Gestor não identificado.");
+  }
+
+  atualizarBloqueioNovaSolicitacao();
+
+  if (confirmacaoPendenteAtual) {
+    throw new Error("Confirme o recebimento do pedido anterior deste item antes de solicitar novamente.");
   }
 
   const tipo = tipoInsumo.value;
