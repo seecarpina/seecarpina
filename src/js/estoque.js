@@ -1,3 +1,5 @@
+import { categoriaExigeValidade, dataValida, hojeLocal, listarLotes, formatarValidade, loteDaEntradaParaExcluir } from "./core/estoqueLotes.js";
+import { garantirLotes, adicionarBaixaLotes, adicionarDevolucaoLotes } from "./core/estoqueLotesFirebase.js";
 import { paginarRegistros } from "./core/paginacaoEstoque.js";
 import { auth, rtdb } from "./firebaseConfig.js";
 import { exportarPlanilhasExcel } from "./core/exportarExcel.js";
@@ -14,6 +16,7 @@ import {
   get,
   update,
   increment,
+  runTransaction,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 const { jsPDF } = window.jspdf;
@@ -427,6 +430,7 @@ function selecionarMaterialCadastro(valorSelecionado) {
   selectCategoriaMaterial.value = material.categoriaId || "";
   selectUnidadeMaterial.value = material.unidade || "Unidade";
 
+  atualizarCampoValidade();
   selectCategoriaMaterial.disabled = true;
   selectUnidadeMaterial.disabled = true;
 }
@@ -443,6 +447,7 @@ function liberarDadosMaterialCadastro() {
     selectCategoriaMaterial.value = "";
     selectUnidadeMaterial.value = "Unidade";
   }
+  atualizarCampoValidade();
 }
 
 /* =========================
@@ -523,6 +528,21 @@ const boxMaterial = document.getElementById("autocompleteMaterial");
 const selectCategoriaMaterial = document.getElementById("categoriaMaterial");
 const selectUnidadeMaterial = document.getElementById("unidade");
 
+const inputValidadeEntrada = document.getElementById("validadeEntrada");
+const campoValidadeEntrada = document.getElementById("campoValidadeEntrada");
+function exigeValidadeCategoria(id) {
+  return categoriaExigeValidade(categoriasEstoque.find(c => c.id === id) || {});
+}
+function atualizarCampoValidade() {
+  const exige = !materialEmEdicaoId && exigeValidadeCategoria(selectCategoriaMaterial.value);
+  const visivel = !materialEmEdicaoId && Boolean(selectCategoriaMaterial.value);
+  campoValidadeEntrada.hidden = !visivel;
+  inputValidadeEntrada.disabled = !visivel;
+  inputValidadeEntrada.required = exige;
+  campoValidadeEntrada.querySelector("label").textContent = exige ? "Validade do lote" : "Validade do lote (opcional)";
+  inputValidadeEntrada.min = hojeLocal();
+}
+selectCategoriaMaterial.addEventListener("change", atualizarCampoValidade);
 const inputQuantidade = document.getElementById("quantidade");
 const inputJustificativaEntrada = document.getElementById(
   "justificativaEntrada",
@@ -601,6 +621,7 @@ onValue(categoriasEstoqueRef, (snapshot) => {
   );
 
   preencherCategoriasMaterial();
+  atualizarCampoValidade();
 
   preencherFiltroCategoriasEstoque();
 
@@ -775,6 +796,7 @@ function encerrarEdicaoMaterial() {
 
   selectUnidadeMaterial.disabled = false;
 
+  atualizarCampoValidade();
   btnAdicionarEstoque.value = "Adicionar ao estoque";
 
   if (btnCancelarEdicaoMaterial) {
@@ -812,6 +834,7 @@ function editarMaterial(materialId) {
   inputJustificativaEntrada.required = false;
   campoJustificativaEntrada.hidden = true;
 
+  atualizarCampoValidade();
   btnAdicionarEstoque.value = "Salvar alterações";
 
   if (btnCancelarEdicaoMaterial) {
@@ -870,6 +893,13 @@ formMaterial.addEventListener("submit", async (event) => {
     return;
   }
 
+  const exigeValidade = exigeValidadeCategoria(categoriaId);
+  const validade = inputValidadeEntrada.value;
+  if (!materialEmEdicaoId && ((exigeValidade && !validade) || (validade && (!dataValida(validade) || validade < hojeLocal())))) {
+    mostrarNotificacao("Informe uma validade válida, igual ou posterior a hoje.", "erro");
+    inputValidadeEntrada.focus();
+    return;
+  }
   salvandoMaterial = true;
 
   btnAdicionarEstoque.disabled = true;
@@ -970,62 +1000,37 @@ formMaterial.addEventListener("submit", async (event) => {
       return;
     }
 
+    const materialId = existente?._key || push(materiaisRef).key;
+    const agora = new Date().toISOString();
+    const materialAtual = existente ? await garantirLotes(materialId, exigeValidade) : null;
+    if (materialAtual?.exigeValidade && !dataValida(validade)) throw new Error("Informe a validade desta entrada.");
+    const loteId = push(ref(rtdb, `materiais/${materialId}/lotes`)).key;
+    const lote = { codigo: `Lote ${loteId.slice(-8)}`, entradaEm: agora, validade, quantidadeInicial: quantidade, saldo: quantidade, justificativa, usuario: getNomeResponsavel() };
+    const historicoId = push(historicoEstoqueRef).key;
+    const atualizacoes = {};
     if (existente) {
-      const estoqueAnterior = Number(existente.estoque || 0);
-
-      const estoquePosterior = estoqueAnterior + quantidade;
-
-      await update(ref(rtdb, `materiais/${existente._key}`), {
-        codigo: codigo || existente.codigo || null,
-        estoque: estoquePosterior,
-        atualizadoEm: new Date().toISOString(),
-      });
-
-      await registrarMovimentacaoEstoque({
-        tipo: "entrada",
-        acao: "adicao",
-
-        materialId: existente._key,
-        material: existente.nome,
-        categoriaId: existente.categoriaId,
-        unidade: existente.unidade,
-
-        quantidade,
-        estoqueAnterior,
-        estoquePosterior,
-        justificativa,
-      });
+      atualizacoes[`materiais/${materialId}/estoque`] = increment(quantidade);
+      atualizacoes[`materiais/${materialId}/codigo`] = codigo || existente.codigo || null;
+      atualizacoes[`materiais/${materialId}/atualizadoEm`] = agora;
+      atualizacoes[`materiais/${materialId}/lotes/${loteId}`] = lote;
     } else {
-      const novoMaterialRef = await push(materiaisRef, {
-        nome,
-        codigo: codigo || null,
-        categoriaId,
-        unidade,
-        estoque: quantidade,
-        criadoEm: new Date().toISOString(),
-        atualizadoEm: new Date().toISOString(),
-      });
-
-      await registrarMovimentacaoEstoque({
-        tipo: "entrada",
-        acao: "cadastro",
-
-        materialId: novoMaterialRef.key,
-        material: nome,
-        categoriaId,
-        unidade,
-
-        quantidade,
-        estoqueAnterior: 0,
-        estoquePosterior: quantidade,
-        justificativa,
-      });
+      atualizacoes[`materiais/${materialId}`] = { nome, codigo: codigo || null, categoriaId, unidade, estoque: quantidade, criadoEm: agora, atualizadoEm: agora, controleLotes: true, exigeValidade, lotes: { [loteId]: lote } };
     }
+    const estoqueAnterior = Number(materialAtual?.estoque || 0);
+    atualizacoes[`historicoEstoque/${historicoId}`] = {
+      tipo: "entrada", acao: existente ? "adicao" : "cadastro", materialId,
+      material: existente?.nome || nome, categoriaId, unidade, quantidade,
+      estoqueAnterior, estoquePosterior: estoqueAnterior + quantidade,
+      justificativa, loteId, loteCodigo: lote.codigo, validade,
+      usuario: getNomeResponsavel(), data: agora,
+    };
+    await update(ref(rtdb), atualizacoes);
 
     mostrarNotificacao("Material salvo com sucesso!");
 
     formMaterial.reset();
     liberarDadosMaterialCadastro();
+    atualizarCampoValidade();
     inputMaterial.focus();
   } catch (erro) {
     console.error("Erro ao salvar material:", erro);
@@ -1189,6 +1194,7 @@ function renderTabela() {
             </span>
           </div>
 
+          <button type="button" class="btn-ver-lotes" data-material-id="${escaparHtmlEstoque(material._key)}">Ver lotes</button>
           <button
             type="button"
             class="btn-editar-material"
@@ -1375,6 +1381,25 @@ btnExportarExcel?.addEventListener("click", async () => {
               ? formatarData(material.atualizadoEm)
               : "",
           })),
+        },
+        {
+          nomePlanilha: "Lotes",
+          nomeTabela: "TabelaLotesEstoque",
+          colunas: [
+            { titulo: "Material", chave: "material", largura: 40 },
+            { titulo: "Lote", chave: "lote", largura: 25 },
+            { titulo: "Entrada", chave: "entrada", largura: 20 },
+            { titulo: "Validade", chave: "validade", largura: 20 },
+            { titulo: "Recebido", chave: "quantidade", largura: 15 },
+            { titulo: "Saldo", chave: "saldo", largura: 15 },
+            { titulo: "Unidade", chave: "unidade", largura: 15 },
+          ],
+          linhas: materiaisExportar.flatMap(material => listarLotes(material).map(lote => ({
+            material: material.nome || "", lote: lote.codigo || lote.id,
+            entrada: lote.entradaEm ? formatarData(lote.entradaEm) : "Não informada",
+            validade: lote.validade ? formatarValidade(lote.validade) : "Não informada",
+            quantidade: lote.quantidadeInicial, saldo: lote.saldo, unidade: material.unidade || "Unidade",
+          }))),
         },
         {
           nomePlanilha: "Movimentações",
@@ -1672,14 +1697,21 @@ btnGerarRomaneio.addEventListener("click", async () => {
       throw new Error("Não foi possível gerar o identificador do romaneio.");
     }
 
+    const materiaisAtuais = [];
+    for (const item of itensEntrega) {
+      const material = await garantirLotes(item.materialId);
+      materiaisAtuais.push({ ...material, _key: item.materialId });
+    }
+    itensPreparados = prepararItensSaidaEstoque(itensEntrega, materiaisAtuais);
     const agora = new Date().toISOString();
+    const lotesPorMaterial = new Map(itensPreparados.map(r => [r.materialId, adicionarBaixaLotes({}, r.materialId, r.material, r.quantidade)]));
 
     const movimentacao = {
       destinoId: destinoSelecionado.id,
       destino: destinoSelecionado.nome,
       data: agora,
       observacao,
-      itens: itensEntrega.map((item) => ({ ...item })),
+      itens: itensEntrega.map((item) => ({ ...item, lotes: lotesPorMaterial.get(item.materialId) })),
       responsavel: getNomeResponsavel(),
     };
 
@@ -1701,6 +1733,7 @@ btnGerarRomaneio.addEventListener("click", async () => {
         estoquePosterior,
       } = registro;
 
+      const lotes = adicionarBaixaLotes(atualizacoes, materialId, material, quantidade);
       const historicoRef = push(historicoEstoqueRef);
       const historicoId = historicoRef.key;
 
@@ -1715,6 +1748,7 @@ btnGerarRomaneio.addEventListener("click", async () => {
       atualizacoes[`historicoEstoque/${historicoId}`] = {
         tipo: "saida",
         acao: "romaneio",
+        lotes,
         materialId,
         material: material.nome || item.nome || "",
         categoriaId: material.categoriaId || null,
@@ -1753,7 +1787,7 @@ btnGerarRomaneio.addEventListener("click", async () => {
   } catch (erro) {
     console.error("Erro ao gerar romaneio:", erro);
 
-    mostrarNotificacao("Erro ao gerar romaneio.", "erro");
+    mostrarNotificacao(erro.message || "Erro ao gerar romaneio. Atualize os saldos e tente novamente.", "erro");
   } finally {
     gerandoRomaneio = false;
 
@@ -1928,6 +1962,14 @@ function gerarPDF(dados) {
       doc.text(linhas, margemEsquerda, y);
 
       y += alturaItem + 3;
+      for (const lote of item.lotes || []) {
+        const linhasLote = doc.splitTextToSize(`  ${lote.codigo || lote.loteId}: ${lote.quantidade} ${item.unidade || ""} — validade: ${lote.validade ? formatarValidade(lote.validade) : "não informada"}`, larguraTexto);
+        for (const linha of linhasLote) {
+          if (y + 7 > limiteInferiorItens) adicionarNovaPagina();
+          doc.text(linha, margemEsquerda, y);
+          y += 7;
+        }
+      }
     });
 
     const totalItens = dados.itens.length;
@@ -2204,6 +2246,7 @@ async function excluirRomaneio(romaneioId) {
           throw new Error(`Item inválido no romaneio: ${item.nome || "-"}`);
         }
 
+        await adicionarDevolucaoLotes(atualizacoes, item);
         atualizacoes[`materiais/${item.materialId}/estoque`] =
           increment(quantidade);
         atualizacoes[`materiais/${item.materialId}/atualizadoEm`] = agora;
@@ -2334,6 +2377,7 @@ async function cancelarRomaneio(romaneioId) {
         );
       }
 
+      await adicionarDevolucaoLotes(atualizacoes, item);
       atualizacoes[`materiais/${item.materialId}/estoque`] =
         increment(quantidade);
 
@@ -2360,6 +2404,7 @@ async function cancelarRomaneio(romaneioId) {
         categoriaId: item.categoriaId || null,
         unidade: item.unidade || "Unidade",
         quantidade: Number(item.quantidade || 0),
+        lotes: item.lotes || [],
       })),
 
       usuario: getNomeResponsavel(),
@@ -2750,7 +2795,7 @@ async function excluirMovimentacaoEstoque(movimentacaoId) {
       throw new Error("O material vinculado não foi encontrado no estoque.");
     }
 
-    const material = materialSnapshot.val();
+    const material = await garantirLotes(materialId);
     const estoqueAtual = Number(material.estoque || 0);
 
     if (ehEntrada && quantidade > estoqueAtual) {
@@ -2762,6 +2807,13 @@ async function excluirMovimentacaoEstoque(movimentacaoId) {
     const variacaoEstoque = ehEntrada ? -quantidade : quantidade;
     const atualizacoes = {};
 
+    if (ehEntrada) {
+      const loteId = loteDaEntradaParaExcluir(material, movimentacao);
+      atualizacoes[`materiais/${materialId}/lotes/${loteId}/saldo`] = increment(-quantidade);
+      if (movimentacao.loteId) atualizacoes[`materiais/${materialId}/lotes/${loteId}/entradaExcluida`] = true;
+    } else {
+      await adicionarDevolucaoLotes(atualizacoes, { ...movimentacao, materialId, quantidade });
+    }
     atualizacoes[`materiais/${materialId}/estoque`] =
       increment(variacaoEstoque);
     atualizacoes[`materiais/${materialId}/atualizadoEm`] =
@@ -2989,6 +3041,8 @@ function renderMovimentacoes() {
                     : ""
                 }
 
+                ${movimentacao.loteId ? `<p><strong>Lote:</strong> ${escaparHtmlEstoque(movimentacao.loteCodigo || movimentacao.loteId)} · Validade: ${movimentacao.validade ? formatarValidade(movimentacao.validade) : "Não informada"}</p>` : ""}
+                ${(movimentacao.lotes || []).map(lote => `<p>${escaparHtmlEstoque(lote.codigo || lote.loteId)}: ${Number(lote.quantidade)} · Validade: ${lote.validade ? formatarValidade(lote.validade) : "Não informada"}</p>`).join("")}
                 <div class="movimentacao-detalhes">
                   <span>
                     Estoque:
@@ -3085,4 +3139,60 @@ tabBtns.forEach((botao) => {
       if (aba.id === "movimentacoesTab") iniciarHistoricoMovimentacoes();
     }
   });
+});
+
+// Consulta de lotes sem alterar o layout dos cartões do estoque.
+const dialogLotes = document.getElementById("dialogLotes");
+let materialLotesAberto = null;
+document.getElementById("fecharLotes").addEventListener("click", () => dialogLotes.close());
+async function abrirLotes(materialId) {
+  const permitido = obterMateriaisPermitidos().find(m => m._key === materialId);
+  if (!permitido) return;
+  materialLotesAberto = materialId;
+  document.getElementById("tituloLotes").textContent = `Lotes — ${permitido.nome}`;
+  const lista = document.getElementById("listaLotes");
+  lista.textContent = "Carregando lotes…";
+  if (!dialogLotes.open) dialogLotes.showModal();
+  try {
+    const material = await garantirLotes(materialId);
+    if (materialLotesAberto !== materialId) return;
+    lista.innerHTML = listarLotes(material).map(lote => {
+      const vencido = lote.validade && lote.validade < hojeLocal() && lote.saldo > 0;
+      return `<article class="lote-estoque ${vencido ? "lote-vencido" : ""}">
+        <strong>${escaparHtmlEstoque(lote.codigo || lote.id)}</strong>
+        <span>Entrada: ${lote.entradaEm ? formatarData(lote.entradaEm) : "Data não informada"}</span>
+        <span>Recebido: ${Number(lote.quantidadeInicial)} · Saldo: ${Number(lote.saldo)} ${escaparHtmlEstoque(material.unidade || "")}</span>
+        <span>Validade: ${lote.validade ? formatarValidade(lote.validade) : "Não informada"}${vencido ? " — Vencido" : ""}${lote.entradaExcluida ? " — Entrada excluída" : lote.saldo === 0 ? " — Esgotado" : ""}</span>
+        ${lote.justificativa ? `<small>${escaparHtmlEstoque(lote.justificativa)}</small>` : ""}
+        ${!lote.validade && material.exigeValidade && lote.saldo > 0 ? `<form class="form-validade-lote" data-lote-id="${escaparHtmlEstoque(lote.id)}"><label>Informar validade <input type="date" name="validade" required /></label><button type="submit">Salvar validade</button></form>` : ""}
+      </article>`;
+    }).join("") || "Nenhum lote registrado.";
+  } catch (erro) { lista.textContent = erro.message || "Não foi possível carregar lotes."; }
+}
+listaMateriais.addEventListener("click", event => {
+  const botao = event.target.closest(".btn-ver-lotes");
+  if (botao) abrirLotes(botao.dataset.materialId);
+});
+document.getElementById("listaLotes").addEventListener("submit", async event => {
+  const form = event.target.closest(".form-validade-lote");
+  if (!form) return;
+  event.preventDefault();
+  const validade = form.elements.validade.value;
+  if (!dataValida(validade)) return;
+  const materialId = materialLotesAberto;
+  const loteId = form.dataset.loteId;
+  const botao = form.querySelector("button");
+  botao.disabled = true;
+  try {
+    const permitido = obterMateriaisPermitidos().some(m => m._key === materialId);
+    if (!permitido) throw new Error("Sem permissão para este material.");
+    const resultado = await runTransaction(ref(rtdb, `materiais/${materialId}/lotes/${loteId}`), lote => {
+      if (!lote || lote.validade) return;
+      return { ...lote, validade };
+    }, { applyLocally: false });
+    if (!resultado.committed) throw new Error("A validade deste lote já foi atualizada. Abra os lotes novamente.");
+    mostrarNotificacao("Validade registrada.");
+    await abrirLotes(materialId);
+  } catch (erro) { mostrarNotificacao(erro.message, "erro"); }
+  finally { botao.disabled = false; }
 });
