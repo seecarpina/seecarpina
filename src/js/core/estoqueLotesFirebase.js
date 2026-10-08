@@ -12,8 +12,14 @@ export async function garantirLotes(materialId, exigirValidade) {
     exigirValidade = categoriaExigeValidade(categoria.val() || {});
   }
   if (atual.controleLotes && (!exigirValidade || atual.exigeValidade)) return atual;
-  const resultado = await runTransaction(caminho, material => material ? inicializarLotes(material, exigirValidade) : undefined, { applyLocally: false });
+  const resultado = await runTransaction(caminho, material => {
+    // null pode representar apenas o cache local vazio. Retornar undefined
+    // abortaria antes de o Firebase conferir o valor no servidor.
+    // O resultado nulo não recria um material removido durante a operação.
+    return material ? inicializarLotes(material, exigirValidade) : null;
+  }, { applyLocally: false });
   if (!resultado.committed) throw new Error("Não foi possível preparar os lotes. Tente novamente.");
+  if (!resultado.snapshot.exists()) throw new Error("Material não encontrado. Atualize a lista do estoque.");
   return resultado.snapshot.val();
 }
 
