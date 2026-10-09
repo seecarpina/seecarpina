@@ -4,7 +4,7 @@ Cada entrada cria um lote separado em `materiais/{id}/lotes/{loteId}`. O saldo t
 
 Categorias com nome contendo “alimentação”, “gêneros” ou “merenda”, ou com `exigeValidade: true`, exigem validade nas novas entradas. Os demais materiais também são separados por entrada, com validade opcional.
 
-Saídas usam primeiro o menor vencimento (FEFO) e, em empate, a entrada mais antiga. Datas de hoje ainda são válidas. Lotes vencidos não são usados. Alimentos sem validade não são usados até a regularização em “Ver lotes”.
+Saídas usam primeiro o menor vencimento (FEFO) e, em empate, a entrada mais antiga. Datas de hoje ainda são válidas. Lotes vencidos não são usados. Durante a transição, alimentos sem validade cadastrada podem ser entregues, depois dos lotes com validade conhecida. A data permanece vazia, sem inventar vencimentos; o PDF informa “Validade: Não informada”. Lotes com data inválida continuam bloqueados. A regularização segue disponível em “Ver lotes”, e novas entradas de alimentos continuam exigindo validade.
 
 O saldo antigo é preservado em um lote “Estoque anterior”, sem inventar validade ou reconstruir os lotes de entradas antigas. A preparação desse lote ocorre em uma transação por material, quando ele é consultado ou movimentado. Não é necessário migrar todo o banco antes da publicação. Romaneios anteriores sem identificação de lote devolvem os itens ao lote “Estoque anterior”.
 

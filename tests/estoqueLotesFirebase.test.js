@@ -84,3 +84,17 @@ test("material removido no servidor não é recriado a partir da leitura anterio
   };
   await assert.rejects(c.garantirLotes("arroz"), /Material não encontrado/);
 });
+
+
+test("alimento migrado sem validade permite baixa e estorno no mesmo lote", async () => {
+  const { contexto: c } = iniciar({ estoque: 50, categoriaId: "comida" });
+  const material = await c.garantirLotes("arroz");
+  const baixa = {};
+  const lotes = c.adicionarBaixaLotes(baixa, "arroz", material, 12);
+  assert.equal(baixa["materiais/arroz/lotes/legado/saldo"].incremento, -12);
+  assert.equal(lotes[0].validade, "");
+  assert.equal(lotes[0].quantidade, 12);
+  const devolucao = {};
+  await c.adicionarDevolucaoLotes(devolucao, { materialId: "arroz", quantidade: 12, lotes });
+  assert.equal(devolucao["materiais/arroz/lotes/legado/saldo"].incremento, 12);
+});
