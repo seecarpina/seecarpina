@@ -1,4 +1,4 @@
-import { categoriaExigeValidade, dataValida, hojeLocal, listarLotes, formatarValidade, loteDaEntradaParaExcluir } from "./core/estoqueLotes.js";
+import { categoriaExigeValidade, dataValida, hojeLocal, listarLotes, formatarValidade, loteDaEntradaParaExcluir, linhasValidadeRomaneio } from "./core/estoqueLotes.js";
 import { garantirLotes, adicionarBaixaLotes, adicionarDevolucaoLotes } from "./core/estoqueLotesFirebase.js";
 import { paginarRegistros } from "./core/paginacaoEstoque.js";
 import { auth, rtdb } from "./firebaseConfig.js";
@@ -1711,7 +1711,7 @@ btnGerarRomaneio.addEventListener("click", async () => {
       destino: destinoSelecionado.nome,
       data: agora,
       observacao,
-      itens: itensEntrega.map((item) => ({ ...item, lotes: lotesPorMaterial.get(item.materialId) })),
+      itens: itensEntrega.map((item) => ({ ...item, lotes: lotesPorMaterial.get(item.materialId), alimentacao: materiaisAtuais.find(material => material._key === item.materialId)?.exigeValidade === true })),
       responsavel: getNomeResponsavel(),
     };
 
@@ -1962,8 +1962,10 @@ function gerarPDF(dados) {
       doc.text(linhas, margemEsquerda, y);
 
       y += alturaItem + 3;
-      for (const lote of item.lotes || []) {
-        const linhasLote = doc.splitTextToSize(`  ${lote.codigo || lote.loteId}: ${lote.quantidade} ${item.unidade || ""} — validade: ${lote.validade ? formatarValidade(lote.validade) : "não informada"}`, larguraTexto);
+      const materialAtual = materiais.find(material => material._key === item.materialId);
+      const alimentacao = item.alimentacao ?? (materialAtual?.exigeValidade === true || exigeValidadeCategoria(item.categoriaId || materialAtual?.categoriaId));
+      for (const informacao of linhasValidadeRomaneio(item, alimentacao)) {
+        const linhasLote = doc.splitTextToSize(informacao, larguraTexto);
         for (const linha of linhasLote) {
           if (y + 7 > limiteInferiorItens) adicionarNovaPagina();
           doc.text(linha, margemEsquerda, y);
