@@ -39,13 +39,14 @@ export function selecionarLotesSaida(material, quantidade, hoje = hojeLocal()) {
   let restante = quantidade;
   const utilizados = [];
   for (const lote of listarLotes(material)) {
-    if (lote.saldo <= 0 || (lote.validade && lote.validade < hoje) || (material.exigeValidade && !dataValida(lote.validade))) continue;
+    // Durante a transição, saldo sem validade pode sair; datas inválidas ou vencidas continuam bloqueadas.
+    if (lote.saldo <= 0 || (lote.validade && (!dataValida(lote.validade) || lote.validade < hoje))) continue;
     const baixa = Math.min(restante, Number(lote.saldo));
     if (baixa > 0) utilizados.push({ loteId: lote.id, codigo: lote.codigo || lote.id, validade: lote.validade || "", quantidade: baixa });
     restante -= baixa;
     if (restante === 0) break;
   }
-  if (restante > 0) throw new Error(`Saldo de lotes disponíveis insuficiente para "${material.nome || "material"}". Confira lotes vencidos ou sem validade em Ver lotes.`);
+  if (restante > 0) throw new Error(`Saldo de lotes disponíveis insuficiente para "${material.nome || "material"}". Confira os saldos e lotes vencidos ou com validade inválida em Ver lotes.`);
   return utilizados;
 }
 

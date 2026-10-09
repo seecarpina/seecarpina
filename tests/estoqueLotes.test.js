@@ -20,7 +20,7 @@ test("migração preserva o saldo antigo e nunca inventa validade", () => {
   assert.equal(m.lotes.legado.validade, "");
   assert.equal(original.controleLotes, undefined);
   assert.deepEqual(inicializarLotes(m, true), m);
-  assert.throws(() => selecionarLotesSaida(m, 1, "2026-10-08"), /sem validade/);
+  assert.deepEqual(selecionarLotesSaida(m, 1, "2026-10-08").map(l => [l.loteId, l.validade, l.quantidade]), [["legado", "", 1]]);
 });
 
 test("saída atravessa lotes por menor validade, independentemente da ordem de entrada", () => {
@@ -76,4 +76,20 @@ test("entrada consumida não pode ser excluída usando o saldo de outro lote", (
   const m = { estoque: 150, lotes: { consumido: lote(50, "2026-12-01"), outro: lote(100, "2026-12-20") } };
   assert.throws(() => loteDaEntradaParaExcluir(m, { loteId: "consumido", quantidade: 100 }), /já foi utilizada/);
   assert.equal(loteDaEntradaParaExcluir(m, { loteId: "outro", quantidade: 100 }), "outro");
+});
+
+
+test("transição usa alimentos com validade conhecida antes do saldo sem validade", () => {
+  const m = { nome: "Arroz", controleLotes: true, exigeValidade: true, lotes: {
+    semData: lote(10, "", "2026-01-01"),
+    valido: lote(5, "2026-12-20", "2026-10-01"),
+    vencido: lote(100, "2026-10-07"),
+    invalido: lote(100, "2026-13-01"),
+  } };
+  const antes = structuredClone(m);
+  const usados = selecionarLotesSaida(m, 12, "2026-10-08");
+  assert.deepEqual(usados.map(l => [l.loteId, l.quantidade]), [["valido", 5], ["semData", 7]]);
+  assert.equal(usados[1].validade, "");
+  assert.deepEqual(m, antes);
+  assert.throws(() => selecionarLotesSaida(m, 16, "2026-10-08"), /insuficiente/);
 });
