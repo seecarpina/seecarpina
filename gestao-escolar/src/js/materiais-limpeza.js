@@ -1,3 +1,4 @@
+import { obterPedidoMaterialAberto } from "./regrasPedidosMateriais.js";
 import { imprimirPedido } from "./imprimirPedido.js";
 import { auth, db, rtdb } from "./firebaseConfig.js";
 
@@ -81,6 +82,9 @@ let materiaisEstoque = [];
 let materiaisDisponiveis = [];
 let itensSolicitacao = [];
 let confirmacaoPendenteAtual = null;
+let enviandoSolicitacao = false;
+let solicitacoesCarregadas = false;
+btnEnviarSolicitacao.disabled = true;
 let cancelarEscutaSolicitacoes = null;
 
 let dadosGestorAtual = null;
@@ -1486,28 +1490,18 @@ listaMateriaisSelecionados.addEventListener("click", (event) => {
 });
 
 function atualizarBloqueioNovaSolicitacao() {
-  confirmacaoPendenteAtual = solicitacoesEscola.find(
-    (solicitacao) =>
-      solicitacao.modulo === "MATERIAIS_LIMPEZA" &&
-      String(solicitacao.escolaId) === String(dadosGestorAtual?.escolaId) &&
-      solicitacao.status === "AGUARDANDO_CONFIRMACAO" &&
-      solicitacao.confirmacaoEntrega?.pendente === true,
-  );
-
+  confirmacaoPendenteAtual = obterPedidoMaterialAberto(solicitacoesEscola, "MATERIAIS_LIMPEZA", dadosGestorAtual?.escolaId);
   const possuiPendencia = Boolean(confirmacaoPendenteAtual);
-
   avisoConfirmacaoPendente.style.display = possuiPendencia ? "flex" : "none";
-
-  btnEnviarSolicitacao.disabled = possuiPendencia;
-
+  btnEnviarSolicitacao.disabled = enviandoSolicitacao || !solicitacoesCarregadas || possuiPendencia;
   if (!possuiPendencia) {
     textoConfirmacaoPendente.textContent = "";
     return;
   }
-
-  textoConfirmacaoPendente.textContent = `A solicitação ${
-    confirmacaoPendenteAtual.protocolo || ""
-  } aguarda sua confirmação de recebimento.`;
+  const protocolo = confirmacaoPendenteAtual.protocolo || "sem protocolo";
+  textoConfirmacaoPendente.textContent = confirmacaoPendenteAtual.status === "AGUARDANDO_CONFIRMACAO"
+    ? `Confirme o recebimento da solicitação ${protocolo} antes de realizar um novo pedido nesta aba, mesmo que os itens sejam diferentes.`
+    : `A solicitação ${protocolo} ainda está em aberto. Aguarde o atendimento e confirme o recebimento antes de realizar um novo pedido nesta aba, mesmo que os itens sejam diferentes.`;
 }
 
 function formatarQuantidadeMaterial(quantidade) {
@@ -1778,6 +1772,8 @@ function renderizarSolicitacoes() {
 }
 
 function carregarSolicitacoesEscola() {
+  solicitacoesCarregadas = false;
+  atualizarBloqueioNovaSolicitacao();
   if (!dadosGestorAtual?.uid) {
     return;
   }
@@ -1798,14 +1794,14 @@ function carregarSolicitacoesEscola() {
 
   const registrosRef = ref(rtdb, "portalGestor/solicitacoes/registros");
 
-  const consultaUsuario = query(
+  const consultaEscola = query(
     registrosRef,
-    orderByChild("solicitanteUid"),
-    equalTo(dadosGestorAtual.uid),
+    orderByChild("escolaId"),
+    equalTo(dadosGestorAtual.escolaId),
   );
 
   cancelarEscutaSolicitacoes = onValue(
-    consultaUsuario,
+    consultaEscola,
 
     (snapshot) => {
       solicitacoesEscola = [];
@@ -1825,11 +1821,14 @@ function carregarSolicitacoesEscola() {
         (a, b) => Number(b.criadoEm || 0) - Number(a.criadoEm || 0),
       );
 
+      solicitacoesCarregadas = true;
       atualizarBloqueioNovaSolicitacao();
       renderizarSolicitacoes();
     },
 
     (error) => {
+      solicitacoesCarregadas = false;
+      atualizarBloqueioNovaSolicitacao();
       console.error("Erro ao carregar solicitações:", error);
 
       listaSolicitacoes.innerHTML = `
@@ -1876,7 +1875,8 @@ async function gerarProtocoloLimpeza() {
 }
 
 function alterarEstadoEnvio(enviando) {
-  btnEnviarSolicitacao.disabled = enviando || Boolean(confirmacaoPendenteAtual);
+  enviandoSolicitacao = enviando;
+  atualizarBloqueioNovaSolicitacao();
 
   if (enviando) {
     btnEnviarSolicitacao.innerHTML = `
@@ -1901,20 +1901,12 @@ async function salvarSolicitacao() {
     throw new Error("Gestor não identificado.");
   }
 
-  const confirmacaoPendente = solicitacoesEscola.find(
-    (solicitacao) =>
-      solicitacao.modulo === "MATERIAIS_LIMPEZA" &&
-      String(solicitacao.escolaId) === String(dadosGestorAtual?.escolaId) &&
-      solicitacao.status === "AGUARDANDO_CONFIRMACAO" &&
-      solicitacao.confirmacaoEntrega?.pendente === true,
-  );
-
-  if (confirmacaoPendente) {
-    throw new Error(
-      `Confirme o recebimento da solicitação ${
-        confirmacaoPendente.protocolo || ""
-      } antes de enviar um novo pedido.`,
-    );
+  if (!solicitacoesCarregadas) {
+    throw new Error("Aguarde o carregamento das solicitações antes de enviar um pedido.");
+  }
+  atualizarBloqueioNovaSolicitacao();
+  if (confirmacaoPendenteAtual) {
+    throw new Error(textoConfirmacaoPendente.textContent);
   }
 
   if (!itensSolicitacao.length) {
