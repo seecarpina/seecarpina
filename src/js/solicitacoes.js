@@ -1,4 +1,4 @@
-import { formatarValidade } from "./core/estoqueLotes.js";
+import { linhasValidadeRomaneio } from "./core/estoqueLotes.js";
 import { garantirLotes, adicionarBaixaLotes } from "./core/estoqueLotesFirebase.js";
 import { gerarPDFPedidoSolicitacao, obterListaPedido } from "../../gestao-escolar/src/js/pedidoPDF.js";
 import { auth, db, rtdb } from "./firebaseConfig.js";
@@ -1644,6 +1644,7 @@ async function prepararBaixaMateriaisManutencao(solicitacao) {
     };
 
     itens.push({
+      alimentacao: material.exigeValidade === true,
       lotes,
       materialId: itemSelecionado.materialId,
       nome: material.nome || itemSelecionado.nome,
@@ -1796,6 +1797,7 @@ async function prepararRomaneioSolicitacao({
     };
 
     itens.push({
+      alimentacao: material.exigeValidade === true,
       lotes,
       nome: material.nome || itemEntregue.nome || "Material",
       categoriaId: material.categoriaId || null,
@@ -1887,8 +1889,8 @@ function gerarPDFRomaneioSolicitacao(dados) {
       if (y + linhas.length * 7 > 235) novaPagina();
       doc.text(linhas, margem, y);
       y += linhas.length * 7 + 3;
-      for (const lote of item.lotes || []) {
-        const linhasLote = doc.splitTextToSize(`${lote.codigo || lote.loteId}: ${lote.quantidade} ${item.unidade || ""} - validade: ${formatarValidade(lote.validade)}`, larguraTexto);
+      for (const informacao of linhasValidadeRomaneio(item)) {
+        const linhasLote = doc.splitTextToSize(informacao, larguraTexto);
         for (const linha of linhasLote) {
           if (y + 7 > 235) novaPagina();
           doc.text(linha, margem, y);

@@ -64,3 +64,18 @@ export function loteDaEntradaParaExcluir(material, movimentacao) {
   }
   return loteId;
 }
+
+// Informações de entrega para o PDF, sem nomes de lotes nem saldos internos.
+export function linhasValidadeRomaneio(item, alimentacao = item.alimentacao === true) {
+  if (!alimentacao) return [];
+  const porValidade = new Map();
+  for (const lote of item.lotes || []) {
+    const quantidade = Number(lote.quantidade || 0);
+    if (!(quantidade > 0)) continue;
+    const validade = dataValida(lote.validade) ? lote.validade : "";
+    porValidade.set(validade, (porValidade.get(validade) || 0) + quantidade);
+  }
+  return [...porValidade].map(([validade, quantidade]) =>
+    `Validade: ${formatarValidade(validade)} - Quantidade entregue: ${quantidade} ${item.unidade || "Unidade"}`,
+  );
+}
