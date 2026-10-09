@@ -2094,7 +2094,7 @@ async function desligarServidor(servidor, botao) {
     console.error("Erro ao desligar servidor:", erro);
 
     mostrarNotificacao("Não foi possível concluir o desligamento.", "erro");
-
+  } finally {
     botao.disabled = false;
     botao.innerHTML = conteudoOriginal;
   }
