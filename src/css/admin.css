@@ -217,7 +217,7 @@
 }
 
 .usuario-admin-aviso {
-  color: var(--clr-warning);
+  color: var(--clr-attention);
   font-size: 0.72rem;
   line-height: 1.35;
 }

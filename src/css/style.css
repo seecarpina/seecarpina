@@ -99,7 +99,7 @@
 .tab-btn {
   padding: var(--padding-1);
   cursor: pointer;
-  background: var(--color-light);
+  background: var(--clr-light);
   border-radius: var(--border-radius-1);
   color: var(--clr-dark);
   font-weight: 600;
@@ -112,8 +112,8 @@
 
 .tab-btn.active {
   border: 1px solid var(--clr-primary);
-  background: var(--color-primary);
-  color: var(--clr-primary);
+  background: var(--clr-primary);
+  color: #fff;
 }
 
 .tab-content {
@@ -1525,7 +1525,7 @@ table th {
 
   width: 3px;
 
-  background: var(--color-primary);
+  background: var(--clr-primary);
 
   opacity: 0.15;
 }
@@ -1549,7 +1549,7 @@ table th {
 
   border-radius: 50%;
 
-  background: var(--color-primary);
+  background: var(--clr-primary);
 
   color: #fff;
 
@@ -1597,11 +1597,11 @@ table th {
 .timeline-titulo {
   font-weight: 700;
 
-  color: var(--color-dark);
+  color: var(--clr-dark);
 }
 
 .timeline-data {
-  color: var(--color-info-dark);
+  color: var(--clr-info-dark);
 
   font-size: 0.82rem;
 }
@@ -1617,7 +1617,7 @@ table th {
 .timeline-usuario {
   font-size: 0.82rem;
 
-  color: var(--color-info-dark);
+  color: var(--clr-info-dark);
 }
 
 .dados-grid {
@@ -1639,7 +1639,7 @@ table th {
 
   box-shadow: var(--box-shadow);
 
-  border-left: 5px solid var(--color-primary);
+  border-left: 5px solid var(--clr-primary);
 }
 
 .box-dados h3 {
@@ -1655,7 +1655,7 @@ table th {
 
   padding: 10px 0;
 
-  border-bottom: 1px solid var(--color-light);
+  border-bottom: 1px solid var(--clr-light);
 }
 
 .linha-dado:last-child {
@@ -1663,7 +1663,7 @@ table th {
 }
 
 .linha-dado span {
-  color: var(--color-info-dark);
+  color: var(--clr-info-dark);
 }
 
 .linha-dado strong {

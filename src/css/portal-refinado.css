@@ -234,3 +234,151 @@
 @media print {
   .aviso-rolagem-tabela { display: none; }
 }
+
+/* Componentes com a mesma linguagem visual em todos os módulos. */
+@media screen {
+  .portal-refinado main :is(.tab-btn, .admin-tab, .escolas-tab, .abas-eventos .aba, .filtro-tarefa) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 44px;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid var(--clr-primary);
+    border-radius: 0.7rem;
+    background: transparent;
+    color: var(--clr-dark);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: normal;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .portal-refinado main :is(.tab-btn, .admin-tab, .escolas-tab, .abas-eventos .aba, .filtro-tarefa):hover {
+    background: color-mix(in srgb, var(--clr-primary) 10%, transparent);
+  }
+
+  .portal-refinado main :is(.tab-btn, .admin-tab, .escolas-tab, .abas-eventos .aba, .filtro-tarefa):is(.active, .ativa, .ativo) {
+    background: var(--clr-primary);
+    color: #fff;
+  }
+
+  .portal-refinado main :is(
+    .campo-busca, .campo-busca-oficios, .campo-busca-servidores,
+    .campo-busca-contratos, .campo-busca-escolas, .campo-busca-usuarios,
+    .campo-busca-estoque
+  ) {
+    min-width: 0;
+    max-width: 100%;
+    min-height: 44px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 0.7rem;
+    background: var(--clr-white);
+  }
+
+  .portal-refinado main :is(
+    .campo-busca, .campo-busca-oficios, .campo-busca-servidores,
+    .campo-busca-contratos, .campo-busca-escolas, .campo-busca-usuarios,
+    .campo-busca-estoque
+  ):focus-within {
+    outline: 2px solid var(--clr-primary);
+    outline-offset: 2px;
+  }
+
+  .portal-refinado main :is(
+    .campo-busca, .campo-busca-oficios, .campo-busca-servidores,
+    .campo-busca-contratos, .campo-busca-escolas, .campo-busca-usuarios,
+    .campo-busca-estoque
+  ) input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    outline: none;
+  }
+
+  .portal-refinado main :is(
+    .card-evento, .item-tarefa, .card-usuario, .card-escola,
+    .card-turma-escola, .usuario-admin-card, .quadro-indicador,
+    .timeline-card, .box-dados, .card-aditivo
+  ) {
+    border-radius: var(--border-radius-3);
+  }
+
+  .portal-refinado main novo,
+  .portal-refinado #tabelaDfds thead th,
+  .portal-refinado main .modalidade-check input:checked + span {
+    color: #fff;
+  }
+
+  .portal-refinado .msg, .portal-refinado #btnTopo { color: #fff; }
+
+  .portal-refinado main .checkbox-tarefa { appearance: auto; }
+
+  .portal-refinado .quadro-indicadores {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  }
+
+  .portal-refinado .dados-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  }
+
+  .portal-refinado .lista-usuarios-admin {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  }
+}
+
+@media screen and (max-width: 1100px) {
+  .portal-refinado .coordenador-adicionar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .portal-refinado .coordenador-adicionar .btn { width: 100%; }
+}
+
+@media screen and (max-width: 650px) {
+  .portal-refinado main :is(.tab-btn, .admin-tab, .escolas-tab, .abas-eventos .aba, .filtro-tarefa) {
+    max-width: 100%;
+  }
+  .portal-refinado main :is(.btn-editar-evento, .btn-excluir-evento, .btn-excluir-tarefa) {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .portal-refinado .quadro-indicadores { grid-template-columns: minmax(0, 1fr); }
+  .portal-refinado #btnGerarQuadro { min-width: 0; }
+}
+
+/* A adaptação acompanha a largura da coluna, inclusive com o menu lateral aberto. */
+@media screen {
+  .portal-refinado .escolas-grid { container: escolas / inline-size; }
+  .portal-refinado .quadro-controle { container: quadro / inline-size; }
+  .portal-refinado .lista-escolas {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  }
+  .portal-refinado .lista-turmas-escola {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  }
+  .portal-refinado .lista-materiais {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  }
+  .portal-refinado .lista-usuarios {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+  }
+}
+
+@container escolas (max-width: 760px) {
+  .coordenador-adicionar { grid-template-columns: minmax(0, 1fr); }
+  .coordenador-adicionar .btn { width: 100%; }
+}
+
+@container quadro (max-width: 740px) {
+  .quadro-selecao { grid-template-columns: minmax(0, 1fr); }
+  .quadro-botoes-acao { flex-wrap: wrap; }
+  .quadro-botoes-acao .btn { flex: 1; }
+  .quadro-controle .label-invisivel { display: none; }
+  #btnGerarQuadro { min-width: 0; }
+}

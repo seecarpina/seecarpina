@@ -357,8 +357,8 @@
 .evento-atrasado {
   padding: 0.2rem 0.5rem;
   border-radius: 999px;
-  background: rgba(220, 20, 60, 0.12);
-  color: crimson;
+  background: color-mix(in srgb, var(--clr-danger) 12%, transparent);
+  color: var(--clr-danger);
   font-weight: 700;
   opacity: 1;
 }
@@ -391,7 +391,7 @@
 }
 
 .btn-excluir-evento {
-  color: crimson;
+  color: var(--clr-danger);
 }
 
 .btn-editar-evento:hover,
@@ -464,7 +464,7 @@
 ========================================= */
 
 .card-evento.atrasado {
-  background: rgba(220, 20, 60, 0.05);
+  background: color-mix(in srgb, var(--clr-danger) 5%, var(--clr-white));
 }
 
 /* =========================================
@@ -587,3 +587,10 @@
     width: 100%;
   }
 }
+
+/* Mesmas categorias, com tons legíveis sobre o fundo escuro. */
+.dark-theme-variables .evento-categoria.categoria-aniversario { color: #df9fec; }
+.dark-theme-variables .evento-categoria.categoria-resposta_mp { color: #b6a0ff; }
+.dark-theme-variables .evento-categoria.categoria-audiencias { color: #7cd7a5; }
+.dark-theme-variables .evento-categoria.categoria-alerta { color: var(--clr-danger); }
+.dark-theme-variables .evento-categoria.categoria-outros { color: var(--clr-info-dark); }
