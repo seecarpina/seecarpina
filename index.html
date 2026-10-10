@@ -214,6 +214,41 @@
 
         <div id="datasComemorativas"></div>
 
+        <div id="dashboardGraficos" class="dashboard-graficos" hidden>
+          <div class="graficos">
+            <section id="resumoOficios" class="card dashboard-grafico-card glass" hidden aria-labelledby="tituloGraficoOficios">
+              <header class="dashboard-grafico-cabecalho">
+                <span class="material-symbols-outlined" aria-hidden="true">outgoing_mail</span>
+                <div>
+                  <h2 id="tituloGraficoOficios">Ofícios enviados</h2>
+                  <p>Distribuição mensal no ano selecionado.</p>
+                </div>
+              </header>
+              <div id="totalOficios" class="dashboard-grafico-total">
+                <strong>—</strong><span>Ofícios no ano</span>
+              </div>
+              <div class="dashboard-grafico-area">
+                <canvas id="graficoOficiosMes" role="img" aria-label="Quantidade de ofícios enviados por mês"></canvas>
+              </div>
+            </section>
+            <section id="resumoContratos" class="card dashboard-grafico-card glass" hidden aria-labelledby="tituloGraficoContratos">
+              <header class="dashboard-grafico-cabecalho">
+                <span class="material-symbols-outlined" aria-hidden="true">contract</span>
+                <div>
+                  <h2 id="tituloGraficoContratos">Contratos e ARPs</h2>
+                  <p>Distribuição dos registros por tipo.</p>
+                </div>
+              </header>
+              <div id="totalContratos" class="dashboard-grafico-total">
+                <strong>—</strong><span>Registros no gráfico</span>
+              </div>
+              <div class="dashboard-grafico-area">
+                <canvas id="graficoContratos" role="img" aria-label="Distribuição de contratos por CNPJ e ARPs"></canvas>
+              </div>
+            </section>
+          </div>
+        </div>
+
         <section
           id="dashboardAtendimento"
           class="dashboard-operacional"
@@ -265,41 +300,6 @@
             <div id="dashboardPedidosAtencao"></div>
           </div>
         </section>
-
-        <div id="dashboardGraficos" class="dashboard-graficos" hidden>
-          <div class="graficos">
-            <section id="resumoOficios" class="card dashboard-grafico-card glass" hidden aria-labelledby="tituloGraficoOficios">
-              <header class="dashboard-grafico-cabecalho">
-                <span class="material-symbols-outlined" aria-hidden="true">outgoing_mail</span>
-                <div>
-                  <h2 id="tituloGraficoOficios">Ofícios enviados</h2>
-                  <p>Distribuição mensal no ano selecionado.</p>
-                </div>
-              </header>
-              <div id="totalOficios" class="dashboard-grafico-total">
-                <strong>—</strong><span>Ofícios no ano</span>
-              </div>
-              <div class="dashboard-grafico-area">
-                <canvas id="graficoOficiosMes" role="img" aria-label="Quantidade de ofícios enviados por mês"></canvas>
-              </div>
-            </section>
-            <section id="resumoContratos" class="card dashboard-grafico-card glass" hidden aria-labelledby="tituloGraficoContratos">
-              <header class="dashboard-grafico-cabecalho">
-                <span class="material-symbols-outlined" aria-hidden="true">contract</span>
-                <div>
-                  <h2 id="tituloGraficoContratos">Contratos e ARPs</h2>
-                  <p>Distribuição dos registros por tipo.</p>
-                </div>
-              </header>
-              <div id="totalContratos" class="dashboard-grafico-total">
-                <strong>—</strong><span>Registros no gráfico</span>
-              </div>
-              <div class="dashboard-grafico-area">
-                <canvas id="graficoContratos" role="img" aria-label="Distribuição de contratos por CNPJ e ARPs"></canvas>
-              </div>
-            </section>
-          </div>
-        </div>
 
         <div class="recent_order" style="display: none">
           <h1>Ordens de Fornecimento Recentes</h1>
