@@ -269,7 +269,7 @@
 }
 
 .material-barra-preenchida.estoque-medio {
-  background: darkorange;
+  background: var(--clr-attention);
 }
 
 .material-barra-preenchida.estoque-baixo {
@@ -371,8 +371,8 @@
 }
 
 .movimentacao-icone.saida {
-  background: rgba(255, 159, 10, 0.12);
-  color: var(--clr-danger);
+  background: color-mix(in srgb, var(--clr-accent) 12%, transparent);
+  color: var(--clr-accent);
 }
 
 .movimentacao-icone .material-symbols-outlined {

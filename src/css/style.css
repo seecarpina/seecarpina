@@ -7,7 +7,10 @@
   --clr-danger: #ff7782;
   --clr-success: #41f1b6; */
   --clr-primary: #0a84ff;
-  --clr-danger: #ff9f0a;
+  /* Destaques visuais e alertas têm funções distintas. */
+  --clr-accent: #db4d87;
+  --clr-danger: #c93838;
+  --clr-attention: #b77909;
   --clr-success: #34c759;
   --clr-white: #fff;
   --clr-info-dark: #7d8da1;
@@ -37,21 +40,21 @@
 
 .paleta_1 {
   --clr-primary: #1abc9c;
-  --clr-danger: #e74c3c;
+  --clr-accent: #e74c3c;
   --clr-success: #2ecc71;
   --clr-warnig: #f39c12;
   --clr-primary-variant: #117864;
 }
 .paleta_2 {
   --clr-primary: #fd79a8;
-  --clr-danger: #e55039;
+  --clr-accent: #e55039;
   --clr-success: #6ab04c;
   --clr-warnig: #c44569;
   --clr-primary-variant: #f6b93b;
 }
 .paleta_3 {
   --clr-primary: #e74c3c;
-  --clr-danger: #c0392b;
+  --clr-accent: #c0392b;
   --clr-success: #27ae60;
   --clr-warnig: #f39c12;
   --clr-primary-variant: #922b21;
@@ -59,7 +62,7 @@
 .paleta_4 {
   --clr-primary: #8a6662;
   --clr-success: #c98d7b;
-  --clr-danger: #deb297;
+  --clr-accent: #deb297;
   --clr-warnig: #e6d0b1;
   --clr-primary-variant: #a9baae;
 }
@@ -200,7 +203,7 @@
 }
 
 .modal-content .opcoes a:hover {
-  background: var(--clr-danger);
+  background: var(--clr-accent);
 }
 
 .fechar {
@@ -209,7 +212,7 @@
   right: 15px;
   font-size: 22px;
   cursor: pointer;
-  color: var(--clr-danger);
+  color: var(--clr-accent);
 }
 
 details {
@@ -305,6 +308,8 @@ summary {
 
 /* dark theme */
 .dark-theme-variables {
+  --clr-danger: #ff6961;
+  --clr-attention: #f5bd58;
   --clr-color-background: #181a1e;
   --clr-white: #202528;
   --clr-light: rgba(0, 0, 0, 0.4);
@@ -316,6 +321,10 @@ summary {
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
   --glass-highlight: rgba(255, 255, 255, 0.04);
+}
+/* A cor padrão de destaque ganha contraste no modo escuro. */
+.dark-theme-variables:not(.paleta_1, .paleta_2, .paleta_3, .paleta_4) {
+  --clr-accent: #f080ac;
 }
 ::selection {
   background-color: var(--clr-primary);
@@ -813,7 +822,7 @@ main .recent_order a {
 }
 
 #tabelaOficios a:hover {
-  color: var(--clr-danger);
+  color: var(--clr-accent);
 }
 
 .right {
@@ -940,7 +949,7 @@ main .recent_order a {
   color: var(--clr-primary);
 }
 .links-uteis details a:hover {
-  color: var(--clr-danger);
+  color: var(--clr-accent);
 }
 .links-uteis ul {
   list-style: none;
@@ -2037,7 +2046,7 @@ select {
   cursor: pointer;
 }
 #chat-badge {
-  background-color: var(--clr-danger);
+  background-color: var(--clr-accent);
   color: #fff;
   border-radius: 999px;
   padding: 2px 7px;

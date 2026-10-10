@@ -122,7 +122,7 @@ function desenharGraficoContratos(cnpj1, cnpj2, atas) {
           borderColor: cssVar("--clr-white"),
           backgroundColor: [
             cssVar("--clr-success"),
-            cssVar("--clr-danger"),
+            cssVar("--clr-accent"),
             cssVar("--clr-primary"),
           ],
         },
@@ -314,7 +314,7 @@ function atualizarTemaGraficos() {
     Object.assign(grafico.options.plugins.tooltip, coresTooltip());
     const dataset = grafico.data.datasets[0];
     if (grafico === graficoContratos) {
-      dataset.backgroundColor = [cssVar("--clr-success"), cssVar("--clr-danger"), cssVar("--clr-primary")];
+      dataset.backgroundColor = [cssVar("--clr-success"), cssVar("--clr-accent"), cssVar("--clr-primary")];
       dataset.borderColor = cssVar("--clr-white");
       grafico.options.plugins.legend.labels.color = cssVar("--clr-dark-variant");
     } else {
