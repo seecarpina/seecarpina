@@ -88,9 +88,9 @@
 
 .acordeao-dados-complementares {
   overflow: hidden;
-  border: 1px solid var(--clr-light);
+  border: 0;
   border-radius: 0.85rem;
-  background: rgba(255, 255, 255, 0.35);
+  background: transparent;
 }
 
 .acordeao-dados-complementares > summary {
@@ -285,9 +285,9 @@
 .painel-pendencias-servidores {
   margin-bottom: 1rem;
   padding: 1rem;
-  border: 1px solid var(--clr-light);
+  border: 0;
   border-radius: 0.9rem;
-  background: rgba(255, 255, 255, 0.35);
+  background: transparent;
 }
 
 .painel-pendencias-titulo > div {
