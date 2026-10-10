@@ -1,4 +1,5 @@
-import { rtdb } from "./firebaseConfig.js";
+import { auth, rtdb } from "./firebaseConfig.js";
+import { primeiroEUltimoNome } from "./core/responsavelOficio.js";
 import { exportarTabelaExcel } from "./core/exportarExcel.js";
 import {
   ref,
@@ -2050,7 +2051,7 @@ async function desligarServidor(servidor, botao) {
 
     const dataISO = agora.toLocaleDateString("sv-SE");
 
-    const responsavel = window.dadosUsuario?.nome?.split(" ")[0] || "Usuário";
+    const responsavel = primeiroEUltimoNome(window.dadosUsuario?.nome);
 
     const assunto = `SOLICITA DESLIGAMENTO DE ${servidor.nome}`
       .trim()
@@ -2075,6 +2076,7 @@ async function desligarServidor(servidor, botao) {
       data: dataISO,
       destinoId: "29",
       responsavel,
+      responsavelUid: auth.currentUser?.uid || null,
       criadoEm: agora.toISOString(),
       origem: "DESLIGAMENTO_SERVIDOR",
       servidorId: servidor._key,

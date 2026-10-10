@@ -2,18 +2,21 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
+import { primeiroEUltimoNome } from "../src/js/core/responsavelOficio.js";
 
 const fonte = readFileSync(new URL("../src/js/servidores.js", import.meta.url), "utf8");
 const inicio = fonte.indexOf("async function desligarServidor(");
 const fim = fonte.indexOf("function resetarFormulario(", inicio);
 
-function preparar({ confirmar = true, falhar = "" } = {}) {
+function preparar({ confirmar = true, falhar = "", nome = "Usuário Teste" } = {}) {
   const botao = { disabled: false, innerHTML: "<span>Desligar servidor</span>" };
   const gravacoes = [];
   const avisos = [];
   const contexto = {
-    window: { mostrarConfirmacao: async () => confirmar, dadosUsuario: { nome: "Usuário Teste" } },
+    window: { mostrarConfirmacao: async () => confirmar, dadosUsuario: { nome } },
     rtdb: {},
+    auth: { currentUser: { uid: "autor-desligamento" } },
+    primeiroEUltimoNome,
     ref: (_, caminho) => caminho || "/",
     get: async () => {
       assert.equal(botao.disabled, true);
@@ -70,4 +73,20 @@ test("cancelar a confirmação não altera o botão nem grava o desligamento", a
   assert.equal(botao.disabled, false);
   assert.equal(botao.innerHTML, original);
   assert.equal(gravacoes.length, 0);
+});
+
+
+test("ofício automático de desligamento usa primeiro e último nome e identifica o autor", async () => {
+  for (const [nome, esperado] of [
+    ["  Luiz   Carlos da Silva  ", "Luiz Silva"],
+    ["Maria de Souza", "Maria Souza"],
+    ["Adriana", "Adriana"],
+    [null, "Usuário"],
+  ]) {
+    const { desligar, gravacoes } = preparar({ nome });
+    await desligar({ _key: "servidor", nome: "Servidor", situacao: "Ativo" });
+    const oficio = Object.values(gravacoes[0]).find(v => v?.origem === "DESLIGAMENTO_SERVIDOR");
+    assert.equal(oficio.responsavel, esperado);
+    assert.equal(oficio.responsavelUid, "autor-desligamento");
+  }
 });
