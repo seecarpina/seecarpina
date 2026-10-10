@@ -27,7 +27,9 @@ function iniciarDashboard() {
   elementos.get("graficoContratos").closest = () => elementos.get("resumoContratos");
   const assinaturas = new Map();
   const graficos = [];
+  const concluidos = [];
   const contexto = {
+    concluirCarregamento: nome => concluidos.push(nome),
     rtdb: {}, ref: (_, caminho) => caminho,
     onValue: (caminho, receber, falhar) => assinaturas.set(caminho, { receber, falhar }),
     document: {
@@ -54,7 +56,7 @@ function iniciarDashboard() {
     .replace(/import[\s\S]*?from\s+"[^"]+";/g, "");
   vm.runInNewContext(codigo, contexto);
   const enviar = (caminho, dados) => assinaturas.get(caminho).receber({ exists: () => dados !== null, val: () => dados });
-  return { elementos, assinaturas, graficos, enviar, trocarTema: cor => { corTema = cor; observarTema(); } };
+  return { elementos, assinaturas, graficos, enviar, concluidos, trocarTema: cor => { corTema = cor; observarTema(); } };
 }
 
 test("gráficos são revelados independentemente após receber dados, inclusive dados vazios", () => {
@@ -130,4 +132,14 @@ test("troca de tema atualiza as cores sem refazer gráficos, consultar dados ou 
       assert.equal(g.configuracao.options.plugins.legend.labels.color, "#abcdef");
     }
   }
+});
+
+
+test("gráficos sinalizam prontidão após desenhar dados e também em falhas da consulta", () => {
+  const d = iniciarDashboard();
+  assert.deepEqual(d.concluidos, []);
+  d.enviar("oficios", null);
+  assert.deepEqual(d.concluidos, ["oficios"]);
+  d.assinaturas.get("contratos/fiscais").falhar();
+  assert.deepEqual(d.concluidos, ["oficios", "contratos"]);
 });

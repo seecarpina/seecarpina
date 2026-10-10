@@ -1,3 +1,4 @@
+import { concluirCarregamento } from "./core/carregamentoPagina.js";
 import { rtdb } from "./firebaseConfig.js";
 import {
   ref,
@@ -23,10 +24,16 @@ onValue(eventosRef, (snap) => {
     });
   }
 
+  window.eventosCalendario = eventosPorData;
+
   // 🔔 avisa TODAS as páginas
   window.dispatchEvent(
     new CustomEvent("eventosAtualizados", {
       detail: eventosPorData,
     }),
   );
+  concluirCarregamento("calendario-eventos");
+}, erro => {
+  console.error("Erro ao carregar eventos do calendário:", erro);
+  concluirCarregamento("calendario-eventos");
 });

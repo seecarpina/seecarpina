@@ -28,11 +28,11 @@
     />
     <script defer src="./src/js/instalar-app.js"></script>
     <link rel="stylesheet" href="./src/css/portal-refinado.css" />
-      <script defer src="./src/js/componentes/carregamento.js"></script>
+    <script defer src="./src/js/componentes/carregamento.js"></script>
   </head>
   <body class="portal-refinado">
     <button id="btnTopo">↑</button>
-    <div class="loading">
+    <div class="loading" data-aguardar="usuario lateral links frase datas calendario-datas calendario-eventos contratos oficios atendimento">
       <see-spinner mensagem="Carregando o sistema" tamanho="grande"></see-spinner>
     </div>
     <div class="container">
@@ -332,7 +332,8 @@
     <script type="module" src="./src/js/dashboard.js"></script>
     <script type="module" src="./src/js/modelosDocumentos.js"></script>
     <script type="module" src="./src/js/dashboardAtendimento.js"></script>
-    <script>
+    <script type="module">
+      import { concluirCarregamento } from "./src/js/core/carregamentoPagina.js";
       // ============================================================
       // DATAS COMEMORATIVAS
       // ============================================================
@@ -459,6 +460,8 @@
               </div>
             </div>
           `;
+        } finally {
+          concluirCarregamento("datas");
         }
       }
 
