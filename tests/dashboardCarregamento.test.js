@@ -4,6 +4,8 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
 function iniciarDashboard() {
+  let corTema = "#123456";
+  let observarTema;
   const elementos = new Map();
   function elemento(id) {
     const el = {
@@ -12,7 +14,7 @@ function iniciarDashboard() {
         if (filho.className === "dashboard-grafico-erro") this.erro = filho;
         else if (!this.value) this.value = filho.value;
       },
-      querySelector() { return this.erro; },
+      querySelector(seletor) { return seletor === "strong" ? elementos.get("totalContratosStrong") : this.erro; },
       setAttribute() {},
       addEventListener(tipo, fn) { this[tipo] = fn; },
       remove() { for (const pai of elementos.values()) if (pai.erro === this) pai.erro = null; },
@@ -20,7 +22,7 @@ function iniciarDashboard() {
     elementos.set(id, el);
     return el;
   }
-  for (const id of ["dashboardGraficos", "resumoOficios", "resumoContratos", "graficoOficiosMes", "graficoContratos", "totalOficios", "filtroAno", "totalStrong"]) elemento(id);
+  for (const id of ["dashboardGraficos", "resumoOficios", "resumoContratos", "graficoOficiosMes", "graficoContratos", "totalOficios", "filtroAno", "totalStrong", "totalContratos", "totalContratosStrong"]) elemento(id);
   elementos.get("graficoOficiosMes").closest = () => elementos.get("resumoOficios");
   elementos.get("graficoContratos").closest = () => elementos.get("resumoContratos");
   const assinaturas = new Map();
@@ -32,12 +34,18 @@ function iniciarDashboard() {
       body: {}, getElementById: (id) => elementos.get(id),
       querySelector: () => elementos.get("totalStrong"), createElement: () => elemento(Symbol()),
     },
-    getComputedStyle: () => ({ getPropertyValue: () => "#123456" }),
+    getComputedStyle: () => ({ getPropertyValue: () => corTema }),
+    MutationObserver: function(callback) { observarTema = callback; this.observe = () => {}; },
     Chart: function(canvas, configuracao) {
       assert.equal(canvas.hidden, false);
       assert.equal(canvas.closest().hidden, false);
       assert.equal(elementos.get("dashboardGraficos").hidden, false);
       graficos.push({ canvas, configuracao });
+      this.options = configuracao.options;
+      this.data = configuracao.data;
+      this.atualizacoes = 0;
+      this.update = () => { this.atualizacoes++; };
+      graficos.at(-1).instancia = this;
       this.destroy = () => {};
     },
     console: { error() {} },
@@ -46,7 +54,7 @@ function iniciarDashboard() {
     .replace(/import[\s\S]*?from\s+"[^"]+";/g, "");
   vm.runInNewContext(codigo, contexto);
   const enviar = (caminho, dados) => assinaturas.get(caminho).receber({ exists: () => dados !== null, val: () => dados });
-  return { elementos, assinaturas, graficos, enviar };
+  return { elementos, assinaturas, graficos, enviar, trocarTema: cor => { corTema = cor; observarTema(); } };
 }
 
 test("gráficos são revelados independentemente após receber dados, inclusive dados vazios", () => {
@@ -82,4 +90,44 @@ test("falha apresenta mensagem e recuperação substitui erro pelo gráfico", ()
   d.enviar("oficios", null);
   assert.equal(d.elementos.get("resumoOficios").erro, null);
   assert.equal(d.elementos.get("graficoOficiosMes").hidden, false);
+});
+
+
+test("cards preservam totais e usam gráficos com altura controlada", () => {
+  const d = iniciarDashboard();
+  d.enviar("contratos/fiscais", {
+    a: { tipoContrato: "CONTRATOS CNPJ 30.784.957/0001-37" },
+    b: { tipoContrato: "CONTRATOS CNPJ 59.593.430/0001-07" },
+    c: { tipoContrato: "ARPS" },
+  });
+  assert.equal(d.elementos.get("totalContratosStrong").textContent, 3);
+  assert.equal(d.elementos.get("totalContratos").hidden, false);
+  assert.equal(d.graficos[0].configuracao.type, "doughnut");
+  assert.equal(d.graficos[0].configuracao.options.maintainAspectRatio, false);
+  d.assinaturas.get("contratos/fiscais").falhar();
+  assert.equal(d.elementos.get("totalContratos").hidden, true);
+  d.enviar("contratos/fiscais", null);
+  assert.equal(d.elementos.get("totalContratosStrong").textContent, 0);
+  assert.equal(d.elementos.get("totalContratos").hidden, false);
+});
+
+test("troca de tema atualiza as cores sem refazer gráficos, consultar dados ou alterar valores", () => {
+  const d = iniciarDashboard();
+  d.enviar("contratos/fiscais", { a: { tipoContrato: "ARPS" } });
+  d.enviar("oficios", { "2026": { a: { data: "2026-02-10" } } });
+  const dadosAntes = JSON.stringify(d.graficos.map(g => g.configuracao.data.datasets[0].data));
+  d.trocarTema("#abcdef");
+  assert.equal(d.graficos.length, 2);
+  assert.equal(d.assinaturas.size, 2);
+  assert.equal(JSON.stringify(d.graficos.map(g => g.configuracao.data.datasets[0].data)), dadosAntes);
+  for (const g of d.graficos) {
+    assert.equal(g.instancia.atualizacoes, 1);
+    assert.equal(g.configuracao.options.plugins.tooltip.bodyColor, "#abcdef");
+    if (g.configuracao.type === "bar") {
+      assert.equal(g.configuracao.options.scales.y.ticks.color, "#abcdef");
+      assert.equal(g.configuracao.options.scales.y.grid.color, "#abcdef");
+    } else {
+      assert.equal(g.configuracao.options.plugins.legend.labels.color, "#abcdef");
+    }
+  }
 });

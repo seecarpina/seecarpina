@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="./src/css/dashboard-atendimento.css" />
     <link rel="stylesheet" href="./src/css/modelos-documentos.css" />
     <link rel="stylesheet" href="./src/css/home-acessos.css" />
+    <link rel="stylesheet" href="./src/css/dashboard-graficos.css" />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
@@ -55,7 +56,6 @@
         <div class="line-dash">
           <h2 id="boasVindas"></h2>
           <!-- <input type="date" class="date" id="dataHoje" /> -->
-          <select id="filtroAno"></select>
         </div>
 
         <div class="line-dash frase-container">
@@ -213,6 +213,45 @@
 
         <div id="datasComemorativas"></div>
 
+        <div id="dashboardGraficos" class="dashboard-graficos" hidden>
+          <div class="graficos">
+            <section id="resumoOficios" class="card dashboard-grafico-card glass" hidden aria-labelledby="tituloGraficoOficios">
+              <header class="dashboard-grafico-cabecalho">
+                <span class="material-symbols-outlined" aria-hidden="true">outgoing_mail</span>
+                <div>
+                  <h2 id="tituloGraficoOficios">Ofícios enviados</h2>
+                  <p>Distribuição mensal no ano selecionado.</p>
+                </div>
+                <label class="dashboard-grafico-filtro" for="filtroAno">
+                  <span>Ano</span>
+                  <select id="filtroAno" aria-label="Ano dos ofícios enviados"></select>
+                </label>
+              </header>
+              <div id="totalOficios" class="dashboard-grafico-total">
+                <strong>—</strong><span>Ofícios no ano</span>
+              </div>
+              <div class="dashboard-grafico-area">
+                <canvas id="graficoOficiosMes" role="img" aria-label="Quantidade de ofícios enviados por mês"></canvas>
+              </div>
+            </section>
+            <section id="resumoContratos" class="card dashboard-grafico-card glass" hidden aria-labelledby="tituloGraficoContratos">
+              <header class="dashboard-grafico-cabecalho">
+                <span class="material-symbols-outlined" aria-hidden="true">contract</span>
+                <div>
+                  <h2 id="tituloGraficoContratos">Contratos e ARPs</h2>
+                  <p>Distribuição dos registros por tipo.</p>
+                </div>
+              </header>
+              <div id="totalContratos" class="dashboard-grafico-total">
+                <strong>—</strong><span>Registros no gráfico</span>
+              </div>
+              <div class="dashboard-grafico-area">
+                <canvas id="graficoContratos" role="img" aria-label="Distribuição de contratos por CNPJ e ARPs"></canvas>
+              </div>
+            </section>
+          </div>
+        </div>
+
         <section
           id="dashboardAtendimento"
           class="dashboard-operacional"
@@ -264,26 +303,6 @@
             <div id="dashboardPedidosAtencao"></div>
           </div>
         </section>
-
-        <div id="dashboardGraficos" class="dashboard-graficos glass" hidden>
-          <div class="graficos">
-            <div id="resumoOficios" class="card" hidden>
-              <h2>Ofícios enviados</h2>
-
-              <div id="totalOficios" class="total-oficios">
-                Total geral de ofícios: <strong></strong>
-                <br />
-              </div>
-
-              <canvas id="graficoOficiosMes" height="220"></canvas>
-            </div>
-
-            <div id="resumoContratos" class="card" hidden>
-              <h2>Total de contratos e ARPs</h2>
-              <canvas id="graficoContratos" height="200"></canvas>
-            </div>
-          </div>
-        </div>
 
         <div class="recent_order" style="display: none">
           <h1>Ordens de Fornecimento Recentes</h1>
