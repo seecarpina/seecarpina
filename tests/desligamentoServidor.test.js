@@ -2,9 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
-import { primeiroEUltimoNome } from "../src/js/core/responsavelOficio.js";
+import { primeiroEUltimoNome } from "../secretaria/src/js/core/responsavelOficio.js";
 
-const fonte = readFileSync(new URL("../src/js/servidores.js", import.meta.url), "utf8");
+const fonte = readFileSync(new URL("../secretaria/src/js/servidores.js", import.meta.url), "utf8");
 const inicio = fonte.indexOf("async function desligarServidor(");
 const fim = fonte.indexOf("function resetarFormulario(", inicio);
 

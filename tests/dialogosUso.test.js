@@ -45,7 +45,7 @@ function preparar() {
   dialogo.contains = el => el === dialogo || campos().includes(el);
   const origem = criar("button"); origem.focus();
   const contexto = { document:doc, window:{}, setTimeout: fn => { timers.set(++numero,fn); return numero; }, clearTimeout: id => timers.delete(id) };
-  vm.runInNewContext(readFileSync(new URL("../src/js/dialogos.js",import.meta.url),"utf8"),contexto);
+  vm.runInNewContext(readFileSync(new URL("../secretaria/src/js/dialogos.js",import.meta.url),"utf8"),contexto);
   function tecla(key, extra = {}) {
     const event = {key, shiftKey:false, ctrlKey:false, prevented:false, preventDefault(){this.prevented=true;},stopPropagation(){},...extra};
     [...doc.listeners].forEach(fn => fn(event));

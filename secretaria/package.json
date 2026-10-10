@@ -1,0 +1,12 @@
+{
+  "name": "@see/secretaria",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node ../packages/compartilhado/preparar.mjs"
+  },
+  "dependencies": {
+    "@see/compartilhado": "1.0.0"
+  }
+}

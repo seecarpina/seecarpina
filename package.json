@@ -5,9 +5,17 @@
   "type": "module",
   "scripts": {
     "test": "node --test",
-    "check": "npm test"
+    "check": "npm test",
+    "build": "npm run build --workspaces --if-present",
+    "pretest": "npm run build"
   },
   "engines": {
     "node": ">=20"
-  }
+  },
+  "workspaces": [
+    "secretaria",
+    "gestao-escolar",
+    "packages/*"
+  ],
+  "packageManager": "npm@10.8.2"
 }

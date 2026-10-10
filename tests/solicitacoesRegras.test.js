@@ -6,7 +6,7 @@ import {
   obterTransicoesPermitidas,
   validarEntregaMateriais,
   validarObservacaoAtualizacao,
-} from "../src/js/core/solicitacoesRegras.js";
+} from "../secretaria/src/js/core/solicitacoesRegras.js";
 
 const itens = [
   { materialId: "papel", nome: "Papel", unidade: "Resma", quantidadeSolicitada: 10 },

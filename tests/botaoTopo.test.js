@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
-const fonte = readFileSync(new URL("../src/js/scripts.js", import.meta.url), "utf8");
+const fonte = readFileSync(new URL("../secretaria/src/js/scripts.js", import.meta.url), "utf8");
 const inicio = fonte.indexOf('const btnTopo = document.getElementById("btnTopo");');
 const fim = fonte.indexOf('const inputData =', inicio);
 

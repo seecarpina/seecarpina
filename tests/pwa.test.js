@@ -4,7 +4,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
-for (const pasta of [".", "gestao-escolar"]) {
+for (const pasta of ["secretaria", "gestao-escolar"]) {
   test(`instalação em ${pasta} resolve os recursos na raiz de cada publicação`, () => {
     const base = resolve(pasta);
     const manifesto = JSON.parse(readFileSync(resolve(base, "manifest.webmanifest"), "utf8"));

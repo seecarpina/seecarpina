@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { categoriaExigeValidade, dataValida, formatarValidade, inicializarLotes, selecionarLotesSaida, lotesParaDevolucao, loteDaEntradaParaExcluir } from "../src/js/core/estoqueLotes.js";
+import { categoriaExigeValidade, dataValida, formatarValidade, inicializarLotes, selecionarLotesSaida, lotesParaDevolucao, loteDaEntradaParaExcluir } from "../secretaria/src/js/core/estoqueLotes.js";
 
 const lote = (saldo, validade, entradaEm = "2026-01-01") => ({ codigo: validade, saldo, quantidadeInicial: saldo, validade, entradaEm });
 

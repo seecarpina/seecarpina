@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { validarEntrada, ocultarCPFs, restaurarCPFs, mensagensRevisao } from '../server/revisao.js';
-import handler from '../api/revisar-texto.js';
+import { validarEntrada, ocultarCPFs, restaurarCPFs, mensagensRevisao } from '../secretaria/server/revisao.js';
+import handler from '../secretaria/api/revisar-texto.js';
 
 test('valida tamanho e formato e preserva o texto', () => {
   assert.throws(() => validarEntrada({texto: 'curto', tipo: 'oficio'}), /20/);

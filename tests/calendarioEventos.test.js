@@ -2,12 +2,12 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
-import { categoriaCalendario, categoriasDoDia, dataLocalCalendario, datasComemorativasDoDia } from "../src/js/core/calendarioEventos.js";
+import { categoriaCalendario, categoriasDoDia, dataLocalCalendario, datasComemorativasDoDia } from "../secretaria/src/js/core/calendarioEventos.js";
 
 test("carregamento global preserva categoria do evento enviada ao calendário", () => {
   let receber;
   let publicado;
-  const codigo = readFileSync(new URL("../src/js/eventosStore.js", import.meta.url), "utf8")
+  const codigo = readFileSync(new URL("../secretaria/src/js/eventosStore.js", import.meta.url), "utf8")
     .replace(/import[\s\S]*?from\s+"[^"]+";/g, "");
   vm.runInNewContext(codigo, {
     rtdb: {}, ref: (_, caminho) => caminho,

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
-import { normalizarCaminhoPagina, normalizarLinkInterno } from "../src/js/core/rotas.js";
+import { normalizarCaminhoPagina, normalizarLinkInterno } from "../secretaria/src/js/core/rotas.js";
 
 const origem = "https://www.seecarpina.online";
 
@@ -24,7 +24,7 @@ function ativar(urlAtual, hrefs) {
     active: false, getAttribute: () => href,
     classList: { remove() { links.find(l => l.classList === this).active = false; }, add() { links.find(l => l.classList === this).active = true; } },
   }));
-  const codigo = readFileSync(new URL("../src/js/include.js", import.meta.url), "utf8");
+  const codigo = readFileSync(new URL("../secretaria/src/js/include.js", import.meta.url), "utf8");
   const inicio = codigo.indexOf("export function ativarLinkAtual()");
   const fim = codigo.indexOf('import { initChat }', inicio);
   const contexto = { URL, normalizarCaminhoPagina, window: { location: new URL(urlAtual) }, document: { querySelectorAll: () => links } };
@@ -46,11 +46,11 @@ test("home e páginas de subdiretório identificam o item correto no menu", () =
 });
 
 test("as duas publicações usam URLs limpas e templates continuam sendo arquivos HTML", () => {
-  for (const caminho of ["../vercel.json", "../gestao-escolar/vercel.json"]) {
+  for (const caminho of ["../secretaria/vercel.json", "../gestao-escolar/vercel.json"]) {
     const config = JSON.parse(readFileSync(new URL(caminho, import.meta.url), "utf8"));
     assert.equal(config.cleanUrls, true);
     assert.equal(config.rewrites, undefined);
   }
-  const codigo = readFileSync(new URL("../src/js/include.js", import.meta.url), "utf8");
+  const codigo = readFileSync(new URL("../secretaria/src/js/include.js", import.meta.url), "utf8");
   assert.match(codigo, /fetch\("\/src\/template\/sidebar\.html"\)/);
 });

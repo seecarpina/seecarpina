@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import vm from "node:vm";
 
-const codigo = readFileSync(new URL("../src/js/componentes/carregamento.js", import.meta.url), "utf8");
+const codigo = readFileSync(new URL("../secretaria/src/js/componentes/carregamento.js", import.meta.url), "utf8");
 
 function iniciar({ pronto = false, reduzir = false } = {}) {
   const registro = new Map();
@@ -59,7 +59,7 @@ test("inicialização tardia não deixa tela presa e movimento reduzido evita at
 });
 
 test("todas as páginas do portal que usam spinner carregam o componente compartilhado", () => {
-  const raiz = new URL("../", import.meta.url);
+  const raiz = new URL("../secretaria/", import.meta.url);
   const paginas = readdirSync(raiz).filter(nome => nome.endsWith(".html"));
   let quantidade = 0;
   for (const nome of paginas) {

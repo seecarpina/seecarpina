@@ -6,7 +6,7 @@ import {
   formatarUnidade,
   obterQuantidadeNumerica,
   prepararItensSaidaEstoque,
-} from "../src/js/core/estoqueCalculos.js";
+} from "../secretaria/src/js/core/estoqueCalculos.js";
 
 test("converte quantidade formatada em pt-BR", () => {
   assert.equal(obterQuantidadeNumerica("1.250"), 1250);

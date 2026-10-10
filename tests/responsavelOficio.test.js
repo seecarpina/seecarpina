@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { primeiroEUltimoNome, podeEditarOficio } from "../src/js/core/responsavelOficio.js";
+import { primeiroEUltimoNome, podeEditarOficio } from "../secretaria/src/js/core/responsavelOficio.js";
 
 test("responsável usa primeiro e último nome e normaliza espaços", () => {
   assert.equal(primeiroEUltimoNome("  Luiz   Carlos da Silva  "), "Luiz Silva");

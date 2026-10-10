@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { linhasValidadeRomaneio } from "../src/js/core/estoqueLotes.js";
+import { linhasValidadeRomaneio } from "../secretaria/src/js/core/estoqueLotes.js";
 
 const lote = { loteId: "legado", codigo: "Estoque anterior", quantidade: 2, saldo: 900, quantidadeInicial: 1000, validade: "2027-03-15" };
 
