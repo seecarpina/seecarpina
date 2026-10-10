@@ -924,7 +924,7 @@ body.drawer-aberto {
   padding: 0;
   border: none;
   border-radius: 50%;
-  color: var(--text-color);
+  color: var(--clr-dark);
   background: transparent;
   cursor: pointer;
   transition:
@@ -934,13 +934,13 @@ body.drawer-aberto {
 }
 
 .btn-editar-material:hover {
-  color: var(--primary-color);
-  background: rgba(64, 81, 181, 0.1);
+  color: var(--clr-primary);
+  background: color-mix(in srgb, var(--clr-primary) 10%, transparent);
   transform: scale(1.08);
 }
 
 .btn-editar-material:focus-visible {
-  outline: 2px solid var(--primary-color);
+  outline: 2px solid var(--clr-primary);
   outline-offset: 2px;
 }
 

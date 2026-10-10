@@ -1399,7 +1399,7 @@ body.drawer-solicitacao-aberto {
   padding: 1rem;
   border: 1px solid var(--clr-info-light);
   border-radius: 0.9rem;
-  background: var(--clr-background);
+  background: var(--clr-color-background);
 }
 
 .adicionar-material-manutencao {

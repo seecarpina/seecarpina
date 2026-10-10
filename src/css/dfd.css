@@ -83,7 +83,7 @@
 }
 
 #tabelaDfds .cancel-btn {
-  color: crimson;
+  color: var(--clr-danger);
 }
 
 @media (max-width: 650px) {

@@ -495,7 +495,7 @@
 }
 
 #tabelaContratos .cancel-btn {
-  color: crimson;
+  color: var(--clr-danger);
 }
 
 #tabelaContratos .view-btn {
