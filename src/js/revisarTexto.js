@@ -50,7 +50,7 @@ form.addEventListener('submit', async event => {
   finally { botao.disabled = !autorizado; limpar.disabled = false; }
 });
 copiar.addEventListener('click', async () => {
-  try { await navigator.clipboard.writeText(resultado.value); status.textContent = 'Texto copiado.'; }
+  try { await navigator.clipboard.writeText(resultado.value); window.mostrarNotificacao('Texto copiado.'); }
   catch { resultado.focus(); resultado.select(); status.textContent = 'Selecionei o resultado. Use a opção Copiar do seu dispositivo.'; }
 });
 limpar.addEventListener('click', () => {
