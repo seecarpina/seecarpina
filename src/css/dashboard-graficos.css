@@ -18,7 +18,8 @@ main .dashboard-graficos .graficos {
   border-radius: var(--card-border-radius);
   color: var(--clr-dark);
 }
-.dashboard-grafico-cabecalho { display: flex; align-items: center; gap: .8rem; }
+.dashboard-grafico-cabecalho { display: flex; align-items: center; flex-wrap: wrap; gap: .8rem; }
+.dashboard-grafico-cabecalho > div { flex: 1; min-width: 140px; }
 .dashboard-grafico-cabecalho > .material-symbols-outlined {
   display: grid;
   place-items: center;
@@ -39,4 +40,31 @@ main .dashboard-grafico-cabecalho h2 { margin: 0; font-size: 1rem; line-height: 
 @media (max-width: 540px) {
   .dashboard-graficos .dashboard-grafico-card { padding: 1rem; }
   .dashboard-grafico-area { height: 260px; }
+}
+
+.dashboard-grafico-cabecalho .dashboard-grafico-filtro {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--clr-dark-variant);
+  font-size: .72rem;
+  font-weight: 500;
+}
+.portal-refinado main #filtroAno {
+  width: 90px;
+  appearance: auto;
+  min-height: 38px;
+  padding: .4rem .65rem;
+  border-radius: 8px;
+  background: var(--glass-bg);
+  border: 1px solid rgba(255, 255, 255, .15);
+  color: var(--clr-dark);
+  font-size: .85rem;
+  cursor: pointer;
+}
+.portal-refinado main #filtroAno option {
+  background: var(--clr-white);
+  color: var(--clr-dark);
 }

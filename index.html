@@ -56,7 +56,6 @@
         <div class="line-dash">
           <h2 id="boasVindas"></h2>
           <!-- <input type="date" class="date" id="dataHoje" /> -->
-          <select id="filtroAno"></select>
         </div>
 
         <div class="line-dash frase-container">
@@ -223,6 +222,10 @@
                   <h2 id="tituloGraficoOficios">Ofícios enviados</h2>
                   <p>Distribuição mensal no ano selecionado.</p>
                 </div>
+                <label class="dashboard-grafico-filtro" for="filtroAno">
+                  <span>Ano</span>
+                  <select id="filtroAno" aria-label="Ano dos ofícios enviados"></select>
+                </label>
               </header>
               <div id="totalOficios" class="dashboard-grafico-total">
                 <strong>—</strong><span>Ofícios no ano</span>
