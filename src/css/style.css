@@ -524,8 +524,8 @@ aside .logo {
 }
 aside .logo .logo-sistema {
   display: block;
-  width: 100%;
-  max-width: 14rem;
+  width: 90%;
+  max-width: 12.5rem;
   height: auto;
 }
 aside .close {
@@ -2483,7 +2483,7 @@ body.dialogo-aberto {
   }
 
   aside .logo .logo-sistema {
-    max-width: 16rem;
+    max-width: 14rem;
   }
 
   aside .close {
