@@ -50,6 +50,10 @@
             <ul id="docs" class="checklist-lista"></ul>
             <footer class="checklist-rodape">
               <p id="mensagemChecklist">Marque os documentos à medida que forem conferidos.</p>
+              <button type="button" id="imprimirChecklist" class="checklist-nova">
+                <span class="material-symbols-outlined" aria-hidden="true">print</span>
+                Imprimir conferência
+              </button>
               <button type="button" id="novaConferencia" class="checklist-nova" disabled>
                 <span class="material-symbols-outlined" aria-hidden="true">restart_alt</span>
                 Nova conferência
@@ -61,6 +65,15 @@
 
       <div class="right"></div>
     </div>
+    <section id="conferenciaImpressao" class="checklist-impressao" aria-label="Conferência de documentos para impressão">
+      <h1>Checklist de documentos</h1>
+      <p>SEE Carpina · Formalização de contrato</p>
+      <p class="checklist-identificacao">Servidor(a): __________________________________________________</p>
+      <p id="resumoImpressao"></p>
+      <p id="dataImpressao"></p>
+      <ul id="documentosImpressao"></ul>
+      <p class="checklist-legenda">✓ Entregue · Pendente: documento ainda não conferido como entregue.</p>
+    </section>
     <script type="module" src="./src/js/scripts.js"></script>
     <script type="module" src="./src/js/checklist.js"></script>
   </body>
