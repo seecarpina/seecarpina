@@ -1092,11 +1092,20 @@ window.mostrarNotificacao = mostrarNotificacao;
 
 const btnTopo = document.getElementById("btnTopo");
 
-window.addEventListener("scroll", function () {
-  btnTopo.style.opacity = window.scrollY > 300 ? "1" : "0";
-});
+function atualizarBotaoTopo() {
+  if (!btnTopo) return;
+  const visivel = window.scrollY > 300;
+  btnTopo.classList.toggle("visivel", visivel);
+  btnTopo.setAttribute("aria-hidden", String(!visivel));
+  btnTopo.setAttribute("tabindex", visivel ? "0" : "-1");
+  if (!visivel && document.activeElement === btnTopo) btnTopo.blur();
+}
 
-btnTopo.addEventListener("click", function () {
+atualizarBotaoTopo();
+btnTopo?.setAttribute("aria-label", "Voltar ao topo");
+window.addEventListener("scroll", atualizarBotaoTopo, { passive: true });
+
+btnTopo?.addEventListener("click", function () {
   const duration = 800;
   const start = window.scrollY;
   const startTime = performance.now();
