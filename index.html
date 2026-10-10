@@ -32,7 +32,7 @@
   </head>
   <body class="portal-refinado">
     <button id="btnTopo">↑</button>
-    <div class="loading" data-aguardar="usuario lateral links frase datas calendario-datas calendario-eventos contratos oficios atendimento">
+    <div class="loading">
       <see-spinner mensagem="Carregando o sistema" tamanho="grande"></see-spinner>
     </div>
     <div class="container">
@@ -332,8 +332,7 @@
     <script type="module" src="./src/js/dashboard.js"></script>
     <script type="module" src="./src/js/modelosDocumentos.js"></script>
     <script type="module" src="./src/js/dashboardAtendimento.js"></script>
-    <script type="module">
-      import { concluirCarregamento } from "./src/js/core/carregamentoPagina.js";
+    <script>
       // ============================================================
       // DATAS COMEMORATIVAS
       // ============================================================
@@ -460,8 +459,6 @@
               </div>
             </div>
           `;
-        } finally {
-          concluirCarregamento("datas");
         }
       }
 

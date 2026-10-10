@@ -1,4 +1,3 @@
-import { concluirCarregamento } from "./core/carregamentoPagina.js";
 import { eventosCalendarioPorAno } from "./core/eventosRegras.js";
 import { categoriaCalendario, categoriasDoDia, dataLocalCalendario, datasComemorativasDoDia } from "./core/calendarioEventos.js";
 
@@ -240,7 +239,7 @@ carregarRight().then(() => {
     const container = document.getElementById("linksContainer");
     if (!container) return;
 
-    container.innerHTML = "";
+    container.innerHTML = '<see-spinner mensagem="Carregando links úteis"></see-spinner>';
 
     const q = query(collection(db, "linksUteis"), orderBy("ordem"));
     const snapshot = await getDocs(q);
@@ -257,6 +256,8 @@ carregarRight().then(() => {
       grupos[data.grupo].push(data);
     });
 
+    // Substitui o indicador somente depois de receber os dados.
+    container.replaceChildren();
     // montar HTML
     Object.keys(grupos).forEach((grupo) => {
       const details = document.createElement("details");
@@ -350,7 +351,7 @@ carregarRight().then(() => {
     console.error("Erro ao carregar links úteis:", erro);
     const container = document.getElementById("linksContainer");
     if (container) container.textContent = "Não foi possível carregar os links úteis.";
-  }).finally(() => concluirCarregamento("links"));
+  });
 
   function initCalendario() {
     // ==============================
@@ -376,8 +377,6 @@ carregarRight().then(() => {
           renderCalendario();
         } catch (erro) {
           console.error("Não foi possível carregar datas comemorativas no calendário:", erro);
-        } finally {
-          concluirCarregamento("calendario-datas");
         }
       }
 
@@ -698,10 +697,7 @@ carregarRight().then(() => {
         aplicarTema("system");
       }
     });
-}).catch(erro => {
-  console.error("Erro ao preparar painel lateral:", erro);
-  for (const nome of ["links", "calendario-datas"]) concluirCarregamento(nome);
-}).finally(() => concluirCarregamento("lateral"));
+});
 
 // 📦 Imports necessários do Firebase (agora sem config)
 import {
@@ -845,7 +841,7 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     // Sidebar já pode ser montada usando o cargo salvo
-    montarSidebarDinamica(usuarioCache).catch(erro => console.error("Erro ao montar menu em cache:", erro));
+    montarSidebarDinamica(usuarioCache);
 
     const campoResp = document.getElementById("responsavel");
 
@@ -919,8 +915,6 @@ onAuthStateChanged(auth, async (user) => {
 
       await signOut(auth);
 
-      // O aviso exige interação antes do redirecionamento.
-      window.carregamentoPagina?.liberar();
       await window.mostrarAlerta({
         titulo: "Acesso desativado",
         mensagem:
@@ -985,8 +979,6 @@ onAuthStateChanged(auth, async (user) => {
     }
   } catch (err) {
     console.error("Erro ao buscar dados do usuário:", err);
-  } finally {
-    concluirCarregamento("usuario");
   }
 
   // ==================================
@@ -1068,9 +1060,7 @@ async function carregarFraseDoDia() {
     };
   } catch (error) {
     console.error(error);
-    if (span) span.textContent = "Acredite: você já deu o primeiro passo.";
-  } finally {
-    concluirCarregamento("frase");
+    span.textContent = "Acredite: você já deu o primeiro passo.";
   }
 }
 

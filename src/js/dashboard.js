@@ -1,4 +1,3 @@
-import { concluirCarregamento } from "./core/carregamentoPagina.js";
 // ===============================
 // 📊 DASHBOARD
 // ===============================
@@ -86,13 +85,8 @@ onValue(contratosRef, (snap) => {
   } catch (erro) {
     console.error("Erro ao desenhar resumo de contratos:", erro);
     mostrarErroGrafico("graficoContratos");
-  } finally {
-    concluirCarregamento("contratos");
   }
-}, () => {
-  mostrarErroGrafico("graficoContratos");
-  concluirCarregamento("contratos");
-});
+}, () => mostrarErroGrafico("graficoContratos"));
 
 // ===============================
 // 🥧 Gráfico de pizza — Contratos
@@ -160,11 +154,7 @@ onValue(oficiosRef, (snap) => {
   popularSelectAnos(anos.length ? anos : [atual]);
   if (anos.includes(selecionado)) filtroAno.value = selecionado;
   carregarOficiosSelecionados();
-  concluirCarregamento("oficios");
-}, () => {
-  mostrarErroGrafico("graficoOficiosMes");
-  concluirCarregamento("oficios");
-});
+}, () => mostrarErroGrafico("graficoOficiosMes"));
 
 function carregarOficiosSelecionados() {
   todosOficios = Object.values(dadosOficios[filtroAno.value] || {});

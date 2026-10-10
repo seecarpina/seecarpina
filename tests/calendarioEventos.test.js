@@ -10,7 +10,6 @@ test("carregamento global preserva categoria do evento enviada ao calendário", 
   const codigo = readFileSync(new URL("../src/js/eventosStore.js", import.meta.url), "utf8")
     .replace(/import[\s\S]*?from\s+"[^"]+";/g, "");
   vm.runInNewContext(codigo, {
-    concluirCarregamento() {},
     rtdb: {}, ref: (_, caminho) => caminho,
     onValue: (_, callback) => { receber = callback; },
     window: { dispatchEvent: (evento) => { publicado = evento; } },

@@ -1,4 +1,3 @@
-import { concluirCarregamento } from "./core/carregamentoPagina.js";
 import { auth, db, rtdb } from './firebaseConfig.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
@@ -55,16 +54,16 @@ onAuthStateChanged(auth, async user => {
   cancelar.forEach(fn => fn());
   cancelar = [];
   painel.hidden = true;
-  if (!user) { concluirCarregamento("atendimento"); return; }
+  if (!user) return;
   try {
     const usuario = await getDoc(doc(db, 'usuarios', user.uid));
-    if (!usuario.exists() || usuario.data().ativo === false) { concluirCarregamento("atendimento"); return; }
+    if (!usuario.exists() || usuario.data().ativo === false) return;
     const perfil = String(usuario.data().cargo || '').trim().toUpperCase();
-    if (!perfil || perfil === "GESTOR_ESCOLAR") { concluirCarregamento("atendimento"); return; }
+    if (!perfil || perfil === 'GESTOR_ESCOLAR') return;
     const permissoes = await get(ref(rtdb, `configuracoes/solicitacoes/permissoes/${perfil}`));
     if (atual !== versao) return;
     const modulos = modulosDashboardPermitidos(permissoes.val());
-    if (!modulos.length) { concluirCarregamento("atendimento"); return; }
+    if (!modulos.length) return;
     painel.hidden = false;
     mensagem.textContent = 'Carregando os pedidos dos seus módulos…';
     lista.replaceChildren();
@@ -82,11 +81,9 @@ onAuthStateChanged(auth, async user => {
         for (const chave of ['recebidas', 'atendimento', 'confirmacao', 'urgentes']) {
           document.getElementById(`dashboard-${chave}`).textContent = '—';
         }
-        concluirCarregamento("atendimento");
         return;
       }
       renderizar(Object.values(porModulo).flat());
-      concluirCarregamento("atendimento");
     };
     for (const modulo of modulos) {
       const consulta = query(ref(rtdb, 'portalGestor/solicitacoes/registros'), orderByChild('modulo'), equalTo(modulo));
@@ -103,7 +100,6 @@ onAuthStateChanged(auth, async user => {
     if (atual === versao) {
       painel.hidden = false;
       mensagem.textContent = 'Resumo indisponível no momento. Tente atualizar a página.';
-      concluirCarregamento("atendimento");
     }
   }
 });
