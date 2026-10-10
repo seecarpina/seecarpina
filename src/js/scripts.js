@@ -750,11 +750,11 @@ function saudacao() {
   let mensagem = "";
 
   if (hora >= 5 && hora < 12) {
-    mensagem = "☀️ Bom dia";
+    mensagem = "Bom dia";
   } else if (hora >= 12 && hora < 18) {
-    mensagem = "🌇 Boa tarde";
+    mensagem = "Boa tarde";
   } else {
-    mensagem = "🌙 Boa noite";
+    mensagem = "Boa noite";
   }
 
   return mensagem;
