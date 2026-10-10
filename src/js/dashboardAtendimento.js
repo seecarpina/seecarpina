@@ -12,8 +12,33 @@ const nomes = { INSUMOS: 'Água, gás e caminhão-pipa', MATERIAIS_EXPEDIENTE: '
 let cancelar = [];
 let versao = 0;
 
+function iniciarCarregamento() {
+  painel.setAttribute('aria-busy', 'true');
+  mensagem.textContent = 'Carregando os pedidos dos seus módulos…';
+  lista.innerHTML = '<see-spinner mensagem="Carregando pedidos"></see-spinner>';
+  for (const chave of ['recebidas', 'atendimento', 'confirmacao', 'urgentes']) {
+    document.getElementById(`dashboard-${chave}`).innerHTML = '<see-spinner tamanho="pequeno"></see-spinner>';
+  }
+}
+
+function ocultarPainel() {
+  painel.hidden = true;
+  painel.setAttribute('aria-busy', 'false');
+}
+
+function mostrarErro(texto) {
+  painel.hidden = false;
+  painel.setAttribute('aria-busy', 'false');
+  mensagem.textContent = texto;
+  lista.replaceChildren();
+  for (const chave of ['recebidas', 'atendimento', 'confirmacao', 'urgentes']) {
+    document.getElementById(`dashboard-${chave}`).textContent = '—';
+  }
+}
+
 function renderizar(registros) {
   const resumo = resumirAtendimento(registros);
+  painel.setAttribute('aria-busy', 'false');
   for (const chave of ['recebidas', 'atendimento', 'confirmacao', 'urgentes']) {
     document.getElementById(`dashboard-${chave}`).textContent = resumo[chave];
   }
@@ -53,34 +78,26 @@ onAuthStateChanged(auth, async user => {
   const atual = ++versao;
   cancelar.forEach(fn => fn());
   cancelar = [];
-  painel.hidden = true;
-  if (!user) return;
+  if (!user) { ocultarPainel(); return; }
+  painel.hidden = false;
+  iniciarCarregamento();
   try {
     const usuario = await getDoc(doc(db, 'usuarios', user.uid));
-    if (!usuario.exists() || usuario.data().ativo === false) return;
+    if (atual !== versao) return;
+    if (!usuario.exists() || usuario.data().ativo === false) { ocultarPainel(); return; }
     const perfil = String(usuario.data().cargo || '').trim().toUpperCase();
-    if (!perfil || perfil === 'GESTOR_ESCOLAR') return;
+    if (!perfil || perfil === 'GESTOR_ESCOLAR') { ocultarPainel(); return; }
     const permissoes = await get(ref(rtdb, `configuracoes/solicitacoes/permissoes/${perfil}`));
     if (atual !== versao) return;
     const modulos = modulosDashboardPermitidos(permissoes.val());
-    if (!modulos.length) return;
-    painel.hidden = false;
-    mensagem.textContent = 'Carregando os pedidos dos seus módulos…';
-    lista.replaceChildren();
-    for (const chave of ['recebidas', 'atendimento', 'confirmacao', 'urgentes']) {
-      document.getElementById(`dashboard-${chave}`).textContent = '—';
-    }
+    if (!modulos.length) { ocultarPainel(); return; }
     const porModulo = {};
     const carregados = new Set();
     const falhas = new Set();
     const atualizar = () => {
       if (atual !== versao || carregados.size !== modulos.length) return;
       if (falhas.size) {
-        mensagem.textContent = 'Não foi possível carregar todos os pedidos. Abra a Central de Solicitações para consultar.';
-        lista.replaceChildren();
-        for (const chave of ['recebidas', 'atendimento', 'confirmacao', 'urgentes']) {
-          document.getElementById(`dashboard-${chave}`).textContent = '—';
-        }
+        mostrarErro('Não foi possível carregar todos os pedidos. Abra a Central de Solicitações para consultar.');
         return;
       }
       renderizar(Object.values(porModulo).flat());
@@ -98,8 +115,7 @@ onAuthStateChanged(auth, async user => {
   } catch (erro) {
     console.error('Erro ao carregar resumo de atendimento:', erro);
     if (atual === versao) {
-      painel.hidden = false;
-      mensagem.textContent = 'Resumo indisponível no momento. Tente atualizar a página.';
+      mostrarErro('Resumo indisponível no momento. Tente atualizar a página.');
     }
   }
 });

@@ -35,6 +35,9 @@
 @media (max-width: 540px) { .dashboard-numeros { gap: .75rem; } .dashboard-fila { padding: 1rem; } }
 @media (max-width: 360px) { .dashboard-numeros { grid-template-columns: minmax(0, 1fr); } }
 
-/* Não reserva espaço para gráficos antes do primeiro resultado. */
+/* Respeita os estados ocultos de erro e dos gráficos ainda sem dados. */
 #dashboardGraficos[hidden], #resumoOficios[hidden], #resumoContratos[hidden], #dashboardGraficos canvas[hidden] { display: none; }
 .dashboard-grafico-erro { color: var(--clr-dark-variant); padding: 1rem 0; }
+
+.dashboard-numero strong { min-height: 2.3rem; }
+#dashboardPedidosAtencao > see-spinner { display: flex; padding: 1rem; }

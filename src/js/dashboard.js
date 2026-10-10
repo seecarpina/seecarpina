@@ -40,8 +40,11 @@ const filtroAno = document.getElementById("filtroAno");
 
 function mostrarBloco(canvas) {
   const bloco = canvas.closest(".card");
+  bloco.querySelector(".dashboard-grafico-carregando").hidden = true;
+  bloco.setAttribute("aria-busy", "false");
   bloco.querySelector(".dashboard-grafico-erro")?.remove();
   canvas.hidden = false;
+  if (canvas.id === "graficoOficiosMes") filtroAno.disabled = false;
   bloco.hidden = false;
   document.getElementById("dashboardGraficos").hidden = false;
 }
@@ -51,6 +54,8 @@ function mostrarErroGrafico(idCanvas) {
   if (!canvas) return;
   const bloco = canvas.closest(".card");
   canvas.hidden = true;
+  bloco.querySelector(".dashboard-grafico-carregando").hidden = true;
+  bloco.setAttribute("aria-busy", "false");
   bloco.querySelector(".dashboard-grafico-erro")?.remove();
   const mensagem = document.createElement("p");
   mensagem.className = "dashboard-grafico-erro";

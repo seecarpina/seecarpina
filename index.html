@@ -200,9 +200,9 @@
 
         <div id="datasComemorativas"></div>
 
-        <div id="dashboardGraficos" class="dashboard-graficos" hidden>
+        <div id="dashboardGraficos" class="dashboard-graficos">
           <div class="graficos">
-            <section id="resumoOficios" class="card dashboard-grafico-card glass" hidden aria-labelledby="tituloGraficoOficios">
+            <section id="resumoOficios" class="card dashboard-grafico-card glass" aria-busy="true" aria-labelledby="tituloGraficoOficios">
               <header class="dashboard-grafico-cabecalho">
                 <span class="material-symbols-outlined" aria-hidden="true">outgoing_mail</span>
                 <div>
@@ -211,17 +211,18 @@
                 </div>
                 <label class="dashboard-grafico-filtro" for="filtroAno">
                   <span>Ano</span>
-                  <select id="filtroAno" aria-label="Ano dos ofícios enviados"></select>
+                  <select id="filtroAno" disabled aria-label="Ano dos ofícios enviados"></select>
                 </label>
               </header>
-              <div id="totalOficios" class="dashboard-grafico-total">
+              <div class="dashboard-grafico-carregando"><see-spinner mensagem="Carregando gráfico"></see-spinner></div>
+              <div id="totalOficios" class="dashboard-grafico-total" hidden>
                 <strong>—</strong><span>Ofícios no ano</span>
               </div>
               <div class="dashboard-grafico-area">
-                <canvas id="graficoOficiosMes" role="img" aria-label="Quantidade de ofícios enviados por mês"></canvas>
+                <canvas id="graficoOficiosMes" hidden role="img" aria-label="Quantidade de ofícios enviados por mês"></canvas>
               </div>
             </section>
-            <section id="resumoContratos" class="card dashboard-grafico-card glass" hidden aria-labelledby="tituloGraficoContratos">
+            <section id="resumoContratos" class="card dashboard-grafico-card glass" aria-busy="true" aria-labelledby="tituloGraficoContratos">
               <header class="dashboard-grafico-cabecalho">
                 <span class="material-symbols-outlined" aria-hidden="true">contract</span>
                 <div>
@@ -229,11 +230,12 @@
                   <p>Distribuição dos registros por tipo.</p>
                 </div>
               </header>
-              <div id="totalContratos" class="dashboard-grafico-total">
+              <div class="dashboard-grafico-carregando"><see-spinner mensagem="Carregando gráfico"></see-spinner></div>
+              <div id="totalContratos" class="dashboard-grafico-total" hidden>
                 <strong>—</strong><span>Registros no gráfico</span>
               </div>
               <div class="dashboard-grafico-area">
-                <canvas id="graficoContratos" role="img" aria-label="Distribuição de contratos por CNPJ e ARPs"></canvas>
+                <canvas id="graficoContratos" hidden role="img" aria-label="Distribuição de contratos por CNPJ e ARPs"></canvas>
               </div>
             </section>
           </div>
@@ -242,7 +244,7 @@
         <section
           id="dashboardAtendimento"
           class="dashboard-operacional"
-          hidden
+          aria-busy="true"
           aria-labelledby="tituloAtendimentoDashboard"
         >
           <div class="dashboard-cabecalho">
@@ -256,25 +258,25 @@
             <a class="dashboard-numero home-acesso glass" href="./solicitacoes.html?status=RECEBIDA">
               <span class="material-symbols-outlined dashboard-indicador-icone" aria-hidden="true">inbox</span>
               <span class="home-acesso-titulo">Recebidas</span>
-              <strong id="dashboard-recebidas">—</strong>
+              <strong id="dashboard-recebidas"><see-spinner tamanho="pequeno"></see-spinner></strong>
               <small class="home-acesso-acao">Aguardando início</small>
             </a>
             <a class="dashboard-numero home-acesso glass" href="./solicitacoes.html?status=EM_ATENDIMENTO">
               <span class="material-symbols-outlined dashboard-indicador-icone" aria-hidden="true">handyman</span>
               <span class="home-acesso-titulo">Em atendimento</span>
-              <strong id="dashboard-atendimento">—</strong>
+              <strong id="dashboard-atendimento"><see-spinner tamanho="pequeno"></see-spinner></strong>
               <small class="home-acesso-acao">Trabalho em andamento</small>
             </a>
             <a class="dashboard-numero home-acesso glass" href="./solicitacoes.html?status=AGUARDANDO_CONFIRMACAO">
               <span class="material-symbols-outlined dashboard-indicador-icone" aria-hidden="true">task_alt</span>
               <span class="home-acesso-titulo">Aguardando confirmação</span>
-              <strong id="dashboard-confirmacao">—</strong>
+              <strong id="dashboard-confirmacao"><see-spinner tamanho="pequeno"></see-spinner></strong>
               <small class="home-acesso-acao">Retorno da escola</small>
             </a>
             <a class="dashboard-numero home-acesso glass urgente" href="./solicitacoes.html?prioridade=URGENTE&amp;abertos=1">
               <span class="material-symbols-outlined dashboard-indicador-icone" aria-hidden="true">priority_high</span>
               <span class="home-acesso-titulo">Urgentes</span>
-              <strong id="dashboard-urgentes">—</strong>
+              <strong id="dashboard-urgentes"><see-spinner tamanho="pequeno"></see-spinner></strong>
               <small class="home-acesso-acao">Prioridade no atendimento</small>
             </a>
           </div>
@@ -287,7 +289,7 @@
             >
               Carregando solicitações…
             </p>
-            <div id="dashboardPedidosAtencao"></div>
+            <div id="dashboardPedidosAtencao"><see-spinner mensagem="Carregando pedidos"></see-spinner></div>
           </div>
         </section>
 
