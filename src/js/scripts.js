@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 import "./eventosStore.js";
 import "./dialogos.js";
+import "./componentes/tabelasRolaveis.js";
 
 import {
   carregarSidebar,

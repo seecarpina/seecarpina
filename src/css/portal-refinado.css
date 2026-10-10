@@ -148,3 +148,89 @@
   .portal-refinado main :is(input, select, textarea, .btn, .btn-excel, .btn-salvar),
   .portal-refinado aside .sidebar a { transition: none; }
 }
+
+/* Detalhes de uso compartilhados; sem alterar a impressão. */
+@media screen {
+  .portal-refinado .table-wrapper {
+    min-width: 0;
+    max-width: 100%;
+    overscroll-behavior-x: contain;
+  }
+
+  .portal-refinado .table-wrapper:focus-visible {
+    outline: 2px solid var(--clr-primary);
+    outline-offset: 3px;
+  }
+
+  .portal-refinado .aviso-rolagem-tabela {
+    margin: 0.75rem 0;
+    color: var(--clr-info-dark);
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+
+  .portal-refinado .paginacao button:is(.ativo, :hover):not(:disabled),
+  .portal-refinado :is(#tabelaOficios, #tabelaCirculares, #tabelaContratos, #tabelaServidores) thead th {
+    color: #fff;
+  }
+
+  .portal-refinado .paginacao button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .portal-refinado .dialogo-global {
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+    overflow-wrap: anywhere;
+  }
+
+  .portal-refinado .dialogo-global-prompt {
+    display: block;
+    width: 100%;
+    min-height: 7rem;
+    margin-top: 1rem;
+    padding: 0.8rem;
+    resize: vertical;
+    border: 1px solid var(--clr-info-dark);
+    border-radius: 0.7rem;
+    background: var(--clr-color-background);
+    color: var(--clr-dark);
+    font: inherit;
+  }
+
+  .portal-refinado .dialogo-global-prompt::placeholder {
+    color: var(--clr-info-dark);
+    opacity: 1;
+  }
+
+  .portal-refinado .dialogo-global-prompt:focus-visible {
+    outline: 2px solid var(--clr-primary);
+    outline-offset: 2px;
+  }
+
+  .portal-refinado .dialogo-global-prompt[aria-invalid="true"] {
+    border-color: var(--clr-danger);
+  }
+
+  .portal-refinado .dialogo-global-conteudo .dialogo-global-erro {
+    margin-top: 0.5rem;
+    color: var(--clr-danger);
+    font-size: 0.85rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .portal-refinado .paginacao button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .portal-refinado .dialogo-global-prompt { font-size: 16px; }
+  .portal-refinado .dialogo-global-acoes { flex-wrap: wrap; }
+  .portal-refinado .btn-dialogo { min-height: 44px; }
+}
+
+@media print {
+  .aviso-rolagem-tabela { display: none; }
+}
