@@ -136,6 +136,7 @@ async function montarSidebarDinamica(dadosUsuario) {
       tituloGrupo.className = "sidebar-grupo-titulo";
 
       tituloGrupo.textContent = grupo.titulo;
+      tituloGrupo.title = grupo.titulo || "";
 
       fragment.appendChild(tituloGrupo);
 
@@ -151,12 +152,12 @@ async function montarSidebarDinamica(dadosUsuario) {
     logout.id = "logout";
 
     logout.innerHTML = `
-      <span class="material-symbols-outlined">
+      <span class="material-symbols-outlined" aria-hidden="true">
         logout
       </span>
 
       <h3>
-        Logout
+        Sair
       </h3>
     `;
 
