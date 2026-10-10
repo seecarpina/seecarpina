@@ -1,3 +1,4 @@
+import { normalizarLinkInterno } from "./core/rotas.js";
 import { eventosCalendarioPorAno } from "./core/eventosRegras.js";
 import { categoriaCalendario, categoriasDoDia, dataLocalCalendario, datasComemorativasDoDia } from "./core/calendarioEventos.js";
 
@@ -90,7 +91,7 @@ async function montarSidebarDinamica(dadosUsuario) {
     function criarLinkMenu(item) {
       const link = document.createElement("a");
 
-      link.href = item.link || "#";
+      link.href = normalizarLinkInterno(item.link || "#", window.location.href);
 
       link.innerHTML = `
     <span
@@ -269,7 +270,7 @@ carregarRight().then(() => {
           .map(
             (link) => `
           <li>
-            <a href="${link.url}" target="_blank">
+            <a href="${normalizarLinkInterno(link.url, window.location.href)}" target="_blank">
               ${link.nome}
             </a>
           </li>

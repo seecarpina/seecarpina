@@ -176,13 +176,13 @@ function obterIconeSolicitacao(solicitacao) {
 
 function obterLinkSolicitacao(solicitacao) {
   const links = {
-    INSUMOS: "./insumos.html#historico",
-    MATERIAIS_EXPEDIENTE: "./materiais-expediente.html#historico",
-    MATERIAIS_LIMPEZA: "./materiais-limpeza.html#historico",
-    MANUTENCAO: "./manutencao.html#historico",
+    INSUMOS: "./insumos#historico",
+    MATERIAIS_EXPEDIENTE: "./materiais-expediente#historico",
+    MATERIAIS_LIMPEZA: "./materiais-limpeza#historico",
+    MANUTENCAO: "./manutencao#historico",
   };
 
-  return links[solicitacao.modulo] || "./minhas-solicitacoes.html";
+  return links[solicitacao.modulo] || "./minhas-solicitacoes";
 }
 
 function renderizarSolicitacoesRecentes(solicitacoes) {
@@ -419,7 +419,7 @@ async function encerrarAcesso(motivo) {
 
   sessionStorage.setItem("mensagemLogin", mensagem);
 
-  window.location.replace("./login.html");
+  window.location.replace("./login");
 }
 
 onAuthStateChanged(auth, async (user) => {
@@ -431,7 +431,7 @@ onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
     sessionStorage.removeItem("gestorEscolar");
-    window.location.replace("./login.html");
+    window.location.replace("./login");
     return;
   }
 
@@ -463,7 +463,7 @@ btnSair?.addEventListener("click", async () => {
   try {
     sessionStorage.removeItem("gestorEscolar");
     await signOut(auth);
-    window.location.replace("./login.html");
+    window.location.replace("./login");
   } catch (error) {
     console.error("Erro ao sair:", error);
 
