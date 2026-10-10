@@ -1,0 +1,60 @@
+/* Checkbox compartilhado: ofícios e servidores. */
+.filtro-disponiveis {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+
+  width: max-content;
+  max-width: 100%;
+  min-height: 44px;
+  margin: 0.1rem 0 0;
+
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--clr-dark);
+
+  cursor: pointer;
+}
+
+.filtro-disponiveis input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.filtro-checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+  width: 1.3rem;
+  height: 1.3rem;
+
+  border: 1px solid var(--clr-primary);
+  border-radius: 0.35rem;
+
+  color: transparent;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.filtro-checkbox .material-symbols-outlined {
+  font-size: 0.95rem;
+}
+
+.filtro-disponiveis input:checked + .filtro-checkbox {
+  background: var(--clr-primary);
+  color: #fff;
+}
+
+.filtro-disponiveis input:focus-visible + .filtro-checkbox {
+  outline: 2px solid var(--clr-primary);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filtro-checkbox { transition: none; }
+}
