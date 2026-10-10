@@ -641,9 +641,18 @@ aside .sidebar a:focus-visible {
 }
 aside .sidebar #logout {
   margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--clr-light);
+  padding-block: 0;
   color: var(--menu-sair-cor);
+}
+aside .sidebar #logout::before {
+  content: "";
+  position: absolute;
+  top: -.5rem;
+  left: 1rem;
+  right: 1rem;
+  height: 1px;
+  background: var(--clr-light);
+  pointer-events: none;
 }
 aside .sidebar #logout > .material-symbols-outlined,
 aside .sidebar #logout:hover > .material-symbols-outlined {
@@ -656,6 +665,11 @@ aside .sidebar #logout:hover { background: var(--menu-sair-fundo); color: var(--
 }
 
 .sidebar-grupo-titulo {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   padding: 1.2rem 1rem 0.45rem;
   font-size: 0.68rem;
   font-weight: 700;

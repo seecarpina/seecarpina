@@ -136,6 +136,7 @@ async function montarSidebarDinamica(dadosUsuario) {
       tituloGrupo.className = "sidebar-grupo-titulo";
 
       tituloGrupo.textContent = grupo.titulo;
+      tituloGrupo.title = grupo.titulo || "";
 
       fragment.appendChild(tituloGrupo);
 
