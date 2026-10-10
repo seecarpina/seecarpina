@@ -24,22 +24,14 @@
     <link rel="apple-touch-icon" sizes="180x180" href="./src/images/app/icon-180.png?v=2" />
     <script defer src="./src/js/instalar-app.js"></script>
     <link rel="stylesheet" href="./src/css/portal-refinado.css" />
+      <script defer src="./src/js/componentes/carregamento.js"></script>
   </head>
 
   <body class="portal-refinado">
     <button id="btnTopo">↑</button>
 
     <div class="loading">
-      <svg class="svg-spinner" viewBox="0 0 50 50">
-        <circle
-          class="path"
-          cx="25"
-          cy="25"
-          r="20"
-          fill="none"
-          stroke-width="4"
-        />
-      </svg>
+      <see-spinner mensagem="Carregando o sistema" tamanho="grande"></see-spinner>
     </div>
 
     <div class="container">
@@ -251,16 +243,7 @@
 
               <div id="listaMateriais" class="lista-materiais">
                 <div class="estoque-carregando">
-                  <svg class="svg-spinner" viewBox="0 0 50 50">
-                    <circle
-                      class="path"
-                      cx="25"
-                      cy="25"
-                      r="20"
-                      fill="none"
-                      stroke-width="4"
-                    />
-                  </svg>
+                  <see-spinner></see-spinner>
                 </div>
               </div>
               <nav id="paginacaoMateriais" class="paginacao" aria-label="Paginação dos materiais do estoque" hidden></nav>
@@ -286,16 +269,7 @@
 
               <div id="listaHistorico" class="lista-historico">
                 <div class="estoque-carregando">
-                  <svg class="svg-spinner" viewBox="0 0 50 50">
-                    <circle
-                      class="path"
-                      cx="25"
-                      cy="25"
-                      r="20"
-                      fill="none"
-                      stroke-width="4"
-                    />
-                  </svg>
+                  <see-spinner></see-spinner>
                 </div>
               </div>
               <nav id="paginacaoRomaneios" class="paginacao" aria-label="Paginação do histórico de romaneios" hidden></nav>
@@ -334,16 +308,7 @@
 
               <div id="listaMovimentacoes" class="lista-movimentacoes">
                 <div class="estoque-carregando">
-                  <svg class="svg-spinner" viewBox="0 0 50 50">
-                    <circle
-                      class="path"
-                      cx="25"
-                      cy="25"
-                      r="20"
-                      fill="none"
-                      stroke-width="4"
-                    />
-                  </svg>
+                  <see-spinner></see-spinner>
                 </div>
               </div>
               <nav id="paginacaoMovimentacoes" class="paginacao" aria-label="Paginação das movimentações" hidden></nav>

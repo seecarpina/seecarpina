@@ -600,9 +600,7 @@ function mostrarNotificacao(msg, tipo = "sucesso") {
 tabela.innerHTML = `
   <tr>
     <td colspan="8" style="text-align:center;">
-      <svg class="svg-spinner" viewBox="0 0 50 50">
-        <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="4"/>
-      </svg>
+      <see-spinner></see-spinner>
     </td>
   </tr>
 `;
