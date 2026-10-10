@@ -24,6 +24,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="./src/images/app/icon-180.png?v=2" />
     <script defer src="./src/js/instalar-app.js"></script>
     <link rel="stylesheet" href="./src/css/portal-refinado.css" />
+      <script defer src="./src/js/componentes/carregamento.js"></script>
   </head>
 
   <body class="portal-refinado">
@@ -32,21 +33,7 @@
     <button id="btnTopo">↑</button>
 
     <div class="loading">
-      <svg
-        class="svg-spinner"
-        viewBox="0 0 50 50"
-        role="img"
-        aria-label="Carregando"
-      >
-        <circle
-          class="path"
-          cx="25"
-          cy="25"
-          r="20"
-          fill="none"
-          stroke-width="4"
-        />
-      </svg>
+      <see-spinner mensagem="Carregando o sistema" tamanho="grande"></see-spinner>
     </div>
 
     <div class="container">
@@ -244,16 +231,7 @@
 
             <div id="listaUsuariosAdmin" class="lista-usuarios-admin">
               <div class="admin-loading">
-                <svg class="svg-spinner" viewBox="0 0 50 50">
-                  <circle
-                    class="path"
-                    cx="25"
-                    cy="25"
-                    r="20"
-                    fill="none"
-                    stroke-width="4"
-                  />
-                </svg>
+                <see-spinner></see-spinner>
               </div>
             </div>
           </div>
@@ -437,16 +415,7 @@
 
             <div id="listaMenuAdmin" class="lista-menu-admin">
               <div class="admin-loading">
-                <svg class="svg-spinner" viewBox="0 0 50 50">
-                  <circle
-                    class="path"
-                    cx="25"
-                    cy="25"
-                    r="20"
-                    fill="none"
-                    stroke-width="4"
-                  />
-                </svg>
+                <see-spinner></see-spinner>
               </div>
             </div>
           </div>
@@ -525,16 +494,7 @@
 
             <div id="listaLocaisAdmin" class="lista-locais-admin">
               <div class="admin-loading">
-                <svg class="svg-spinner" viewBox="0 0 50 50">
-                  <circle
-                    class="path"
-                    cx="25"
-                    cy="25"
-                    r="20"
-                    fill="none"
-                    stroke-width="4"
-                  />
-                </svg>
+                <see-spinner></see-spinner>
               </div>
             </div>
           </div>
@@ -610,16 +570,7 @@
 
             <div id="listaDestinosAdmin" class="lista-locais-admin">
               <div class="admin-loading">
-                <svg class="svg-spinner" viewBox="0 0 50 50">
-                  <circle
-                    class="path"
-                    cx="25"
-                    cy="25"
-                    r="20"
-                    fill="none"
-                    stroke-width="4"
-                  />
-                </svg>
+                <see-spinner></see-spinner>
               </div>
             </div>
           </div>
@@ -704,16 +655,7 @@
 
             <div id="listaCategoriasEstoque" class="lista-locais-admin">
               <div class="admin-loading">
-                <svg class="svg-spinner" viewBox="0 0 50 50">
-                  <circle
-                    class="path"
-                    cx="25"
-                    cy="25"
-                    r="20"
-                    fill="none"
-                    stroke-width="4"
-                  />
-                </svg>
+                <see-spinner></see-spinner>
               </div>
             </div>
           </div>
@@ -901,7 +843,7 @@
               <label>Categorias vinculadas à página</label>
 
               <div id="listaCategoriasMateriaisGestores" class="perfis-grid">
-                <div class="estado-vazio">Carregando categorias...</div>
+                <div class="estado-vazio"><see-spinner mensagem="Carregando categorias..."></see-spinner></div>
               </div>
             </div>
 
@@ -956,7 +898,7 @@
               >
 
               <div id="listaCategoriasMateriaisLimpeza" class="perfis-grid">
-                <div class="estado-vazio">Carregando categorias...</div>
+                <div class="estado-vazio"><see-spinner mensagem="Carregando categorias..."></see-spinner></div>
               </div>
             </div>
 

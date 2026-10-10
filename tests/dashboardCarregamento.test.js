@@ -14,7 +14,7 @@ function iniciarDashboard() {
         if (filho.className === "dashboard-grafico-erro") this.erro = filho;
         else if (!this.value) this.value = filho.value;
       },
-      querySelector(seletor) { return seletor === "strong" ? elementos.get("totalContratosStrong") : this.erro; },
+      querySelector(seletor) { if (seletor === ".dashboard-grafico-carregando") return elementos.get(this.id + "Loader"); return seletor === "strong" ? elementos.get("totalContratosStrong") : this.erro; },
       setAttribute() {},
       addEventListener(tipo, fn) { this[tipo] = fn; },
       remove() { for (const pai of elementos.values()) if (pai.erro === this) pai.erro = null; },
@@ -22,7 +22,8 @@ function iniciarDashboard() {
     elementos.set(id, el);
     return el;
   }
-  for (const id of ["dashboardGraficos", "resumoOficios", "resumoContratos", "graficoOficiosMes", "graficoContratos", "totalOficios", "filtroAno", "totalStrong", "totalContratos", "totalContratosStrong"]) elemento(id);
+  for (const id of ["dashboardGraficos", "resumoOficios", "resumoContratos", "graficoOficiosMes", "graficoContratos", "totalOficios", "filtroAno", "totalStrong", "totalContratos", "totalContratosStrong", "resumoOficiosLoader", "resumoContratosLoader"]) elemento(id);
+  for (const id of ["dashboardGraficos", "resumoOficios", "resumoContratos", "resumoOficiosLoader", "resumoContratosLoader"]) elementos.get(id).hidden = false;
   elementos.get("graficoOficiosMes").closest = () => elementos.get("resumoOficios");
   elementos.get("graficoContratos").closest = () => elementos.get("resumoContratos");
   const assinaturas = new Map();
@@ -57,16 +58,22 @@ function iniciarDashboard() {
   return { elementos, assinaturas, graficos, enviar, trocarTema: cor => { corTema = cor; observarTema(); } };
 }
 
-test("gráficos são revelados independentemente após receber dados, inclusive dados vazios", () => {
+test("indicadores dos gráficos são substituídos independentemente após receber dados, inclusive dados vazios", () => {
   const d = iniciarDashboard();
   assert.equal(d.graficos.length, 0);
+  assert.equal(d.elementos.get("resumoOficiosLoader").hidden, false);
+  assert.equal(d.elementos.get("resumoContratosLoader").hidden, false);
   d.enviar("contratos/fiscais", null);
   assert.equal(d.elementos.get("resumoContratos").hidden, false);
-  assert.equal(d.elementos.get("resumoOficios").hidden, true);
+  assert.equal(d.elementos.get("resumoOficios").hidden, false);
+  assert.equal(d.elementos.get("resumoOficiosLoader").hidden, false);
+  assert.equal(d.elementos.get("resumoContratosLoader").hidden, true);
   d.enviar("oficios", null);
   assert.equal(d.elementos.get("resumoOficios").hidden, false);
   assert.equal(d.elementos.get("totalStrong").textContent, 0);
   assert.equal(d.graficos.length, 2);
+  assert.equal(d.elementos.get("resumoOficiosLoader").hidden, true);
+  assert.equal(d.elementos.get("filtroAno").disabled, false);
 });
 
 test("troca de ano usa dados recebidos sem acumular assinaturas", () => {
@@ -87,6 +94,7 @@ test("falha apresenta mensagem e recuperação substitui erro pelo gráfico", ()
   d.assinaturas.get("oficios").falhar();
   assert.match(d.elementos.get("resumoOficios").erro.textContent, /Não foi possível/);
   assert.equal(d.elementos.get("graficoOficiosMes").hidden, true);
+  assert.equal(d.elementos.get("resumoOficiosLoader").hidden, true);
   d.enviar("oficios", null);
   assert.equal(d.elementos.get("resumoOficios").erro, null);
   assert.equal(d.elementos.get("graficoOficiosMes").hidden, false);

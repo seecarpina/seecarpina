@@ -367,6 +367,8 @@ const transferenciasRef = ref(rtdb, "servidores/transferencias");
    VARIÁVEIS
 ================================ */
 let servidores = [];
+let carregandoServidores = true;
+let erroCarregamentoServidores = "";
 let paginaAtual = 1;
 let filtroPendenciaAtual = "todos";
 const itensPorPagina = 100;
@@ -597,41 +599,25 @@ function mostrarNotificacao(msg, tipo = "sucesso") {
 /* ===============================
    LOADING (IGUAL OFÍCIOS)
 ================================ */
-tabela.innerHTML = `
-  <tr>
-    <td colspan="8" style="text-align:center;">
-      <svg class="svg-spinner" viewBox="0 0 50 50">
-        <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="4"/>
-      </svg>
-    </td>
-  </tr>
-`;
+renderTabela();
 
 /* ===============================
    FIREBASE LISTENER
 ================================ */
 onValue(registrosRef, (snap) => {
   requestAnimationFrame(() => {
-    tabela.innerHTML = "";
-
-    if (!snap.exists()) {
-      tabela.innerHTML = `
-        <tr>
-          <td colspan="8" style="text-align:center">
-            Nenhum servidor encontrado
-          </td>
-        </tr>
-      `;
-      return;
-    }
-
-    servidores = Object.entries(snap.val()).map(([k, v]) => ({
-      ...v,
-      _key: k,
-    }));
-
+    servidores = snap.exists()
+      ? Object.entries(snap.val()).map(([k, v]) => ({ ...v, _key: k }))
+      : [];
+    carregandoServidores = false;
+    erroCarregamentoServidores = "";
     renderTabela();
   });
+}, erro => {
+  console.error("Erro ao carregar servidores:", erro);
+  carregandoServidores = false;
+  erroCarregamentoServidores = "Não foi possível carregar os servidores. Tente novamente.";
+  renderTabela();
 });
 
 /* ===============================
@@ -1056,6 +1042,16 @@ cardsPendenciasServidores?.addEventListener("click", (event) => {
    RENDER TABELA
 ================================ */
 function renderTabela() {
+  if (carregandoServidores || erroCarregamentoServidores) {
+    tabela.innerHTML = `<tr><td colspan="8" class="carregamento-local">${
+      carregandoServidores
+        ? '<see-spinner mensagem="Carregando servidores"></see-spinner>'
+        : erroCarregamentoServidores
+    }</td></tr>`;
+    if (contadorServidores) contadorServidores.textContent = "";
+    paginacao.innerHTML = "";
+    return;
+  }
   tabela.innerHTML = "";
 
   const termo = normalizarTextoLocal(busca.value);
@@ -1098,7 +1094,8 @@ function renderTabela() {
     } encontrado${total === 1 ? "" : "s"}`;
   }
 
-  const totalPaginas = Math.ceil(filtrados.length / itensPorPagina);
+  const totalPaginas = Math.max(1, Math.ceil(filtrados.length / itensPorPagina));
+  paginaAtual = Math.min(paginaAtual, totalPaginas);
   const inicio = (paginaAtual - 1) * itensPorPagina;
   const fim = inicio + itensPorPagina;
 
@@ -2017,9 +2014,7 @@ async function desligarServidor(servidor, botao) {
   botao.disabled = true;
 
   botao.innerHTML = `
-    <span class="material-symbols-outlined">
-      hourglass_top
-    </span>
+    <see-spinner tamanho="pequeno"></see-spinner>
   `;
 
   try {

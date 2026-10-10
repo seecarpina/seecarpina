@@ -23,6 +23,8 @@ onValue(eventosRef, (snap) => {
     });
   }
 
+  window.eventosCalendario = eventosPorData;
+
   // 🔔 avisa TODAS as páginas
   window.dispatchEvent(
     new CustomEvent("eventosAtualizados", {

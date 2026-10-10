@@ -357,9 +357,7 @@ function bloquearCadastro(bloquear) {
 
   btnAdicionar.innerHTML = bloquear
     ? `
-      <span class="material-symbols-outlined">
-        hourglass_top
-      </span>
+      <see-spinner tamanho="pequeno"></see-spinner>
       Salvando...
     `
     : `

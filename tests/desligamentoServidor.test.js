@@ -20,7 +20,7 @@ function preparar({ confirmar = true, falhar = "", nome = "Usuário Teste" } = {
     ref: (_, caminho) => caminho || "/",
     get: async () => {
       assert.equal(botao.disabled, true);
-      assert.match(botao.innerHTML, /hourglass_top/);
+      assert.match(botao.innerHTML, /see-spinner/);
       if (falhar === "leitura") throw new Error("Falha na leitura");
       return { exists: () => false };
     },

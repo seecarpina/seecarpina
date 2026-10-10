@@ -157,16 +157,7 @@ function mostrarLoadingTabela() {
   tabela.innerHTML = `
     <tr>
       <td colspan="10" style="text-align:center; padding:2rem">
-        <svg class="svg-spinner" viewBox="0 0 50 50" width="40">
-          <circle
-            class="path"
-            cx="25"
-            cy="25"
-            r="20"
-            fill="none"
-            stroke-width="4"
-          />
-        </svg>
+        <see-spinner mensagem="Carregando contratos e ARPs"></see-spinner>
       </td>
     </tr>
   `;
@@ -270,6 +261,8 @@ form.addEventListener("submit", async (e) => {
 // 📡 Listagem
 // ===============================
 let contratos = [];
+let carregandoContratos = true;
+let erroCarregamentoContratos = "";
 
 let paginaAtual = 1;
 const ITENS_POR_PAGINA = 20;
@@ -305,6 +298,13 @@ function corSaldo(percentual) {
 }
 
 function renderTabela() {
+  if (carregandoContratos || erroCarregamentoContratos) {
+    if (carregandoContratos) mostrarLoadingTabela();
+    else tabela.innerHTML = `<tr><td colspan="10" class="carregamento-local">${erroCarregamentoContratos}</td></tr>`;
+    contadorContratos.textContent = "";
+    paginacao.innerHTML = "";
+    return;
+  }
   const filtroTexto = busca.value.trim().toLowerCase();
   const filtroTipo = filtroTipoContrato.value;
 
@@ -493,9 +493,16 @@ function renderPaginacao(totalPaginas) {
 mostrarLoadingTabela();
 
 onValue(fiscaisContratoRef, (snap) => {
+  carregandoContratos = false;
+  erroCarregamentoContratos = "";
   contratos = snap.exists()
     ? Object.entries(snap.val()).map(([k, v]) => ({ ...v, _key: k }))
     : [];
+  renderTabela();
+}, erro => {
+  console.error("Erro ao carregar contratos:", erro);
+  carregandoContratos = false;
+  erroCarregamentoContratos = "Não foi possível carregar os contratos e ARPs. Tente novamente.";
   renderTabela();
 });
 

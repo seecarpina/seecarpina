@@ -34,12 +34,14 @@ main .dashboard-grafico-cabecalho h2 { margin: 0; font-size: 1rem; line-height: 
 .dashboard-grafico-total { display: flex; align-items: baseline; flex-wrap: wrap; gap: .6rem; margin: 1.25rem 0; }
 .dashboard-grafico-total strong { font-size: 2rem; line-height: 1.15; font-variant-numeric: tabular-nums; }
 .dashboard-grafico-total span { color: var(--clr-dark-variant); font-size: .8rem; }
+.dashboard-grafico-carregando { display: flex; align-items: center; justify-content: center; height: 360px; }
 .dashboard-grafico-area { position: relative; height: 280px; min-width: 0; }
 .dashboard-grafico-area:has(canvas[hidden]) { display: none; }
 .dashboard-graficos [hidden] { display: none !important; }
 @media (max-width: 540px) {
   .dashboard-graficos .dashboard-grafico-card { padding: 1rem; }
   .dashboard-grafico-area { height: 260px; }
+  .dashboard-grafico-carregando { height: 340px; }
 }
 
 .dashboard-grafico-cabecalho .dashboard-grafico-filtro {
