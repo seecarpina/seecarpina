@@ -1,3 +1,4 @@
+import { criarMemoriaConsulta, normalizarConsultaOficios } from "./core/memoriaConsulta.js";
 import { primeiroEUltimoNome, podeEditarOficio } from "./core/responsavelOficio.js";
 import { auth, db, rtdb } from "./firebaseConfig.js";
 import { exportarTabelaExcel } from "./core/exportarExcel.js";
@@ -34,6 +35,8 @@ let destinos = [];
 let destinoIdSelecionado = null;
 let copiaIdSelecionado = null;
 
+const memoriaConsulta = criarMemoriaConsulta("oficios", () => auth.currentUser?.uid);
+let consultaUid = null;
 let paginaAtual = 1;
 const porPagina = 25;
 let pararEscutaOficios = null;
@@ -113,6 +116,11 @@ onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "./login";
     return;
+  }
+
+  if (consultaUid !== user.uid) {
+    consultaUid = user.uid;
+    carregarAnosDisponiveis();
   }
 
   // ==============================
@@ -561,6 +569,14 @@ function obterOficiosFiltrados() {
    RENDERIZAÇÃO DA TABELA
 ========================================= */
 
+function salvarConsultaOficios() {
+  memoriaConsulta.salvar({ ano: anoSelecionado, busca: inputBusca?.value || "",
+    disponiveis: Boolean(filtroDisponiveis?.checked), inicio: filtroDataInicio?.value || "",
+    fim: filtroDataFim?.value || "", pagina: paginaAtual });
+}
+
+window.addEventListener("pagehide", salvarConsultaOficios);
+
 function renderTabela() {
   if (!tabela) {
     return;
@@ -571,6 +587,7 @@ function renderTabela() {
   // ==============================
 
   if (carregandoOficios) {
+    salvarConsultaOficios();
     tabela.innerHTML = `
       <tr>
         <td
@@ -616,6 +633,8 @@ function renderTabela() {
   if (paginaAtual > totalPaginas) {
     paginaAtual = totalPaginas || 1;
   }
+
+  salvarConsultaOficios();
 
   const inicio = (paginaAtual - 1) * porPagina;
 
@@ -1134,15 +1153,17 @@ function carregarAnosDisponiveis() {
     filtroAno.appendChild(option);
   });
 
-  anoSelecionado = filtroAno.value || ANO_ATUAL;
-
+  const consulta = normalizarConsultaOficios(
+    memoriaConsulta.ler(), ANO_ATUAL, new Date().toLocaleDateString("sv-SE"),
+  );
+  anoSelecionado = consulta.ano;
+  filtroAno.value = consulta.ano;
+  if (inputBusca) inputBusca.value = consulta.busca;
+  if (filtroDisponiveis) filtroDisponiveis.checked = consulta.disponiveis;
+  if (filtroDataInicio) filtroDataInicio.value = consulta.inicio;
+  if (filtroDataFim) filtroDataFim.value = consulta.fim;
+  paginaAtual = consulta.pagina;
   atualizarLimitesPeriodo();
-
-  const hoje = new Date().toLocaleDateString("sv-SE");
-
-  if (filtroDataFim && anoSelecionado === ANO_ATUAL) {
-    filtroDataFim.value = hoje;
-  }
 
   carregarOficiosPorAno();
 }
@@ -1196,8 +1217,6 @@ function carregarOficiosPorAno() {
   }
 
   carregandoOficios = true;
-
-  paginaAtual = 1;
 
   renderTabela();
 
@@ -1359,4 +1378,4 @@ btnExportar?.addEventListener("click", async () => {
    INICIALIZAÇÃO
 ========================================= */
 
-carregarAnosDisponiveis();
+// A consulta é restaurada após identificar o usuário logado.

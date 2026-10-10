@@ -1,4 +1,6 @@
+import { criarMemoriaConsulta, normalizarConsultaServidores } from "./core/memoriaConsulta.js";
 import { auth, rtdb } from "./firebaseConfig.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { primeiroEUltimoNome } from "./core/responsavelOficio.js";
 import { exportarTabelaExcel } from "./core/exportarExcel.js";
 import {
@@ -369,6 +371,8 @@ const transferenciasRef = ref(rtdb, "servidores/transferencias");
 let servidores = [];
 let carregandoServidores = true;
 let erroCarregamentoServidores = "";
+const memoriaConsulta = criarMemoriaConsulta("servidores", () => auth.currentUser?.uid);
+let consultaUid = null;
 let paginaAtual = 1;
 let filtroPendenciaAtual = "todos";
 const itensPorPagina = 100;
@@ -1041,8 +1045,33 @@ cardsPendenciasServidores?.addEventListener("click", (event) => {
 /* ===============================
    RENDER TABELA
 ================================ */
+function restaurarConsultaServidores() {
+  const uid = auth.currentUser?.uid;
+  if (!uid || consultaUid === uid) return;
+  consultaUid = uid;
+  const botoes = [...(cardsPendenciasServidores?.querySelectorAll("[data-filtro-pendencia]") || [])];
+  const consulta = normalizarConsultaServidores(memoriaConsulta.ler(), botoes.map(b => b.dataset.filtroPendencia));
+  busca.value = consulta.busca;
+  filtroPendenciaAtual = consulta.pendencia;
+  paginaAtual = consulta.pagina;
+  botoes.forEach(botao => {
+    const ativo = botao.dataset.filtroPendencia === filtroPendenciaAtual;
+    botao.classList.toggle("ativo", ativo);
+    botao.setAttribute("aria-pressed", String(ativo));
+  });
+}
+
+function salvarConsultaServidores() {
+  if (!consultaUid) return;
+  memoriaConsulta.salvar({ busca: busca.value, pendencia: filtroPendenciaAtual, pagina: paginaAtual });
+}
+
+window.addEventListener("pagehide", salvarConsultaServidores);
+
 function renderTabela() {
+  restaurarConsultaServidores();
   if (carregandoServidores || erroCarregamentoServidores) {
+    salvarConsultaServidores();
     tabela.innerHTML = `<tr><td colspan="8" class="carregamento-local">${
       carregandoServidores
         ? '<see-spinner mensagem="Carregando servidores"></see-spinner>'
@@ -1096,6 +1125,7 @@ function renderTabela() {
 
   const totalPaginas = Math.max(1, Math.ceil(filtrados.length / itensPorPagina));
   paginaAtual = Math.min(paginaAtual, totalPaginas);
+  salvarConsultaServidores();
   const inicio = (paginaAtual - 1) * itensPorPagina;
   const fim = inicio + itensPorPagina;
 
@@ -3180,3 +3210,8 @@ function gerarPDFTransferencia(dados) {
     );
   };
 }
+
+// Restaura a consulta mesmo se os dados chegarem antes da identificação do usuário.
+onAuthStateChanged(auth, (user) => {
+  if (user) renderTabela();
+});
