@@ -19,6 +19,8 @@ function criarEstruturaDialogo() {
       role="dialog"
       aria-modal="true"
       aria-labelledby="dialogoGlobalTitulo"
+      aria-describedby="dialogoGlobalMensagem"
+      tabindex="-1"
     >
       <div class="dialogo-global-icone">
         <span
@@ -86,6 +88,33 @@ function obterConfiguracaoDialogo(tipo) {
   return configuracoes[tipo] || configuracoes.informacao;
 }
 
+// Mantém a navegação por Tab no diálogo e devolve o foco ao fechar.
+function gerenciarFocoDialogo(dialogo, inicial) {
+  const anterior = document.activeElement;
+  const temporizador = setTimeout(() => inicial.focus(), 50);
+
+  function conterFoco(event) {
+    if (event.key !== "Tab") return;
+    const campos = [...dialogo.querySelectorAll("button, textarea")]
+      .filter((campo) => !campo.disabled && campo.getClientRects().length > 0);
+    const primeiro = campos[0] || dialogo;
+    const ultimo = campos.at(-1) || dialogo;
+    const foco = document.activeElement;
+    if (!dialogo.contains(foco) || (event.shiftKey && foco === primeiro) ||
+        (!event.shiftKey && foco === ultimo)) {
+      event.preventDefault();
+      (event.shiftKey ? ultimo : primeiro).focus();
+    }
+  }
+
+  document.addEventListener("keydown", conterFoco);
+  return () => {
+    clearTimeout(temporizador);
+    document.removeEventListener("keydown", conterFoco);
+    if (anterior?.isConnected) anterior.focus();
+  };
+}
+
 function abrirDialogo({
   titulo = "Confirmação",
   mensagem = "",
@@ -127,6 +156,8 @@ function abrirDialogo({
 
   btnCancelar.style.display = mostrarCancelar ? "inline-flex" : "none";
 
+  const restaurarFoco = gerenciarFocoDialogo(dialogo, btnConfirmar);
+
   overlay.classList.add("ativo");
 
   document.body.classList.add("dialogo-aberto");
@@ -151,6 +182,7 @@ function abrirDialogo({
 
       document.removeEventListener("keydown", pressionarTecla);
 
+      restaurarFoco();
       resolve(valor);
     }
 
@@ -170,12 +202,11 @@ function abrirDialogo({
 
     function pressionarTecla(event) {
       if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
         finalizar(false);
       }
-
-      if (event.key === "Enter") {
-        finalizar(true);
-      }
+      // Enter segue o comportamento nativo do botão que tem foco.
     }
 
     btnConfirmar.addEventListener("click", confirmar);
@@ -186,9 +217,6 @@ function abrirDialogo({
 
     document.addEventListener("keydown", pressionarTecla);
 
-    setTimeout(() => {
-      btnConfirmar.focus();
-    }, 50);
   });
 }
 
@@ -270,8 +298,20 @@ window.mostrarPrompt = function ({
   input.placeholder = placeholder;
   input.rows = 3;
   input.maxLength = 500;
+  input.required = obrigatorio;
+  input.setAttribute("aria-label", titulo);
+  input.setAttribute("aria-describedby", "dialogoGlobalMensagem dialogoGlobalPromptErro");
+
+  const erro = document.createElement("p");
+  erro.id = "dialogoGlobalPromptErro";
+  erro.className = "dialogo-global-erro";
+  erro.setAttribute("role", "alert");
+  erro.textContent = "Preencha este campo para continuar.";
+  erro.hidden = true;
 
   mensagemElemento.insertAdjacentElement("afterend", input);
+  input.insertAdjacentElement("afterend", erro);
+  const restaurarFoco = gerenciarFocoDialogo(dialogo, input);
 
   overlay.classList.add("ativo");
   document.body.classList.add("dialogo-aberto");
@@ -288,12 +328,14 @@ window.mostrarPrompt = function ({
       document.body.classList.remove("dialogo-aberto");
 
       input.remove();
+      erro.remove();
 
       btnConfirmar.removeEventListener("click", confirmar);
       btnCancelar.removeEventListener("click", cancelar);
       overlay.removeEventListener("click", clicarFora);
       document.removeEventListener("keydown", pressionarTecla);
 
+      restaurarFoco();
       resolve(valor);
     }
 
@@ -302,6 +344,8 @@ window.mostrarPrompt = function ({
 
       if (obrigatorio && !valor) {
         input.classList.add("erro");
+        input.setAttribute("aria-invalid", "true");
+        erro.hidden = false;
         input.focus();
         return;
       }
@@ -321,11 +365,14 @@ window.mostrarPrompt = function ({
 
     function pressionarTecla(event) {
       if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
         finalizar(null);
       }
 
       // Ctrl + Enter confirma
       if (event.key === "Enter" && event.ctrlKey) {
+        event.preventDefault();
         confirmar();
       }
     }
@@ -337,10 +384,9 @@ window.mostrarPrompt = function ({
 
     input.addEventListener("input", () => {
       input.classList.remove("erro");
+      input.removeAttribute("aria-invalid");
+      erro.hidden = true;
     });
 
-    setTimeout(() => {
-      input.focus();
-    }, 50);
   });
 };
