@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="./src/css/style.css" />
     <link rel="stylesheet" href="./src/css/dashboard-atendimento.css" />
     <link rel="stylesheet" href="./src/css/modelos-documentos.css" />
+    <link rel="stylesheet" href="./src/css/home-acessos.css" />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
@@ -64,82 +65,31 @@
           </button>
         </div>
 
-        <div class="insights">
-          <a>
-            <div
-              class="documentos glass"
-              id="abrirDocs"
-              role="button"
-              tabindex="0"
-              aria-haspopup="dialog"
-              aria-controls="modalDocumentos"
-              data-tilt
-              data-tilt-glare
-              data-tilt-max-glare="0.2"
-            >
-              <img src="./src/images/icons/files.svg" />
-              <div class="middle">
-                <div class="left">
-                  <h3>Modelos de Documentos</h3>
-                  <h1>Acessar</h1>
-                </div>
-              </div>
-            </div>
-          </a>
-
-
-          <a
+        <div class="insights home-acessos" aria-label="Serviços e documentos">
+          <button type="button" class="home-acesso documentos glass" id="abrirDocs"
+            aria-haspopup="dialog" aria-controls="modalDocumentos">
+            <img src="./src/images/icons/files.svg" alt="" />
+            <span class="home-acesso-titulo">Modelos de Documentos</span>
+            <span class="home-acesso-acao">Acessar <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></span>
+          </button>
+          <a class="home-acesso contracheques glass"
             href="http://pmcarpina.tabsassessoria.com.br:8893/sipweb/trabalhador/login/login.xhtml"
-            target="_blank"
-          >
-            <div
-              class="contracheques glass"
-              data-tilt
-              data-tilt-glare
-              data-tilt-max-glare="0.2"
-            >
-              <img src="./src/images/icons/wallet.svg" />
-              <div class="middle">
-                <div class="left">
-                  <h3>Contracheques</h3>
-                  <h1>Acessar</h1>
-                </div>
-              </div>
-            </div>
+            target="_blank" rel="noopener noreferrer" aria-label="Contracheques (abre em nova aba)">
+            <img src="./src/images/icons/wallet.svg" alt="" />
+            <span class="home-acesso-titulo">Contracheques</span>
+            <span class="home-acesso-acao">Acessar <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span></span>
           </a>
-
-          <a href="https://www.carpina.pe.gov.br:2096/" target="_blank">
-            <div
-              class="email glass"
-              data-tilt
-              data-tilt-glare
-              data-tilt-max-glare="0.2"
-            >
-              <img src="./src/images/icons/mail.svg" />
-              <div class="middle">
-                <div class="left">
-                  <h3>Email</h3>
-                  <h1>Acessar</h1>
-                </div>
-              </div>
-            </div>
+          <a class="home-acesso email glass" href="https://www.carpina.pe.gov.br:2096/"
+            target="_blank" rel="noopener noreferrer" aria-label="Email (abre em nova aba)">
+            <img src="./src/images/icons/mail.svg" alt="" />
+            <span class="home-acesso-titulo">Email</span>
+            <span class="home-acesso-acao">Acessar <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span></span>
           </a>
-
-          <a href="https://digital.carpina.pe.gov.br/" target="_blank">
-            <div
-              class="digital glass"
-              data-tilt
-              data-tilt-glare
-              data-tilt-max-glare="0.2"
-            >
-              <img src="./src/images/icons/safari.svg" />
-              <div class="middle">
-                <div class="left">
-                  <h3>Carpina Digital</h3>
-                  <h1>Acessar</h1>
-                </div>
-              </div>
-            </div>
+          <a class="home-acesso digital glass" href="https://digital.carpina.pe.gov.br/"
+            target="_blank" rel="noopener noreferrer" aria-label="Carpina Digital (abre em nova aba)">
+            <img src="./src/images/icons/safari.svg" alt="" />
+            <span class="home-acesso-titulo">Carpina Digital</span>
+            <span class="home-acesso-acao">Acessar <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span></span>
           </a>
         </div>
 
