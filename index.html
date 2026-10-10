@@ -18,7 +18,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="SEE Carpina" />
-    <link rel="apple-touch-icon" sizes="180x180" href="./src/images/app/icon-180.png?v=2" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="./src/images/app/icon-180.png?v=2"
+    />
     <script defer src="./src/js/instalar-app.js"></script>
     <link rel="stylesheet" href="./src/css/portal-refinado.css" />
   </head>
@@ -98,13 +102,21 @@
                   <span class="material-symbols-outlined">download</span>
                   <span>Timbre Horizontal</span>
                 </a>
+                <a href="./src/downloads/Modelo de Ofício.docx" download>
+                  <span class="material-symbols-outlined">download</span>
+                  <span>Modelo de Ofício</span>
+                </a>
                 <a href="./src/downloads/Ficha Funcional.pdf" download>
                   <span class="material-symbols-outlined">download</span>
                   <span>Ficha Funcional</span>
                 </a>
-                <a href="./src/downloads/Requerimento Padrão.pdf" download>
+                <a href="./src/downloads/Requerimento Padrão.docx" download>
                   <span class="material-symbols-outlined">download</span>
                   <span>Requerimento Padrão</span>
+                </a>
+                <a href="./src/downloads/Solicitação de Diária.docx" download>
+                  <span class="material-symbols-outlined">download</span>
+                  <span>Solicitação de Diária</span>
                 </a>
               </div>
             </div>
@@ -167,20 +179,56 @@
 
         <div id="datasComemorativas"></div>
 
-        <section id="dashboardAtendimento" class="dashboard-operacional" hidden aria-labelledby="tituloAtendimentoDashboard">
+        <section
+          id="dashboardAtendimento"
+          class="dashboard-operacional"
+          hidden
+          aria-labelledby="tituloAtendimentoDashboard"
+        >
           <div class="dashboard-cabecalho">
-            <div><h2 id="tituloAtendimentoDashboard">Atendimento às escolas</h2><p>Um panorama dos pedidos que você acompanha.</p></div>
+            <div>
+              <h2 id="tituloAtendimentoDashboard">Atendimento às escolas</h2>
+              <p>Um panorama dos pedidos que você acompanha.</p>
+            </div>
             <a href="./solicitacoes.html">Abrir Central de Solicitações →</a>
           </div>
           <div class="dashboard-numeros">
-            <a class="dashboard-numero" href="./solicitacoes.html?status=RECEBIDA"><span>Recebidas</span><strong id="dashboard-recebidas">—</strong><small>Aguardando início</small></a>
-            <a class="dashboard-numero" href="./solicitacoes.html?status=EM_ATENDIMENTO"><span>Em atendimento</span><strong id="dashboard-atendimento">—</strong><small>Trabalho em andamento</small></a>
-            <a class="dashboard-numero" href="./solicitacoes.html?status=AGUARDANDO_CONFIRMACAO"><span>Aguardando confirmação</span><strong id="dashboard-confirmacao">—</strong><small>Retorno da unidade escolar</small></a>
-            <a class="dashboard-numero urgente" href="./solicitacoes.html?prioridade=URGENTE&amp;abertos=1"><span>Urgentes</span><strong id="dashboard-urgentes">—</strong><small>Aguardando ação da secretaria</small></a>
+            <a
+              class="dashboard-numero"
+              href="./solicitacoes.html?status=RECEBIDA"
+              ><span>Recebidas</span><strong id="dashboard-recebidas">—</strong
+              ><small>Aguardando início</small></a
+            >
+            <a
+              class="dashboard-numero"
+              href="./solicitacoes.html?status=EM_ATENDIMENTO"
+              ><span>Em atendimento</span
+              ><strong id="dashboard-atendimento">—</strong
+              ><small>Trabalho em andamento</small></a
+            >
+            <a
+              class="dashboard-numero"
+              href="./solicitacoes.html?status=AGUARDANDO_CONFIRMACAO"
+              ><span>Aguardando confirmação</span
+              ><strong id="dashboard-confirmacao">—</strong
+              ><small>Retorno da unidade escolar</small></a
+            >
+            <a
+              class="dashboard-numero urgente"
+              href="./solicitacoes.html?prioridade=URGENTE&amp;abertos=1"
+              ><span>Urgentes</span><strong id="dashboard-urgentes">—</strong
+              ><small>Aguardando ação da secretaria</small></a
+            >
           </div>
           <div class="dashboard-fila">
             <h3>Pedidos que precisam de atenção</h3>
-            <p id="dashboardAtendimentoMensagem" class="dashboard-mensagem" role="status">Carregando solicitações…</p>
+            <p
+              id="dashboardAtendimentoMensagem"
+              class="dashboard-mensagem"
+              role="status"
+            >
+              Carregando solicitações…
+            </p>
             <div id="dashboardPedidosAtencao"></div>
           </div>
         </section>
@@ -193,7 +241,6 @@
               <div id="totalOficios" class="total-oficios">
                 Total geral de ofícios: <strong></strong>
                 <br />
-
               </div>
 
               <canvas id="graficoOficiosMes" height="220"></canvas>
@@ -263,7 +310,7 @@
 
           if (!resposta.ok) {
             throw new Error(
-              `Erro ao carregar datasComemorativas.json: ${resposta.status}`
+              `Erro ao carregar datasComemorativas.json: ${resposta.status}`,
             );
           }
 
@@ -279,7 +326,9 @@
           const dataHoje = `${mes}-${dia}`;
 
           // Filtra todas as datas comemorativas de hoje
-          const eventosHoje = datas.filter(evento => evento.data === dataHoje);
+          const eventosHoje = datas.filter(
+            (evento) => evento.data === dataHoje,
+          );
 
           // --------------------------------------------------------
           // NENHUMA DATA
@@ -316,8 +365,8 @@
                 <div>
                   <strong>Datas de hoje</strong>
                   <span>${eventosHoje.length} ${
-            eventosHoje.length === 1 ? "comemoração" : "comemorações"
-          }</span>
+                    eventosHoje.length === 1 ? "comemoração" : "comemorações"
+                  }</span>
                 </div>
               </div>
 
@@ -356,7 +405,6 @@
                 .join("")}
             </div>
           `;
-
         } catch (erro) {
           console.error("Erro ao carregar datas comemorativas:", erro);
 
@@ -375,15 +423,12 @@
         }
       }
 
-
       // ============================================================
       // ÍCONES DAS CATEGORIAS
       // ============================================================
 
       function obterIconeDataComemorativa(categoria) {
-
         switch (categoria) {
-
           case "Educação":
             return "school";
 
@@ -422,14 +467,12 @@
         }
       }
 
-
       // ============================================================
       // SEGURANÇA
       // Evita que caracteres do JSON sejam interpretados como HTML
       // ============================================================
 
       function escaparHTML(texto) {
-
         if (texto === undefined || texto === null) {
           return "";
         }
@@ -442,7 +485,6 @@
           .replace(/'/g, "&#039;");
       }
 
-
       // ============================================================
       // ATUALIZAÇÃO AUTOMÁTICA À MEIA-NOITE
       // ============================================================
@@ -450,18 +492,14 @@
       let ultimaDataComemorativa = new Date().toDateString();
 
       setInterval(() => {
-
         const novaData = new Date().toDateString();
 
         if (novaData !== ultimaDataComemorativa) {
-
           ultimaDataComemorativa = novaData;
 
           carregarDatasComemorativas();
         }
-
       }, 60000);
-
 
       // ============================================================
       // INICIALIZAÇÃO
