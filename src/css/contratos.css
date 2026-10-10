@@ -271,7 +271,7 @@
 }
 
 .barra-saldo-preenchida.laranja {
-  background: var(--clr-warnig);
+  background: var(--clr-attention);
 }
 
 .barra-saldo-preenchida.vermelho {

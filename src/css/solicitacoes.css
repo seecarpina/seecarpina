@@ -42,8 +42,8 @@
 }
 
 .resumo-central-icone.analise {
-  color: var(--clr-danger);
-  background: rgba(255, 159, 10, 0.13);
+  color: var(--clr-accent);
+  background: color-mix(in srgb, var(--clr-accent) 13%, transparent);
 }
 
 .resumo-central-icone.atendimento {
@@ -605,9 +605,9 @@ body.drawer-solicitacao-aberto {
 .observacao-entrega-central {
   margin-top: 15px;
   padding: 13px;
-  border: 1px solid rgba(255, 159, 10, 0.3);
+  border: 1px solid color-mix(in srgb, var(--clr-attention) 30%, transparent);
   border-radius: 11px;
-  background: rgba(255, 159, 10, 0.08);
+  background: color-mix(in srgb, var(--clr-attention) 8%, transparent);
 }
 
 .observacao-entrega-central small {
@@ -920,8 +920,8 @@ body.drawer-solicitacao-aberto {
 }
 
 .resultado-comparativo.parcial {
-  color: var(--clr-danger);
-  background: rgba(255, 159, 10, 0.12);
+  color: var(--clr-attention);
+  background: color-mix(in srgb, var(--clr-attention) 12%, transparent);
 }
 
 .resultado-comparativo.nao-entregue {
@@ -1085,8 +1085,8 @@ body.drawer-solicitacao-aberto {
 }
 
 .secao-detalhe-central.cancelamento {
-  border-color: rgba(255, 159, 10, 0.35);
-  background: rgba(255, 159, 10, 0.07);
+  border-color: color-mix(in srgb, var(--clr-danger) 35%, transparent);
+  background: color-mix(in srgb, var(--clr-danger) 7%, transparent);
 }
 
 .secao-detalhe-central.cancelamento small {
@@ -1316,10 +1316,10 @@ body.drawer-solicitacao-aberto {
   align-items: flex-start;
   gap: 0.5rem;
   padding: 0.7rem;
-  border: 1px solid rgba(255, 159, 10, 0.3);
+  border: 1px solid color-mix(in srgb, var(--clr-attention) 30%, transparent);
   border-radius: 0.6rem;
   color: var(--clr-dark-variant);
-  background: rgba(255, 159, 10, 0.08);
+  background: color-mix(in srgb, var(--clr-attention) 8%, transparent);
 }
 
 .aviso-observacao-obrigatoria.ativo {
@@ -1328,7 +1328,7 @@ body.drawer-solicitacao-aberto {
 
 .aviso-observacao-obrigatoria .material-symbols-outlined {
   flex: 0 0 auto;
-  color: var(--clr-danger);
+  color: var(--clr-attention);
   font-size: 1.1rem;
 }
 
@@ -1463,7 +1463,7 @@ body.drawer-solicitacao-aberto {
   height: 2.35rem;
   border: 0;
   border-radius: 50%;
-  background: rgba(255, 159, 10, 0.14);
+  background: color-mix(in srgb, var(--clr-danger) 14%, transparent);
   color: var(--clr-danger);
   cursor: pointer;
 }
