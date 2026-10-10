@@ -22,7 +22,7 @@
       <script defer src="./src/js/componentes/carregamento.js"></script>
   </head>
 
-  <body class="portal-refinado">
+  <body class="portal-refinado pagina-checklist">
     <button id="btnTopo">↑</button>
     <div class="loading">
       <see-spinner mensagem="Carregando o sistema" tamanho="grande"></see-spinner>
@@ -32,44 +32,36 @@
 
       <main>
         <h1>Checklist de Documentos</h1>
-        <div id="docs" class="checkbox-wrapper-14 glass"></div>
+        <p class="checklist-introducao">Confira os documentos entregues para formalizar o contrato.</p>
+        <section class="checklist-prancheta" id="pranchetaChecklist" aria-labelledby="tituloConferencia">
+          <span class="checklist-presilha" aria-hidden="true"></span>
+          <div class="checklist-folha">
+            <header class="checklist-cabecalho">
+              <span class="checklist-icone material-symbols-outlined" aria-hidden="true">fact_check</span>
+              <div>
+                <span class="checklist-sobretitulo">Formalização de contrato</span>
+                <h2 id="tituloConferencia">Documentos do servidor</h2>
+              </div>
+            </header>
+            <div class="checklist-andamento">
+              <output id="contagemDocumentos" aria-live="polite">0 de 16 documentos conferidos</output>
+              <progress id="progressoDocumentos" value="0" max="16" aria-label="Documentos conferidos"></progress>
+            </div>
+            <ul id="docs" class="checklist-lista"></ul>
+            <footer class="checklist-rodape">
+              <p id="mensagemChecklist">Marque os documentos à medida que forem conferidos.</p>
+              <button type="button" id="novaConferencia" class="checklist-nova" disabled>
+                <span class="material-symbols-outlined" aria-hidden="true">restart_alt</span>
+                Nova conferência
+              </button>
+            </footer>
+          </div>
+        </section>
       </main>
 
       <div class="right"></div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script type="module" src="./src/js/scripts.js"></script>
-    <script>
-      const caixaDocs = document.querySelector("#docs");
-      let documentos = [
-        "RG",
-        "CPF",
-        "PIS/PASEP/NIS",
-        "Título de Eleitor",
-        "Certidão de Regularidade Eleitoral",
-        "CTPS",
-        "Registro de Nascimento/Casamento",
-        "Comprovante de Residência",
-        "Carteira de Reservista",
-        "Foto 3x4",
-        "Currículo",
-        "Comprovante de Grau de Escolaridade",
-        "Certidão de Improbidade",
-        "Certidão negativa criminal Estadual",
-        "Certidão negativa criminal Federal",
-        "Conta do Santander",
-      ];
-
-      for (let i = 0; i < documentos.length; i++) {
-        caixaDocs.insertAdjacentHTML(
-          "beforeend",
-          `
-                <input id="${documentos[i]}" type="checkbox" class="switch" />
-                <label for="${documentos[i]}">${documentos[i]}</label>
-                <br><br>
-            `,
-        );
-      }
-    </script>
+    <script type="module" src="./src/js/checklist.js"></script>
   </body>
 </html>
