@@ -6,6 +6,7 @@
     <title>SEE Carpina</title>
     <link rel="stylesheet" href="./src/css/style.css" />
     <link rel="stylesheet" href="./src/css/dashboard-atendimento.css" />
+    <link rel="stylesheet" href="./src/css/modelos-documentos.css" />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
@@ -68,6 +69,10 @@
             <div
               class="documentos glass"
               id="abrirDocs"
+              role="button"
+              tabindex="0"
+              aria-haspopup="dialog"
+              aria-controls="modalDocumentos"
               data-tilt
               data-tilt-glare
               data-tilt-max-glare="0.2"
@@ -81,46 +86,7 @@
               </div>
             </div>
           </a>
-          <!-- POPUP -->
-          <div class="modal" id="modalDocumentos">
-            <div class="modal-content">
-              <span class="fechar">&times;</span>
-              <h2>Modelos de Documentos</h2>
 
-              <div class="opcoes">
-                <a
-                  href="./src/downloads/SEE CARPINA - Timbre Vertical.docx"
-                  download
-                >
-                  <span class="material-symbols-outlined">download</span>
-                  <span>Timbre Vertical</span>
-                </a>
-                <a
-                  href="./src/downloads/SEE CARPINA - Timbre Horizontal.docx"
-                  download
-                >
-                  <span class="material-symbols-outlined">download</span>
-                  <span>Timbre Horizontal</span>
-                </a>
-                <a href="./src/downloads/Modelo de Ofício.docx" download>
-                  <span class="material-symbols-outlined">download</span>
-                  <span>Modelo de Ofício</span>
-                </a>
-                <a href="./src/downloads/Ficha Funcional.pdf" download>
-                  <span class="material-symbols-outlined">download</span>
-                  <span>Ficha Funcional</span>
-                </a>
-                <a href="./src/downloads/Requerimento Padrão.docx" download>
-                  <span class="material-symbols-outlined">download</span>
-                  <span>Requerimento Padrão</span>
-                </a>
-                <a href="./src/downloads/Solicitação de Diária.docx" download>
-                  <span class="material-symbols-outlined">download</span>
-                  <span>Solicitação de Diária</span>
-                </a>
-              </div>
-            </div>
-          </div>
 
           <a
             href="http://pmcarpina.tabsassessoria.com.br:8893/sipweb/trabalhador/login/login.xhtml"
@@ -176,6 +142,124 @@
             </div>
           </a>
         </div>
+
+          <dialog id="modalDocumentos" class="modelos-dialog" aria-labelledby="tituloModelos" aria-describedby="descricaoModelos">
+            <header class="modelos-cabecalho">
+              <div>
+                <span class="modelos-subtitulo">DOCUMENTOS DA SECRETARIA</span>
+                <h2 id="tituloModelos">Modelos de Documentos</h2>
+                <p id="descricaoModelos">Escolha um modelo e baixe uma cópia para preencher.</p>
+              </div>
+              <button type="button" class="modelos-fechar" aria-label="Fechar modelos de documentos">
+                <span class="material-symbols-outlined" aria-hidden="true">close</span>
+              </button>
+            </header>
+            <div class="modelos-conteudo">
+              <section class="modelos-grupo" aria-labelledby="grupoModelos0">
+                <h3 id="grupoModelos0">Timbrados</h3>
+                <p class="modelos-descricao-grupo">Identidade visual para os documentos da Secretaria.</p>
+                <div class="modelos-lista">
+                  <article class="modelo-item">
+                    <span class="material-symbols-outlined modelo-icone" aria-hidden="true">description</span>
+                    <div class="modelo-info">
+                      <h4>Timbre Vertical</h4>
+                      <p>Para documentos em páginas na orientação retrato.</p>
+                      <span class="modelo-formato">Word · Editável</span>
+                    </div>
+                    <a class="modelo-download" href="./src/downloads/SEE CARPINA - Timbre Vertical.docx" download aria-label="Baixar modelo: Timbre Vertical">
+                      <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                      Baixar modelo
+                    </a>
+                  </article>
+                  <article class="modelo-item">
+                    <span class="material-symbols-outlined modelo-icone" aria-hidden="true">article</span>
+                    <div class="modelo-info">
+                      <h4>Timbre Horizontal</h4>
+                      <p>Para documentos e quadros na orientação paisagem.</p>
+                      <span class="modelo-formato">Word · Editável</span>
+                    </div>
+                    <a class="modelo-download" href="./src/downloads/SEE CARPINA - Timbre Horizontal.docx" download aria-label="Baixar modelo: Timbre Horizontal">
+                      <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                      Baixar modelo
+                    </a>
+                  </article>
+                </div>
+              </section>
+              <section class="modelos-grupo" aria-labelledby="grupoModelos1">
+                <h3 id="grupoModelos1">Comunicação oficial</h3>
+                <p class="modelos-descricao-grupo">Modelos para solicitações e comunicações administrativas.</p>
+                <div class="modelos-lista">
+                  <article class="modelo-item">
+                    <span class="material-symbols-outlined modelo-icone" aria-hidden="true">description</span>
+                    <div class="modelo-info">
+                      <h4>Modelo de Ofício</h4>
+                      <p>Para comunicações oficiais da Secretaria.</p>
+                      <span class="modelo-formato">Word · Editável</span>
+                    </div>
+                    <a class="modelo-download" href="./src/downloads/Modelo de Ofício.docx" download aria-label="Baixar modelo: Modelo de Ofício">
+                      <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                      Baixar modelo
+                    </a>
+                  </article>
+                  <article class="modelo-item">
+                    <span class="material-symbols-outlined modelo-icone" aria-hidden="true">edit_document</span>
+                    <div class="modelo-info">
+                      <h4>Requerimento Padrão</h4>
+                      <p>Para formalizar pedidos à administração.</p>
+                      <span class="modelo-formato">Word · Editável</span>
+                    </div>
+                    <a class="modelo-download" href="./src/downloads/Requerimento Padrão.docx" download aria-label="Baixar modelo: Requerimento Padrão">
+                      <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                      Baixar modelo
+                    </a>
+                  </article>
+                </div>
+                <details class="modelos-orientacoes">
+                  <summary>Como preencher o modelo de ofício</summary>
+                  <div>
+                    <p>Use a formatação do arquivo como referência e preserve o timbre, a fonte, as margens e o espaçamento do modelo.</p>
+                    <ol>
+                      <li>Preencha o número do ofício e o ano conforme o registro no sistema.</li>
+                      <li>Atualize a data, o destinatário e o assunto.</li>
+                      <li>Substitua o texto de exemplo pela comunicação desejada.</li>
+                      <li>Confira o nome e o cargo de quem assina e revise o documento antes de enviar.</li>
+                    </ol>
+                  </div>
+                </details>
+              </section>
+              <section class="modelos-grupo" aria-labelledby="grupoModelos2">
+                <h3 id="grupoModelos2">Recursos Humanos</h3>
+                <p class="modelos-descricao-grupo">Documentos de cadastro e solicitação de diária.</p>
+                <div class="modelos-lista">
+                  <article class="modelo-item">
+                    <span class="material-symbols-outlined modelo-icone" aria-hidden="true">badge</span>
+                    <div class="modelo-info">
+                      <h4>Ficha Funcional</h4>
+                      <p>Para registrar os dados funcionais do servidor.</p>
+                      <span class="modelo-formato">PDF</span>
+                    </div>
+                    <a class="modelo-download" href="./src/downloads/Ficha Funcional.pdf" download aria-label="Baixar modelo: Ficha Funcional">
+                      <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                      Baixar modelo
+                    </a>
+                  </article>
+                  <article class="modelo-item">
+                    <span class="material-symbols-outlined modelo-icone" aria-hidden="true">work</span>
+                    <div class="modelo-info">
+                      <h4>Solicitação de Diária</h4>
+                      <p>Para formalizar a solicitação de diária.</p>
+                      <span class="modelo-formato">Word · Editável</span>
+                    </div>
+                    <a class="modelo-download" href="./src/downloads/Solicitação de Diária.docx" download aria-label="Baixar modelo: Solicitação de Diária">
+                      <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                      Baixar modelo
+                    </a>
+                  </article>
+                </div>
+              </section>
+              <p class="modelos-rodape"><span class="material-symbols-outlined" aria-hidden="true">info</span>Os arquivos Word podem ser editados. A ficha funcional está disponível em PDF.</p>
+            </div>
+          </dialog>
 
         <div id="datasComemorativas"></div>
 
@@ -292,6 +376,7 @@
     <script type="module" src="./src/js/scripts.js"></script>
     <script type="module" src="./src/js/vanilla-tilt.min.js"></script>
     <script type="module" src="./src/js/dashboard.js"></script>
+    <script type="module" src="./src/js/modelosDocumentos.js"></script>
     <script type="module" src="./src/js/dashboardAtendimento.js"></script>
     <script>
       // ============================================================
@@ -507,33 +592,6 @@
 
       carregarDatasComemorativas();
 
-      // POPUP DOCUMENTOS
-      const abrirDocs = document.getElementById("abrirDocs");
-      const modalDocumentos = document.getElementById("modalDocumentos");
-      const fechar = modalDocumentos.querySelector(".fechar");
-      function abrirFecharmodal(acao) {
-        modalDocumentos.style.display = acao;
-      }
-
-      abrirDocs.addEventListener("click", () => {
-        abrirFecharmodal("flex");
-      });
-
-      document.addEventListener("keydown", function (event) {
-        if (event.key === "Escape") {
-          abrirFecharmodal("none");
-        }
-      });
-
-      fechar.addEventListener("click", () => {
-        abrirFecharmodal("none");
-      });
-
-      modalDocumentos.addEventListener("click", (e) => {
-        if (e.target === modalDocumentos) {
-          abrirFecharmodal("none");
-        }
-      });
     </script>
   </body>
 </html>
