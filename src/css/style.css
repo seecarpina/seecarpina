@@ -32,7 +32,7 @@
   --glass-border: rgba(255, 255, 255, 0.35);
   --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.12);
   --glass-highlight: rgba(255, 255, 255, 0.35);
-  --bg: url(../images/background.png);
+  --bg: url(../images/bg.png);
 }
 
 .paleta_1 {
@@ -329,7 +329,7 @@ body {
   overflow-x: hidden;
   background-color: var(--clr-color-background);
   background-image: var(--bg);
-  background-size: auto 100%;
+  background-size: cover;
   background-attachment: fixed;
   background-repeat: no-repeat;
   background-position: top right;
@@ -550,14 +550,18 @@ aside .sidebar {
   --menu-sair-cor: #c93838;
   --menu-sair-fundo: color-mix(in srgb, var(--menu-sair-cor) 10%, transparent);
 }
-.dark-theme-variables aside .sidebar { --menu-sair-cor: #ff6961; }
+.dark-theme-variables aside .sidebar {
+  --menu-sair-cor: #ff6961;
+}
 aside .sidebar a {
   display: flex;
   color: var(--clr-dark);
   gap: 1rem;
   align-items: center;
   height: 3.2rem;
-  transition: background-color .18s ease, color .18s ease;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease;
   padding-left: 1rem;
   position: relative;
 }
@@ -571,7 +575,9 @@ aside .sidebar a > .material-symbols-outlined {
   background: var(--menu-icone-fundo);
   color: var(--menu-icone-cor);
   border-radius: 8px;
-  transition: background-color .18s ease, color .18s ease;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease;
 }
 aside .sidebar a.active {
   background: var(--menu-ativo-fundo);
@@ -600,7 +606,7 @@ aside .sidebar #logout {
 aside .sidebar #logout::before {
   content: "";
   position: absolute;
-  top: -.5rem;
+  top: -0.5rem;
   left: 1rem;
   right: 1rem;
   height: 1px;
@@ -612,9 +618,15 @@ aside .sidebar #logout:hover > .material-symbols-outlined {
   background: var(--menu-sair-fundo);
   color: var(--menu-sair-cor);
 }
-aside .sidebar #logout:hover { background: var(--menu-sair-fundo); color: var(--menu-sair-cor); }
+aside .sidebar #logout:hover {
+  background: var(--menu-sair-fundo);
+  color: var(--menu-sair-cor);
+}
 @media (prefers-reduced-motion: reduce) {
-  aside .sidebar a, aside .sidebar a > .material-symbols-outlined { transition: none; }
+  aside .sidebar a,
+  aside .sidebar a > .material-symbols-outlined {
+    transition: none;
+  }
 }
 
 .sidebar-grupo-titulo {
@@ -1891,15 +1903,50 @@ select {
   color: var(--clr-dark);
   font-weight: 700;
 }
-.cal-dias .tem-evento .cal-numero { transform: translateY(-2px); }
-.cal-evento-marcadores { position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 2px; }
-.cal-evento-marcador { display: inline-block; width: 5px; height: 5px; flex-shrink: 0; border-radius: 50%; }
-.cal-evento-mais { font-size: 8px; line-height: 1; color: var(--clr-dark); }
-.cal-dias .tem-evento:focus-visible { outline: 2px solid var(--clr-primary); outline-offset: 1px; border-radius: 50%; }
-.cal-tooltip-evento { display: flex; align-items: baseline; gap: .4rem; }
-.cal-tooltip-evento + .cal-tooltip-evento { margin-top: .35rem; }
-.cal-tooltip-evento .cal-evento-marcador { width: 7px; height: 7px; }
-.cal-tooltip-evento > span:last-child { overflow-wrap: anywhere; }
+.cal-dias .tem-evento .cal-numero {
+  transform: translateY(-2px);
+}
+.cal-evento-marcadores {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.cal-evento-marcador {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+.cal-evento-mais {
+  font-size: 8px;
+  line-height: 1;
+  color: var(--clr-dark);
+}
+.cal-dias .tem-evento:focus-visible {
+  outline: 2px solid var(--clr-primary);
+  outline-offset: 1px;
+  border-radius: 50%;
+}
+.cal-tooltip-evento {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+.cal-tooltip-evento + .cal-tooltip-evento {
+  margin-top: 0.35rem;
+}
+.cal-tooltip-evento .cal-evento-marcador {
+  width: 7px;
+  height: 7px;
+}
+.cal-tooltip-evento > span:last-child {
+  overflow-wrap: anywhere;
+}
 
 .calendario .btn {
   display: flex;
