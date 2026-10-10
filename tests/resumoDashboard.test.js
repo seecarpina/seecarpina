@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { modulosDashboardPermitidos, resumirAtendimento, diasDesdePedido } from '../src/js/core/resumoDashboard.js';
+import { modulosDashboardPermitidos, resumirAtendimento, diasDesdePedido } from '../secretaria/src/js/core/resumoDashboard.js';
 
 test('dashboard consulta somente módulos explicitamente permitidos', () => {
   assert.deepEqual(modulosDashboardPermitidos(null), []);

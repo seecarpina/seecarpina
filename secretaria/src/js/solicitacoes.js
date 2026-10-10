@@ -1,6 +1,6 @@
 import { linhasValidadeRomaneio } from "./core/estoqueLotes.js";
 import { garantirLotes, adicionarBaixaLotes } from "./core/estoqueLotesFirebase.js";
-import { gerarPDFPedidoSolicitacao, obterListaPedido } from "../../gestao-escolar/src/js/pedidoPDF.js";
+import { gerarPDFPedidoSolicitacao, obterListaPedido } from "./pedidoPDF.js";
 import { auth, db, rtdb } from "./firebaseConfig.js";
 import {
   observacaoEhObrigatoria,

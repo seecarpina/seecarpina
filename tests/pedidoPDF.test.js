@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { gerarPDFPedidoSolicitacao, obterListaPedido } from "../gestao-escolar/src/js/pedidoPDF.js";
+import { gerarPDFPedidoSolicitacao, obterListaPedido } from "../packages/compartilhado/src/js/pedidoPDF.js";
 
 test("listas do pedido aceitam itens em array ou registros do Firebase", () => {
   assert.deepEqual(obterListaPedido({ a: { nome: "Papel" } }), [{ nome: "Papel" }]);

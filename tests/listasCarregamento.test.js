@@ -2,9 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
-import { normalizarConsultaServidores } from "../src/js/core/memoriaConsulta.js";
+import { normalizarConsultaServidores } from "../secretaria/src/js/core/memoriaConsulta.js";
 
-const fonte = readFileSync(new URL("../src/js/servidores.js", import.meta.url), "utf8");
+const fonte = readFileSync(new URL("../secretaria/src/js/servidores.js", import.meta.url), "utf8");
 function prepararServidores(consulta = null) {
   const assinaturas = {};
   const frames = [];
@@ -78,7 +78,7 @@ test("contratos, circulares e DFDs também preservam estado pendente ou erro dur
     ["oficios-circulares.js", "carregandoCirculares", "erroCarregamentoCirculares"],
     ["dfd.js", "carregandoDfds", "erroCarregamentoDfds"],
   ]) {
-    const texto = readFileSync(new URL(`../src/js/${arquivo}`, import.meta.url), "utf8");
+    const texto = readFileSync(new URL(`../secretaria/src/js/${arquivo}`, import.meta.url), "utf8");
     // O primeiro bloco impede renderização antecipada, antes de qualquer filtro.
     const inicio = texto.indexOf("function renderTabela() {");
     const fim = texto.indexOf("    return;\n  }", inicio) + "    return;\n  }".length;

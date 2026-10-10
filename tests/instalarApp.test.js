@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 
-const codigo = readFileSync(new URL("../src/js/instalar-app.js", import.meta.url), "utf8");
+const codigo = readFileSync(new URL("../secretaria/src/js/instalar-app.js", import.meta.url), "utf8");
 function iniciar({ instalado = false, ios = false, adiado = false } = {}) {
   const eventos = {};
   const elementos = {};

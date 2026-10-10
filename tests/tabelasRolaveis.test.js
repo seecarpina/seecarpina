@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { prepararTabelaRolavel } from "../src/js/componentes/tabelasRolaveis.js";
+import { prepararTabelaRolavel } from "../secretaria/src/js/componentes/tabelasRolaveis.js";
 
 test("aviso acompanha carga, filtro e redimensionamento sem manter foco em tabela que cabe", () => {
   const callbacks={}; const attrs=new Map(); const tabela={}; let aviso;

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
-import { criarMemoriaConsulta, normalizarConsultaOficios, normalizarConsultaServidores } from "../src/js/core/memoriaConsulta.js";
+import { criarMemoriaConsulta, normalizarConsultaOficios, normalizarConsultaServidores } from "../secretaria/src/js/core/memoriaConsulta.js";
 
 function storage() {
   const dados=new Map(); return {dados,getItem:k=>dados.get(k)||null,setItem:(k,v)=>dados.set(k,v)};
@@ -46,7 +46,7 @@ test("estado inválido não injeta ano fora do catálogo, datas impossíveis ou 
 });
 
 test("inicialização de ofícios restaura o ano antes da consulta e mantém página durante a carga",()=>{
-  const fonte=readFileSync(new URL("../src/js/oficios.js",import.meta.url),"utf8");
+  const fonte=readFileSync(new URL("../secretaria/src/js/oficios.js",import.meta.url),"utf8");
   const filtroAno={value:"2026",innerHTML:"",appendChild(){}};
   const ctx={filtroAno,ANO_ATUAL:"2026", memoriaConsulta:{ler:()=>({ano:"2025",busca:"Escola",disponiveis:true,inicio:"2025-03-01",fim:"2025-04-30",pagina:4})},normalizarConsultaOficios,
     inputBusca:{},filtroDisponiveis:{},filtroDataInicio:{},filtroDataFim:{},anoSelecionado:"2026",paginaAtual:1,

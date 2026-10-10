@@ -51,7 +51,7 @@ function iniciarDashboard() {
     },
     console: { error() {} },
   };
-  const codigo = readFileSync(new URL("../src/js/dashboard.js", import.meta.url), "utf8")
+  const codigo = readFileSync(new URL("../secretaria/src/js/dashboard.js", import.meta.url), "utf8")
     .replace(/import[\s\S]*?from\s+"[^"]+";/g, "");
   vm.runInNewContext(codigo, contexto);
   const enviar = (caminho, dados) => assinaturas.get(caminho).receber({ exists: () => dados !== null, val: () => dados });

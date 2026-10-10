@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
-import { categoriaExigeValidade, inicializarLotes, selecionarLotesSaida, lotesParaDevolucao } from "../src/js/core/estoqueLotes.js";
+import { categoriaExigeValidade, inicializarLotes, selecionarLotesSaida, lotesParaDevolucao } from "../secretaria/src/js/core/estoqueLotes.js";
 
 function iniciar(material) {
   const dados = { materiais: { arroz: structuredClone(material) }, configuracoes: { estoque: { categorias: { comida: { nome: "Alimentação" } } } } };
@@ -22,7 +22,7 @@ function iniciar(material) {
     },
     increment: quantidade => ({ incremento: quantidade }),
   };
-  const codigo = readFileSync(new URL("../src/js/core/estoqueLotesFirebase.js", import.meta.url), "utf8").replace(/^import .*;\n/gm, "").replace(/export /g, "");
+  const codigo = readFileSync(new URL("../secretaria/src/js/core/estoqueLotesFirebase.js", import.meta.url), "utf8").replace(/^import .*;\n/gm, "").replace(/export /g, "");
   vm.runInNewContext(codigo, contexto);
   return { contexto, dados };
 }

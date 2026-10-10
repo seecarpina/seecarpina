@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { paginarRegistros } from "../src/js/core/paginacaoEstoque.js";
+import { paginarRegistros } from "../secretaria/src/js/core/paginacaoEstoque.js";
 
 test("estoque mostra trinta registros por página sem perder nem repetir itens", () => {
   const registros = Array.from({ length: 63 }, (_, i) => i);

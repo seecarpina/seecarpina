@@ -17,7 +17,7 @@ function iniciar({ modulos = ["INSUMOS", "MANUTENCAO"], falhaPerfil = false } = 
     });
     return elementos.get(id);
   }
-  const codigo = readFileSync(new URL("../src/js/dashboardAtendimento.js", import.meta.url), "utf8")
+  const codigo = readFileSync(new URL("../secretaria/src/js/dashboardAtendimento.js", import.meta.url), "utf8")
     .replace(/import[\s\S]*?from\s+['"][^'"]+['"];/g, "");
   vm.runInNewContext(codigo, {
     auth: {}, db: {}, rtdb: {},

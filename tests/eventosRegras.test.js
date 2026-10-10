@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { dataEventoNoAno, eventoAtrasado, eventosCalendarioPorAno, separarEventosPorAba } from "../src/js/core/eventosRegras.js";
+import { dataEventoNoAno, eventoAtrasado, eventosCalendarioPorAno, separarEventosPorAba } from "../secretaria/src/js/core/eventosRegras.js";
 
 test("aniversários ignoram o ano do cadastro e nunca ficam atrasados", () => {
   const evento = { data: "2020-01-10", categoria: "aniversario" };

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
-const fonte = readFileSync(new URL("../src/js/servidores.js", import.meta.url), "utf8");
+const fonte = readFileSync(new URL("../secretaria/src/js/servidores.js", import.meta.url), "utf8");
 const inicio = fonte.indexOf("function gerarCartaRegistradaDoServidor(");
 const fim = fonte.indexOf("function calcularPreenchimentoFicha(", inicio);
 const codigo = fonte.slice(inicio, fim);
