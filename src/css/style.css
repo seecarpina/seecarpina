@@ -1842,7 +1842,15 @@ select {
   box-shadow: var(--box-shadow);
   z-index: 999;
   opacity: 0;
-  transition: all 0.5s ease;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+#btnTopo.visivel {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 #btnTopo:hover {
