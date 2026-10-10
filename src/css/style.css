@@ -513,6 +513,7 @@ aside .top {
 }
 aside .logo {
   width: 100%;
+  min-width: 0;
   color: var(--clr-dark);
   display: flex;
   flex-direction: column;
@@ -521,8 +522,11 @@ aside .logo {
   padding: 0.5rem;
   text-align: center;
 }
-aside .logo img {
-  max-width: 100%;
+aside .logo .logo-sistema {
+  display: block;
+  width: 100%;
+  max-width: 14rem;
+  height: auto;
 }
 aside .close {
   display: none;
@@ -2470,15 +2474,16 @@ body.dialogo-aberto {
 
   aside .logo {
     width: auto;
+    flex: 1;
+    margin-right: 1rem;
     padding: 0;
 
     align-items: flex-start;
     text-align: left;
   }
 
-  aside .logo h2 {
-    display: inline;
-    margin: 0;
+  aside .logo .logo-sistema {
+    max-width: 16rem;
   }
 
   aside .close {
