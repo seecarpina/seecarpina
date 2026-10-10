@@ -446,9 +446,7 @@ formOficio?.addEventListener("submit", async (event) => {
   const textoOriginal = btnCadastrar.innerHTML;
 
   btnCadastrar.innerHTML = `
-      <span class="material-symbols-outlined">
-        hourglass_top
-      </span>
+      <see-spinner tamanho="pequeno"></see-spinner>
       Salvando...
     `;
 
@@ -579,7 +577,7 @@ function renderTabela() {
           colspan="7"
           style="text-align:center;"
         >
-          <see-spinner></see-spinner>
+          <see-spinner mensagem="Carregando ofícios"></see-spinner>
         </td>
       </tr>
     `;

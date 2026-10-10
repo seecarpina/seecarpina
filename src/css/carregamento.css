@@ -56,3 +56,5 @@ see-spinner[tamanho="pequeno"] { --spinner-tamanho: 20px; }
 @media print {
   .loading, see-spinner { display: none !important; }
 }
+
+.carregamento-local, td:has(> see-spinner) { text-align: center; padding: 2rem; }

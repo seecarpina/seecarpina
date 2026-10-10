@@ -2351,9 +2351,7 @@ btnConfirmarAtualizacao.addEventListener("click", async () => {
   btnConfirmarAtualizacao.disabled = true;
 
   btnConfirmarAtualizacao.innerHTML = `
-      <span class="material-symbols-outlined">
-        progress_activity
-      </span>
+      <see-spinner tamanho="pequeno"></see-spinner>
 
       Salvando...
     `;

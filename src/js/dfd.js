@@ -21,6 +21,8 @@ const POR_PAGINA = 25;
 
 let nomeResponsavel = "Usuário";
 let todosDfds = [];
+let carregandoDfds = true;
+let erroCarregamentoDfds = "";
 let paginaAtual = 1;
 let editando = false;
 let chaveEdicao = null;
@@ -178,6 +180,16 @@ function renderizarPaginacao(totalPaginas) {
 }
 
 function renderTabela() {
+  if (carregandoDfds || erroCarregamentoDfds) {
+    tabela.innerHTML = `<tr><td colspan="3" class="carregamento-local">${
+      carregandoDfds
+        ? '<see-spinner mensagem="Carregando DFDs"></see-spinner>'
+        : erroCarregamentoDfds
+    }</td></tr>`;
+    contador.textContent = "";
+    renderizarPaginacao(0);
+    return;
+  }
   const filtrados = obterFiltrados();
   const totalPaginas = Math.ceil(filtrados.length / POR_PAGINA);
 
@@ -326,7 +338,7 @@ formDfd?.addEventListener("submit", async (event) => {
   const conteudoOriginal = btnCadastrar.innerHTML;
 
   btnCadastrar.innerHTML = `
-    <span class="material-symbols-outlined">hourglass_top</span>
+    <see-spinner tamanho="pequeno"></see-spinner>
     Salvando...
   `;
 
@@ -449,18 +461,15 @@ tabela?.addEventListener("click", (event) => {
 
 function carregarDfds() {
   if (typeof pararEscuta === "function") pararEscuta();
-
-  tabela.innerHTML = `
-    <tr>
-      <td colspan="3" style="text-align:center;">
-        Carregando...
-      </td>
-    </tr>
-  `;
+  carregandoDfds = true;
+  erroCarregamentoDfds = "";
+  renderTabela();
 
   pararEscuta = onValue(
     getDfdsRef(),
     (snapshot) => {
+      carregandoDfds = false;
+      erroCarregamentoDfds = "";
       todosDfds = snapshot.exists()
         ? extrairRegistrosDfd(snapshot.val()).sort(
             (a, b) => Number(b.numero || 0) - Number(a.numero || 0),
@@ -470,14 +479,10 @@ function carregarDfds() {
       renderTabela();
     },
     (erro) => {
+      carregandoDfds = false;
+      erroCarregamentoDfds = "Não foi possível carregar DFDs. Tente novamente.";
       console.error("Erro ao carregar DFDs:", erro);
-      tabela.innerHTML = `
-        <tr>
-          <td colspan="3" style="text-align:center;">
-            Não foi possível carregar os DFDs.
-          </td>
-        </tr>
-      `;
+      renderTabela();
       notificar("Não foi possível carregar os DFDs.", "erro");
     },
   );

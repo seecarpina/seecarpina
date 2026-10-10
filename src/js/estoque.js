@@ -3153,7 +3153,7 @@ async function abrirLotes(materialId) {
   materialLotesAberto = materialId;
   document.getElementById("tituloLotes").textContent = `Lotes — ${permitido.nome}`;
   const lista = document.getElementById("listaLotes");
-  lista.textContent = "Carregando lotes…";
+  lista.innerHTML = '<see-spinner mensagem="Carregando lotes"></see-spinner>';
   if (!dialogLotes.open) dialogLotes.showModal();
   try {
     const material = await garantirLotes(materialId);

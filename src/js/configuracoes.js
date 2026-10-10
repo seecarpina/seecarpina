@@ -153,9 +153,7 @@ btnSalvar?.addEventListener("click", async () => {
   const textoOriginal = btnSalvar.innerHTML;
 
   btnSalvar.innerHTML = `
-      <span class="material-symbols-outlined">
-        hourglass_top
-      </span>
+      <see-spinner tamanho="pequeno"></see-spinner>
 
       Salvando...
     `;

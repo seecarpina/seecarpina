@@ -1201,9 +1201,7 @@ formTurma?.addEventListener("submit", async (event) => {
   btnSalvarTurma.disabled = true;
 
   btnSalvarTurma.innerHTML = `
-    <span class="material-symbols-outlined">
-      hourglass_top
-    </span>
+    <see-spinner tamanho="pequeno"></see-spinner>
 
     Salvando...
   `;

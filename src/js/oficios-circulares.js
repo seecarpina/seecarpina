@@ -24,6 +24,8 @@ const POR_PAGINA = 25;
 let anoSelecionado = ANO_ATUAL;
 let nomeResponsavel = "Usuário";
 let todosCirculares = [];
+let carregandoCirculares = true;
+let erroCarregamentoCirculares = "";
 let destinosDisponiveis = [];
 let destinosSelecionados = [];
 let paginaAtual = 1;
@@ -260,6 +262,16 @@ function renderizarPaginacao(totalPaginas) {
 }
 
 function renderTabela() {
+  if (carregandoCirculares || erroCarregamentoCirculares) {
+    tabela.innerHTML = `<tr><td colspan="4" class="carregamento-local">${
+      carregandoCirculares
+        ? '<see-spinner mensagem="Carregando ofícios circulares"></see-spinner>'
+        : erroCarregamentoCirculares
+    }</td></tr>`;
+    contador.textContent = "";
+    renderizarPaginacao(0);
+    return;
+  }
   const filtrados = obterFiltrados();
   const totalPaginas = Math.ceil(filtrados.length / POR_PAGINA);
 
@@ -428,7 +440,7 @@ formCircular?.addEventListener("submit", async (event) => {
   const conteudoOriginal = btnCadastrar.innerHTML;
 
   btnCadastrar.innerHTML = `
-    <span class="material-symbols-outlined">hourglass_top</span>
+    <see-spinner tamanho="pequeno"></see-spinner>
     Salvando...
   `;
 
@@ -564,18 +576,15 @@ tabela?.addEventListener("click", (event) => {
 
 function carregarCirculares() {
   if (typeof pararEscuta === "function") pararEscuta();
-
-  tabela.innerHTML = `
-    <tr>
-      <td colspan="4" style="text-align:center;">
-        Carregando...
-      </td>
-    </tr>
-  `;
+  carregandoCirculares = true;
+  erroCarregamentoCirculares = "";
+  renderTabela();
 
   pararEscuta = onValue(
     getCircularesRef(),
     (snapshot) => {
+      carregandoCirculares = false;
+      erroCarregamentoCirculares = "";
       todosCirculares = snapshot.exists()
         ? Object.entries(snapshot.val())
             .filter(([, dados]) => dados && typeof dados === "object")
@@ -586,14 +595,10 @@ function carregarCirculares() {
       renderTabela();
     },
     (erro) => {
+      carregandoCirculares = false;
+      erroCarregamentoCirculares = "Não foi possível carregar ofícios circulares. Tente novamente.";
       console.error("Erro ao carregar Ofícios Circulares:", erro);
-      tabela.innerHTML = `
-        <tr>
-          <td colspan="4" style="text-align:center;">
-            Não foi possível carregar os Ofícios Circulares.
-          </td>
-        </tr>
-      `;
+      renderTabela();
       notificar("Não foi possível carregar os Ofícios Circulares.", "erro");
     },
   );
