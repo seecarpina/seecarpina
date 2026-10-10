@@ -48,3 +48,28 @@ nova.addEventListener("click", () => {
   campos[0]?.focus();
 });
 atualizarConferencia();
+
+function prepararImpressao() {
+  const entregues = campos.filter(campo => campo.checked).length;
+  document.getElementById("resumoImpressao").textContent =
+    `${entregues} entregues · ${documentos.length - entregues} pendentes · ${documentos.length} documentos`;
+  document.getElementById("dataImpressao").textContent =
+    `Conferência em ${new Date().toLocaleDateString("pt-BR")}`;
+  const linhas = documentos.map((nome, indice) => {
+    const linha = document.createElement("li");
+    const documento = document.createElement("span");
+    const situacao = document.createElement("strong");
+    documento.textContent = nome;
+    situacao.textContent = campos[indice].checked ? "✓ Entregue" : "Pendente";
+    linha.append(documento, situacao);
+    return linha;
+  });
+  document.getElementById("documentosImpressao").replaceChildren(...linhas);
+}
+
+// Também mantém a conferência atualizada ao usar Ctrl+P ou o menu do navegador.
+window.addEventListener("beforeprint", prepararImpressao);
+document.getElementById("imprimirChecklist").addEventListener("click", () => {
+  prepararImpressao();
+  window.print();
+});

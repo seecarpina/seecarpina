@@ -143,8 +143,24 @@
   .pagina-checklist main { display: block; }
   .checklist-prancheta { padding: 1.6rem 0.55rem 0.55rem; }
 }
+.checklist-impressao { display: none; }
+@page { size: A4; margin: 16mm; }
 @media print {
-  .checklist-presilha, .checklist-nova { display: none; }
-  .checklist-prancheta { margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none; }
-  .checklist-folha { padding: 0; box-shadow: none; }
+  body.pagina-checklist { height: auto; min-height: 0; margin: 0; background: #fff; color: #000; overflow: visible; }
+  body.pagina-checklist > :not(.checklist-impressao) { display: none !important; }
+  body.pagina-checklist .checklist-impressao {
+    display: block;
+    width: 100%;
+    font: 11pt/1.4 Arial, sans-serif;
+    color: #000;
+    background: #fff;
+  }
+  .checklist-impressao * { font-family: Arial, sans-serif; color: #000; }
+  .checklist-impressao h1 { font-size: 18pt; margin: 0 0 3mm; }
+  .checklist-impressao p { margin: 0 0 3mm; }
+  .checklist-impressao .checklist-identificacao { margin: 7mm 0; }
+  .checklist-impressao ul { margin: 6mm 0; padding: 0; list-style: none; }
+  .checklist-impressao li { display: flex; justify-content: space-between; gap: 8mm; padding: 2.5mm 0; border-bottom: 1px solid #ddd; break-inside: avoid; }
+  .checklist-impressao li strong { flex-shrink: 0; font-size: 10pt; }
+  .checklist-impressao .checklist-legenda { font-size: 9pt; }
 }
