@@ -587,116 +587,103 @@ aside .sidebar .sidebar-loading {
 aside h3 {
   font-weight: 400;
 }
+/* Paleta fixa por grupo: tokens centralizados, com contraste ajustado ao tema. */
+aside .sidebar {
+  --menu-grupo-azul: #2563eb;
+  --menu-grupo-violeta: #8056d9;
+  --menu-grupo-verde: #16806a;
+  --menu-grupo-laranja: #b56416;
+  --menu-grupo-rosa: #c43c62;
+  --menu-grupo-ciano: #127fa0;
+}
+.dark-theme-variables aside .sidebar {
+  --menu-grupo-azul: #72a7ff;
+  --menu-grupo-violeta: #b59aff;
+  --menu-grupo-verde: #62d5b1;
+  --menu-grupo-laranja: #ffbc75;
+  --menu-grupo-rosa: #ff93b2;
+  --menu-grupo-ciano: #63cbe6;
+}
+aside .sidebar [data-grupo-cor="azul"] { --menu-grupo-cor: var(--menu-grupo-azul); }
+aside .sidebar [data-grupo-cor="violeta"] { --menu-grupo-cor: var(--menu-grupo-violeta); }
+aside .sidebar [data-grupo-cor="verde"] { --menu-grupo-cor: var(--menu-grupo-verde); }
+aside .sidebar [data-grupo-cor="laranja"] { --menu-grupo-cor: var(--menu-grupo-laranja); }
+aside .sidebar [data-grupo-cor="rosa"] { --menu-grupo-cor: var(--menu-grupo-rosa); }
+aside .sidebar [data-grupo-cor="ciano"] { --menu-grupo-cor: var(--menu-grupo-ciano); }
+/* Cores semânticas: independentes da ordem e das permissões do menu. */
+aside .sidebar {
+  --menu-icone-cor: var(--clr-dark-variant);
+  --menu-icone-fundo: color-mix(in srgb, var(--clr-dark) 7%, transparent);
+  --menu-ativo-cor: var(--clr-primary);
+  --menu-ativo-fundo: color-mix(in srgb, var(--clr-primary) 12%, transparent);
+  --menu-hover-fundo: color-mix(in srgb, var(--clr-primary) 6%, transparent);
+  --menu-sair-cor: #c93838;
+  --menu-sair-fundo: color-mix(in srgb, var(--menu-sair-cor) 10%, transparent);
+}
+.dark-theme-variables aside .sidebar { --menu-sair-cor: #ff6961; }
 aside .sidebar a {
   display: flex;
   color: var(--clr-dark);
   gap: 1rem;
   align-items: center;
   height: 3.2rem;
-  transition: all 0.4s ease-in;
+  transition: background-color .18s ease, color .18s ease;
   padding-left: 1rem;
   position: relative;
 }
-aside .sidebar a span {
-  font-size: 1.6rem;
-  transition: all 0.4s ease-in;
-  background: var(--clr-primary);
-  padding: 0.1rem;
+aside .sidebar a > .material-symbols-outlined {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  font-size: 1.4rem;
+  background: var(--menu-icone-fundo);
+  color: var(--menu-icone-cor);
+  border-radius: 8px;
+  transition: background-color .18s ease, color .18s ease;
+}
+aside .sidebar a.active {
+  background: var(--menu-ativo-fundo);
+  color: var(--menu-ativo-cor);
+}
+aside .sidebar a.active > .material-symbols-outlined {
+  background: var(--menu-ativo-cor);
   color: #fff;
-  border-radius: 5px;
 }
-aside .sidebar a:nth-child(1) span {
-  background: var(--clr-primary);
+aside .sidebar a:hover:not(.active) {
+  background: var(--menu-hover-fundo);
+  color: var(--menu-ativo-cor);
 }
-aside .sidebar a:nth-child(2) span {
-  background: #5ac8fa;
+aside .sidebar a:hover:not(.active) > .material-symbols-outlined {
+  color: var(--menu-ativo-cor);
 }
-aside .sidebar a:nth-child(3) span {
-  background: #30d158;
+aside .sidebar a:focus-visible {
+  outline: 2px solid var(--menu-ativo-cor);
+  outline-offset: -2px;
 }
-aside .sidebar a:nth-child(4) span {
-  background: #ff9f0a;
-}
-aside .sidebar a:nth-child(5) span {
-  background: #bf5af2;
-}
-aside .sidebar a:nth-child(6) span {
-  background: #34c759;
-}
-aside .sidebar a:nth-child(7) span {
-  background: #64d2ff;
-}
-aside .sidebar a:nth-child(8) span {
-  background: #8e8e93;
-}
-aside .sidebar a:nth-child(9) span {
-  background: #5e5ce6;
-}
-aside .sidebar a:nth-child(10) span {
-  background: #ff375f;
-}
-
-aside .sidebar a:nth-child(11) span {
-  background: #00c7be;
-}
-
-aside .sidebar a:nth-child(12) span {
-  background: #ffcc00;
-}
-
-aside .sidebar a:nth-child(13) span {
-  background: #af52de;
-}
-
-aside .sidebar a:nth-child(14) span {
-  background: #32ade6;
-}
-
-aside .sidebar a:nth-child(15) span {
-  background: #ff6482;
-}
-
-aside .sidebar a:nth-child(16) span {
-  background: #0a84ff;
-}
-
-aside .sidebar a:nth-child(17) span {
-  background: #66d4cf;
-}
-
-aside .sidebar a:nth-child(18) span {
-  background: #ac8e68;
-}
-
-aside .sidebar a:nth-child(19) span {
-  background: #ff453a;
-}
-
-aside .sidebar a:nth-child(20) span {
-  background: #5856d6;
-}
-aside .sidebar a:last-child span {
-  background: #ff453a;
-}
-
-aside .sidebar a:last-child {
+aside .sidebar #logout {
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid var(--clr-light);
+  color: var(--menu-sair-cor);
+}
+aside .sidebar #logout > .material-symbols-outlined,
+aside .sidebar #logout:hover > .material-symbols-outlined {
+  background: var(--menu-sair-fundo);
+  color: var(--menu-sair-cor);
+}
+aside .sidebar #logout:hover { background: var(--menu-sair-fundo); color: var(--menu-sair-cor); }
+@media (prefers-reduced-motion: reduce) {
+  aside .sidebar a, aside .sidebar a > .material-symbols-outlined { transition: none; }
 }
 
-aside .sidebar a.active {
-  background: var(--clr-light);
-  color: var(--clr-primary);
+/* O estado ativo mantém a cor principal; grupos identificam os demais itens. */
+aside .sidebar a[data-grupo-cor]:not(.active) > .material-symbols-outlined {
+  background: color-mix(in srgb, var(--menu-grupo-cor) 12%, transparent);
+  color: var(--menu-grupo-cor);
 }
-
-aside .sidebar a:hover {
-  color: var(--clr-primary);
-}
-aside .sidebar a:hover span {
-  margin-left: 1rem;
-  transition: 0.4s ease;
-}
+aside .sidebar .sidebar-grupo-titulo[data-grupo-cor] { color: var(--menu-grupo-cor); }
 
 .sidebar-grupo-titulo {
   padding: 1.2rem 1rem 0.45rem;

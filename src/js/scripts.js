@@ -1,3 +1,4 @@
+import { corDoGrupoMenu } from "./core/coresGruposMenu.js";
 import { eventosCalendarioPorAno } from "./core/eventosRegras.js";
 import { categoriaCalendario, categoriasDoDia, dataLocalCalendario, datasComemorativasDoDia } from "./core/calendarioEventos.js";
 
@@ -98,6 +99,8 @@ async function montarSidebarDinamica(dadosUsuario) {
       const link = document.createElement("a");
 
       link.href = item.link || "#";
+      const corGrupo = corDoGrupoMenu(item.grupoId);
+      if (corGrupo) link.dataset.grupoCor = corGrupo;
 
       link.innerHTML = `
     <span
@@ -136,6 +139,7 @@ async function montarSidebarDinamica(dadosUsuario) {
       tituloGrupo.className = "sidebar-grupo-titulo";
 
       tituloGrupo.textContent = grupo.titulo;
+      tituloGrupo.dataset.grupoCor = corDoGrupoMenu(grupo.id);
 
       fragment.appendChild(tituloGrupo);
 
@@ -151,12 +155,12 @@ async function montarSidebarDinamica(dadosUsuario) {
     logout.id = "logout";
 
     logout.innerHTML = `
-      <span class="material-symbols-outlined">
+      <span class="material-symbols-outlined" aria-hidden="true">
         logout
       </span>
 
       <h3>
-        Logout
+        Sair
       </h3>
     `;
 
