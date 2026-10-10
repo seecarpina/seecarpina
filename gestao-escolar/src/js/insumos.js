@@ -366,7 +366,7 @@ async function encerrarAcesso(motivo) {
     mensagens[motivo] || "Não foi possível validar seu acesso.",
   );
 
-  window.location.replace("./login.html");
+  window.location.replace("./login");
 }
 
 function ativarAba(idAba) {
@@ -1635,7 +1635,7 @@ btnSair.addEventListener("click", async () => {
   try {
     sessionStorage.removeItem("gestorEscolar");
     await signOut(auth);
-    window.location.replace("./login.html");
+    window.location.replace("./login");
   } catch (error) {
     console.error("Erro ao sair:", error);
 
@@ -1653,7 +1653,7 @@ onAuthStateChanged(auth, async (user) => {
   verificacaoConcluida = true;
 
   if (!user) {
-    window.location.replace("./login.html");
+    window.location.replace("./login");
     return;
   }
 

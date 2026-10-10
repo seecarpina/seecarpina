@@ -149,25 +149,25 @@ function obterDadosModulo(modulo) {
     INSUMOS: {
       nome: "Água, gás e caminhão-pipa",
       icone: "water_drop",
-      link: "./insumos.html#historico",
+      link: "./insumos#historico",
     },
 
     MATERIAIS_EXPEDIENTE: {
       nome: "Material de expediente",
       icone: "inventory_2",
-      link: "./materiais-expediente.html#historico",
+      link: "./materiais-expediente#historico",
     },
 
     MATERIAIS_LIMPEZA: {
       nome: "Materiais de limpeza e higiene",
       icone: "cleaning_services",
-      link: "./materiais-limpeza.html#historico",
+      link: "./materiais-limpeza#historico",
     },
 
     MANUTENCAO: {
       nome: "Chamado de manutenção",
       icone: "construction",
-      link: "./manutencao.html#historico",
+      link: "./manutencao#historico",
     },
   };
 
@@ -513,7 +513,7 @@ async function encerrarAcesso(motivo) {
     mensagens[motivo] || "Não foi possível validar seu acesso.",
   );
 
-  window.location.replace("./login.html");
+  window.location.replace("./login");
 }
 
 onAuthStateChanged(auth, async (user) => {
@@ -525,7 +525,7 @@ onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
     sessionStorage.removeItem("gestorEscolar");
-    window.location.replace("./login.html");
+    window.location.replace("./login");
     return;
   }
 
@@ -560,7 +560,7 @@ btnSair?.addEventListener("click", async () => {
 
     await signOut(auth);
 
-    window.location.replace("./login.html");
+    window.location.replace("./login");
   } catch (error) {
     console.error("Erro ao sair:", error);
 

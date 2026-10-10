@@ -1,3 +1,4 @@
+import { normalizarCaminhoPagina } from "./core/rotas.js";
 export async function carregarSidebar() {
   const el = document.getElementById("sidebar");
   if (!el) return;
@@ -17,20 +18,25 @@ export async function carregarRight() {
 export function ativarLinkAtual() {
   const links = document.querySelectorAll("#sidebar a");
 
-  const pathAtual = window.location.pathname.replace(/\/$/, "").toLowerCase();
+  const pathAtual = normalizarCaminhoPagina(window.location.pathname);
+  const basePagina = new URL(window.location.href);
+  // As páginas do portal são arquivos: uma barra final não cria uma pasta.
+  basePagina.pathname = basePagina.pathname.replace(/\/+$/, "") || "/";
 
   links.forEach((link) => {
     link.classList.remove("active");
 
     const href = link.getAttribute("href");
 
-    if (!href) return;
+    if (!href || href.startsWith("#")) return;
 
-    const urlLink = new URL(href, window.location.origin);
+    let urlLink;
+    try { urlLink = new URL(href, basePagina); }
+    catch { return; }
 
-    const pathLink = urlLink.pathname.replace(/\/$/, "").toLowerCase();
+    const pathLink = normalizarCaminhoPagina(urlLink.pathname);
 
-    if (pathAtual === pathLink) {
+    if (urlLink.origin === window.location.origin && pathAtual === pathLink) {
       link.classList.add("active");
     }
   });

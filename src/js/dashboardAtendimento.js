@@ -53,7 +53,7 @@ function renderizar(registros) {
   for (const pedido of resumo.atencao) {
     const link = document.createElement('a');
     link.className = 'dashboard-pedido';
-    link.href = `./solicitacoes.html?pedido=${encodeURIComponent(pedido.id)}`;
+    link.href = `./solicitacoes?pedido=${encodeURIComponent(pedido.id)}`;
     const texto = document.createElement('div');
     const titulo = document.createElement('strong');
     titulo.textContent = pedido.escolaNome || 'Unidade escolar';
