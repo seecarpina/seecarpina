@@ -36,6 +36,7 @@
   --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.12);
   --glass-highlight: rgba(255, 255, 255, 0.35);
   --bg: url(../images/bg.png);
+  --bg-suavizacao: rgba(246, 246, 249, 0.28);
 }
 
 .paleta_1 {
@@ -311,6 +312,7 @@ summary {
   --clr-danger: #ff6961;
   --clr-attention: #f5bd58;
   --clr-color-background: #181a1e;
+  --bg-suavizacao: rgba(24, 26, 30, 0.28);
   --clr-white: #202528;
   --clr-light: rgba(0, 0, 0, 0.4);
   --clr-dark: #edeffd;
@@ -337,12 +339,15 @@ body {
   /* user-select: none;*/
   overflow-x: hidden;
   background-color: var(--clr-color-background);
-  background-image: var(--bg);
+  /* Suaviza o degradê com a cor de fundo do tema. */
+  background-image:
+    linear-gradient(var(--bg-suavizacao), var(--bg-suavizacao)),
+    var(--bg);
   background-size: cover;
   background-attachment: fixed;
   background-repeat: no-repeat;
   background-position: top right;
-  background-blend-mode: multiply;
+  background-blend-mode: normal, multiply;
 }
 .login {
   width: 90%;
