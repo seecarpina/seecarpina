@@ -151,12 +151,12 @@ async function montarSidebarDinamica(dadosUsuario) {
     logout.id = "logout";
 
     logout.innerHTML = `
-      <span class="material-symbols-outlined">
+      <span class="material-symbols-outlined" aria-hidden="true">
         logout
       </span>
 
       <h3>
-        Logout
+        Sair
       </h3>
     `;
 
