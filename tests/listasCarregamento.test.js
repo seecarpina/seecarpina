@@ -2,13 +2,18 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
+import { normalizarConsultaServidores } from "../src/js/core/memoriaConsulta.js";
 
 const fonte = readFileSync(new URL("../src/js/servidores.js", import.meta.url), "utf8");
-function prepararServidores() {
+function prepararServidores(consulta = null) {
   const assinaturas = {};
   const frames = [];
   const tabela = { innerHTML: "", appendChild(tr) { this.innerHTML += tr.innerHTML; } };
   const contexto = {
+    auth: { currentUser: consulta ? { uid: "usuario-teste" } : null }, consultaUid: null,
+    cardsPendenciasServidores: null, normalizarConsultaServidores,
+    memoriaConsulta: { ler: () => consulta, salvar(estado) { contexto.ultimaConsulta = estado; } },
+    window: { addEventListener() {} },
     tabela, busca: { value: "" }, paginacao: { innerHTML: "" }, contadorServidores: {},
     servidores: [], carregandoServidores: true, erroCarregamentoServidores: "",
     paginaAtual: 1, itensPorPagina: 100, filtroPendenciaAtual: "todos",
@@ -21,7 +26,7 @@ function prepararServidores() {
     renderPaginacao() {}, abrirMenuAcoesServidor() {}, console: { error() {} },
     document: { createElement: () => ({ innerHTML: "", querySelector: () => ({ addEventListener() {} }) }) },
   };
-  const render = fonte.slice(fonte.indexOf("function renderTabela() {"), fonte.indexOf("/* ===============================\n   DETALHES DO SERVIDOR"));
+  const render = fonte.slice(fonte.indexOf("function restaurarConsultaServidores() {"), fonte.indexOf("/* ===============================\n   DETALHES DO SERVIDOR"));
   const listener = fonte.slice(fonte.indexOf("onValue(registrosRef,"), fonte.indexOf("/* ===============================\n   HISTÓRICO DE TRANSFERÊNCIAS"));
   vm.runInNewContext(render + listener, contexto);
   return { contexto, tabela, assinaturas, frames, enviar(dados) {
@@ -92,4 +97,24 @@ test("contratos, circulares e DFDs também preservam estado pendente ou erro dur
     assert.match(tabela.innerHTML, /Falha na consulta/, arquivo);
     assert.doesNotMatch(tabela.innerHTML, /see-spinner/, arquivo);
   }
+});
+
+test("consulta restaurada aguarda os dados e mantém página; redução de resultados corrige a página salva", () => {
+  const d = prepararServidores({ busca: "Maria", pagina: 2 });
+  d.contexto.renderTabela();
+  assert.equal(d.contexto.busca.value, "Maria");
+  assert.equal(d.contexto.paginaAtual, 2);
+  assert.match(d.tabela.innerHTML, /see-spinner/);
+  const registros = Object.fromEntries(Array.from({length:150}, (_,i) => [String(i),{ nome: `Maria ${String(i).padStart(3,"0")}` }]));
+  d.enviar(registros);
+  assert.equal(d.contexto.paginaAtual, 2);
+  assert.match(d.tabela.innerHTML, /Maria 100/);
+  assert.doesNotMatch(d.tabela.innerHTML, /Maria 000/);
+  assert.equal(d.contexto.ultimaConsulta.pagina, 2);
+  d.contexto.busca.value = "João";
+  d.contexto.renderTabela();
+  assert.equal(d.contexto.busca.value, "João");
+  assert.equal(d.contexto.paginaAtual, 1);
+  assert.equal(d.contexto.ultimaConsulta.busca, "João");
+  assert.equal(d.contexto.ultimaConsulta.pagina, 1);
 });
